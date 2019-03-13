@@ -7,27 +7,30 @@ from os import remove, mkdir
 import gzip
 import shutil
 
-from private import datadir, CMEMS_password, CMEMS_username
+from ninolearn.private import datadir
 
 if not exists(datadir):
     print("make a data directory at %s" %datadir)
     mkdir(datadir)
 
-def downloadFileFTP(info_dict, username='anonymous', password='anonymous_pass'):
+def downloadFileFTP(info_dict, outdir='', username='anonymous', password='anonymous_pass'):
     """
     Download a file from a FTP server
     """
     filename = info_dict['filename']
     host = info_dict['host']
     location = info_dict['location']
+    if not exists(join(datadir,outdir)):
+        print("make a data directory at %s" %join(datadir,outdir))
+        mkdir(join(datadir,outdir))
     
-    if not isfile(join(datadir,filename)):
+    if not isfile(join(datadir,outdir,filename)):
         print("Download %s" % filename)
         ftp = FTP(host)
         ftp.login(username,password)
         ftp.cwd(location)
         
-        localfile = open(join(datadir,filename), 'wb')
+        localfile = open(join(datadir,outdir,filename), 'wb')
         ftp.retrbinary('RETR ' + filename, localfile.write,1024)
         localfile.close()
         ftp.quit() 
@@ -35,7 +38,7 @@ def downloadFileFTP(info_dict, username='anonymous', password='anonymous_pass'):
     else:
         print("%s already downloaded" % filename)
 
-def downloadFileHTTP(info_dict):
+def downloadFileHTTP(info_dict, outdir=''):
     """
     download a file via HTTP
     """
@@ -43,9 +46,9 @@ def downloadFileHTTP(info_dict):
     filename = info_dict['filename']
     url = info_dict['url']
    
-    if not isfile(join(datadir,filename.replace(".gz",""))):
+    if not isfile(join(datadir,outdir,filename.replace(".gz",""))):
         print("Download %s" % filename)
-        with open(join(datadir,filename), "wb") as file:
+        with open(join(datadir,outdir,filename), "wb") as file:
             # get request
             response = get(url)
             
@@ -75,9 +78,12 @@ def unzip_gz(info_dict):
         remove(join(datadir,filename_old))
         print("Remove %s " % filename_old)
 
+
+
+
 if __name__ == "__main__":
     
-    
+    from ninolearn.private import CMEMS_password, CMEMS_username
 # =============================================================================
 # ERSSTv5
 # =============================================================================
@@ -129,4 +135,34 @@ if __name__ == "__main__":
                 month_str = month_int
             
             ORAP50_dict['filename'] = 'sossheig_ORAP5.0_1m_%s%s_grid_T_02.nc'%(year_str,month_str)
-            downloadFileFTP(ORAP50_dict,username=CMEMS_username,password=CMEMS_password)
+            downloadFileFTP(ORAP50_dict,outdir='ssh', username=CMEMS_username,password=CMEMS_password)
+            
+            
+# =============================================================================
+# WWV 
+# =============================================================================
+    WWV_dict = { 
+            'filename': 'wwv.dat',
+            'url' : 'https://www.pmel.noaa.gov/tao/wwv/data/wwv.dat'
+            }
+    
+    downloadFileHTTP(WWV_dict)        
+    
+# =============================================================================
+# Wind
+# =============================================================================
+    uwind_dict = {
+            'filename' : 'uwnd.mon.mean.nc',
+            'host' : 'ftp.cdc.noaa.gov',
+            'location' : '/Datasets/ncep.reanalysis.derived/surface/'
+            }
+    
+    vwind_dict = {
+            'filename' : 'vwnd.mon.mean.nc',
+            'host' : 'ftp.cdc.noaa.gov',
+            'location' : '/Datasets/ncep.reanalysis.derived/surface/'
+            }
+    
+    downloadFileFTP(uwind_dict)
+    downloadFileFTP(vwind_dict)
+    
