@@ -9,3 +9,6 @@ def nino34_anom():
     """
     data = pd.read_csv(join(datadir,"nino34.txt"), delim_whitespace=True)
     return data.ANOM
+
+if __name__ == "__main__":
+    data = nino34_anom()
