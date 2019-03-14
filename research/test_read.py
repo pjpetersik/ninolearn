@@ -1,4 +1,4 @@
-from ninolearn.IO.read_data import data_reader
+from ninolearn.IO.read import data_reader
 
 import numpy as np
 import matplotlib.pyplot as plt
