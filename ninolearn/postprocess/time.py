@@ -32,7 +32,7 @@ def season_to_month(season):
     
     return switcher[season]
 
-def postprocess_nino34():
+def add_DatetimeIndex_nino34():
     """
     Add a time axis corresponding to the first day of the central month of a 3-month season.
     For example: DJF 2019 becomes 2019-01-01
@@ -47,7 +47,7 @@ def postprocess_nino34():
     
     data.to_csv(join(postdir,'nino34.csv'))
 
-def postprocess_wwv():
+def add_DatetimeIndex_wwv():
     """
     Add a time axis corresponding to the first day of the central month of a 3-month season.
     For example: DJF 2019 becomes 2019-01-01
@@ -63,7 +63,7 @@ def postprocess_wwv():
 
 
 if __name__ == "__main__":
-    postprocess_nino34()
-    postprocess_wwv()
+    add_DatetimeIndex_nino34()
+    add_DatetimeIndex_wwv()
     
     

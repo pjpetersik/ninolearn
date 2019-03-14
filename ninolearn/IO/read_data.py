@@ -1,6 +1,7 @@
 from os.path import join
 import pandas as pd
 import xarray as xr
+import gc
 
 from ninolearn.pathes import rawdir, postdir
 
@@ -24,6 +25,9 @@ class data_reader(object):
         self.lat_min = lat_min
         self.lat_max = lat_max
         
+    def __del__(self):
+        gc.collect()
+        
     def nino34_anom(self):
         """
         get the Nino3.4 Index anomaly
@@ -31,7 +35,7 @@ class data_reader(object):
         data = pd.read_csv(join(postdir,"nino34.csv"),index_col=0, parse_dates=True)
         self._check_dates(data, "Nino3.4")
         
-        return data.ANOM
+        return data.ANOM.loc[self.startdate:self.enddate]
     
     def wwv_anom(self):
         """
@@ -40,20 +44,28 @@ class data_reader(object):
         data = pd.read_csv(join(postdir,"wwv.csv"),index_col=0, parse_dates=True)
         self._check_dates(data, "WWV")
         
-        return data.Anomaly
+        return data.Anomaly.loc[self.startdate:self.enddate]
     
     def sst_ERSSTv5(self):
         """
         get the sea surface temperature from the ERSST-v5 data set
         """
         data = xr.open_dataset(join(rawdir,"sst.mnmean.nc"))
-        return data
+        self._check_dates(data.sst, "SST (ERSSTv5)")
+        
+        return data.sst.loc[self.startdate:self.enddate,
+                            self.lat_max:self.lat_min,
+                            self.lon_min:self.lon_max]
     
     def sst_HadISST(self):
         """
         get the sea surface temperature from the ERSST-v5 data set
+        
+        NOT FULLY POSTPROCESSED YET
         """
+        print("HadISST data is NOT FULLY POSTPROCESSED YET!")
         data = xr.open_dataset(join(rawdir,"HadISST_sst.nc"))
+        self._check_dates(data.sst, "SST (HadISST)")
         return data
     
     def uwind(self):
@@ -61,14 +73,22 @@ class data_reader(object):
         get u-wind from NCEP/NCAR reanalysis
         """
         data = xr.open_dataset(join(rawdir,"uwnd.mon.mean.nc"))
-        return data
+        self._check_dates(data.uwnd, "uwind (NCEP/NCAR)")
+        
+        return data.uwnd.loc[self.startdate:self.enddate,
+                            self.lat_max:self.lat_min,
+                            self.lon_min:self.lon_max]
     
     def vwind(self):
         """
-        get u-wind from NCEP/NCAR reanalysis
+        get v-wind from NCEP/NCAR reanalysis
         """
         data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
-        return data
+        self._check_dates(data.vwnd, "vwind (NCEP/NCAR)")
+        
+        return data.vwnd.loc[self.startdate:self.enddate,
+                            self.lat_max:self.lat_min,
+                            self.lon_min:self.lon_max]
     
     
     def _check_dates(self,data, name):
@@ -90,6 +110,7 @@ if __name__ == "__main__":
     reader = data_reader()
     nino34 = reader.nino34_anom()
     wwv = reader.wwv_anom()
-    data3 = reader.sst_ERSSTv5()
-    data4 = reader.uwind()
-    data5 = reader.vwind()
+    sst_ERSST = reader.sst_ERSSTv5()
+    #sst_HadISST = reader.sst_HadISST()
+    uwind = reader.uwind()
+    vwind = reader.vwind()

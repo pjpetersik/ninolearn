@@ -97,7 +97,7 @@ downloadFileFTP(vwind_dict)
 # =============================================================================
 # =============================================================================
 print_header("Postprocess Data")
-from ninolearn.postprocessing import postprocess_nino34, postprocess_wwv
+from ninolearn.postprocess.time import add_DatetimeIndex_nino34, add_DatetimeIndex_wwv
 
-postprocess_nino34()
-postprocess_wwv()
+add_DatetimeIndex_nino34()
+add_DatetimeIndex_wwv()
