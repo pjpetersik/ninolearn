@@ -7,11 +7,11 @@ from os import remove, mkdir
 import gzip
 import shutil
 
-from ninolearn.private import datadir
+from ninolearn.pathes import rawdir
 
-if not exists(datadir):
-    print("make a data directory at %s" %datadir)
-    mkdir(datadir)
+if not exists(rawdir):
+    print("make a data directory at %s" %rawdir)
+    mkdir(rawdir)
 
 def downloadFileFTP(info_dict, outdir='', username='anonymous', password='anonymous_pass'):
     """
@@ -20,17 +20,17 @@ def downloadFileFTP(info_dict, outdir='', username='anonymous', password='anonym
     filename = info_dict['filename']
     host = info_dict['host']
     location = info_dict['location']
-    if not exists(join(datadir,outdir)):
-        print("make a data directory at %s" %join(datadir,outdir))
-        mkdir(join(datadir,outdir))
+    if not exists(join(rawdir,outdir)):
+        print("make a data directory at %s" %join(rawdir,outdir))
+        mkdir(join(rawdir,outdir))
     
-    if not isfile(join(datadir,outdir,filename)):
+    if not isfile(join(rawdir,outdir,filename)):
         print("Download %s" % filename)
         ftp = FTP(host)
         ftp.login(username,password)
         ftp.cwd(location)
         
-        localfile = open(join(datadir,outdir,filename), 'wb')
+        localfile = open(join(rawdir,outdir,filename), 'wb')
         ftp.retrbinary('RETR ' + filename, localfile.write,1024)
         localfile.close()
         ftp.quit() 
@@ -46,9 +46,9 @@ def downloadFileHTTP(info_dict, outdir=''):
     filename = info_dict['filename']
     url = info_dict['url']
    
-    if not isfile(join(datadir,outdir,filename.replace(".gz",""))):
+    if not isfile(join(rawdir,outdir,filename.replace(".gz",""))):
         print("Download %s" % filename)
-        with open(join(datadir,outdir,filename), "wb") as file:
+        with open(join(rawdir,outdir,filename), "wb") as file:
             # get request
             response = get(url)
             
@@ -65,17 +65,17 @@ def unzip_gz(info_dict):
     filename_new = filename_old.replace(".gz","")
     
     # unpack file
-    if not isfile(join(datadir,filename_new)):
+    if not isfile(join(rawdir,filename_new)):
         print("Unzip %s" % filename_old)
-        with gzip.open(join(datadir,filename_old), 'rb') as f_in:
-            with open(join(datadir,filename_new), 'wb') as f_out:
+        with gzip.open(join(rawdir,filename_old), 'rb') as f_in:
+            with open(join(rawdir,filename_new), 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
     else:
          print("%s already unzipped" % filename_old)
     
     # remove .gz file
-    if isfile(join(datadir,filename_new)) and isfile(join(datadir,filename_old)):
-        remove(join(datadir,filename_old))
+    if isfile(join(rawdir,filename_new)) and isfile(join(rawdir,filename_old)):
+        remove(join(rawdir,filename_old))
         print("Remove %s " % filename_old)
 
 

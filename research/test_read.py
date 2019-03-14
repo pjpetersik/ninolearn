@@ -1,9 +1,11 @@
-from ninolearn.io import read_data
-
+from ninolearn.IO.read_data import data_reader
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-nino34 = read_data.nino34_anom().values
-wwv = read_data.wwv_anom().values
-sst = read_data.sst_ERSSTv5()
+reader = data_reader()
+data = reader.nino34_anom()
+data2 = reader.wwv_anom()
+data3 = reader.sst_ERSSTv5()
+data4 = reader.uwind()
+data5 = reader.vwind()

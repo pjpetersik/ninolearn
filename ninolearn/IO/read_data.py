@@ -2,7 +2,8 @@ from os.path import join
 import pandas as pd
 import xarray as xr
 
-from ninolearn.private import datadir
+from ninolearn.pathes import rawdir, postdir
+
 
 class data_reader(object):
     def __init__(self, startyear = 1980, endyear = 2010, lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
@@ -27,42 +28,42 @@ class data_reader(object):
         """
         get the Nino3.4 Index anomaly
         """
-        data = pd.read_csv(join(datadir,"nino34.txt"), delim_whitespace=True)
-        return data.ANOM[(data.YR>=self.startyear) & (data.YR>=self.startyear)]
+        data = pd.read_csv(join(postdir,"nino34.csv"),index_col=0)
+        return data.ANOM
     
     def wwv_anom(self):
         """
         get the warm water volume anomaly
         """
-        data = pd.read_csv(join(datadir,"wwv.dat"), delim_whitespace=True, header=4)
+        data = pd.read_csv(join(postdir,"wwv.csv"),index_col=0)
         return data.Anomaly
     
     def sst_ERSSTv5(self):
         """
         get the sea surface temperature from the ERSST-v5 data set
         """
-        data = xr.open_dataset(join(datadir,"sst.mnmean.nc"))
+        data = xr.open_dataset(join(rawdir,"sst.mnmean.nc"))
         return data
     
     def sst_HadISST(self):
         """
         get the sea surface temperature from the ERSST-v5 data set
         """
-        data = xr.open_dataset(join(datadir,"HadISST_sst.nc"))
+        data = xr.open_dataset(join(rawdir,"HadISST_sst.nc"))
         return data
     
     def uwind(self):
         """
         get u-wind from NCEP/NCAR reanalysis
         """
-        data = xr.open_dataset(join(datadir,"uwnd.mon.mean.nc"))
+        data = xr.open_dataset(join(rawdir,"uwnd.mon.mean.nc"))
         return data
     
     def vwind(self):
         """
         get u-wind from NCEP/NCAR reanalysis
         """
-        data = xr.open_dataset(join(datadir,"vwnd.mon.mean.nc"))
+        data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
         return data
 
 if __name__ == "__main__":
