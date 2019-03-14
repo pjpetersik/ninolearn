@@ -37,6 +37,7 @@ def postprocess_nino34():
     Add a time axis corresponding to the first day of the central month of a 3-month season.
     For example: DJF 2019 becomes 2019-01-01
     """
+    print("Postprocess Nino3.4 timeseries.")
     data = pd.read_csv(join(rawdir,"nino34.txt"), delim_whitespace=True)
     
     df = ({'year': data.YR.values, 'month': data.SEAS.apply(season_to_month).values, 'day': data.YR.values/data.YR.values})
@@ -51,6 +52,7 @@ def postprocess_wwv():
     Add a time axis corresponding to the first day of the central month of a 3-month season.
     For example: DJF 2019 becomes 2019-01-01
     """
+    print("Postprocess WWV timeseries.")
     data = pd.read_csv(join(rawdir,"wwv.dat"), delim_whitespace=True, header=4)
     
     df = ({'year': data.date.astype(str).str[:4], 'month': data.date.astype(str).str[4:], 'day': data.date/data.date})

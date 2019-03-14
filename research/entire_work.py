@@ -1,5 +1,13 @@
 from ninolearn.download import downloadFileFTP, downloadFileHTTP, unzip_gz
 from ninolearn.private import CMEMS_password, CMEMS_username
+from ninolearn.utils import print_header
+
+# =============================================================================
+# =============================================================================
+# # Download
+# =============================================================================
+# =============================================================================
+print_header("Download Data")
 
 # =============================================================================
 # ERSSTv5
@@ -82,3 +90,14 @@ vwind_dict = {
 
 downloadFileFTP(uwind_dict)
 downloadFileFTP(vwind_dict)
+
+# =============================================================================
+# =============================================================================
+# # Postprocess
+# =============================================================================
+# =============================================================================
+print_header("Postprocess Data")
+from ninolearn.postprocessing import postprocess_nino34, postprocess_wwv
+
+postprocess_nino34()
+postprocess_wwv()
