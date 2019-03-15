@@ -92,12 +92,27 @@ downloadFileFTP(uwind_dict)
 downloadFileFTP(vwind_dict)
 
 # =============================================================================
+# Surface Air Temperature (SAT)
+# =============================================================================
+
+SAT_dict = {
+        'filename' : 'air.sig995.2019.nc',
+        'host' : 'ftp.cdc.noaa.gov',
+        'location' : '/Datasets/ncep.reanalysis.dailyavgs/surface/'
+        }
+
+for year_int in range(1948,2019):
+    year_str = str(year_int)
+    SAT_dict['filename'] = 'air.sig995.%s.nc'%year_str
+    downloadFileFTP(SAT_dict,outdir='sat')
+
+# =============================================================================
 # =============================================================================
 # # Postprocess
 # =============================================================================
 # =============================================================================
 print_header("Postprocess Data")
-from ninolearn.postprocess.time import add_DatetimeIndex_nino34, add_DatetimeIndex_wwv
+from ninolearn.postprocess.time_axis import add_DatetimeIndex_nino34, add_DatetimeIndex_wwv
 
 add_DatetimeIndex_nino34()
 add_DatetimeIndex_wwv()

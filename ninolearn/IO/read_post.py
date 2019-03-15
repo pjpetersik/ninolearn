@@ -3,8 +3,7 @@ import pandas as pd
 import xarray as xr
 import gc
 
-from ninolearn.pathes import rawdir, postdir
-
+from ninolearn.pathes import postdir
 
 class data_reader(object):
     def __init__(self, startdate = '1980-01', enddate = '2018-12', lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
@@ -46,50 +45,23 @@ class data_reader(object):
         
         return data.Anomaly.loc[self.startdate:self.enddate]
     
-    def sst_ERSSTv5(self):
-        """
-        get the sea surface temperature from the ERSST-v5 data set
-        """
-        data = xr.open_dataset(join(rawdir,"sst.mnmean.nc"))
-        self._check_dates(data.sst, "SST (ERSSTv5)")
+    def sst_ERSSTv5(self, processed=''):
+        filename = 'sst.nc'
         
-        return data.sst.loc[self.startdate:self.enddate,
-                            self.lat_max:self.lat_min,
-                            self.lon_min:self.lon_max]
-    
-    def sst_HadISST(self):
-        """
-        get the sea surface temperature from the ERSST-v5 data set
+        if processed != '':
+            filename = f'sst.{processed}.nc'
         
-        NOT FULLY POSTPROCESSED YET
-        """
-        print("HadISST data is NOT FULLY POSTPROCESSED YET!")
-        data = xr.open_dataset(join(rawdir,"HadISST_sst.nc"))
-        self._check_dates(data.sst, "SST (HadISST)")
-        return data
-    
-    def uwind(self):
-        """
-        get u-wind from NCEP/NCAR reanalysis
-        """
-        data = xr.open_dataset(join(rawdir,"uwnd.mon.mean.nc"))
-        self._check_dates(data.uwnd, "uwind (NCEP/NCAR)")
+        try: 
+            data = xr.open_dataarray(join(postdir,filename))
+        except:
+            raise Exception(f'Data for processed={processed} not found!')
         
-        return data.uwnd.loc[self.startdate:self.enddate,
-                            self.lat_max:self.lat_min,
-                            self.lon_min:self.lon_max]
-    
-    def vwind(self):
-        """
-        get v-wind from NCEP/NCAR reanalysis
-        """
-        data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
-        self._check_dates(data.vwnd, "vwind (NCEP/NCAR)")
-        
-        return data.vwnd.loc[self.startdate:self.enddate,
-                            self.lat_max:self.lat_min,
-                            self.lon_min:self.lon_max]
-    
+        self._check_dates(data, "SST (ERSSTv5)")
+            
+        return data.loc[self.startdate:self.enddate,
+                                self.lat_max:self.lat_min,
+                                self.lon_min:self.lon_max]
+
     
     def _check_dates(self,data, name):
         """
@@ -106,11 +78,9 @@ class data_reader(object):
         except:
             raise IndexError("The enddate is out of bounds for %s data!"%name)
 
+
 if __name__ == "__main__":
     reader = data_reader()
     nino34 = reader.nino34_anom()
     wwv = reader.wwv_anom()
-    sst_ERSST = reader.sst_ERSSTv5()
-    #sst_HadISST = reader.sst_HadISST()
-    uwind = reader.uwind()
-    vwind = reader.vwind()
+    sst_ERSST = reader.sst_ERSSTv5(processed='norm')

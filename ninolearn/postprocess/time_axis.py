@@ -2,6 +2,7 @@ import pandas as pd
 from os.path import join, exists
 from os import mkdir
 
+from ninolearn.IO import read_raw
 from ninolearn.pathes import rawdir, postdir
 
 if not exists(postdir):
@@ -38,7 +39,7 @@ def add_DatetimeIndex_nino34():
     For example: DJF 2019 becomes 2019-01-01
     """
     print("Postprocess Nino3.4 timeseries.")
-    data = pd.read_csv(join(rawdir,"nino34.txt"), delim_whitespace=True)
+    data = read_raw.nino34_anom() 
     
     df = ({'year': data.YR.values, 'month': data.SEAS.apply(season_to_month).values, 'day': data.YR.values/data.YR.values})
     dti = pd.to_datetime(df)
@@ -53,7 +54,7 @@ def add_DatetimeIndex_wwv():
     For example: DJF 2019 becomes 2019-01-01
     """
     print("Postprocess WWV timeseries.")
-    data = pd.read_csv(join(rawdir,"wwv.dat"), delim_whitespace=True, header=4)
+    data = read_raw.wwv_anom() 
     
     df = ({'year': data.date.astype(str).str[:4], 'month': data.date.astype(str).str[4:], 'day': data.date/data.date})
     dti = pd.to_datetime(df)
