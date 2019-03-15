@@ -6,7 +6,7 @@ import gc
 from ninolearn.pathes import postdir
 
 class data_reader(object):
-    def __init__(self, startdate = '1980-01', enddate = '2018-12', lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
+    def __init__(self, startdate = '1980-01', enddate = '2017-12', lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
         """
         Data reader for different kind of El Nino related data.
         
@@ -17,8 +17,8 @@ class data_reader(object):
         :lat_min: southern boundary of data set in degrees north
         :lat_max: northern boundary of data set in degrees north
         """
-        self.startdate = startdate + "-01"
-        self.enddate = enddate + "-01"
+        self.startdate = pd.to_datetime(startdate + "-01")
+        self.enddate = pd.to_datetime(enddate + "-01")
         self.lon_min = lon_min
         self.lon_max = lon_max
         self.lat_min = lat_min
@@ -26,6 +26,10 @@ class data_reader(object):
         
     def __del__(self):
         gc.collect()
+        
+    def shift_window(self, month=1):
+        self.startdate =self.startdate + pd.DateOffset(months=month)
+        self.enddate = self.enddate + pd.DateOffset(months=month)
         
     def nino34_anom(self):
         """
@@ -61,6 +65,11 @@ class data_reader(object):
         return data.loc[self.startdate:self.enddate,
                                 self.lat_max:self.lat_min,
                                 self.lon_min:self.lon_max]
+        
+    def sst_cc(self):
+        data = pd.read_csv(join(postdir,"cc.csv"),index_col=0, parse_dates=True)
+        self._check_dates(data, "CC SST")
+        return data.loc[self.startdate:self.enddate]
 
     
     def _check_dates(self,data, name):
@@ -80,7 +89,14 @@ class data_reader(object):
 
 
 if __name__ == "__main__":
-    reader = data_reader()
+    reader = data_reader(startdate="1950-01")
     nino34 = reader.nino34_anom()
-    wwv = reader.wwv_anom()
-    sst_ERSST = reader.sst_ERSSTv5(processed='norm')
+    #wwv = reader.wwv_anom()
+    #sst_ERSST = reader.sst_ERSSTv5(processed='norm')
+    sst_cc = reader.sst_cc()
+    
+    sst_cc_norm = (sst_cc - sst_cc.mean())/sst_cc.std()
+    nino34_norm = (nino34 - nino34.mean())/nino34.std()
+    
+    sst_cc_norm.plot()
+    nino34_norm.plot()
