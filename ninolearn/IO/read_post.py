@@ -50,6 +50,12 @@ class data_reader(object):
         return data.Anomaly.loc[self.startdate:self.enddate]
     
     def sst_ERSSTv5(self, processed=''):
+        """
+        Processed ERSSTv5 data.
+        
+        :param processed: Either '','deviation' or 'norm'. Where '' means the unprocessed 
+        data, 'deviation' the data minus its means and 'norm', the normalized data.
+        """
         filename = 'sst.nc'
         
         if processed != '':
@@ -66,10 +72,10 @@ class data_reader(object):
                                 self.lat_max:self.lat_min,
                                 self.lon_min:self.lon_max]
         
-    def sst_cc(self):
-        data = pd.read_csv(join(postdir,"cc.csv"),index_col=0, parse_dates=True)
-        self._check_dates(data, "CC SST")
-        return data.loc[self.startdate:self.enddate]
+#    def sst_cc(self):
+#        data = pd.read_csv(join(postdir,"cc.csv"),index_col=0, parse_dates=True)
+#        self._check_dates(data, "CC SST")
+#        return data.loc[self.startdate:self.enddate]
 
     
     def _check_dates(self,data, name):

@@ -49,3 +49,14 @@ def vwind():
     """
     data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
     return data
+
+def sat():
+    """
+    Get the surface air temperature from NCEP/NCAR Reanalysis
+    """
+    data = xr.open_mfdataset(join(rawdir,'sat','*.nc'))
+    return data.air
+
+def ssh():
+    data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'))
+    return data

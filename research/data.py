@@ -116,3 +116,10 @@ from ninolearn.postprocess.time_axis import add_DatetimeIndex_nino34, add_Dateti
 
 add_DatetimeIndex_nino34()
 add_DatetimeIndex_wwv()
+
+from ninolearn.IO.read_raw import sst_ERSSTv5
+from ninolearn.postprocess.statisitcs import postprocess
+
+# postprocess sst
+sst = sst_ERSSTv5()
+postprocess(sst)

@@ -1,22 +1,41 @@
+"""
+In this module, I want to write the code for the computation of complex climate 
+network metrics
+"""
+
+
 import igraph 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from os.path import join
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
-#%%
 
-
-
-def computeNetworkMetrics():
+class climateNetwork(igraph.Graph):
     """
-    routine to compute complex network metrics
+    Wrapper object for the construction of a complex climate network
     """
-    reader = data_reader(startdate='1948-01', enddate='1948-12')
-    C = pd.Series()
+    @classmethod
+    def from_adjacency(cls,adjacency):
+        np.fill_diagonal(adjacency,0)
+        A = (adjacency > 0).tolist()
+        return cls.Adjacency(A)
+    
+    @classmethod
+    def from_correalation_matrix(cls,correalation_matrix,threshold = 0.9):
+        adjacency = np.zeros_like(correalation_matrix)
+        adjacency[corrcoef>threshold] = 1.
+        return cls.from_adjacency(adjacency)
+    
 
+if __name__ == "__main__":
+    reader = data_reader(startdate='1993-01', enddate='1993-12')
+    
+    CC = pd.Series()
+    c2 = pd.Series()
+    S =pd.Series()
+    
     while reader.enddate != pd.to_datetime('2019-01-01'):
         
         data = reader.sst_ERSSTv5(processed='norm')
@@ -43,37 +62,43 @@ def computeNetworkMetrics():
         # =============================================================================
         
         df = pd.DataFrame(data2Darr)
-        
+        df = df.dropna(axis=1)
         df_corrcoef = df.corr()
-        df_corrcoef = df_corrcoef.fillna(0)
         
         corrcoef = df_corrcoef.to_numpy()
         
         # =============================================================================
-        # Adjacency
+        # Cimate Network Graph
         # =============================================================================
-        adjacency = np.zeros_like(corrcoef)
-        adjacency[corrcoef>0.9] = 1.
-        np.fill_diagonal(adjacency,0)
+        cn = climateNetwork.from_correalation_matrix(corrcoef,threshold=0.99)
+        n = cn.vcount()
         
-        # =============================================================================
-        # Graph
-        # =============================================================================
+        clusters = cn.clusters()
+        giant = clusters.giant()
+        gn = giant.vcount()
         
-        G_igraph = igraph.Graph.Adjacency((adjacency > 0).tolist())
+        n2 = clusters.sizes().count(2)
         
-        C[reader.enddate + pd.DateOffset(months=1)]  = G_igraph.transitivity_undirected()
         
+        save_date = reader.enddate + pd.DateOffset(months=1)
+        CC[save_date] = cn.transitivity_undirected()
+        c2[save_date] =  n2/n
+        S[save_date] = gn/n
         
         print(f'{reader.startdate} till {reader.enddate}')
-        print(C.loc[reader.enddate + pd.DateOffset(months=1)])
+        print(c2.loc[reader.enddate + pd.DateOffset(months=1)])
         reader.shift_window()
         
-    df = pd.DataFrame({'clustering_coefficent':C})
-    df.to_csv(join(postdir,'cc.csv'))
+    df = pd.DataFrame({'clustering_coefficent' : CC,'c2':c2, 'S':S})
+    df.to_csv(join(postdir,'network_metrics.csv'))
     
-    
-if __name__ =="__main__":
-    reader = data_reader()
-    nino34 = reader.nino34_anom()
-    
+#%%
+import matplotlib.pyplot as plt
+reader = data_reader()
+nino = reader.nino34_anom()
+
+def normalize(data):
+    return (data - data.mean())/data.std()
+
+plt.plot(normalize(nino))
+plt.plot(normalize(df))
