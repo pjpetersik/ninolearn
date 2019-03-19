@@ -18,7 +18,7 @@ class data_reader(object):
         :lat_max: northern boundary of data set in degrees north
         """
         self.startdate = pd.to_datetime(startdate + "-01")
-        self.enddate = pd.to_datetime(enddate + "-01")
+        self.enddate = pd.to_datetime(enddate + "-31")
         self.lon_min = lon_min
         self.lon_max = lon_max
         self.lat_min = lat_min
@@ -72,37 +72,25 @@ class data_reader(object):
                                 self.lat_max:self.lat_min,
                                 self.lon_min:self.lon_max]
         
-#    def sst_cc(self):
-#        data = pd.read_csv(join(postdir,"cc.csv"),index_col=0, parse_dates=True)
-#        self._check_dates(data, "CC SST")
-#        return data.loc[self.startdate:self.enddate]
-
-    
     def _check_dates(self,data, name):
         """
         Checks if provided start and end date are in the bounds of the data that 
         should be read.
         """
-        try:
-            data.loc[self.startdate]
-        except:
-            raise IndexError("The startdate is out of bounds for %s data!"%name) 
+        if isinstance(data,xr.DataArray):
+            if self.startdate < data.time.values.min():
+                raise IndexError("The startdate is out of bounds for %s data!"%name)
+            if self.enddate > data.time.values.max():
+                raise IndexError("The enddate is out of bounds for %s data!"%name)
         
-        try:
-            data.loc[self.enddate]
-        except:
-            raise IndexError("The enddate is out of bounds for %s data!"%name)
-
+        if isinstance(data,pd.DataFrame):
+            if self.startdate < data.index.values.min():
+                raise IndexError("The startdate is out of bounds for %s data!"%name)
+            if self.enddate > data.index.values.max():
+                raise IndexError("The enddate is out of bounds for %s data!"%name)
 
 if __name__ == "__main__":
-    reader = data_reader(startdate="1950-01")
+    reader = data_reader(startdate="1980-01",enddate='1980-12')
     nino34 = reader.nino34_anom()
-    #wwv = reader.wwv_anom()
-    #sst_ERSST = reader.sst_ERSSTv5(processed='norm')
-    sst_cc = reader.sst_cc()
-    
-    sst_cc_norm = (sst_cc - sst_cc.mean())/sst_cc.std()
-    nino34_norm = (nino34 - nino34.mean())/nino34.std()
-    
-    sst_cc_norm.plot()
-    nino34_norm.plot()
+    wwv = reader.wwv_anom()
+    sst_ERSST = reader.sst_ERSSTv5(processed='norm')

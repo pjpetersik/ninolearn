@@ -28,12 +28,13 @@ def sst_ERSSTv5():
 
 def sst_HadISST():
     """
-    get the sea surface temperature from the ERSST-v5 data set
-    
-    NOT FULLY POSTPROCESSED YET
+    get the sea surface temperature from the ERSST-v5 data set and directly 
+    manipulate the time axis in such a way that the monthly mean values are assigned
+    to the beginning of a month as this is the default for the other data sets
     """
-    print("HadISST data is NOT FULLY POSTPROCESSED YET!")
     data = xr.open_dataset(join(rawdir,"HadISST_sst.nc"))
+    maxtime = pd.to_datetime(data.time.values.max()).date()
+    data['time'] = pd.date_range(start='1870-01-01', end=maxtime, freq='MS')
     return data
 
 def uwind():

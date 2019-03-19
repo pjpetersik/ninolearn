@@ -104,3 +104,7 @@ def postprocess(data,new=False):
 if __name__ == "__main__":
     data = read_raw.sst_ERSSTv5()
     postprocess(data)
+    
+    data2 = read_raw.sst_HadISST()
+    #data2 = change_Time_sst_HadISST()
+    #postprocess(data2)

@@ -4,6 +4,7 @@ from os import mkdir
 
 from ninolearn.IO import read_raw
 from ninolearn.pathes import rawdir, postdir
+from ninolearn.postprocess.statistics import toPostDir
 
 if not exists(postdir):
     print("make a data directory at %s" %postdir)
@@ -45,7 +46,7 @@ def add_DatetimeIndex_nino34():
     dti = pd.to_datetime(df)
     
     data.index = dti
-    
+    data.index.name = 'time'
     data.to_csv(join(postdir,'nino34.csv'))
 
 def add_DatetimeIndex_wwv():
@@ -60,11 +61,12 @@ def add_DatetimeIndex_wwv():
     dti = pd.to_datetime(df)
     
     data.index = dti
+    data.index.name = 'time'
     data.to_csv(join(postdir,'wwv.csv'))
 
-
+    
 if __name__ == "__main__":
     add_DatetimeIndex_nino34()
     add_DatetimeIndex_wwv()
-    
+    change_Time_sst_HadISST()
     

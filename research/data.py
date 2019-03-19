@@ -118,7 +118,7 @@ add_DatetimeIndex_nino34()
 add_DatetimeIndex_wwv()
 
 from ninolearn.IO.read_raw import sst_ERSSTv5
-from ninolearn.postprocess.statisitcs import postprocess
+from ninolearn.postprocess.statistics import postprocess
 
 # postprocess sst
 sst = sst_ERSSTv5()
@@ -131,5 +131,6 @@ postprocess(sst)
 # =============================================================================
 print_header("Network Metrics")
 from ninolearn.postprocess.network import networkMetricsSeries
+
 nms = networkMetricsSeries()
 nms.computeTimeSeries()

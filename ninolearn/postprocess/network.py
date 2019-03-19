@@ -1,9 +1,3 @@
-"""
-In this module, I want to write the code for the computation of complex climate 
-network metrics
-"""
-
-
 import igraph 
 import numpy as np
 import pandas as pd
@@ -14,7 +8,8 @@ from ninolearn.pathes import postdir
 
 class climateNetwork(igraph.Graph):
     """
-    Wrapper object for the construction of a complex climate network
+    Child object of the igraph.Graph class for the construction of a complex
+    climate network
     """
     @classmethod
     def from_adjacency(cls,adjacency):
@@ -174,7 +169,7 @@ class networkMetricsSeries(object):
         
         self.save()
             
-#%%
+
 if __name__ =="__maiasn__":
     n = networkMetricsSeries()
     n.computeTimeSeries()
