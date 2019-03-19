@@ -72,6 +72,30 @@ class data_reader(object):
                                 self.lat_max:self.lat_min,
                                 self.lon_min:self.lon_max]
         
+    def sst_HadISST(self, processed=''):
+        """
+        Processed ERSSTv5 data.
+        
+        :param processed: Either '','deviation' or 'norm'. Where '' means the unprocessed 
+        data, 'deviation' the data minus its means and 'norm', the normalized data.
+        """
+        filename = 'sst_HadISST.nc'
+        
+        if processed != '':
+            filename = f'sst_HadISST.{processed}.nc'
+        
+        try: 
+            data = xr.open_dataarray(join(postdir,filename))
+        except:
+            raise Exception(f'Data for processed={processed} not found!')
+        
+        self._check_dates(data, "SST (HadISST)")
+            
+        return data.loc[self.startdate:self.enddate,
+                                self.lat_max:self.lat_min,
+                                self.lon_min:self.lon_max]
+    
+    
     def _check_dates(self,data, name):
         """
         Checks if provided start and end date are in the bounds of the data that 
@@ -90,7 +114,8 @@ class data_reader(object):
                 raise IndexError("The enddate is out of bounds for %s data!"%name)
 
 if __name__ == "__main__":
-    reader = data_reader(startdate="1980-01",enddate='1980-12')
+    reader = data_reader(startdate="1961-01", enddate='1990-12')
     nino34 = reader.nino34_anom()
-    wwv = reader.wwv_anom()
-    sst_ERSST = reader.sst_ERSSTv5(processed='norm')
+    #wwv = reader.wwv_anom()
+    sst_ERSST = reader.sst_ERSSTv5(processed='deviation')
+    sst_HadISST = reader.sst_HadISST(processed='deviation')

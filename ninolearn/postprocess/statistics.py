@@ -10,7 +10,7 @@ def computeDeviation(data):
     """
     remove the over all time mean from a time series
     """
-    time_mean = data.mean(dim = 'time', skipna=True)
+    time_mean = data.loc['1948-01-01':'2018-12-31'].mean(dim = 'time', skipna=True)
     deviation = data - time_mean
     return deviation
 
@@ -57,12 +57,13 @@ def saveDeviation(data, new):
         deviation.name = ''.join([data.name, '.deviation'])
         
         deviation.attrs = data.attrs.copy()
-        deviation.attrs['long_name'] = ''.join(['Deviation of ',deviation.attrs['long_name']])
-        deviation.attrs['var_desc'] = ''.join([deviation.attrs['var_desc'], ' Deviation'])
         deviation.attrs['statistic'] = 'Substracted the Mean'
-        deviation.attrs['actual_range'][0] = deviation.min()
-        deviation.attrs['actual_range'][1] = deviation.max()
-        del deviation.attrs['valid_range']
+        deviation.attrs['actual_range'] = (deviation.min(), deviation.max())
+       
+        try:
+            del deviation.attrs['valid_range']
+        except:
+            pass
         
         deviation.to_netcdf(path)
 
@@ -82,13 +83,13 @@ def saveNormalized(data, new):
         norm.name = ''.join([data.name, '.norm'])
         
         norm.attrs = data.attrs.copy()
-        norm.attrs['long_name'] = ''.join(['Normalized ',norm.attrs['long_name']])
-        norm.attrs['var_desc'] = ''.join(['Normalized ',norm.attrs['var_desc']])
         norm.attrs['statistic'] = 'Substracted the Mean. Divided by standerd Deviation.'
-        norm.attrs['actual_range'][0] = norm.min()
-        norm.attrs['actual_range'][1] = norm.max()
-        del norm.attrs['valid_range']
+        norm.attrs['actual_range'] = (norm.min(),norm.max())
         
+        try:
+            del norm.attrs['valid_range']
+        except:
+            pass
         norm.to_netcdf(path)
 
 def postprocess(data,new=False):
@@ -106,5 +107,5 @@ if __name__ == "__main__":
     postprocess(data)
     
     data2 = read_raw.sst_HadISST()
-    #data2 = change_Time_sst_HadISST()
-    #postprocess(data2)
+    data2.name = 'sst_HadISST'
+    postprocess(data2)

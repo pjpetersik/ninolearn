@@ -35,7 +35,7 @@ def sst_HadISST():
     data = xr.open_dataset(join(rawdir,"HadISST_sst.nc"))
     maxtime = pd.to_datetime(data.time.values.max()).date()
     data['time'] = pd.date_range(start='1870-01-01', end=maxtime, freq='MS')
-    return data
+    return data.sst
 
 def uwind():
     """

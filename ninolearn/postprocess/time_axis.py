@@ -68,5 +68,4 @@ def add_DatetimeIndex_wwv():
 if __name__ == "__main__":
     add_DatetimeIndex_nino34()
     add_DatetimeIndex_wwv()
-    change_Time_sst_HadISST()
     
