@@ -123,3 +123,13 @@ from ninolearn.postprocess.statisitcs import postprocess
 # postprocess sst
 sst = sst_ERSSTv5()
 postprocess(sst)
+
+# =============================================================================
+# =============================================================================
+# # Network Metrics
+# =============================================================================
+# =============================================================================
+print_header("Network Metrics")
+from ninolearn.postprocess.network import networkMetricsSeries
+nms = networkMetricsSeries()
+nms.computeTimeSeries()

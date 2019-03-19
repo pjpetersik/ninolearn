@@ -34,7 +34,7 @@ class climateNetwork(igraph.Graph):
         generate an igraph network from a correlation matrix
         """
         adjacency = np.zeros_like(correalation_matrix)
-        adjacency[corrcoef>threshold] = 1.
+        adjacency[correalation_matrix>threshold] = 1.
         cls.threshold = threshold
         return cls.from_adjacency(adjacency)
     
@@ -54,24 +54,49 @@ class climateNetwork(igraph.Graph):
         nodes_total = self.vcount()
         nodes_cluster = self.clusters().sizes().count(size)
         return nodes_cluster/nodes_total
-
-
-if __name__ == "__main__":
-    reader = data_reader(startdate='1990-01', enddate='1991-12')
     
-    global_transitivity = pd.Series()
-    avglocal_transitivity = pd.Series()
-    frac_cluster_size2 = pd.Series()
-    frac_giant = pd.Series()
-    
-    while reader.enddate != pd.to_datetime('2019-01-01'):
-        
-        data = reader.sst_ERSSTv5(processed='norm')
-        
-        #%% =============================================================================
-        # Reshape
-        # =============================================================================
+    def hamming_distance(self,old_adjacency):
+        """
+        comput the Hamming distance
+        :param other_graph: a igragph.Graph instance with which the Graph should be compared
+        """
+        try:
+            N = self.vcount()
+            H = np.abs(np.sum(self.adjacency_array - old_adjacency)) / (N * (N - 1))
+            return H
+        except:
+            print("Wrong input for computation of hamming distance.")
+            return 0
+ 
        
+class networkMetricsSeries(object):
+    def __init__(self, startdate='1948-01', enddate='1948-12'):
+        """
+        Object for the computation of network metrics time series
+        """
+        self.startdate = startdate 
+        self.enddate = enddate
+        
+        self.reader = data_reader(startdate=startdate, enddate=enddate)
+        
+        self.initalizeSeries()
+        
+    def initalizeSeries(self):
+        self.global_transitivity = pd.Series()
+        self.avglocal_transitivity = pd.Series()
+        self.frac_cluster_size2 = pd.Series()
+        self.frac_cluster_size3 = pd.Series()
+        self.frac_cluster_size5 = pd.Series()
+        self.frac_giant = pd.Series()
+        self.avg_path_length = pd.Series()
+        self.hamming_distance = pd.Series()
+        
+        self._old_adjacency = np.array([])
+        
+    def computeCorrelationMatrix(self):
+        data = self.reader.sst_ERSSTv5(processed='norm')
+        
+        # Reshape
         data3Darr  = np.array(data)
         
         dims = data.coords.dims
@@ -84,54 +109,72 @@ if __name__ == "__main__":
         len_lon = data3Darr.shape[lon_index]
         
         data2Darr = data3Darr.reshape(len_time,len_lat*len_lon)
-        
-        # =============================================================================
+
         # Correlation matrix
-        # =============================================================================
-        
-        df = pd.DataFrame(data2Darr)
-        df = df.dropna(axis=1)
-        df_corrcoef = df.corr()
+        df2Darr = pd.DataFrame(data2Darr)
+        df2Darr = df2Darr.dropna(axis=1)
+        df_corrcoef = df2Darr.corr()
         
         corrcoef = df_corrcoef.to_numpy()
+        return corrcoef
         
-        # =============================================================================
-        # Cimate Network Graph
-        # =============================================================================
+    def computeNetworkMetrics(self,corrcoef):
         cn = climateNetwork.from_correalation_matrix(corrcoef,threshold=0.99)
         
-        save_date = reader.enddate + pd.DateOffset(months=1)
+        save_date = self.reader.enddate + pd.DateOffset(months=1)
         
         # C1 as in Newman (2003) and Eq. (6) in Radebach et al. (2013)
-        global_transitivity[save_date] = cn.transitivity_undirected()
+        self.global_transitivity[save_date] = cn.transitivity_undirected()
         
         # C2 as in Newman (2003) and Eq. (7) in Radebach et al. (2013)
-        avglocal_transitivity[save_date] = cn.transitivity_avglocal_undirected(mode="zero")
+        self.avglocal_transitivity[save_date] = cn.transitivity_avglocal_undirected(mode="zero")
         
         # fraction of nodes in clusters of size 2
-        frac_cluster_size2[save_date] =  cn.cluster_fraction(2)
+        self.frac_cluster_size2[save_date] =  cn.cluster_fraction(2)
+        
+        # fraction of nodes in clusters of size 3
+        self.frac_cluster_size3[save_date] =  cn.cluster_fraction(3)
+        
+        # fraction of nodes in clusters of size 3
+        self.frac_cluster_size5[save_date] =  cn.cluster_fraction(5)
         
         # fraciont of nodes in giant component
-        frac_giant[save_date] = cn.giant_fraction()
+        self.frac_giant[save_date] = cn.giant_fraction()
         
-        print(f'{reader.startdate} till {reader.enddate}')
-        print(frac_cluster_size2.loc[reader.enddate + pd.DateOffset(months=1)])
-        reader.shift_window()
+        # average path length
+        self.avg_path_length[save_date] = cn.average_path_length()
         
-    df = pd.DataFrame({'global transitivity' : global_transitivity,
-                       'avelocal_transmissivity': avglocal_transitivity,
-                       'fraction_clusters_size_2': frac_cluster_size2, 
-                       'fraction_giant_component': frac_giant})
+        # hamming distance
+        self.hamming_distance[save_date] = cn.hamming_distance(self._old_adjacency)        
+        
+        # copy the old adjacency
+        self._old_adjacency = cn.adjacency_array.copy()
+        
+    def save(self):
+        self.data = pd.DataFrame({'global_transitivity' : self.global_transitivity,
+                       'avelocal_transmissivity': self.avglocal_transitivity,
+                       'fraction_clusters_size_2': self.frac_cluster_size2, 
+                       'fraction_clusters_size_3': self.frac_cluster_size3, 
+                       'fraction_clusters_size_5': self.frac_cluster_size5, 
+                       'fraction_giant_component': self.frac_giant,
+                       'average_path_length':self.avg_path_length,
+                       'hamming_distance':self.hamming_distance
+                       })
     
-    df.to_csv(join(postdir,'network_metrics.csv'))
+        self.data.to_csv(join(postdir,'network_metrics.csv'))
     
-
-    import matplotlib.pyplot as plt
-    reader = data_reader()
-    nino = reader.nino34_anom()
-    
-    def normalize(data):
-        return (data - data.mean())/data.std()
-    
-    plt.plot(normalize(nino))
-    plt.plot(normalize(df))
+    def computeTimeSeries(self):
+        while self.reader.enddate != pd.to_datetime('2019-01-01'):
+            print(f'{self.reader.startdate} till {self.reader.enddate}')
+            
+            corrcoef = self.computeCorrelationMatrix()
+            self.computeNetworkMetrics(corrcoef)
+            
+            self.reader.shift_window()
+        
+        self.save()
+            
+#%%
+if __name__ =="__maiasn__":
+    n = networkMetricsSeries()
+    n.computeTimeSeries()
