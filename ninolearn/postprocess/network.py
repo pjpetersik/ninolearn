@@ -65,10 +65,28 @@ class climateNetwork(igraph.Graph):
  
        
 class networkMetricsSeries(object):
-    def __init__(self, startdate='1948-01', enddate='1948-12'):
+    def __init__(self, data_set='sst_ERSSTv5', processed='deviation', threshold= 0.99, startdate='1948-01', enddate='1948-12'):
         """
-        Object for the computation of network metrics time series
+        Class for the computation of network metrics time series
+        
+        :type data_set: str
+        :param data_set: the data_set that should be used to build the network
+        
+        :type processed: str
+        :param processed: either '','deviation' or 'norm'
+        
+        :type threshold: float
+        :param threshold: the threshold for a the correlation coeficent between 
+        two grid point to be considered as connected
+        
+        :param startdate: start of the window for the computation of network metrics
+        :param enddate: end of the window for the computation of network metrics
         """
+        self.data_set = data_set
+        self.processed = processed
+        
+        self.threshold = threshold
+        
         self.startdate = startdate 
         self.enddate = enddate
         
@@ -77,6 +95,10 @@ class networkMetricsSeries(object):
         self.initalizeSeries()
         
     def initalizeSeries(self):
+        """
+        initializes the pandas Series and array that saves the adjacency of the 
+        network from the previous time step
+        """
         self.global_transitivity = pd.Series()
         self.avglocal_transitivity = pd.Series()
         self.frac_cluster_size2 = pd.Series()
@@ -89,7 +111,7 @@ class networkMetricsSeries(object):
         self._old_adjacency = np.array([])
         
     def computeCorrelationMatrix(self):
-        data = self.reader.sst_ERSSTv5(processed='norm')
+        data = eval(f'self.reader.{self.data_set}(processed="{self.processed}")')
         
         # Reshape
         data3Darr  = np.array(data)
@@ -114,7 +136,13 @@ class networkMetricsSeries(object):
         return corrcoef
         
     def computeNetworkMetrics(self,corrcoef):
-        cn = climateNetwork.from_correalation_matrix(corrcoef,threshold=0.99)
+        """
+        computes network metrics from a correlation matrix in combination with the
+        already given threshold
+        
+        :param corrcoef: the correlation matrix
+        """
+        cn = climateNetwork.from_correalation_matrix(corrcoef,threshold=self.threshold)
         
         save_date = self.reader.enddate + pd.DateOffset(months=1)
         
@@ -170,6 +198,6 @@ class networkMetricsSeries(object):
         self.save()
             
 
-if __name__ =="__maiasn__":
+if __name__ =="__main__":
     n = networkMetricsSeries()
     n.computeTimeSeries()
