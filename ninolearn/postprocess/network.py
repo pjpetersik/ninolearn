@@ -2,6 +2,7 @@ import igraph
 import numpy as np
 import pandas as pd
 from os.path import join
+from scipy.special import binom
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
@@ -50,19 +51,59 @@ class climateNetwork(igraph.Graph):
         nodes_cluster = self.clusters().sizes().count(size)
         return nodes_cluster/nodes_total
     
-    def hamming_distance(self,old_adjacency):
+    def hamming_distance(self, old_adjacency):
         """
         comput the Hamming distance
+        
         :param other_graph: a igragph.Graph instance with which the Graph should be compared
         """
         try:
             N = self.vcount()
-            H = np.abs(np.sum(self.adjacency_array - old_adjacency)) / (N * (N - 1))
+            
+            # indeces for upper triangular matrix excluding the diagonal
+            ui = np.triu_indices(N,1)
+            
+            # Hamming distance
+            H = np.sum(np.abs(self.adjacency_array[ui] - old_adjacency[ui])) / binom(N,2)
             return H
+        
         except:
             print("Wrong input for computation of hamming distance.")
             return 0
- 
+        
+    def corrected_hamming_distance(self, old_adjacency):
+        """
+        comput the corrected Hamming distance as described in Radebach et al. (2013)
+        
+        :param other_graph: a igragph.Graph instance with which the Graph should be compared
+        """
+        try:
+            N = self.vcount()
+            
+            # indeces for upper triangular matrix excluding the diagonal
+            ui = np.triu_indices(N,1)
+            
+            # count types of link changes
+            b = np.sum((self.adjacency_array[ui]==1) &  (old_adjacency[ui]==0))
+            c = np.sum((self.adjacency_array[ui]==0) &  (old_adjacency[ui]==1))
+            d = np.sum((self.adjacency_array[ui]==1) &  (old_adjacency[ui]==1))
+            
+            # edge densities
+            rho = (b + d) / binom(N,2)
+            rho_dash = (c + d) / binom(N,2)
+            
+            # corrected Hamming distance
+            if rho >= rho_dash:
+                Hstar =  2 * c / binom(N,2)
+            else:
+                Hstar = 2 * b / binom(N,2)            
+            
+            return Hstar
+        
+        except:
+            print("Wrong input for computation of corrected hamming distance.")
+            return 0
+        
        
 class networkMetricsSeries(object):
     def __init__(self, data_set='sst_ERSSTv5', processed='deviation', threshold= 0.99, startdate='1948-01', enddate='1948-12'):
@@ -107,6 +148,7 @@ class networkMetricsSeries(object):
         self.frac_giant = pd.Series()
         self.avg_path_length = pd.Series()
         self.hamming_distance = pd.Series()
+        self.corrected_hamming_distance = pd.Series()
         
         self._old_adjacency = np.array([])
         
@@ -168,7 +210,10 @@ class networkMetricsSeries(object):
         self.avg_path_length[save_date] = cn.average_path_length()
         
         # hamming distance
-        self.hamming_distance[save_date] = cn.hamming_distance(self._old_adjacency)        
+        self.hamming_distance[save_date] = cn.hamming_distance(self._old_adjacency)
+
+        # corrected hamming distance
+        self.corrected_hamming_distance[save_date] = cn.corrected_hamming_distance(self._old_adjacency)        
         
         # copy the old adjacency
         self._old_adjacency = cn.adjacency_array.copy()
@@ -181,7 +226,8 @@ class networkMetricsSeries(object):
                        'fraction_clusters_size_5': self.frac_cluster_size5, 
                        'fraction_giant_component': self.frac_giant,
                        'average_path_length':self.avg_path_length,
-                       'hamming_distance':self.hamming_distance
+                       'hamming_distance':self.hamming_distance,
+                       'corrected_hamming_distance':self.corrected_hamming_distance
                        })
     
         self.data.to_csv(join(postdir,'network_metrics.csv'))
