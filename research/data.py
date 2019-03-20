@@ -105,6 +105,15 @@ for year_int in range(1948,2019):
     year_str = str(year_int)
     SAT_dict['filename'] = 'air.sig995.%s.nc'%year_str
     downloadFileFTP(SAT_dict,outdir='sat')
+    
+SATmon_dict = {
+        'filename' : 'air.mon.mean.nc',
+        'host' : 'ftp.cdc.noaa.gov',
+        'location' : '/Datasets/ncep.reanalysis.derived/surface/'
+        }
+
+downloadFileFTP(SATmon_dict)
+
 
 # =============================================================================
 # =============================================================================
@@ -117,15 +126,30 @@ from ninolearn.postprocess.time_axis import add_DatetimeIndex_nino34, add_Dateti
 add_DatetimeIndex_nino34()
 add_DatetimeIndex_wwv()
 
-from ninolearn.IO.read_raw import sst_ERSSTv5, sst_HadISST
+from ninolearn.IO import read_raw
 from ninolearn.postprocess.statistics import postprocess
 
-# postprocess sst from ERSSTv5
-sst = sst_ERSSTv5()
-postprocess(sst)
+# postprocess sst data from ERSSTv5
+sst_ERSSTv5 = read_raw.sst_ERSSTv5()
+sst_ERSSTv5.name = 'sst.ERSSTv5'
+postprocess(sst_ERSSTv5)
 
-sst_HadISST = sst_HadISST()
-sst_HadISST.name = 'sst_HadISST'
+# postprocess data from NCEP/NCAR reanalysis
+uwind = read_raw.uwind()
+uwind.name = 'uwnd.NCEP_NCAR'
+postprocess(uwind)
+
+vwind = read_raw.vwind()
+vwind.name = 'vwnd.NCEP_NCAR'
+postprocess(vwind)
+
+sat = read_raw.sat(mean='monthly')
+sat.name = 'sat.NCEP_NCAR'
+postprocess(sat)
+
+# postprocess sst date from HadISST date set
+sst_HadISST = read_raw.sst_HadISST()
+sst_HadISST.name = 'sst.HadISST'
 postprocess(sst_HadISST)
 
 # =============================================================================
@@ -136,5 +160,5 @@ postprocess(sst_HadISST)
 print_header("Network Metrics")
 from ninolearn.postprocess.network import networkMetricsSeries
 
-nms = networkMetricsSeries()
+nms = networkMetricsSeries('uwnd','NCEP_NCAR', threshold=0.9,startdate='2017-01', enddate='2017-12')
 nms.computeTimeSeries()

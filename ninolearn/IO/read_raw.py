@@ -42,21 +42,28 @@ def uwind():
     get u-wind from NCEP/NCAR reanalysis
     """
     data = xr.open_dataset(join(rawdir,"uwnd.mon.mean.nc"))
-    return data
+    return data.uwnd
 
 def vwind():
     """
     get v-wind from NCEP/NCAR reanalysis
     """
     data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
-    return data
+    return data.vwnd
 
-def sat():
+def sat(mean='monthly'):
     """
     Get the surface air temperature from NCEP/NCAR Reanalysis
+    
+    :param mean: Choose between daily and monthly mean fields
     """
-    data = xr.open_mfdataset(join(rawdir,'sat','*.nc'))
-    return data.air
+    if mean=='monthly':
+         data = xr.open_dataset(join(rawdir,"air.mon.mean.nc"))
+         return data.air
+     
+    elif mean=='daily':
+        data = xr.open_mfdataset(join(rawdir,'sat','*.nc'))
+        return data.air
 
 def ssh():
     data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'))

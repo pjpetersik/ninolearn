@@ -6,7 +6,7 @@ from scipy.special import binom
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
-from ninolearn.utils import largest_indices
+from ninolearn.utils import largest_indices, generateFileName
 
 class climateNetwork(igraph.Graph):
     """
@@ -25,7 +25,7 @@ class climateNetwork(igraph.Graph):
         A = (adjacency > 0).tolist()
         
         # mode = 1 means undirected
-        return cls.Adjacency(A,mode=1)
+        return cls.Adjacency(A, mode=1)
     
     @classmethod
     def from_correalation_matrix(cls,correalation_matrix, threshold = None, edge_density = None):
@@ -71,7 +71,7 @@ class climateNetwork(igraph.Graph):
     
     def giant_fraction(self):
         """
-        returns the fraction of the nodes that are part of the giant component
+        Returns the fraction of the nodes that are part of the giant component.
         """
         nodes_total = self.vcount()
         nodes_giant = self.clusters().giant().vcount()
@@ -79,18 +79,22 @@ class climateNetwork(igraph.Graph):
         
     def cluster_fraction(self,size=2):
         """
-        returns the fraction of the nodes that are part of a cluster of the given
-        size (default: size=2)
+        Returns the fraction of the nodes that are part of a cluster of the given
+        size (default: size=2).
+        
+        :type size: int
+        :param size: Size of the cluster. Default:2.
         """
         nodes_total = self.vcount()
         nodes_cluster = self.clusters().sizes().count(size)
         return nodes_cluster/nodes_total
     
-    def hamming_distance(self, old_adjacency):
+    def hamming_distance(self, other_adjacency):
         """
-        comput the Hamming distance
+        Compute the Hamming distance of the climate Network to the provided other 
+        Network (by supplying the adjacency of the other Network).
         
-        :param other_graph: a igragph.Graph instance with which the Graph should be compared
+        :param other_adjacency: The adjacency of the other climate Network.
         """
         try:
             N = self.vcount()
@@ -99,18 +103,20 @@ class climateNetwork(igraph.Graph):
             ui = np.triu_indices(N,1)
             
             # Hamming distance
-            H = np.sum(np.abs(self.adjacency_array[ui] - old_adjacency[ui])) / binom(N,2)
+            H = np.sum(np.abs(self.adjacency_array[ui] - other_adjacency[ui])) / binom(N,2)
             return H
         
         except:
             print("Wrong input for computation of hamming distance.")
             return 0
         
-    def corrected_hamming_distance(self, old_adjacency):
+    def corrected_hamming_distance(self, other_adjacency):
         """
-        comput the corrected Hamming distance as described in Radebach et al. (2013)
+        Compute the Hamming distance of the climate Network to the provided other 
+        Network (by supplying the adjacency of the other Network). Computation is 
+        done as described in Radebach et al. (2013).
         
-        :param other_graph: a igragph.Graph instance with which the Graph should be compared
+        :param other_adjacency: The adjacency of the other climate Network.
         """
         try:
             N = self.vcount()
@@ -119,9 +125,9 @@ class climateNetwork(igraph.Graph):
             ui = np.triu_indices(N,1)
             
             # count types of link changes
-            b = np.sum((self.adjacency_array[ui]==1) &  (old_adjacency[ui]==0))
-            c = np.sum((self.adjacency_array[ui]==0) &  (old_adjacency[ui]==1))
-            d = np.sum((self.adjacency_array[ui]==1) &  (old_adjacency[ui]==1))
+            b = np.sum((self.adjacency_array[ui]==1) &  (other_adjacency[ui]==0))
+            c = np.sum((self.adjacency_array[ui]==0) &  (other_adjacency[ui]==1))
+            d = np.sum((self.adjacency_array[ui]==1) &  (other_adjacency[ui]==1))
             
             # edge densities
             rho = (b + d) / binom(N,2)
@@ -132,7 +138,6 @@ class climateNetwork(igraph.Graph):
                 Hstar =  2 * c / binom(N,2)
             else:
                 Hstar = 2 * b / binom(N,2)            
-            
             return Hstar
         
         except:
@@ -141,12 +146,19 @@ class climateNetwork(igraph.Graph):
         
        
 class networkMetricsSeries(object):
-    def __init__(self, data_set='sst_ERSSTv5', processed='deviation', threshold = None, edge_density=None, startdate='1948-01', enddate='1948-12'):
+    def __init__(self, variable, dataset, processed='deviation', 
+                 threshold = None, edge_density=None, 
+                 startdate='1948-01', enddate='1948-12',
+                 lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
         """
         Class for the computation of network metrics time series
         
-        :type data_set: str
-        :param data_set: the data_set that should be used to build the network
+        :type variable: str
+        :param variable: the variable for which the network time series should be
+        computed
+        
+        :type dataset: str
+        :param dataset: the dataset that should be used to build the network
         
         :type processed: str
         :param processed: either '','deviation' or 'norm'
@@ -156,9 +168,17 @@ class networkMetricsSeries(object):
         two grid point to be considered as connected
         
         :param startdate: start of the window for the computation of network metrics
+        
         :param enddate: end of the window for the computation of network metrics
+        
+        :param lon_min,lon_max: the min and the max values of the longitude grid for which the metrics
+        shell be computed (from 0 to 360 degrees east)
+        
+        :param lat_min,lat_max:the min and the max values of the latitude grid for which the metrics
+        shell be computed (from -180 to 180 degrees east)
         """
-        self.data_set = data_set
+        self.variable = variable
+        self.dataset = dataset
         self.processed = processed
         
         self.threshold = threshold
@@ -167,7 +187,14 @@ class networkMetricsSeries(object):
         self.startdate = startdate 
         self.enddate = enddate
         
-        self.reader = data_reader(startdate=startdate, enddate=enddate)
+        self.lon_min = lon_min
+        self.lon_max = lon_max
+        self.lat_min = lat_min
+        self.lat_max = lat_max
+        
+        self.reader = data_reader(startdate=self.startdate, enddate=self.enddate, 
+                                  lon_min = self.lon_min, lon_max = self.lon_max, 
+                                  lat_min = self.lat_min, lat_max = self.lat_max)
         
         self.initalizeSeries()
         
@@ -190,7 +217,9 @@ class networkMetricsSeries(object):
         self._old_adjacency = np.array([])
         
     def computeCorrelationMatrix(self):
-        data = eval(f'self.reader.{self.data_set}(processed="{self.processed}")')
+        data = self.reader.read_netcdf(variable=self.variable, 
+                                       dataset=self.dataset, 
+                                       processed=self.processed)
         
         # Reshape
         data3Darr  = np.array(data)
@@ -269,11 +298,14 @@ class networkMetricsSeries(object):
                        'hamming_distance':self.hamming_distance,
                        'corrected_hamming_distance':self.corrected_hamming_distance
                        })
-    
-        self.data.to_csv(join(postdir,'network_metrics.csv'))
+        
+        filename = generateFileName(self.variable, self.dataset, self.processed,'csv')
+        filename = '.'.join(['network_metrics',filename])
+       
+        self.data.to_csv(join(postdir,filename))
     
     def computeTimeSeries(self):
-        while self.reader.enddate != pd.to_datetime('2019-01-01'):
+        while self.reader.enddate < pd.to_datetime('2019-01-01'):
             print(f'{self.reader.startdate} till {self.reader.enddate}')
             
             corrcoef = self.computeCorrelationMatrix()
@@ -282,8 +314,3 @@ class networkMetricsSeries(object):
             self.reader.shift_window()
         
         self.save()
-            
-
-if __name__ =="__main__":
-    n = networkMetricsSeries(threshold=0.99)
-    n.computeTimeSeries()

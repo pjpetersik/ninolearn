@@ -4,6 +4,7 @@ import xarray as xr
 import gc
 
 from ninolearn.pathes import postdir
+from ninolearn.utils import generateFileName
 
 class data_reader(object):
     def __init__(self, startdate = '1980-01', enddate = '2017-12', lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
@@ -17,8 +18,9 @@ class data_reader(object):
         :lat_min: southern boundary of data set in degrees north
         :lat_max: northern boundary of data set in degrees north
         """
-        self.startdate = pd.to_datetime(startdate + "-01")
-        self.enddate = pd.to_datetime(enddate + "-31")
+        self.startdate = pd.to_datetime(startdate)
+        self.enddate = pd.to_datetime(enddate) + pd.tseries.offsets.MonthEnd(0)
+        
         self.lon_min = lon_min
         self.lon_max = lon_max
         self.lat_min = lat_min
@@ -29,7 +31,7 @@ class data_reader(object):
         
     def shift_window(self, month=1):
         self.startdate =self.startdate + pd.DateOffset(months=month)
-        self.enddate = self.enddate + pd.DateOffset(months=month)
+        self.enddate = self.enddate + pd.DateOffset(months=month) + pd.tseries.offsets.MonthEnd(0)
         
     def nino34_anom(self):
         """
@@ -49,52 +51,20 @@ class data_reader(object):
         
         return data.Anomaly.loc[self.startdate:self.enddate]
     
-    def sst_ERSSTv5(self, processed=''):
-        """
-        Processed ERSSTv5 data.
+    def read_netcdf(self, variable, dataset='', processed=''):
         
-        :param processed: Either '','deviation' or 'norm'. Where '' means the unprocessed 
-        data, 'deviation' the data minus its means and 'norm', the normalized data.
-        """
-        filename = 'sst.nc'
-        
-        if processed != '':
-            filename = f'sst.{processed}.nc'
+        filename = generateFileName(variable, dataset, processed,'nc')
         
         try: 
             data = xr.open_dataarray(join(postdir,filename))
         except:
-            raise Exception(f'Data for processed={processed} not found!')
+            raise Exception(f'Data for {filename[:-4]} not found!')
         
-        self._check_dates(data, "SST (ERSSTv5)")
+        self._check_dates(data, f'{filename[:-3]}')
             
         return data.loc[self.startdate:self.enddate,
                                 self.lat_max:self.lat_min,
                                 self.lon_min:self.lon_max]
-        
-    def sst_HadISST(self, processed=''):
-        """
-        Processed ERSSTv5 data.
-        
-        :param processed: Either '','deviation' or 'norm'. Where '' means the unprocessed 
-        data, 'deviation' the data minus its means and 'norm', the normalized data.
-        """
-        filename = 'sst_HadISST.nc'
-        
-        if processed != '':
-            filename = f'sst_HadISST.{processed}.nc'
-        
-        try: 
-            data = xr.open_dataarray(join(postdir,filename))
-        except:
-            raise Exception(f'Data for processed={processed} not found!')
-        
-        self._check_dates(data, "SST (HadISST)")
-            
-        return data.loc[self.startdate:self.enddate,
-                                self.lat_max:self.lat_min,
-                                self.lon_min:self.lon_max]
-    
     
     def _check_dates(self,data, name):
         """
@@ -114,8 +84,7 @@ class data_reader(object):
                 raise IndexError("The enddate is out of bounds for %s data!"%name)
 
 if __name__ == "__main__":
-    reader = data_reader(startdate="1961-01", enddate='1990-12')
+    reader = data_reader(startdate="1981-01", enddate='1990-12')
     nino34 = reader.nino34_anom()
     #wwv = reader.wwv_anom()
-    sst_ERSST = reader.sst_ERSSTv5(processed='deviation')
-    sst_HadISST = reader.sst_HadISST(processed='deviation')
+    sst_ERSST = reader.read_netcdf('sst', 'ERSSTv5','norm')

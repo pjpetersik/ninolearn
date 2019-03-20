@@ -1,6 +1,5 @@
 from os.path import join, exists
 
-from ninolearn.IO import read_raw
 from ninolearn.pathes import postdir
 
 # =============================================================================
@@ -102,9 +101,5 @@ def postprocess(data,new=False):
     saveNormalized(data, new)
 
 if __name__ == "__main__":
-    data = read_raw.sst_ERSSTv5()
-    postprocess(data)
+    from ninolearn.IO import read_raw
     
-    data2 = read_raw.sst_HadISST()
-    data2.name = 'sst_HadISST'
-    postprocess(data2)
