@@ -6,6 +6,7 @@ from scipy.special import binom
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
+from ninolearn.utils import largest_indices
 
 class climateNetwork(igraph.Graph):
     """
@@ -19,19 +20,53 @@ class climateNetwork(igraph.Graph):
         """
         np.fill_diagonal(adjacency,0)
         cls.adjacency_array = adjacency
+        cls.N = adjacency.shape[0]
+        
         A = (adjacency > 0).tolist()
         
         # mode = 1 means undirected
         return cls.Adjacency(A,mode=1)
     
     @classmethod
-    def from_correalation_matrix(cls,correalation_matrix,threshold = 0.9):
+    def from_correalation_matrix(cls,correalation_matrix, threshold = None, edge_density = None):
         """
         generate an igraph network from a correlation matrix
+        
+        :param correalation_matrix: the NxN correlation matrix that should be used
+        to generate the network
+        
+        :param threshold:  If NOT none but float between 0 and 1, a network with 
+        a fixed global threshold is generated. 
+        Note, EITHER the threshold OR the edge density method can be used!
+        
+        :param edge_density: If NOT none but float between 0 and 1, a network with a fixed edge density where
+        the strongest links are part of network is generated.
+        Note, EITHER the threshold OR the edge density method can be used!
         """
+        
         adjacency = np.zeros_like(correalation_matrix)
-        adjacency[correalation_matrix>threshold] = 1.
-        cls.threshold = threshold
+        
+        cls.N = correalation_matrix.shape[0]
+       
+        np.fill_diagonal(correalation_matrix,0)
+        
+        if (threshold==None and edge_density==None) or (threshold!=None and edge_density!=None):
+            raise Exception("Either use the fixed threshold method OR the fixed edge_density method!")
+        
+        if threshold!=None:
+            adjacency[correalation_matrix>threshold] = 1.
+            cls.threshold = threshold
+        
+        elif edge_density != None:
+            # get index for links
+            n_possible_links = binom(cls.N,2)
+            nlinks = int(edge_density * n_possible_links)
+            
+            il = largest_indices(correalation_matrix, 2 * nlinks)
+            adjacency[il] = 1
+            cls.threshold = np.nanmin(correalation_matrix[il])
+        
+        
         return cls.from_adjacency(adjacency)
     
     def giant_fraction(self):
@@ -106,7 +141,7 @@ class climateNetwork(igraph.Graph):
         
        
 class networkMetricsSeries(object):
-    def __init__(self, data_set='sst_ERSSTv5', processed='deviation', threshold= 0.99, startdate='1948-01', enddate='1948-12'):
+    def __init__(self, data_set='sst_ERSSTv5', processed='deviation', threshold = None, edge_density=None, startdate='1948-01', enddate='1948-12'):
         """
         Class for the computation of network metrics time series
         
@@ -127,6 +162,7 @@ class networkMetricsSeries(object):
         self.processed = processed
         
         self.threshold = threshold
+        self.edge_density = edge_density
         
         self.startdate = startdate 
         self.enddate = enddate
@@ -140,6 +176,7 @@ class networkMetricsSeries(object):
         initializes the pandas Series and array that saves the adjacency of the 
         network from the previous time step
         """
+        self.threshold_value = pd.Series()
         self.global_transitivity = pd.Series()
         self.avglocal_transitivity = pd.Series()
         self.frac_cluster_size2 = pd.Series()
@@ -184,9 +221,12 @@ class networkMetricsSeries(object):
         
         :param corrcoef: the correlation matrix
         """
-        cn = climateNetwork.from_correalation_matrix(corrcoef,threshold=self.threshold)
+        cn = climateNetwork.from_correalation_matrix(corrcoef, threshold=self.threshold, edge_density=self.edge_density)
         
         save_date = self.reader.enddate + pd.DateOffset(months=1)
+        
+        # The threshold of the climate network (changes for fixed edge densities)
+        self.threshold_value[save_date] = cn.threshold
         
         # C1 as in Newman (2003) and Eq. (6) in Radebach et al. (2013)
         self.global_transitivity[save_date] = cn.transitivity_undirected()
@@ -245,5 +285,5 @@ class networkMetricsSeries(object):
             
 
 if __name__ =="__main__":
-    n = networkMetricsSeries()
+    n = networkMetricsSeries(threshold=0.99)
     n.computeTimeSeries()
