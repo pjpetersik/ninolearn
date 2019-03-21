@@ -67,4 +67,4 @@ def sat(mean='monthly'):
 
 def ssh():
     data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'))
-    return data
+    return data.sossheig
