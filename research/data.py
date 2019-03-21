@@ -152,6 +152,21 @@ sst_HadISST = read_raw.sst_HadISST()
 sst_HadISST.name = 'sst.HadISST'
 postprocess(sst_HadISST)
 
+# postprocess sat daily values
+sat_daily = read_raw.sat(mean='daily', purpose="postprocess")
+sat_daily.name = 'sat.dailyNCEP_NCAR'
+postprocess(sat_daily)
+
+# =============================================================================
+# Postprocess BIGData
+# =============================================================================
+from ninolearn.postprocess.statisticsDask import postprocessDask
+
+ssh = read_raw.ssh(purpose="postprocess")
+ssh.name = 'ssh.ORAP5'
+postprocessDask(ssh)
+
+
 # =============================================================================
 # =============================================================================
 # # Network Metrics

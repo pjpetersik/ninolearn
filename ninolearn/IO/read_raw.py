@@ -51,7 +51,7 @@ def vwind():
     data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
     return data.vwnd
 
-def sat(mean='monthly'):
+def sat(mean='monthly',purpose=None):
     """
     Get the surface air temperature from NCEP/NCAR Reanalysis
     
@@ -63,8 +63,9 @@ def sat(mean='monthly'):
      
     elif mean=='daily':
         data = xr.open_mfdataset(join(rawdir,'sat','*.nc'))
+        data = data.load()
         return data.air
 
-def ssh():
-    data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'))
+def ssh(purpose=None):    
+    data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'), concat_dim='time_counter')
     return data.sossheig

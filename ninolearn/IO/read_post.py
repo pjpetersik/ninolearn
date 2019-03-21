@@ -58,7 +58,7 @@ class data_reader(object):
         try: 
             data = xr.open_dataarray(join(postdir,filename))
         except:
-            raise Exception(f'Data for {filename[:-4]} not found!')
+            raise Exception(f'Data for {filename[:-3]} not found!')
         
         self._check_dates(data, f'{filename[:-3]}')
             
@@ -87,4 +87,5 @@ if __name__ == "__main__":
     reader = data_reader(startdate="1981-01", enddate='1990-12')
     nino34 = reader.nino34_anom()
     #wwv = reader.wwv_anom()
-    sst_ERSST = reader.read_netcdf('sst', 'ERSSTv5','norm')
+    #sst_ERSST = reader.read_netcdf('ssh', 'ORAP5','norm')
+    
