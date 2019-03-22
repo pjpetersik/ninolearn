@@ -46,25 +46,38 @@ class data_reader(object):
         """
         get the warm water volume anomaly
         """
-        data = pd.read_csv(join(postdir,"wwv.csv"),index_col=0, parse_dates=True)
+        data = pd.read_csv(join(postdir,"wwv.csv"), index_col=0, parse_dates=True)
         self._check_dates(data, "WWV")
         
         return data.Anomaly.loc[self.startdate:self.enddate]
     
-    def read_netcdf(self, variable, dataset='', processed=''):
+    def read_netcdf(self, variable, dataset='', processed='', chunks=None):
+        """
+        wrapper for xarray.open_dataarray.
         
-        filename = generateFileName(variable, dataset, processed,'nc')
+        TODO: Chunking seems to make the code SLOW! OPTIMIZATION NEEDED.
         
-        try: 
-            data = xr.open_dataarray(join(postdir,filename))
-        except:
-            raise Exception(f'Data for {filename[:-3]} not found!')
+        :param variable: the name of the variable
+        :param dataset: the name of the dataset
+        :param processed: the postprocessing that was applied
+        :param chunks: same as for xarray.open_dataarray
+        """
+        filename = generateFileName(variable, dataset, processed=processed,suffix="nc")
         
+        data = xr.open_dataarray(join(postdir,filename), chunks=chunks)
+
         self._check_dates(data, f'{filename[:-3]}')
-            
-        return data.loc[self.startdate:self.enddate,
+        
+        if variable!='ssh':   
+            return data.loc[self.startdate:self.enddate,
                                 self.lat_max:self.lat_min,
-                                self.lon_min:self.lon_max]
+                                self.lon_min:self.lon_max]   
+        else:
+            return data.loc[self.startdate:self.enddate,:,:].where(
+                   (data.nav_lat>self.lat_min)&(data.nav_lat<self.lat_max)&
+                   (data.nav_lon>self.lon_min)&(data.nav_lon<self.lon_max),
+                   drop=True)
+        
     
     def _check_dates(self,data, name):
         """
@@ -87,5 +100,5 @@ if __name__ == "__main__":
     reader = data_reader(startdate="1981-01", enddate='1990-12')
     nino34 = reader.nino34_anom()
     #wwv = reader.wwv_anom()
-    #sst_ERSST = reader.read_netcdf('ssh', 'ORAP5','norm')
+    data = reader.read_netcdf('air', 'NCEP','norm')
     

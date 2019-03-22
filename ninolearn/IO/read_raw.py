@@ -23,6 +23,7 @@ def sst_ERSSTv5():
     get the sea surface temperature from the ERSST-v5 data set
     """
     data = xr.open_dataset(join(rawdir,'sst.mnmean.nc'))            
+    data.sst.attrs['dataset'] = 'ERSSTv5'
     return data.sst
         
 
@@ -35,6 +36,7 @@ def sst_HadISST():
     data = xr.open_dataset(join(rawdir,"HadISST_sst.nc"))
     maxtime = pd.to_datetime(data.time.values.max()).date()
     data['time'] = pd.date_range(start='1870-01-01', end=maxtime, freq='MS')
+    data.sst.attrs['dataset'] = 'HadISST'
     return data.sst
 
 def uwind():
@@ -42,6 +44,7 @@ def uwind():
     get u-wind from NCEP/NCAR reanalysis
     """
     data = xr.open_dataset(join(rawdir,"uwnd.mon.mean.nc"))
+    data.uwnd.attrs['dataset'] = 'NCEP'
     return data.uwnd
 
 def vwind():
@@ -49,6 +52,7 @@ def vwind():
     get v-wind from NCEP/NCAR reanalysis
     """
     data = xr.open_dataset(join(rawdir,"vwnd.mon.mean.nc"))
+    data.vwnd.attrs['dataset'] = 'NCEP'
     return data.vwnd
 
 def sat(mean='monthly',purpose=None):
@@ -59,13 +63,23 @@ def sat(mean='monthly',purpose=None):
     """
     if mean=='monthly':
          data = xr.open_dataset(join(rawdir,"air.mon.mean.nc"))
+         data.air.attrs['dataset'] = 'NCEP'
          return data.air
      
     elif mean=='daily':
         data = xr.open_mfdataset(join(rawdir,'sat','*.nc'))
-        data = data.load()
-        return data.air
+        data_return  = data.air
+        
+        data_return.attrs['dataset'] = 'NCEP'
+        data_return.name = 'air_daily'
+        return data_return
 
-def ssh(purpose=None):    
+def ssh(purpose=None):  
+    """
+    Get sea surface height. And change some attirbutes and coordinate names
+    """
     data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'), concat_dim='time_counter')
-    return data.sossheig
+    data_return = data.sossheig.rename({'time_counter':'time'})
+    data_return.attrs['dataset'] = 'ORAP5'
+    data_return.name = 'ssh'
+    return data_return

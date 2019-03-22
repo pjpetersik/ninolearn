@@ -1,18 +1,55 @@
 from os.path import join, exists
-from os import mkdir
+from os import remove
+import xarray as xr
 
 from ninolearn.pathes import postdir
+from ninolearn.utils import generateFileName, small_print_header
 """
 TODO: Remove seasonality
 """
 # =============================================================================
-# Computation
+# # ===========================================================================
+# # Computation
+# # ===========================================================================
 # =============================================================================
+
+def computeTimemean(data):  
+    """
+    Compute or read the timely mean of a data set. In case no data can be read, save
+    the computed data.
+    """
+    filename = generateFileName(data.name, dataset=data.dataset, processed='timemean',suffix='nc')
+    path = join(postdir,filename)
+    if not exists(path):
+        print(f"- Compute {data.name} time mean")
+        timemean = data.loc['1948-01-01':'2018-12-31'].mean(dim = 'time', skipna=True)
+        timemean.to_netcdf(path)
+    else:
+        print(f"- Read {data.name} time mean")
+        timemean = xr.open_dataarray(path)
+    return timemean
+
+def computeStd(data):
+    """
+    Compute or read the standard deviation of a data set. In case no data can be read, save
+    the computed data.
+    """
+    filename = generateFileName(data.name, dataset=data.dataset, processed='std',suffix='nc')
+    path = join(postdir,filename)
+    if not exists(path):
+        print(f"- Compute {data.name} standard deviation")
+        std = data.loc['1948-01-01':'2018-12-31'].mean(dim = 'time', skipna=True)
+        std.to_netcdf(path)
+    else:
+        print(f"- Read {data.name} time mean")
+        std = xr.open_dataarray(path)
+    return std
+
 def computeDeviation(data):
     """
     remove the over all time mean from a time series
     """
-    time_mean = data.loc['1948-01-01':'2018-12-31'].mean(dim = 'time', skipna=True)
+    time_mean = computeTimemean(data)
     deviation = data - time_mean
     return deviation
 
@@ -20,21 +57,44 @@ def computeNormalized(data):
     """
     normalize the data
     """
-    time_mean = data.mean(dim = 'time', skipna=True)
-    deviation = data - time_mean
-    std = deviation.std(dim = 'time', skipna=True)
-    norm = deviation/std
+    timemean = computeTimemean(data)
+    std = computeStd(data)
+    norm = (data-timemean) / std
     return norm
 
+
 # =============================================================================
-# Saving
+# =============================================================================
+# # Attribute manipulation
+# =============================================================================
 # =============================================================================
 
+def _delete_some_attributes(attrs):
+    """
+    delete some attributes from the orginal data set that lose meaning after data 
+    processing
+    
+    :param attrs: the attribute list
+    """
+    to_delete_attrs = ['actual_range','valid_range']
+    for del_attrs in to_delete_attrs:
+        if del_attrs in  attrs:
+            del attrs[del_attrs]
+    return attrs
+
+# =============================================================================
+# # ===========================================================================
+# # Saving
+# # ===========================================================================
+# =============================================================================
+    
 def toPostDir(data):
     """
     save the basic data to the postdir
     """
-    path = join(postdir,''.join([data.name,'.nc']))
+    filename = generateFileName(data.name, dataset=data.dataset,suffix='nc')
+    path = join(postdir,filename)
+    
     if exists(path):
          print (f"{data.name} already saved in post directory")
     else:
@@ -45,7 +105,8 @@ def saveDeviation(data, new):
     """
     save deviation to postdir
     """
-    path = join(postdir,''.join([data.name, '.deviation','.nc']))
+    filename = generateFileName(data.name, dataset=data.dataset, processed='deviation',suffix='nc')
+    path = join(postdir,filename)
     
     if exists(path) and not new:
         print (f"{data.name} deviation already computed")
@@ -55,24 +116,23 @@ def saveDeviation(data, new):
         
         deviation = computeDeviation(data)
         
-        deviation.name = ''.join([data.name, '.deviation'])
+        deviation.name = ''.join([data.name, 'Deviation'])
         
         deviation.attrs = data.attrs.copy()
         deviation.attrs['statistic'] = 'Substracted the Mean'
-        deviation.attrs['actual_range'] = (deviation.min(), deviation.max())
-       
-        try:
-            del deviation.attrs['valid_range']
-        except:
-            pass
+        
+        deviation.attrs = _delete_some_attributes(deviation.attrs)
         
         deviation.to_netcdf(path)
+
 
 def saveNormalized(data, new):
     """
     save deviation to postdir
     """
-    path = join(postdir,''.join([''.join([data.name, '.norm']),'.nc']))
+    filename = generateFileName(data.name, dataset=data.dataset, processed='norm',suffix='nc')
+    path = join(postdir,filename)
+    
     
     if exists(path) and not new:
         print (f"{data.name} normalized already computed")
@@ -81,17 +141,16 @@ def saveNormalized(data, new):
         print (f"Compute {data.name} normalized")
         norm = computeNormalized(data)
         
-        norm.name = ''.join([data.name, '.norm'])
+        norm.name = ''.join([data.name, 'Norm'])
         
         norm.attrs = data.attrs.copy()
         norm.attrs['statistic'] = 'Substracted the Mean. Divided by standerd Deviation.'
-        norm.attrs['actual_range'] = (norm.min(),norm.max())
         
-        try:
-            del norm.attrs['valid_range']
-        except:
-            pass
+        norm.attrs = _delete_some_attributes(norm.attrs)
+        
         norm.to_netcdf(path)
+
+
 
 def postprocess(data,new=False):
     """
@@ -99,6 +158,7 @@ def postprocess(data,new=False):
     :param data: xarray data array
     :param new: compute the statistics again (default = False)
     """
+    small_print_header(f"Process {data.name} from {data.dataset}")
     toPostDir(data)
     saveDeviation(data, new)
     saveNormalized(data, new)

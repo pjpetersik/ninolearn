@@ -131,40 +131,29 @@ from ninolearn.postprocess.statistics import postprocess
 
 # postprocess sst data from ERSSTv5
 sst_ERSSTv5 = read_raw.sst_ERSSTv5()
-sst_ERSSTv5.name = 'sst.ERSSTv5'
 postprocess(sst_ERSSTv5)
 
 # postprocess data from NCEP/NCAR reanalysis
 uwind = read_raw.uwind()
-uwind.name = 'uwnd.NCEP_NCAR'
 postprocess(uwind)
 
 vwind = read_raw.vwind()
-vwind.name = 'vwnd.NCEP_NCAR'
 postprocess(vwind)
 
 sat = read_raw.sat(mean='monthly')
-sat.name = 'sat.NCEP_NCAR'
 postprocess(sat)
 
 # postprocess sst date from HadISST date set
 sst_HadISST = read_raw.sst_HadISST()
-sst_HadISST.name = 'sst.HadISST'
 postprocess(sst_HadISST)
 
-# postprocess sat daily values
+# postprocess sat daily values from NCEP/NCAR reanalysis
 sat_daily = read_raw.sat(mean='daily', purpose="postprocess")
-sat_daily.name = 'sat.dailyNCEP_NCAR'
 postprocess(sat_daily)
 
-# =============================================================================
-# Postprocess BIGData
-# =============================================================================
-from ninolearn.postprocess.statisticsDask import postprocessDask
-
+# postprocess ssh values from ORAP5
 ssh = read_raw.ssh(purpose="postprocess")
-ssh.name = 'ssh.ORAP5'
-postprocessDask(ssh)
+postprocess(ssh)
 
 
 # =============================================================================
@@ -175,5 +164,5 @@ postprocessDask(ssh)
 print_header("Network Metrics")
 from ninolearn.postprocess.network import networkMetricsSeries
 
-nms = networkMetricsSeries('uwnd','NCEP_NCAR', threshold=0.9,startdate='2017-01', enddate='2017-12')
+nms = networkMetricsSeries('uwnd','NCEP', threshold=0.9,startdate='2017-01', enddate='2017-12')
 nms.computeTimeSeries()

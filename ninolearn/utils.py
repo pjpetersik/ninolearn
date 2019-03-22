@@ -7,6 +7,13 @@ def print_header(string):
     print("#######################################################################")
     print()
 
+def small_print_header(string):
+    print()
+    print("--------------------------------------")
+    print(string)
+    print("--------------------------------------")
+    print()
+
 def largest_indices(ary, n):
     """Returns the n largest indices from a numpy array."""
     flat = ary.flatten()
@@ -14,14 +21,18 @@ def largest_indices(ary, n):
     indices = indices[np.argsort(-flat[indices])]
     return np.unravel_index(indices, ary.shape)
 
-def generateFileName(variable, dataset, processed, suffix):
+def generateFileName(variable, dataset, processed='',suffix=None):
     """
     generates a file name
     """
-    filenamelist = [variable, dataset, processed,suffix]
+    filenamelist = [variable, dataset, processed]
    
     # remove ''  entries from list
     filenamelist = list(filter(lambda a: a != '', filenamelist))
     
-    filename = '.'.join(filenamelist)
+    filename = '_'.join(filenamelist)
+    
+    if suffix!=None:
+        filename = '.'.join([filename,suffix])
+    
     return filename

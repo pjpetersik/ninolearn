@@ -299,8 +299,8 @@ class networkMetricsSeries(object):
                        'corrected_hamming_distance':self.corrected_hamming_distance
                        })
         
-        filename = generateFileName(self.variable, self.dataset, self.processed,'csv')
-        filename = '.'.join(['network_metrics',filename])
+        filename = generateFileName(self.variable, self.dataset, processed=self.processed,suffix='csv')
+        filename = '-'.join(['network_metrics',filename])
        
         self.data.to_csv(join(postdir,filename))
     
