@@ -77,7 +77,15 @@ class data_reader(object):
                    (data.nav_lat>self.lat_min)&(data.nav_lat<self.lat_max)&
                    (data.nav_lon>self.lon_min)&(data.nav_lon<self.lon_max),
                    drop=True)
+            
+    def read_network_metrics(self,variable, dataset='', processed=''):
         
+        filename = generateFileName(variable, dataset, processed=processed, suffix="csv")
+        filename = '-'.join(['network_metrics',filename])
+        
+        data = pd.read_csv(join(postdir,filename), index_col=0, parse_dates=True)
+        #self._check_dates(data, "WWV")
+        return data
     
     def _check_dates(self,data, name):
         """
@@ -100,5 +108,6 @@ if __name__ == "__main__":
     reader = data_reader(startdate="1981-01", enddate='1990-12')
     nino34 = reader.nino34_anom()
     #wwv = reader.wwv_anom()
-    data = reader.read_netcdf('air', 'NCEP','norm')
+    #data = reader.read_netcdf('air', 'NCEP','norm')
     
+    nwm = reader.read_network_metrics('air', dataset='NCEP', processed='deviation')

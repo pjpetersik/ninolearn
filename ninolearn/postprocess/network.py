@@ -3,10 +3,14 @@ import numpy as np
 import pandas as pd
 from os.path import join
 from scipy.special import binom
+import logging
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
 from ninolearn.utils import largest_indices, generateFileName
+
+logging.basicConfig(format='%(levelname)s:%(message)s')
+logger = logging.getLogger(__name__)
 
 class climateNetwork(igraph.Graph):
     """
@@ -107,7 +111,7 @@ class climateNetwork(igraph.Graph):
             return H
         
         except:
-            print("Wrong input for computation of hamming distance.")
+            logger.warning("Wrong input for computation of hamming distance.")
             return 0
         
     def corrected_hamming_distance(self, other_adjacency):
@@ -141,15 +145,16 @@ class climateNetwork(igraph.Graph):
             return Hstar
         
         except:
-            print("Wrong input for computation of corrected hamming distance.")
+            logger.warning("Wrong input for computation of corrected hamming distance.")
             return 0
         
        
 class networkMetricsSeries(object):
     def __init__(self, variable, dataset, processed='deviation', 
                  threshold = None, edge_density=None, 
-                 startdate='1948-01', enddate='1948-12',
-                 lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30):
+                 startyear=1948, endyear=2000, window_size = 12,
+                 lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30,
+                 verbose = 0):
         """
         Class for the computation of network metrics time series
         
@@ -167,9 +172,11 @@ class networkMetricsSeries(object):
         :param threshold: the threshold for a the correlation coeficent between 
         two grid point to be considered as connected
         
-        :param startdate: start of the window for the computation of network metrics
+        :param startyear: the first year for which the network analysis should be done
         
-        :param enddate: end of the window for the computation of network metrics
+        :param endyear: the last year for which the network analysis should be done
+        
+        :param window_size: the size of the window for which the network metrics are computed
         
         :param lon_min,lon_max: the min and the max values of the longitude grid for which the metrics
         shell be computed (from 0 to 360 degrees east)
@@ -184,20 +191,39 @@ class networkMetricsSeries(object):
         self.threshold = threshold
         self.edge_density = edge_density
         
-        self.startdate = startdate 
-        self.enddate = enddate
+        self.startyear = str(startyear)
+        self.endyear = str(endyear)
+        
+        self.startdate = pd.to_datetime(self.startyear)
+        self.enddate = pd.to_datetime(self.endyear) + pd.tseries.offsets.YearEnd(0)
+        
+        self.window_size = window_size
+        self.window_start = self.startdate
+        self.window_end = self.window_start + pd.tseries.offsets.MonthEnd(self.window_size)
         
         self.lon_min = lon_min
         self.lon_max = lon_max
         self.lat_min = lat_min
         self.lat_max = lat_max
         
-        self.reader = data_reader(startdate=self.startdate, enddate=self.enddate, 
+        self.reader = data_reader(startdate=self.window_start, enddate=self.window_end, 
                                   lon_min = self.lon_min, lon_max = self.lon_max, 
                                   lat_min = self.lat_min, lat_max = self.lat_max)
         
         self.initalizeSeries()
         
+        if verbose==0:
+            logger.setLevel(logging.DEBUG)
+        elif verbose==1:
+            logger.setLevel(logging.INFO)
+        elif verbose==2:
+            logger.setLevel(logging.WARNING)
+        elif verbose==3:
+            logger.setLevel(logging.ERROR)            
+        
+    def __del__(self):
+        logging.shutdown()
+    
     def initalizeSeries(self):
         """
         initializes the pandas Series and array that saves the adjacency of the 
@@ -252,7 +278,9 @@ class networkMetricsSeries(object):
         """
         cn = climateNetwork.from_correalation_matrix(corrcoef, threshold=self.threshold, edge_density=self.edge_density)
         
-        save_date = self.reader.enddate + pd.DateOffset(months=1)
+        save_date = self.reader.enddate + pd.tseries.offsets.MonthBegin(0)
+        
+        logger.debug(f'Save date: {save_date}')
         
         # The threshold of the climate network (changes for fixed edge densities)
         self.threshold_value[save_date] = cn.threshold
@@ -305,12 +333,17 @@ class networkMetricsSeries(object):
         self.data.to_csv(join(postdir,filename))
     
     def computeTimeSeries(self):
-        while self.reader.enddate < pd.to_datetime('2019-01-01'):
-            print(f'{self.reader.startdate} till {self.reader.enddate}')
+        while self.reader.enddate <= self.enddate:
+            logger.info(f'{self.reader.startdate} till {self.reader.enddate}')
             
             corrcoef = self.computeCorrelationMatrix()
             self.computeNetworkMetrics(corrcoef)
             
-            self.reader.shift_window()
+            self.reader.shift_window(month=1)
         
         self.save()
+
+if __name__ == "__main__":
+
+    nms = networkMetricsSeries('air','NCEP', processed="deviation", threshold=0.95,startyear=1990, endyear=2018, window_size=12)
+    nms.computeTimeSeries()
