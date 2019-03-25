@@ -5,13 +5,43 @@ import xarray as xr
 from ninolearn.pathes import postdir
 from ninolearn.utils import generateFileName, small_print_header
 """
-TODO: Remove seasonality
+TODO: Remove seasonality  for daily data
+TODO: Regrid data
 """
 # =============================================================================
 # # ===========================================================================
-# # Computation
+# # Pre-Computation
 # # ===========================================================================
 # =============================================================================
+def computeStdClimatology(data):
+    """
+    Monthly means
+    """
+    filename = generateFileName(data.name, dataset=data.dataset, processed='stdclim',suffix='nc')
+    path = join(postdir,filename)
+    if not exists(path):
+        print(f"- Compute {data.name} climatetology")
+        stdclim = data.loc['1948-01-01':'2018-12-31'].groupby('time.month').std(dim="time")
+        stdclim.to_netcdf(path)
+    else:
+        print(f"- Read {data.name} climatetology")
+        stdclim = xr.open_dataarray(path)
+    return stdclim
+
+def computeMeanClimatology(data):
+    """
+    Monthly means
+    """
+    filename = generateFileName(data.name, dataset=data.dataset, processed='meanclim',suffix='nc')
+    path = join(postdir,filename)
+    if not exists(path):
+        print(f"- Compute {data.name} climatetology")
+        meanclim = data.loc['1948-01-01':'2018-12-31'].groupby('time.month').mean(dim="time")
+        meanclim.to_netcdf(path)
+    else:
+        print(f"- Read {data.name} climatetology")
+        meanclim = xr.open_dataarray(path)
+    return meanclim
 
 def computeTimemean(data):  
     """
@@ -45,6 +75,28 @@ def computeStd(data):
         std = xr.open_dataarray(path)
     return std
 
+# =============================================================================
+# # ===========================================================================
+# # Pre-Computation
+# # ===========================================================================
+# ========================================================================
+def computeAnomaly(data):
+    """
+    Remove the seasonality
+    """
+    meanclim = computeMeanClimatology(data)
+    anom = data.groupby('time.month') - meanclim
+    return anom
+
+def computeNormAnomaly(data):
+    """
+    Remove the seasonality
+    """
+    meanclim = computeMeanClimatology(data)
+    stdclim = computeStdClimatology(data)
+    normanom = (data.groupby('time.month') - meanclim)/stdclim
+    return normanom
+    
 def computeDeviation(data):
     """
     remove the over all time mean from a time series
@@ -149,6 +201,54 @@ def saveNormalized(data, new):
         norm.attrs = _delete_some_attributes(norm.attrs)
         
         norm.to_netcdf(path)
+        
+def saveAnomaly(data, new):
+    """
+    save deviation to postdir
+    """
+    filename = generateFileName(data.name, dataset=data.dataset, processed='anom',suffix='nc')
+    path = join(postdir,filename)
+    
+    
+    if exists(path) and not new:
+        print (f"{data.name} normalized already computed")
+    
+    else:
+        print (f"Compute {data.name} normalized")
+        anom = computeAnomaly(data)
+        
+        anom.name = ''.join([data.name, 'Anom'])
+        
+        anom.attrs = data.attrs.copy()
+        anom.attrs['statistic'] = 'Substracted the monthly Mean.'
+        
+        anom.attrs = _delete_some_attributes(anom.attrs)
+        
+        anom.to_netcdf(path)
+
+def saveNormAnomaly(data, new):
+    """
+    save deviation to postdir
+    """
+    filename = generateFileName(data.name, dataset=data.dataset, processed='normanom',suffix='nc')
+    path = join(postdir,filename)
+    
+    
+    if exists(path) and not new:
+        print (f"{data.name} normalized already computed")
+    
+    else:
+        print (f"Compute {data.name} normalized")
+        normanom = computeNormAnomaly(data)
+        
+        normanom.name = ''.join([data.name, 'Anom'])
+        
+        normanom.attrs = data.attrs.copy()
+        normanom.attrs['statistic'] = 'Substracted the monthly Mean. Divided by the Monthly standard deviation'
+        
+        normanom.attrs = _delete_some_attributes(normanom.attrs)
+        
+        normanom.to_netcdf(path)
 
 
 
@@ -160,5 +260,6 @@ def postprocess(data,new=False):
     """
     small_print_header(f"Process {data.name} from {data.dataset}")
     toPostDir(data)
+    saveAnomaly(data, new)
     saveDeviation(data, new)
     saveNormalized(data, new)

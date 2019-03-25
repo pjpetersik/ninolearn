@@ -4,11 +4,16 @@ import pandas as pd
 from os.path import join
 from scipy.special import binom
 import logging
+from timeit import default_timer as timer
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
 from ninolearn.utils import largest_indices, generateFileName
 
+"""
+TODO: compute correlation coefficents with deepGraph
+TODO: Edge densities to output
+"""
 logging.basicConfig(format='%(levelname)s:%(message)s')
 logger = logging.getLogger(__name__)
 
@@ -243,11 +248,16 @@ class networkMetricsSeries(object):
         self._old_adjacency = np.array([])
         
     def computeCorrelationMatrix(self):
+        start = timer()
+        logger.debug("Start computeCorrelationMatrix()")
+        
+        logger.debug("- Read netcdf data")
         data = self.reader.read_netcdf(variable=self.variable, 
                                        dataset=self.dataset, 
-                                       processed=self.processed)
+                                       processed=self.processed,chunks={'time':1})
         
         # Reshape
+        logger.debug("- Reshape data")
         data3Darr  = np.array(data)
         
         dims = data.coords.dims
@@ -262,11 +272,20 @@ class networkMetricsSeries(object):
         data2Darr = data3Darr.reshape(len_time,len_lat*len_lon)
 
         # Correlation matrix
-        df2Darr = pd.DataFrame(data2Darr)
-        df2Darr = df2Darr.dropna(axis=1)
-        df_corrcoef = df2Darr.corr()
+        logger.debug("- Compute Correlation matrix")
+        # Pandas
+#        df2Darr = pd.DataFrame(data2Darr)
+#        df2Darr = df2Darr.dropna(axis=1)               
+#        df_corrcoef = df2Darr.corr()
+#        corrcoef = df_corrcoef.to_numpy()
         
-        corrcoef = df_corrcoef.to_numpy()
+        # Numpy
+        data2Darr = data2Darr[:,np.isfinite(data2Darr).any(axis=0)]
+        corrcoef = np.corrcoef(data2Darr.T)      
+        
+        end = timer()
+        elapsed = end - start
+        logger.debug(f"End computeCorrelationMatrix(): {elapsed}s")
         return corrcoef
         
     def computeNetworkMetrics(self,corrcoef):
@@ -276,6 +295,7 @@ class networkMetricsSeries(object):
         
         :param corrcoef: the correlation matrix
         """
+        logger.debug("Start computeNetworkMetrics()")
         cn = climateNetwork.from_correalation_matrix(corrcoef, threshold=self.threshold, edge_density=self.edge_density)
         
         save_date = self.reader.enddate + pd.tseries.offsets.MonthBegin(0)
@@ -314,7 +334,8 @@ class networkMetricsSeries(object):
         
         # copy the old adjacency
         self._old_adjacency = cn.adjacency_array.copy()
-        
+        logger.debug("End computeNetworkMetrics()")
+   
     def save(self):
         self.data = pd.DataFrame({'global_transitivity' : self.global_transitivity,
                        'avelocal_transmissivity': self.avglocal_transitivity,
@@ -324,7 +345,8 @@ class networkMetricsSeries(object):
                        'fraction_giant_component': self.frac_giant,
                        'average_path_length':self.avg_path_length,
                        'hamming_distance':self.hamming_distance,
-                       'corrected_hamming_distance':self.corrected_hamming_distance
+                       'corrected_hamming_distance':self.corrected_hamming_distance,
+                       'threshold' :self.threshold_value,
                        })
         
         filename = generateFileName(self.variable, self.dataset, processed=self.processed,suffix='csv')
@@ -345,5 +367,7 @@ class networkMetricsSeries(object):
 
 if __name__ == "__main__":
 
-    nms = networkMetricsSeries('air','NCEP', processed="deviation", threshold=0.95,startyear=1990, endyear=2018, window_size=12)
+    nms = networkMetricsSeries('sst','ERSSTv5', processed="anom", 
+                               edge_density=0.005, startyear=1948, endyear=2018, window_size=12,
+                               lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30, verbose = 1)
     nms.computeTimeSeries()

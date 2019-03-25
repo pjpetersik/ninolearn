@@ -55,7 +55,7 @@ def vwind():
     data.vwnd.attrs['dataset'] = 'NCEP'
     return data.vwnd
 
-def sat(mean='monthly',purpose=None):
+def sat(mean='monthly'):
     """
     Get the surface air temperature from NCEP/NCAR Reanalysis
     
@@ -74,7 +74,7 @@ def sat(mean='monthly',purpose=None):
         data_return.name = 'air_daily'
         return data_return
 
-def ssh(purpose=None):  
+def ssh():  
     """
     Get sea surface height. And change some attirbutes and coordinate names
     """

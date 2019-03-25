@@ -148,11 +148,11 @@ sst_HadISST = read_raw.sst_HadISST()
 postprocess(sst_HadISST)
 
 # postprocess sat daily values from NCEP/NCAR reanalysis
-sat_daily = read_raw.sat(mean='daily', purpose="postprocess")
+sat_daily = read_raw.sat(mean='daily')
 postprocess(sat_daily)
 
 # postprocess ssh values from ORAP5
-ssh = read_raw.ssh(purpose="postprocess")
+ssh = read_raw.ssh()
 postprocess(ssh)
 
 # =============================================================================
