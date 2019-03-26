@@ -154,14 +154,3 @@ postprocess(sat_daily)
 # postprocess ssh values from ORAP5
 ssh = read_raw.ssh()
 postprocess(ssh)
-
-# =============================================================================
-# =============================================================================
-# # Network Metrics
-# =============================================================================
-# =============================================================================
-print_header("Network Metrics")
-from ninolearn.postprocess.network import networkMetricsSeries
-
-nms = networkMetricsSeries('uwnd','NCEP', threshold=0.9,startdate='2017-01', enddate='2017-12')
-nms.computeTimeSeries()

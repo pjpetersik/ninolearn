@@ -3,8 +3,7 @@ from os.path import join, exists
 from os import mkdir
 
 from ninolearn.IO import read_raw
-from ninolearn.pathes import rawdir, postdir
-from ninolearn.postprocess.statistics import toPostDir
+from ninolearn.pathes import postdir
 
 if not exists(postdir):
     print("make a data directory at %s" %postdir)

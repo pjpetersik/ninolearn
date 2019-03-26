@@ -80,6 +80,8 @@ def ssh():
     """
     data = xr.open_mfdataset(join(rawdir,'ssh','*.nc'), concat_dim='time_counter')
     data_return = data.sossheig.rename({'time_counter':'time'})
+    maxtime = pd.to_datetime(data_return.time.values.max()).date()
+    data_return['time'] = pd.date_range(start='1979-01-01', end=maxtime, freq='MS')
     data_return.attrs['dataset'] = 'ORAP5'
     data_return.name = 'ssh'
     return data_return

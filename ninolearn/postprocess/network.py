@@ -11,7 +11,8 @@ from ninolearn.pathes import postdir
 from ninolearn.utils import largest_indices, generateFileName
 
 """
-TODO: compute correlation coefficents with deepGraph
+TODO: Connections with nodes outside of the the tropical pacific
+TODO: check Spearman correlation coefficient
 """
 logging.basicConfig(format='%(levelname)s:%(message)s')
 logger = logging.getLogger(__name__)
@@ -284,8 +285,8 @@ class networkMetricsSeries(object):
         corrcoef = np.corrcoef(data2Darr.T)      
         
         end = timer()
-        elapsed = end - start
-        logger.debug(f"End computeCorrelationMatrix(): {elapsed}s")
+        elapsed = round(end - start,1)
+        logger.debug(f"End computeCorrelationMatrix(): {elapsed} s")
         return corrcoef
         
     def computeNetworkMetrics(self,corrcoef):
@@ -314,6 +315,9 @@ class networkMetricsSeries(object):
         # fraction of nodes in clusters of size 2
         self.frac_cluster_size2[save_date] =  self.cn.cluster_fraction(2)
         
+        if self.frac_cluster_size2[save_date]==0:
+            logger.warning("c2 variable equal to 0!")
+            
         # fraction of nodes in clusters of size 3
         self.frac_cluster_size3[save_date] =  self.cn.cluster_fraction(3)
         
@@ -355,23 +359,25 @@ class networkMetricsSeries(object):
         
         filename = generateFileName(self.variable, self.dataset, processed=self.processed,suffix='csv')
         filename = '-'.join(['network_metrics',filename])
-       
+        
+        if self.threshold != None:
+            # TODO: dynamic naming depending on the methods used
+            pass
+        elif self.edge_density != None:
+            pass
+        
         self.data.to_csv(join(postdir,filename))
     
     def computeTimeSeries(self):
         while self.reader.enddate <= self.enddate:
             logger.info(f'{self.reader.startdate} till {self.reader.enddate}')
-            
             corrcoef = self.computeCorrelationMatrix()
             self.computeNetworkMetrics(corrcoef)
-            
             self.reader.shift_window(month=1)
-        
         self.save()
 
 if __name__ == "__main__":
-
-    nms = networkMetricsSeries('sst','ERSSTv5', processed="anom", 
-                               edge_density=0.005, startyear=1948, endyear=2018, window_size=12,
+    nms = networkMetricsSeries('air_daily','NCEP', processed="anom", 
+                               threshold=0.9, startyear=1948, endyear=2018, window_size=12,
                                lon_min = 120, lon_max = 260, lat_min = -30, lat_max = 30, verbose = 1)
     nms.computeTimeSeries()

@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
-import pandas as pd
-
-from ninolearn.IO.read_post import data_reader
-
-
 
 def nino_background(nino_data, nino_treshold=0.8):
+    """
+    generates a plotbackground based on values of the Nino3.4 Index
+    """
     nino_color = nino_data.copy()
     nino_color[abs(nino_color)<nino_treshold] = 0
     
@@ -25,7 +23,7 @@ def nino_background(nino_data, nino_treshold=0.8):
             end = False
             
             windowmax = abs(nino_data.loc[start_date:end_date]).max()
-            sign = nino34.loc[start_date]
+            sign = nino_color.loc[start_date]
             
             alpha = (windowmax - nino_treshold)/(ninomax-nino_treshold) * 0.8
             
@@ -34,28 +32,3 @@ def nino_background(nino_data, nino_treshold=0.8):
             else:
                 plt.axvspan(start_date, end_date, facecolor='blue', alpha=alpha)
                 
-if __name__ == "__main__":
-    reader = data_reader(startdate='1950-01', enddate='2018-12')
-    
-    nwm = reader.read_network_metrics('sst', dataset='ERSSTv5', processed='anom')
-    nino34 = reader.nino34_anom()
-    
-    
-    plt.close("all")
-    
-    plt.figure(figsize=(12,4))
-    nwm['threshold'].plot(c='k')
-    nino_background(nino34)
-    
-    #'global_transitivity'
-    #'avelocal_transmissivity'
-    #'fraction_clusters_size_2'
-    #'fraction_clusters_size_3'
-    #'fraction_clusters_size_5'
-    #'fraction_giant_component'
-    #'average_path_length'
-    #'hamming_distance'
-    #'corrected_hamming_distance'
-    
-    plt.figure(2)
-    nino34.plot()
