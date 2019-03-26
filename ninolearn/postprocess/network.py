@@ -12,7 +12,6 @@ from ninolearn.utils import largest_indices, generateFileName
 
 """
 TODO: compute correlation coefficents with deepGraph
-TODO: Edge densities to output
 """
 logging.basicConfig(format='%(levelname)s:%(message)s')
 logger = logging.getLogger(__name__)
@@ -242,6 +241,7 @@ class networkMetricsSeries(object):
         self.frac_cluster_size5 = pd.Series()
         self.frac_giant = pd.Series()
         self.avg_path_length = pd.Series()
+        self.edge_density_value = pd.Series()
         self.hamming_distance = pd.Series()
         self.corrected_hamming_distance = pd.Series()
         
@@ -296,44 +296,47 @@ class networkMetricsSeries(object):
         :param corrcoef: the correlation matrix
         """
         logger.debug("Start computeNetworkMetrics()")
-        cn = climateNetwork.from_correalation_matrix(corrcoef, threshold=self.threshold, edge_density=self.edge_density)
+        self.cn = climateNetwork.from_correalation_matrix(corrcoef, threshold=self.threshold, edge_density=self.edge_density)
         
         save_date = self.reader.enddate + pd.tseries.offsets.MonthBegin(0)
         
         logger.debug(f'Save date: {save_date}')
         
         # The threshold of the climate network (changes for fixed edge densities)
-        self.threshold_value[save_date] = cn.threshold
+        self.threshold_value[save_date] = self.cn.threshold
         
         # C1 as in Newman (2003) and Eq. (6) in Radebach et al. (2013)
-        self.global_transitivity[save_date] = cn.transitivity_undirected()
+        self.global_transitivity[save_date] = self.cn.transitivity_undirected()
         
         # C2 as in Newman (2003) and Eq. (7) in Radebach et al. (2013)
-        self.avglocal_transitivity[save_date] = cn.transitivity_avglocal_undirected(mode="zero")
+        self.avglocal_transitivity[save_date] = self.cn.transitivity_avglocal_undirected(mode="zero")
         
         # fraction of nodes in clusters of size 2
-        self.frac_cluster_size2[save_date] =  cn.cluster_fraction(2)
+        self.frac_cluster_size2[save_date] =  self.cn.cluster_fraction(2)
         
         # fraction of nodes in clusters of size 3
-        self.frac_cluster_size3[save_date] =  cn.cluster_fraction(3)
+        self.frac_cluster_size3[save_date] =  self.cn.cluster_fraction(3)
         
         # fraction of nodes in clusters of size 3
-        self.frac_cluster_size5[save_date] =  cn.cluster_fraction(5)
+        self.frac_cluster_size5[save_date] =  self.cn.cluster_fraction(5)
         
         # fraciont of nodes in giant component
-        self.frac_giant[save_date] = cn.giant_fraction()
+        self.frac_giant[save_date] = self.cn.giant_fraction()
         
         # average path length
-        self.avg_path_length[save_date] = cn.average_path_length()
+        self.avg_path_length[save_date] = self.cn.average_path_length()
+        
+        # edge density
+        self.edge_density_value[save_date] = self.cn.density()
         
         # hamming distance
-        self.hamming_distance[save_date] = cn.hamming_distance(self._old_adjacency)
+        self.hamming_distance[save_date] = self.cn.hamming_distance(self._old_adjacency)
 
         # corrected hamming distance
-        self.corrected_hamming_distance[save_date] = cn.corrected_hamming_distance(self._old_adjacency)        
+        self.corrected_hamming_distance[save_date] = self.cn.corrected_hamming_distance(self._old_adjacency)        
         
         # copy the old adjacency
-        self._old_adjacency = cn.adjacency_array.copy()
+        self._old_adjacency = self.cn.adjacency_array.copy()
         logger.debug("End computeNetworkMetrics()")
    
     def save(self):
@@ -347,6 +350,7 @@ class networkMetricsSeries(object):
                        'hamming_distance':self.hamming_distance,
                        'corrected_hamming_distance':self.corrected_hamming_distance,
                        'threshold' :self.threshold_value,
+                       'edge_density': self.edge_density_value
                        })
         
         filename = generateFileName(self.variable, self.dataset, processed=self.processed,suffix='csv')
