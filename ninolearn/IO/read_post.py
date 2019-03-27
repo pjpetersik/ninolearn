@@ -93,7 +93,7 @@ class data_reader(object):
         data = pd.read_csv(join(postdir, filename),
                            index_col=0, parse_dates=True)
         # self._check_dates(data, "WWV")
-        return data
+        return data.loc[self.startdate:self.enddate]
 
     def _check_dates(self, data, name):
         """
@@ -110,8 +110,8 @@ class data_reader(object):
 
         if isinstance(data, pd.DataFrame):
             if self.startdate < data.index.values.min():
-                raise IndexError("The startdate is out of\
-                                 bounds for %s data!" % name)
+                msg = f"The startdate is out of bounds for {name} data!"
+                raise IndexError(msg)
             if self.enddate > data.index.values.max():
                 raise IndexError("The enddate is out of\
                                  bounds for %s data!" % name)

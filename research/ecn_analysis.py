@@ -27,15 +27,15 @@ nms.computeTimeSeries()
 
 reader = data_reader(startdate='1950-01', enddate='2018-12')
 
-nwm_daily = reader.read_network_metrics('sst',
-                                        dataset='ERSSTv5',
+nwm_daily = reader.read_network_metrics('air_daily',
+                                        dataset='NCEP',
                                         processed='anom')
 nino34 = reader.nino34_anom()
 
 plt.close("all")
 
 plt.figure(figsize=(7, 1.5))
-nwm_daily['fraction_clusters_size_5'].plot(c='k')
+nwm_daily['fraction_clusters_size_2'].plot(c='k')
 nino_background(nino34)
 
 """
