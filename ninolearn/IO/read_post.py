@@ -6,10 +6,18 @@ import gc
 from ninolearn.pathes import postdir
 from ninolearn.utils import generateFileName
 
+csv_vars = ['nino34', 'wwv']
+netcdf_vars = ['sst', 'air', 'air_daily', 'uwnd', 'vwnd', 'ssh']
+network_vars = ['global_transitivity', 'avelocal_transmissivity',
+                'fraction_clusters_size_2', 'fraction_clusters_size_3',
+                'fraction_clusters_size_5', 'fraction_giant_component',
+                'average_path_length', 'hamming_distance',
+                'corrected_hamming_distance', 'threshold', 'edge_density']
+
 
 class data_reader(object):
-    def __init__(self, startdate='1980-01', enddate='2017-12',
-                 lon_min=120, lon_max=260, lat_min=-30, lat_max=30):
+    def __init__(self, startdate='1980-01', enddate='2018-12',
+                 lon_min=120, lon_max=280, lat_min=-30, lat_max=30):
         """
         Data reader for different kind of El Nino related data.
 
@@ -36,25 +44,15 @@ class data_reader(object):
         self.enddate = self.enddate + pd.DateOffset(months=month) \
             + pd.tseries.offsets.MonthEnd(0)
 
-    def nino34_anom(self):
+    def read_csv(self, variable, processed='anom'):
         """
-        get the Nino3.4 Index anomaly
+        get data from processed csv
         """
-        data = pd.read_csv(join(postdir, "nino34.csv"),
+        data = pd.read_csv(join(postdir, f"{variable}.csv"),
                            index_col=0, parse_dates=True)
-        self._check_dates(data, "Nino3.4")
+        self._check_dates(data, f"{variable}")
 
-        return data.ANOM.loc[self.startdate:self.enddate]
-
-    def wwv_anom(self):
-        """
-        get the warm water volume anomaly
-        """
-        data = pd.read_csv(join(postdir, "wwv.csv"),
-                           index_col=0, parse_dates=True)
-        self._check_dates(data, "WWV")
-
-        return data.Anomaly.loc[self.startdate:self.enddate]
+        return data[processed].loc[self.startdate:self.enddate]
 
     def read_netcdf(self, variable, dataset='', processed='', chunks=None):
         """

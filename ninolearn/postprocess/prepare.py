@@ -35,12 +35,13 @@ def season_to_month(season):
     return switcher[season]
 
 
-def add_DatetimeIndex_nino34():
+def prep_nino34():
     """
     Add a time axis corresponding to the first day of the central month of a
-    3-month season. For example: DJF 2019 becomes 2019-01-01
+    3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
+    some axis.
     """
-    print("Postprocess Nino3.4 timeseries.")
+    print("Prepare Nino3.4 timeseries.")
     data = read_raw.nino34_anom()
 
     df = ({'year': data.YR.values,
@@ -50,15 +51,17 @@ def add_DatetimeIndex_nino34():
 
     data.index = dti
     data.index.name = 'time'
+    data = data.rename(index=str, columns={'ANOM': 'anom'})
     data.to_csv(join(postdir, 'nino34.csv'))
 
 
-def add_DatetimeIndex_wwv():
+def prep_wwv():
     """
     Add a time axis corresponding to the first day of the central month of a
-    3-month season. For example: DJF 2019 becomes 2019-01-01
+    3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
+    some axis.
     """
-    print("Postprocess WWV timeseries.")
+    print("Prepare WWV timeseries.")
     data = read_raw.wwv_anom()
 
     df = ({'year': data.date.astype(str).str[:4],
@@ -68,9 +71,10 @@ def add_DatetimeIndex_wwv():
 
     data.index = dti
     data.index.name = 'time'
+    data = data.rename(index=str, columns={'Anomaly': 'anom'})
     data.to_csv(join(postdir, 'wwv.csv'))
 
 
 if __name__ == "__main__":
-    add_DatetimeIndex_nino34()
-    add_DatetimeIndex_wwv()
+    prep_nino34()
+    prep_wwv()

@@ -124,13 +124,13 @@ downloadFileFTP(SATmon_dict)
 # =============================================================================
 # =============================================================================
 print_header("Postprocess Data")
-from ninolearn.postprocess.time_axis import add_DatetimeIndex_nino34, add_DatetimeIndex_wwv
+from ninolearn.postprocess.prepare import prep_nino34, prep_wwv
 
-add_DatetimeIndex_nino34()
-add_DatetimeIndex_wwv()
+prep_nino34()
+prep_wwv()
 
 from ninolearn.IO import read_raw
-from ninolearn.postprocess.statistics import postprocess
+from ninolearn.postprocess.anomaly import postprocess
 
 # postprocess sst data from ERSSTv5
 sst_ERSSTv5 = read_raw.sst_ERSSTv5()
