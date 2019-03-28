@@ -33,7 +33,7 @@ class LSTMmodel(object):
 
 class Data(object):
     def __init__(self, label_name="nino34", data_pool_dict=None,
-                 window_size=3, lead_time=3,
+                 window_size=3, lead_time=3, train_frac=0.67,
                  startdate='1980-01', enddate='2018-12'):
         """
         :param data_pool_dict: A dictionary that links keywords, describing
@@ -47,25 +47,31 @@ class Data(object):
         self.window_size = window_size
         self.lead_time = lead_time
 
+        self.train_frac = train_frac
+
         self.startdate = startdate
         self.enddate = enddate
 
-        self.reader = data_reader(startdate=self.startdate,
-                                  enddate=self.enddate)
+        self._reader = data_reader(startdate=self.startdate,
+                                   enddate=self.enddate)
 
         self.data_pool_dict = data_pool_dict
 
         self.load_label(self.label_name)
 
-    def load_features(self, keys):
+    def load_features(self, feature_keys):
         """
         loads the features corresponding to a key into the object and directly
         scales it.
         """
-        self.feature_scalers = self._set_scalers(keys)
+        assert type(feature_keys) is list
+        self.feature_keys = feature_keys
+        self.n_features = len(feature_keys)
+
+        self.feature_scalers = self._set_scalers(self.feature_keys)
         first = True
 
-        for key in keys:
+        for key in self.feature_keys:
             if first:
                 self.features = self._read_wrapper(key)
                 self.features = self._prepare_feature(key, self.features)
@@ -75,6 +81,7 @@ class Data(object):
                 new_feature = self._prepare_feature(key, new_feature)
                 self.features = np.concatenate((self.features, new_feature),
                                                axis=2)
+        self._create_feature_set()
 
     def load_label(self, key):
         """
@@ -85,6 +92,7 @@ class Data(object):
         self.label = self._read_wrapper(key)
         self.label = self._prepare_label(key, self.label)
         self.n_samples = self.label.shape[0]
+        self._create_label_set()
 
     def _read_wrapper(self, key):
         """
@@ -105,17 +113,18 @@ class Data(object):
         for the desired variable
         """
         if variable in csv_vars:
-            df = self.reader.read_csv(variable, processed=processed)
+            df = self._reader.read_csv(variable, processed=processed)
 
         elif variable in netcdf_vars and network_metric in network_vars:
             # returns network metrics belonging to a variable
-            netdf = self.reader.read_network_metrics(variable,
-                                                     processed=processed,
-                                                     dataset=dataset)
+            netdf = self._reader.read_network_metrics(variable,
+                                                      processed=processed,
+                                                      dataset=dataset)
 
             # get a specific network metric from the data set
             df = netdf[network_metric]
-
+        #TODO: do this more elegent
+        self.time_coord = df.index
         return df.values
 
     def _prepare_feature(self, key, feature):
@@ -146,28 +155,37 @@ class Data(object):
             scalers[keys] = MinMaxScaler(feature_range=(0, 1))
         return scalers
 
-    def _split(self, data, train_frac=0.67):
-        self.train_size = int(self.n_samples * train_frac)
+    def _split(self, data):
+        self.train_size = int(self.n_samples * self.train_frac)
         self.test_size = self.n_samples - self.train_size
 
         train = data[:self.train_size]
         test = data[self.train_size:]
         return train, test
 
-    def _restructure(self, X, y, windowsize=3, lead_time=3):
-        dataX, dataY = [], []
-        for i in range(len(X) - windowsize - lead_time + 1):
-            a = X[i:(i + windowsize), 0, :]
+    def _restructure_feature(self, X):
+        dataX = []
+        for i in range(len(X) - self.window_size - self.lead_time + 1):
+            a = X[i:(i + self.window_size), 0, :]
             dataX.append(a)
-            dataY.append(y[i + windowsize + lead_time - 1, 0])
-        return np.array(dataX), np.array(dataY)
+        return np.array(dataX)
 
-    def create_dataset(self):
+    def _restructure_label(self, Y):
+        dataY = []
+        for i in range(len(Y) - self.window_size - self.lead_time + 1):
+            dataY.append(Y[i + self.window_size + self.lead_time - 1, 0])
+        return np.array(dataY)
+
+    def _create_feature_set(self):
         trainX, testX = self._split(self.features)
-        trainY, testY = self._split(self.label)
 
-        self.__trainX, self.__trainY = self._restructure(trainX, trainY)
-        self.__testX, self.__testY = self._restructure(testX, testY)
+        self.__trainX = self._restructure_feature(trainX)
+        self.__testX = self._restructure_feature(testX)
+
+    def _create_label_set(self):
+        trainY, testY = self._split(self.label)
+        self.__trainY = self._restructure_label(trainY)
+        self.__testY = self._restructure_label(testY)
 
     @property
     def trainX(self):
@@ -185,118 +203,47 @@ class Data(object):
     def testY(self):
         return self.__testY
 
+if __name__ == "__main__":
 
-pool = {'c2_air': ['fraction_clusters_size_2', 'air_daily', 'anom', 'NCEP'],
+    #%% Generate the Data object
+
+    pool = {'c2_air': ['fraction_clusters_size_2', 'air_daily', 'anom', 'NCEP'],
         'c3_air': ['fraction_clusters_size_3', 'air_daily', 'anom', 'NCEP'],
+        'c5_air': ['fraction_clusters_size_5', 'air_daily', 'anom', 'NCEP'],
+        'tau': ['global_transitivity', 'air_daily', 'anom', 'NCEP'],
+        'C': ['avelocal_transmissivity', 'air_daily', 'anom', 'NCEP'],
+        'S': ['fraction_giant_component', 'air_daily', 'anom', 'NCEP'],
+        'L': ['average_path_length', 'air_daily', 'anom', 'NCEP'],
+        'H': ['hamming_distance', 'air_daily', 'anom', 'NCEP'],
+        'Hstar': ['corrected_hamming_distance', 'air_daily', 'anom', 'NCEP'],
         'nino34': [None, 'nino34', 'anom', None],
         'wwv': [None, 'wwv', 'anom', None]}
 
-data_obj = Data(data_pool_dict=pool)
+    window_size  = 24
+    lead_time = 12
+    data_obj = Data(data_pool_dict=pool, window_size=window_size,
+                    lead_time=lead_time, startdate='1950-01')
 
-data_obj.load_features(['nino34', 'wwv'])
-data_obj.create_dataset()
+    data_obj.load_features(['nino34', 'c2_air', 'c3_air', 'c5_air', 'S'])#,'C',
 
-if __name__ == "__main__":
-    # convert an array of values into a dataset matrix
-    def create_dataset(X, y, windowsize=3, lead_time=3):
-        dataX, dataY = [], []
-        for i in range(len(X) - windowsize - lead_time + 1):
-            a = X[i:(i + windowsize), 0, :]
-            dataX.append(a)
-            dataY.append(y[i + windowsize + lead_time - 1, 0])
-        return np.array(dataX), np.array(dataY)
 
-    # fix random seed for reproducibility
-    np.random.seed(7)
+    # Extract some data object parameters
+    trainX, trainY = data_obj.trainX, data_obj.trainY
+    testX, testY = data_obj.testX, data_obj.testY
 
-    # read label
-    reader = data_reader(startdate='1980-01')
-    df = reader.read_csv("nino34", processed='anom')
-
-    label = df.values
-    label = label.astype('float32')
-
-    # read feature
-    # csv data
-    df = reader.read_csv("nino34", processed='anom')
-    feature1 = df.values
-    feature1 = feature1.astype('float32')
-
-    df = reader.read_csv("wwv", processed='anom')
-    feature2 = df.values
-    feature2 = feature2.astype('float32')
-
-    # network metric
-    df = reader.read_network_metrics('air_daily',
-                                     dataset='NCEP',
-                                     processed='anom')
-
-    feature3 = df['fraction_clusters_size_2'].values
-    feature3 = feature3.astype('float32')
-
-    feature4 = df['fraction_clusters_size_3'].values
-    feature4 = feature4.astype('float32')
-
-    # normalize the dataset
-    scaler_label = MinMaxScaler(feature_range=(0, 1))
-    scaler_feature1 = MinMaxScaler(feature_range=(0, 1))
-    scaler_feature2 = MinMaxScaler(feature_range=(0, 1))
-    scaler_feature3 = MinMaxScaler(feature_range=(0, 1))
-    scaler_feature4 = MinMaxScaler(feature_range=(0, 1))
-
-    # TODO: better coding regaring the following lines
-    # feature shape [samples, label]
-    label = label.reshape(len(label), 1)
-    label = scaler_label.fit_transform(label)
-
-    # feature shape [samples, time steps, features]
-    feature1 = feature1.reshape(len(feature1), 1)
-    feature1 = scaler_feature1.fit_transform(feature1)
-    feature1 = feature1.reshape(len(feature1), 1, 1)
-
-    feature2 = feature2.reshape(len(feature2), 1)
-    feature2 = scaler_feature2.fit_transform(feature2)
-    feature2 = feature2.reshape(len(feature2), 1, 1)
-
-    feature3 = feature3.reshape(len(feature3), 1)
-    feature3 = scaler_feature3.fit_transform(feature3)
-    feature3 = feature3.reshape(len(feature3), 1, 1)
-
-    feature4 = feature4.reshape(len(feature4), 1)
-    feature4 = scaler_feature4.fit_transform(feature4)
-    feature4 = feature4.reshape(len(feature4), 1, 1)
-
-    # nino3.4 and wwv
-    features = np.concatenate((feature1, feature2, feature3, feature4), axis=2)
-
-    # some structural information
-    n_timesteps = features.shape[0]
-    n_features = features.shape[2]
-
-    # split into train and test sets
-    train_size = int(n_timesteps * 0.67)
-    test_size = n_timesteps - train_size
-
-    train_label, test_label = label[:train_size, :], label[train_size:, :]
-    train_features, test_features = features[:train_size, :, :], features[train_size:, :, :]
-
-    #%% reshape into X=t and Y=t+leadtime
-    windowsize = 3
-    lead_time = 3
-
-    trainX, trainY = create_dataset(train_features, train_label,
-                                    windowsize, lead_time)
-    testX, testY = create_dataset(test_features, test_label,
-                                  windowsize, lead_time)
+    n_features = data_obj.n_features
+    scaler_label = data_obj.label_scalers['nino34']
+    label = data_obj.label
+    time = data_obj.time_coord
 
     # %%create and fit the LSTM network
     model = Sequential()
-    model.add(LSTM(8, input_shape=(windowsize, n_features),
+    model.add(LSTM(32, input_shape=(window_size, n_features),
                    return_sequences=False))
     model.add(Dropout(0.2))
     model.add(Dense(1))
 
-    optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999,
+    optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999,
                      epsilon=None, decay=0.0, amsgrad=False)
 
     model.compile(loss="mean_squared_error",
@@ -309,7 +256,7 @@ if __name__ == "__main__":
                        verbose=0, mode='auto')
 
     history = model.fit(trainX, trainY,
-                        epochs=1000, batch_size=20, verbose=2,
+                        epochs=1000, batch_size=10, verbose=2,
                         validation_data=(testX, testY), callbacks=[es])
 
     # make predictions
@@ -359,7 +306,7 @@ if __name__ == "__main__":
     trainPredictPlot[:, :] = np.nan
 
     # begin and end indeces
-    ibegtrain = windowsize + lead_time - 1
+    ibegtrain = window_size + lead_time - 1
     iendtrain = ibegtrain + len(trainPredict)
     trainPredictPlot[ibegtrain:iendtrain, :] = trainPredict
 
@@ -368,7 +315,7 @@ if __name__ == "__main__":
     testPredictPlot[:, :] = np.nan
 
     # begin index
-    ibegtest = iendtrain + windowsize + lead_time - 1
+    ibegtest = iendtrain + window_size + lead_time - 1
     testPredictPlot[ibegtest:, :] = testPredict
 
     shiftPredictPlot = np.empty_like(label)
@@ -378,14 +325,14 @@ if __name__ == "__main__":
     # plot baseline and predictions
 
     plt.subplots()
-    plt.plot(df.index.date, scaler_label.inverse_transform(label),
+    plt.plot(time, scaler_label.inverse_transform(label),
              label="Nino3.4", c='k')
-    plt.plot(df.index.date, trainPredictPlot, label="trainPrediction",
+    plt.plot(time, trainPredictPlot, label="trainPrediction",
              c='limegreen')
-    plt.plot(df.index.date, testPredictPlot, label="testPrediction",
+    plt.plot(time, testPredictPlot, label="testPrediction",
              c='red')
 
-    plt.plot(df.index.date, shiftPredictPlot, label="shiftPrediction",
+    plt.plot(time, shiftPredictPlot, label="shiftPrediction",
              ls='--', c='grey', alpha=0.5)
 
     plt.gcf().autofmt_xdate()
