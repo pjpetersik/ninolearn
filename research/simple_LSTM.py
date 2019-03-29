@@ -8,7 +8,9 @@ import matplotlib.dates as mdates
 
 import math
 
+import keras
 from keras.models import Sequential
+from keras import layers
 from keras.layers import Dense
 from keras.layers import LSTM, GRU
 from keras.layers import Dropout
@@ -22,17 +24,8 @@ from ninolearn.IO.read_post import (data_reader, csv_vars, network_vars,
                                     netcdf_vars)
 
 
-class LSTMmodel(object):
-    def __init__(self, label_name, window_size=3, lead_time=3,
-                 startdate='1980-01', enddate='2018-12'):
-        """
-        LSTMmodel to predict some time series
-        """
-        pass
-
-
 class Data(object):
-    def __init__(self, label_name="nino34", data_pool_dict=None,
+    def __init__(self, label_name=None, data_pool_dict=None,
                  window_size=3, lead_time=3, train_frac=0.67,
                  startdate='1980-01', enddate='2018-12'):
         """
@@ -123,7 +116,7 @@ class Data(object):
 
             # get a specific network metric from the data set
             df = netdf[network_metric]
-        #TODO: do this more elegent
+        # TODO: do this more elegent
         self.time_coord = df.index
         return df.values
 
@@ -203,141 +196,213 @@ class Data(object):
     def testY(self):
         return self.__testY
 
-if __name__ == "__main__":
 
-    #%% Generate the Data object
+class RNNmodel(object):
+    def __init__(self, DataInstance, n_layers=1, Layer=LSTM, n_neurons=[10],
+                 lr=0.001, epochs=200, batch_size=20, es_epochs=20):
+        """
+        LSTMmodel to predict some time series
+        """
+        assert isinstance(DataInstance, Data)
+        assert type(n_layers) is int
+        assert Layer.__module__ == 'keras.layers.recurrent'
+        assert type(n_neurons) is list
+        assert len(n_neurons) == n_layers
 
-    pool = {'c2_air': ['fraction_clusters_size_2', 'air_daily', 'anom', 'NCEP'],
-        'c3_air': ['fraction_clusters_size_3', 'air_daily', 'anom', 'NCEP'],
-        'c5_air': ['fraction_clusters_size_5', 'air_daily', 'anom', 'NCEP'],
+        self.n_layers = n_layers
+        self.Layer = Layer
+
+        self.n_neurons = n_neurons
+
+        self.architecture = {'layers': n_layers,
+                             'n_neurons': n_neurons,
+                             'layer_type': Layer.__name__}
+
+        self.Data = DataInstance
+
+        self.lr = lr
+        self.epochs = epochs
+        self.batch_size = batch_size
+
+        self.window_size = self.Data.window_size
+        self.n_features = self.Data.n_features
+
+        self.build_model()
+
+        self.optimizer = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
+                              decay=0.0, amsgrad=False)
+
+        self.model.compile(loss="mean_squared_error",
+                           optimizer=self.optimizer,
+                           metrics=['mse'])
+
+        self.es = EarlyStopping(monitor='val_loss', min_delta=0.0,
+                                patience=es_epochs, verbose=0, mode='auto')
+
+    def build_model(self):
+        self.model = Sequential()
+
+        for i in range(self.n_layers):
+            if i == 0 and self.n_layers > 1:
+                self.model.add(self.Layer(self.n_neurons[i],
+                               input_shape=(self.window_size, self.n_features),
+                               return_sequences=True))
+
+            elif i == 0 and self.n_layers == 1:
+                self.model.add(self.Layer(self.n_neurons[i],
+                               input_shape=(self.window_size, self.n_features),
+                               return_sequences=False))
+
+            else:
+                self.model.add(self.Layer(self.n_neurons[i],
+                                          return_sequences=False))
+            self.model.add(Dropout(0.2))
+        self.model.add(Dense(1))
+
+    def fit(self):
+        self.history = self.model.fit(self.Data.trainX, self.Data.trainY,
+                                      epochs=self.epochs,
+                                      batch_size=self.batch_size, verbose=2,
+                                      validation_data=(self.Data.testX,
+                                                       self.Data.testY),
+                                      callbacks=[self.es])
+
+    def predict(self):
+        trainY = self.Data.trainY
+        testY = self.Data.testY
+
+        trainPredict = self.model.predict(self.Data.trainX)
+        testPredict = self.model.predict(self.Data.testX)
+        shiftPredict = np.roll(self.Data.label, self.Data.lead_time)
+
+        self.label_scaler = self._get_label_scaler()
+
+        # invert predictions
+        self.trainPredict = self.label_scaler.inverse_transform(trainPredict)
+        self.trainY = self.label_scaler.inverse_transform([trainY])
+
+        self.testPredict = self.label_scaler.inverse_transform(testPredict)
+        self.testY = self.label_scaler.inverse_transform([testY])
+        self.shiftY = self.label_scaler.inverse_transform(
+                     self.Data.label[self.Data.lead_time:])
+        self.shiftPredict = self.label_scaler.inverse_transform(
+               shiftPredict[self.Data.lead_time:])
+
+    def get_scores(self, part):
+        if part == 'train':
+            RMSE = self._rmse(self.trainY[0], self.trainPredict[:, 0])
+            NRMSE = self._nrmse(self.trainY[0], self.trainPredict[:, 0])
+        elif part == 'test':
+            RMSE = self._rmse(self.testY[0], self.testPredict[:, 0])
+            NRMSE = self._nrmse(self.testY[0], self.testPredict[:, 0])
+        elif part == 'shift':
+            RMSE = self._rmse(self.shiftY, self.shiftPredict)
+            NRMSE = self._nrmse(self.shiftY, self.shiftPredict)
+        return RMSE, NRMSE
+
+    def _rmse(self, y, predict):
+        return math.sqrt(mean_squared_error(y, predict))
+
+    def _nrmse(self, y, predict):
+        return self._rmse(y, predict) / (np.max([y, predict])
+                                         - np.min([y, predict]))
+
+    def _get_label_scaler(self):
+        return self.Data.label_scalers[self.Data.label_name]
+
+    def plot_history(self):
+        plt.subplots()
+        plt.plot(self.history.history['mean_squared_error'],
+                 label="MSE train")
+        plt.plot(self.history.history['val_mean_squared_error'],
+                 label="MSE test")
+        plt.legend()
+
+    def plot_prediction(self):
+        # shift train predictions for plotting
+        trainPredictPlot = np.empty_like(self.Data.label)
+        trainPredictPlot[:, :] = np.nan
+
+        # begin and end indeces
+        ibegtrain = self.window_size + self.Data.lead_time - 1
+        iendtrain = ibegtrain + len(self.trainPredict)
+        trainPredictPlot[ibegtrain:iendtrain, :] = self.trainPredict
+
+        # shift test predictions for plotting
+        testPredictPlot = np.empty_like(self.Data.label)
+        testPredictPlot[:, :] = np.nan
+
+        # begin index
+        ibegtest = iendtrain + self.window_size + self.Data.lead_time - 1
+        testPredictPlot[ibegtest:, :] = self.testPredict
+
+        shiftPredictPlot = np.empty_like(self.Data.label)
+        shiftPredictPlot[:, :] = np.nan
+        shiftPredictPlot[lead_time:, :] = self.shiftPredict
+
+        # plot baseline and predictions
+
+        plt.subplots()
+        plt.plot(self.Data.time_coord,
+                 self.label_scaler.inverse_transform(self.Data.label),
+                 label="Nino3.4", c='k')
+        plt.plot(self.Data.time_coord, trainPredictPlot,
+                 label="trainPrediction",
+                 c='limegreen')
+        plt.plot(self.Data.time_coord, testPredictPlot,
+                 label="testPrediction",
+                 c='red')
+
+        plt.plot(self.Data.time_coord, shiftPredictPlot,
+                 label="shiftPrediction",
+                 ls='--', c='grey', alpha=0.5)
+
+        plt.gcf().autofmt_xdate()
+        myFmt = mdates.DateFormatter('%Y-%m')
+        # ax.xaxis.set_major_formatter(myFmt)
+        plt.gca().xaxis.set_major_formatter(myFmt)
+        plt.legend()
+        plt.show()
+
+
+pool = {'c2_air': ['fraction_clusters_size_2', 'air_daily', 'anom',
+                   'NCEP'],
+        'c3_air': ['fraction_clusters_size_3', 'air_daily', 'anom',
+                   'NCEP'],
+        'c5_air': ['fraction_clusters_size_5', 'air_daily', 'anom',
+                   'NCEP'],
         'tau': ['global_transitivity', 'air_daily', 'anom', 'NCEP'],
         'C': ['avelocal_transmissivity', 'air_daily', 'anom', 'NCEP'],
         'S': ['fraction_giant_component', 'air_daily', 'anom', 'NCEP'],
         'L': ['average_path_length', 'air_daily', 'anom', 'NCEP'],
         'H': ['hamming_distance', 'air_daily', 'anom', 'NCEP'],
-        'Hstar': ['corrected_hamming_distance', 'air_daily', 'anom', 'NCEP'],
+        'Hstar': ['corrected_hamming_distance', 'air_daily', 'anom',
+                  'NCEP'],
         'nino34': [None, 'nino34', 'anom', None],
         'wwv': [None, 'wwv', 'anom', None]}
 
-    window_size  = 24
-    lead_time = 12
-    data_obj = Data(data_pool_dict=pool, window_size=window_size,
-                    lead_time=lead_time, startdate='1950-01')
+window_size = 24
+lead_time = 12
 
-    data_obj.load_features(['nino34', 'c2_air', 'c3_air', 'c5_air', 'S'])#,'C',
+data_obj = Data(label_name="nino34", data_pool_dict=pool,
+                window_size=window_size, lead_time=lead_time,
+                startdate='1950-01')
+
+data_obj.load_features(['nino34', 'c2_air', 'c3_air', 'c5_air', 'S'])
+
+model = RNNmodel(data_obj, n_layers=2, Layer=LSTM, n_neurons=[10, 10],
+                 epochs=2)
+model.fit()
+model.predict()
+trainRMSE, trainNRMSE = model.get_scores('train')
+testRMSE, testNRMSE = model.get_scores('test')
+shiftRMSE, shiftNRMSE = model.get_scores('shift')
+
+print('Train Score: %.2f RMSE, %.2f NMSE' % (trainRMSE, trainNRMSE))
+print('Test Score: %.2f RMSE, %.2f NMSE' % (testRMSE, testNRMSE))
+print('Shift Score: %.2f RMSE, %.2f NMSE' % (shiftRMSE, shiftNRMSE))
 
 
-    # Extract some data object parameters
-    trainX, trainY = data_obj.trainX, data_obj.trainY
-    testX, testY = data_obj.testX, data_obj.testY
-
-    n_features = data_obj.n_features
-    scaler_label = data_obj.label_scalers['nino34']
-    label = data_obj.label
-    time = data_obj.time_coord
-
-    # %%create and fit the LSTM network
-    model = Sequential()
-    model.add(LSTM(32, input_shape=(window_size, n_features),
-                   return_sequences=False))
-    model.add(Dropout(0.2))
-    model.add(Dense(1))
-
-    optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999,
-                     epsilon=None, decay=0.0, amsgrad=False)
-
-    model.compile(loss="mean_squared_error",
-                  optimizer=optimizer,
-                  metrics=['mse'])
-
-    es = EarlyStopping(monitor='val_loss',
-                       min_delta=0.0,
-                       patience=20,
-                       verbose=0, mode='auto')
-
-    history = model.fit(trainX, trainY,
-                        epochs=1000, batch_size=10, verbose=2,
-                        validation_data=(testX, testY), callbacks=[es])
-
-    # make predictions
-    trainPredict = model.predict(trainX)
-    testPredict = model.predict(testX)
-
-    # invert predictions
-    trainPredict = scaler_label.inverse_transform(trainPredict)
-    trainY = scaler_label.inverse_transform([trainY])
-    testPredict = scaler_label.inverse_transform(testPredict)
-    testY = scaler_label.inverse_transform([testY])
-
-    # %% calculate root mean squared error
-    trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:, 0]))
-    print('Train Score: %.2f RMSE' % (trainScore))
-    # calculate normalized root mean squared error
-    trainScore = trainScore / (np.max([trainY[0], trainPredict[:, 0]])
-                               - np.min([trainY[0], trainPredict[:, 0]]))
-    print('Train Score: %.2f NRMSE' % (trainScore))
-
-    testScore = math.sqrt(mean_squared_error(testY[0], testPredict[:, 0]))
-    print('Test Score: %.2f RMSE' % (testScore))
-
-    testScore = testScore / (np.max([testY[0], testPredict[:, 0]])
-                             - np.min([testY[0], testPredict[:, 0]]))
-    print('Test Score: %.2f NRMSE' % (testScore))
-
-    shiftY = scaler_label.inverse_transform(label[lead_time:])
-    shiftPredict = np.roll(label, lead_time)
-    shiftPredict = scaler_label.inverse_transform(shiftPredict[lead_time:])
-
-    shiftScore = math.sqrt(mean_squared_error(shiftY, shiftPredict))
-    print('Shift Score: %.2f RMSE' % (shiftScore))
-    shiftScore = shiftScore / (np.max([shiftY, shiftPredict])
-                               - np.min([shiftY, shiftPredict]))
-    print('Shift Score: %.2f NRMSE' % (shiftScore))
-
-    # %%
-    plt.close("all")
-
-    plt.subplots()
-    plt.plot(history.history['mean_squared_error'], label="MSE train")
-    plt.plot(history.history['val_mean_squared_error'], label="MSE test")
-
-    # shift train predictions for plotting
-    trainPredictPlot = np.empty_like(label)
-    trainPredictPlot[:, :] = np.nan
-
-    # begin and end indeces
-    ibegtrain = window_size + lead_time - 1
-    iendtrain = ibegtrain + len(trainPredict)
-    trainPredictPlot[ibegtrain:iendtrain, :] = trainPredict
-
-    # shift test predictions for plotting
-    testPredictPlot = np.empty_like(label)
-    testPredictPlot[:, :] = np.nan
-
-    # begin index
-    ibegtest = iendtrain + window_size + lead_time - 1
-    testPredictPlot[ibegtest:, :] = testPredict
-
-    shiftPredictPlot = np.empty_like(label)
-    shiftPredictPlot[:, :] = np.nan
-    shiftPredictPlot[lead_time:, :] = shiftPredict
-
-    # plot baseline and predictions
-
-    plt.subplots()
-    plt.plot(time, scaler_label.inverse_transform(label),
-             label="Nino3.4", c='k')
-    plt.plot(time, trainPredictPlot, label="trainPrediction",
-             c='limegreen')
-    plt.plot(time, testPredictPlot, label="testPrediction",
-             c='red')
-
-    plt.plot(time, shiftPredictPlot, label="shiftPrediction",
-             ls='--', c='grey', alpha=0.5)
-
-    plt.gcf().autofmt_xdate()
-    myFmt = mdates.DateFormatter('%Y-%m')
-    # ax.xaxis.set_major_formatter(myFmt)
-    plt.gca().xaxis.set_major_formatter(myFmt)
-    plt.legend()
-    plt.show()
+plt.close("all")
+model.plot_history()
+model.plot_prediction()
