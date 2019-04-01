@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from keras.layers import LSTM, GRU, SimpleRNN
+from keras.layers import LSTM, GRU, SimpleRNN, Dense
 
 from ninolearn.learn.rnn import Data, RNNmodel
 
@@ -31,8 +31,8 @@ data_obj = Data(label_name="nino34", data_pool_dict=pool,
 
 data_obj.load_features(['nino34', 'wwv', 'c2_air', 'c3_air', 'c5_air', 'S', 'H', 'tau', 'C', 'L'])
 
-model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[30], Dropout=0.5,
-                 lr=0.00001, epochs=5, batch_size=100, es_epochs=5)
+model = RNNmodel(data_obj, Layers=[LSTM, Dense], n_neurons=[30,10], Dropout=0.2,
+                 lr=0.0001, epochs=500, batch_size=20, es_epochs=50)
 
 model.fit()
 model.predict()
@@ -41,9 +41,9 @@ trainRMSE, trainNRMSE = model.get_scores('train')
 testRMSE, testNRMSE = model.get_scores('test')
 shiftRMSE, shiftNRMSE = model.get_scores('shift')
 
-print('Train Score: %.2f RMSE, %.2f NMSE' % (trainRMSE, trainNRMSE))
-print('Test Score: %.2f RMSE, %.2f NMSE' % (testRMSE, testNRMSE))
-print('Shift Score: %.2f RMSE, %.2f NMSE' % (shiftRMSE, shiftNRMSE))
+print('Train Score: %.2f MSE, %.2f NMSE' % (trainRMSE**2, trainNRMSE))
+print('Test Score: %.2f MSE, %.2f NMSE' % (testRMSE**2, testNRMSE))
+print('Shift Score: %.2f MSE, %.2f NMSE' % (shiftRMSE**2, shiftNRMSE))
 
 # %%
 
@@ -65,7 +65,7 @@ r = np.zeros(12)
 rsq = np.zeros(12)
 for i in range(0, 12):
     month = (model.Data.testYtime.month == i+1)
-    y = scale(model.testY[0, month])
+    y = scale(model.testY[month])
     pred = scale(model.testPredict[month, 0])
     r[i] = np.corrcoef(y, pred)[0, 1]
     rsq[i] = round(r[i]**2, 3)

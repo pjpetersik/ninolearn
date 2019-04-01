@@ -90,7 +90,6 @@ class Data(object):
         :param key: the name of the label that is used as the key in the
         dictionary
         """
-        self.label_scalers = self._set_scalers(key)
         self.label_df = self._read_wrapper(key)
 
         self.label = self._prepare_label(key, self.label_df.values)
@@ -128,7 +127,7 @@ class Data(object):
             df = netdf[network_metric]
         # TODO: do this more elegent
         self.time = df.index
-        return df#.values
+        return df
 
     def _prepare_feature(self, key, feature):
         """
@@ -146,7 +145,6 @@ class Data(object):
         """
         label = label.astype('float32')
         label = label.reshape(len(label), 1)
-        label = self.label_scalers[key].fit_transform(label)
         return label
 
     def _set_scalers(self, keys):
@@ -254,7 +252,8 @@ class RNNmodel(object):
         assert isinstance(DataInstance, Data)
         self.layer_names = []
         for i in range(len(Layers)):
-            assert Layers[i].__module__ == 'keras.layers.recurrent'
+            assert (Layers[i].__module__ == 'keras.layers.recurrent') or\
+                   (Layers[i].__module__ == 'keras.layers.core')
             self.layer_names.append(Layers[i].__name__)
         assert type(n_neurons) is list
 
@@ -294,14 +293,16 @@ class RNNmodel(object):
         the initialization of the instance.
         """
         self.model = Sequential()
+        self.n_dense = self.Layers.count(Dense)
+        self.n_recurrent = self.n_layers - self.n_dense
 
-        for i in range(self.n_layers):
-            if i == 0 and self.n_layers > 1:
+        for i in range(self.n_recurrent):
+            if i == 0 and self.n_recurrent > 1:
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
                                return_sequences=True))
 
-            elif i == (self.n_layers - 1):
+            elif i == (self.n_recurrent - 1):
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
                                return_sequences=False))
@@ -310,7 +311,11 @@ class RNNmodel(object):
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                               return_sequences=True))
             self.model.add(Dropout(0.2))
-        self.model.add(Dense(1))
+
+        for j in np.arange(self.n_recurrent, self.n_layers):
+            self.model.add(self.Layers[j](self.n_neurons[j], activation="relu"))
+
+        self.model.add(Dense(1, activation="linear"))
 
     def fit(self):
         """
@@ -328,27 +333,17 @@ class RNNmodel(object):
         """
         Wrapper function of the .predict() method of the keras model
         """
-        trainY = self.Data.trainY
-        testY = self.Data.testY
+        self.trainY = self.Data.trainY
+        self.testY = self.Data.testY
         self.testYtime = self.Data.testYtime
         self.trainYtime = self.Data.trainYtime
 
-        trainPredict = self.model.predict(self.Data.trainX)
-        testPredict = self.model.predict(self.Data.testX)
+        self.trainPredict = self.model.predict(self.Data.trainX)
+        self.testPredict = self.model.predict(self.Data.testX)
+
         shiftPredict = np.roll(self.Data.label, self.Data.lead_time)
-
-        self.label_scaler = self._get_label_scaler()
-
-        # invert predictions
-        self.trainPredict = self.label_scaler.inverse_transform(trainPredict)
-        self.trainY = self.label_scaler.inverse_transform([trainY])
-
-        self.testPredict = self.label_scaler.inverse_transform(testPredict)
-        self.testY = self.label_scaler.inverse_transform([testY])
-        self.shiftY = self.label_scaler.inverse_transform(
-                     self.Data.label[self.Data.lead_time:])
-        self.shiftPredict = self.label_scaler.inverse_transform(
-               shiftPredict[self.Data.lead_time:])
+        self.shiftY = self.Data.label[self.Data.lead_time:]
+        self.shiftPredict = shiftPredict[self.Data.lead_time:]
 
     def get_scores(self, part):
         """
@@ -363,11 +358,11 @@ class RNNmodel(object):
         :return: Returns the RMSE and NRMSE
         """
         if part == 'train':
-            RMSE = self._rmse(self.trainY[0], self.trainPredict[:, 0])
-            NRMSE = self._nrmse(self.trainY[0], self.trainPredict[:, 0])
+            RMSE = self._rmse(self.trainY, self.trainPredict[:, 0])
+            NRMSE = self._nrmse(self.trainY, self.trainPredict[:, 0])
         elif part == 'test':
-            RMSE = self._rmse(self.testY[0], self.testPredict[:, 0])
-            NRMSE = self._nrmse(self.testY[0], self.testPredict[:, 0])
+            RMSE = self._rmse(self.testY, self.testPredict[:, 0])
+            NRMSE = self._nrmse(self.testY, self.testPredict[:, 0])
         elif part == 'shift':
             RMSE = self._rmse(self.shiftY, self.shiftPredict)
             NRMSE = self._nrmse(self.shiftY, self.shiftPredict)
@@ -393,12 +388,6 @@ class RNNmodel(object):
         """
         return self._rmse(y, predict) / (np.max([y, predict])
                                          - np.min([y, predict]))
-
-    def _get_label_scaler(self):
-        """
-        Get the Scaler of the labeled data for later use.
-        """
-        return self.Data.label_scalers[self.Data.label_name]
 
     def plot_history(self):
         """
@@ -439,8 +428,7 @@ class RNNmodel(object):
         # plot baseline and predictions
 
         fig, ax = plt.subplots()
-        ax.plot(self.Data.time,
-                self.label_scaler.inverse_transform(self.Data.label),
+        ax.plot(self.Data.time, self.Data.label,
                 label="Nino3.4", c='k')
         ax.plot(self.Data.time, trainPredictPlot,
                 label="trainPrediction",
