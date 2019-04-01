@@ -6,33 +6,42 @@ from keras.layers import LSTM, GRU, SimpleRNN, Dense
 from ninolearn.learn.rnn import Data, RNNmodel
 
 
-pool = {'c2_air': ['fraction_clusters_size_2', 'air_daily', 'anom',
+pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily', 'anom',
                    'NCEP'],
-        'c3_air': ['fraction_clusters_size_3', 'air_daily', 'anom',
+        'c3_air': ['network_metrics', 'fraction_clusters_size_3', 'air_daily', 'anom',
                    'NCEP'],
-        'c5_air': ['fraction_clusters_size_5', 'air_daily', 'anom',
+        'c5_air': ['network_metrics', 'fraction_clusters_size_5', 'air_daily', 'anom',
                    'NCEP'],
-        'tau': ['global_transitivity', 'air_daily', 'anom', 'NCEP'],
-        'C': ['avelocal_transmissivity', 'air_daily', 'anom', 'NCEP'],
-        'S': ['fraction_giant_component', 'air_daily', 'anom', 'NCEP'],
-        'L': ['average_path_length', 'air_daily', 'anom', 'NCEP'],
-        'H': ['hamming_distance', 'air_daily', 'anom', 'NCEP'],
-        'Hstar': ['corrected_hamming_distance', 'air_daily', 'anom',
+        'tau': ['network_metrics', 'global_transitivity', 'air_daily', 'anom', 'NCEP'],
+        'C': ['network_metrics', 'avelocal_transmissivity', 'air_daily', 'anom', 'NCEP'],
+        'S': ['network_metrics', 'fraction_giant_component', 'air_daily', 'anom', 'NCEP'],
+        'L': ['network_metrics', 'average_path_length', 'air_daily', 'anom', 'NCEP'],
+        'H': ['network_metrics', 'hamming_distance', 'air_daily', 'anom', 'NCEP'],
+        'Hstar': ['network_metrics', 'corrected_hamming_distance', 'air_daily', 'anom',
                   'NCEP'],
-        'nino34': [None, 'nino34', 'anom', None],
-        'wwv': [None, 'wwv', 'anom', None]}
+        'nino34': [None, None, 'nino34', 'anom', None],
+        'wwv': [None, None, 'wwv', 'anom', None],
+        'pca1': ['pca', 'pca1', 'air', 'anom', 'NCEP'],
+        'pca2': ['pca', 'pca2', 'vwnd', 'anom', 'NCEP'],
+        'pca3': ['pca', 'pca2', 'uwnd', 'anom', 'NCEP'],
 
-window_size = 24
-lead_time = 6
+        }
+
+window_size = 6
+lead_time = 3
 
 data_obj = Data(label_name="nino34", data_pool_dict=pool,
                 window_size=window_size, lead_time=lead_time,
-                startdate='1980-01')
+                startdate='1980-01', train_frac=0.6)
 
-data_obj.load_features(['nino34', 'wwv', 'c2_air', 'c3_air', 'c5_air', 'S', 'H', 'tau', 'C', 'L'])
+data_obj.load_features(['wwv', # 'nino34',
+                        'pca1', 'pca2', 'pca3',
+                        'c2_air',  'c3_air', 'c5_air',
+                        'S', 'H', 'tau', 'C', 'L'
+                        ])
 
-model = RNNmodel(data_obj, Layers=[LSTM, Dense], n_neurons=[30,10], Dropout=0.2,
-                 lr=0.0001, epochs=500, batch_size=20, es_epochs=50)
+model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[10], Dropout=0.0,
+                 lr=0.0001, epochs=5000, batch_size=2, es_epochs=20)
 
 model.fit()
 model.predict()
@@ -81,4 +90,5 @@ fig, ax = plt.subplots()
 ax.set_ylim(0, 1)
 ax.bar(m, rsq)
 ax.set_xticks(m)
-ax.set_xticklabels(['J','F','M','A','M','J','J','A','S','O','N','D',])
+ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J',
+                    'J', 'A', 'S', 'O', 'N', 'D'])

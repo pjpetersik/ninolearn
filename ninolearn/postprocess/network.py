@@ -163,9 +163,9 @@ class climateNetwork(igraph.Graph):
 
 
 class networkMetricsSeries(object):
-    def __init__(self, variable, dataset, processed='deviation',
+    def __init__(self, variable, dataset, processed='anom',
                  threshold=None, edge_density=None,
-                 startyear=1948, endyear=2000, window_size=12,
+                 startyear=1948, endyear=2018, window_size=12,
                  lon_min=120, lon_max=260, lat_min=-30, lat_max=30,
                  verbose=0):
         """
@@ -179,7 +179,7 @@ class networkMetricsSeries(object):
         :param dataset: the dataset that should be used to build the network
 
         :type processed: str
-        :param processed: either '','deviation' or 'norm'
+        :param processed: either '','anom' or 'normanom'
 
         :type threshold: float
         :param threshold: the threshold for a the correlation coeficent between
@@ -289,11 +289,6 @@ class networkMetricsSeries(object):
 
         # Correlation matrix
         logger.debug("- Compute Correlation matrix")
-        # Pandas
-#        df2Darr = pd.DataFrame(data2Darr)
-#        df2Darr = df2Darr.dropna(axis=1)
-#        df_corrcoef = df2Darr.corr()
-#        corrcoef = df_corrcoef.to_numpy()
 
         # Numpy
         data2Darr = data2Darr[:, np.isfinite(data2Darr).any(axis=0)]

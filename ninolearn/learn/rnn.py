@@ -14,15 +14,14 @@ import math
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from keras.layers import Dropout
+from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
-from ninolearn.IO.read_post import (data_reader, csv_vars, network_vars,
-                                    netcdf_vars)
+from ninolearn.IO.read_post import (data_reader, csv_vars)
 
 
 class Data(object):
@@ -105,11 +104,11 @@ class Data(object):
         """
         ll = self.data_pool_dict[key]
 
-        return self._read_data(network_metric=ll[0], variable=ll[1],
-                               processed=ll[2], dataset=ll[3])
+        return self._read_data(statistic=ll[0], metric=ll[1], variable=ll[2],
+                               processed=ll[3], dataset=ll[4])
 
-    def _read_data(self, network_metric=None, variable=None, processed='anom',
-                   dataset=None):
+    def _read_data(self, statistic=None, metric=None, variable=None,
+                   processed='anom', dataset=None):
         """
         This method ensures that the right reader from the IO package is used
         for the desired variable
@@ -117,14 +116,13 @@ class Data(object):
         if variable in csv_vars:
             df = self._reader.read_csv(variable, processed=processed)
 
-        elif variable in netcdf_vars and network_metric in network_vars:
-            # returns network metrics belonging to a variable
-            netdf = self._reader.read_network_metrics(variable,
-                                                      processed=processed,
-                                                      dataset=dataset)
+        elif statistic is not None:
+            df = self._reader.read_statistic(statistic, variable,
+                                             processed=processed,
+                                             dataset=dataset)
 
-            # get a specific network metric from the data set
-            df = netdf[network_metric]
+            df = df[metric]
+
         # TODO: do this more elegent
         self.time = df.index
         return df
@@ -228,8 +226,10 @@ class RNNmodel(object):
 
         :param DataInstance: An instance of the Data class
 
-        :param Layer: A keras.layers.recurrent class either SimpleRNN, GRU or
-        LSTM
+        :type Layers: list
+        :param Layers: A list of layers. The first layer must be a
+        keras.layers.recurrent class either SimpleRNN, GRU or
+        LSTM. After the last LSTM layer Dense layer can follow.
 
         :type n_neurons: list
         :param n_neurons: the number of neurons in a layer
@@ -287,6 +287,13 @@ class RNNmodel(object):
         self.es = EarlyStopping(monitor='val_loss', min_delta=0.0,
                                 patience=es_epochs, verbose=0, mode='auto')
 
+        # extract some data form the Data instance
+        self.trainY = self.Data.trainY
+        self.testY = self.Data.testY
+
+        self.trainYtime = self.Data.trainYtime
+        self.testYtime = self.Data.testYtime
+
     def build_model(self):
         """
         This methods builds the model based on the information provided during
@@ -310,7 +317,7 @@ class RNNmodel(object):
             else:
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                               return_sequences=True))
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(self.Dropout))
 
         for j in np.arange(self.n_recurrent, self.n_layers):
             self.model.add(self.Layers[j](self.n_neurons[j], activation="relu"))
@@ -333,11 +340,6 @@ class RNNmodel(object):
         """
         Wrapper function of the .predict() method of the keras model
         """
-        self.trainY = self.Data.trainY
-        self.testY = self.Data.testY
-        self.testYtime = self.Data.testYtime
-        self.trainYtime = self.Data.trainYtime
-
         self.trainPredict = self.model.predict(self.Data.trainX)
         self.testPredict = self.model.predict(self.Data.testX)
 

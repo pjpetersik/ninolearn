@@ -7,12 +7,6 @@ from ninolearn.pathes import postdir
 from ninolearn.utils import generateFileName
 
 csv_vars = ['nino34', 'wwv']
-netcdf_vars = ['sst', 'air', 'air_daily', 'uwnd', 'vwnd', 'ssh']
-network_vars = ['global_transitivity', 'avelocal_transmissivity',
-                'fraction_clusters_size_2', 'fraction_clusters_size_3',
-                'fraction_clusters_size_5', 'fraction_giant_component',
-                'average_path_length', 'hamming_distance',
-                'corrected_hamming_distance', 'threshold', 'edge_density']
 
 
 class data_reader(object):
@@ -82,11 +76,11 @@ class data_reader(object):
                    (data.nav_lon < self.lon_max),
                    drop=True)
 
-    def read_network_metrics(self, variable, dataset='', processed=''):
+    def read_statistic(self, statistic, variable, dataset='', processed=''):
 
         filename = generateFileName(variable, dataset,
                                     processed=processed, suffix="csv")
-        filename = '-'.join(['network_metrics', filename])
+        filename = '-'.join([statistic, filename])
 
         data = pd.read_csv(join(postdir, filename),
                            index_col=0, parse_dates=True)
