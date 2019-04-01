@@ -8,7 +8,7 @@ TODO: make the NRMSE the loss
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-
+import pandas as pd
 import math
 
 from keras.models import Sequential
@@ -63,16 +63,20 @@ class Data(object):
         self.n_features = len(feature_keys)
 
         self.feature_scalers = self._set_scalers(self.feature_keys)
+        self.features_df = pd.DataFrame()
+
         first = True
 
         for key in self.feature_keys:
+            self.features_df[key] = self._read_wrapper(key)
             if first:
-                self.features = self._read_wrapper(key)
-                self.features = self._prepare_feature(key, self.features)
+                self.features = self._prepare_feature(key,
+                                                      self.features_df[key].values)
                 first = False
             else:
-                new_feature = self._read_wrapper(key)
-                new_feature = self._prepare_feature(key, new_feature)
+                new_feature = self._prepare_feature(key,
+                                                    self.features_df[key].values)
+
                 self.features = np.concatenate((self.features, new_feature),
                                                axis=2)
         self._create_feature_set()
@@ -81,10 +85,15 @@ class Data(object):
         """
         loads the features corresponding to a key into the object and directly
         scales it.
+
+        :type key: str
+        :param key: the name of the label that is used as the key in the
+        dictionary
         """
         self.label_scalers = self._set_scalers(key)
-        self.label = self._read_wrapper(key)
-        self.label = self._prepare_label(key, self.label)
+        self.label_df = self._read_wrapper(key)
+
+        self.label = self._prepare_label(key, self.label_df.values)
         self.n_samples = self.label.shape[0]
         self._create_label_set()
 
@@ -118,8 +127,8 @@ class Data(object):
             # get a specific network metric from the data set
             df = netdf[network_metric]
         # TODO: do this more elegent
-        self.time_coord = df.index
-        return df.values
+        self.time = df.index
+        return df#.values
 
     def _prepare_feature(self, key, feature):
         """
@@ -160,7 +169,7 @@ class Data(object):
     def _restructure_feature(self, X):
         dataX = []
         for i in range(len(X) - self.window_size - self.lead_time + 1):
-            a = X[i:(i + self.window_size), 0, :]
+            a = X[i:i + self.window_size, 0, :]
             dataX.append(a)
         return np.array(dataX)
 
@@ -170,6 +179,15 @@ class Data(object):
             dataY.append(Y[i + self.window_size + self.lead_time - 1, 0])
         return np.array(dataY)
 
+    def _restructure_time(self, time):
+        """
+        returns the time stamps at which predictions start
+        """
+        dataTime = []
+        for i in range(len(time) - self.window_size - self.lead_time + 1):
+            dataTime.append(time[i + self.window_size - 1])
+        return pd.to_datetime(dataTime)
+
     def _create_feature_set(self):
         trainX, testX = self._split(self.features)
 
@@ -178,8 +196,13 @@ class Data(object):
 
     def _create_label_set(self):
         trainY, testY = self._split(self.label)
+        trainYtime, testYtime = self._split(self.label_df.index)
+
         self.__trainY = self._restructure_label(trainY)
+        self.trainYtime = self._restructure_time(trainYtime)
+
         self.__testY = self._restructure_label(testY)
+        self.testYtime = self._restructure_time(testYtime)
 
     @property
     def trainX(self):
@@ -199,7 +222,7 @@ class Data(object):
 
 
 class RNNmodel(object):
-    def __init__(self, DataInstance, Layer=LSTM, n_neurons=[10], Dropout=0.2,
+    def __init__(self, DataInstance, Layers=LSTM, n_neurons=[10], Dropout=0.2,
                  lr=0.001, epochs=200, batch_size=20, es_epochs=20):
         """
         A class to build and fit a recurrent neural network as well as use the
@@ -229,16 +252,20 @@ class RNNmodel(object):
         :param es_epochs: number of epochs for early stopping
         """
         assert isinstance(DataInstance, Data)
-        assert Layer.__module__ == 'keras.layers.recurrent'
+        self.layer_names = []
+        for i in range(len(Layers)):
+            assert Layers[i].__module__ == 'keras.layers.recurrent'
+            self.layer_names.append(Layers[i].__name__)
         assert type(n_neurons) is list
 
-        self.Layer = Layer
+        self.Layers = Layers
+
         self.n_neurons = n_neurons
         self.n_layers = len(n_neurons)
         self.Dropout = Dropout
         self.architecture = {'layers': self.n_layers,
                              'n_neurons': self.n_neurons,
-                             'layer_type': self.Layer.__name__}
+                             'layer_type': self.layer_names}
 
         self.Data = DataInstance
 
@@ -270,18 +297,18 @@ class RNNmodel(object):
 
         for i in range(self.n_layers):
             if i == 0 and self.n_layers > 1:
-                self.model.add(self.Layer(self.n_neurons[i],
+                self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
                                return_sequences=True))
 
-            elif i == 0 and self.n_layers == 1:
-                self.model.add(self.Layer(self.n_neurons[i],
+            elif i == (self.n_layers - 1):
+                self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
                                return_sequences=False))
 
             else:
-                self.model.add(self.Layer(self.n_neurons[i],
-                                          return_sequences=False))
+                self.model.add(self.Layers[i](self.n_neurons[i],
+                                              return_sequences=True))
             self.model.add(Dropout(0.2))
         self.model.add(Dense(1))
 
@@ -294,7 +321,8 @@ class RNNmodel(object):
                                       batch_size=self.batch_size, verbose=2,
                                       validation_data=(self.Data.testX,
                                                        self.Data.testY),
-                                      callbacks=[self.es])
+                                      callbacks=[self.es],
+                                      shuffle=True)
 
     def predict(self):
         """
@@ -302,6 +330,8 @@ class RNNmodel(object):
         """
         trainY = self.Data.trainY
         testY = self.Data.testY
+        self.testYtime = self.Data.testYtime
+        self.trainYtime = self.Data.trainYtime
 
         trainPredict = self.model.predict(self.Data.trainX)
         testPredict = self.model.predict(self.Data.testX)
@@ -409,17 +439,17 @@ class RNNmodel(object):
         # plot baseline and predictions
 
         fig, ax = plt.subplots()
-        ax.plot(self.Data.time_coord,
+        ax.plot(self.Data.time,
                 self.label_scaler.inverse_transform(self.Data.label),
                 label="Nino3.4", c='k')
-        ax.plot(self.Data.time_coord, trainPredictPlot,
+        ax.plot(self.Data.time, trainPredictPlot,
                 label="trainPrediction",
                 c='limegreen')
-        ax.plot(self.Data.time_coord, testPredictPlot,
+        ax.plot(self.Data.time, testPredictPlot,
                 label="testPrediction",
                 c='red')
 
-        ax.plot(self.Data.time_coord, shiftPredictPlot,
+        ax.plot(self.Data.time, shiftPredictPlot,
                 label="shiftPrediction",
                 ls='--', c='grey', alpha=0.5)
 

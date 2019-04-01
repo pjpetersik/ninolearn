@@ -10,21 +10,23 @@ dependencies:
   - asn1crypto=0.24.0=py36_1003
   - astor=0.7.1=py_0
   - astroid=2.1.0=py36_1000
-  - atomicwrites=1.2.1=py27_0
+  - atomicwrites=1.3.0=py_0
   - attrs=18.2.0=py_0
   - babel=2.6.0=py_1
   - backcall=0.1.0=py_0
   - backports=1.0=py_2
   - backports.weakref=1.0rc1=py36_1
+  - basemap=1.2.0=py36h705c2d8_0
   - binutils_impl_linux-64=2.31.1=h6176602_1
   - binutils_linux-64=2.31.1=h6176602_3
   - blas=1.0=mkl
   - bleach=1.5.0=py36_0
+  - blosc=1.15.0=hd408876_0
   - bokeh=1.0.4=py36_1000
   - boost-cpp=1.67.0=h3a22d5f_0
   - bzip2=1.0.6=h470a237_2
   - c-ares=1.15.0=h14c3975_1001
-  - ca-certificates=2019.3.9=hecc5488_0
+  - ca-certificates=2019.1.23=0
   - cairo=1.14.12=h8948797_3
   - certifi=2019.3.9=py36_0
   - cffi=1.12.1=py36h9745a5d_0
@@ -43,6 +45,7 @@ dependencies:
   - dateutil=2.4.1=py27_0
   - dbus=1.13.6=h746ee38_0
   - decorator=4.3.2=py_0
+  - deepgraph=0.2.0=py36h3010b51_1000
   - distributed=1.26.0=py36_1
   - docutils=0.14=py36_1001
   - eccodes=2.8.2=ha8b302a_0
@@ -138,6 +141,7 @@ dependencies:
   - linecache2=1.0.0=py_1
   - locket=0.2.0=py_2
   - lxml=4.2.5=py27hc9114bc_0
+  - lzo=2.10=h49e0be7_2
   - mako=1.0.7=py_1
   - markdown=2.6.11=py_0
   - markupsafe=1.1.0=py36h14c3975_1000
@@ -149,7 +153,7 @@ dependencies:
   - mkl_fft=1.0.10=py36h14c3975_1
   - mkl_random=1.0.2=py36h637b7d7_2
   - mock=2.0.0=py36_1000
-  - more-itertools=4.3.0=py27_0
+  - more-itertools=6.0.0=py36_0
   - mpi=1.0=mpich
   - mpich=3.2.1=h26a2512_5
   - msgpack-python=0.6.1=py36h6bb024c_0
@@ -161,13 +165,14 @@ dependencies:
   - netcdf4=1.4.2=py36h4b4f87f_0
   - networkx=2.2=py36_1
   - nose=1.3.7=py27_1002
+  - numexpr=2.6.9=py36h9e4a6bb_0
   - numpy=1.15.4=py36h7e9f1db_0
   - numpy-base=1.15.4=py36hde5b4d6_0
   - numpydoc=0.8.0=py_1
   - olefile=0.46=py_0
   - openblas=0.3.3=h9ac9557_1001
   - openjpeg=2.3.0=h0e734dc_3
-  - openssl=1.1.1b=h14c3975_1
+  - openssl=1.1.1=h7b6447c_0
   - owslib=0.17.0=py_0
   - packaging=19.0=py_0
   - pandas=0.24.1=py36he6710b0_0
@@ -184,7 +189,7 @@ dependencies:
   - pillow=5.4.1=py36h00a061d_1000
   - pip=19.0.3=py36_0
   - pixman=0.34.0=hceecf20_3
-  - pluggy=0.7.1=py27h28b3542_0
+  - pluggy=0.9.0=py36_0
   - poppler=0.65.0=h581218d_1
   - poppler-data=0.4.9=0
   - postgresql=11.1=h20c2e04_0
@@ -194,7 +199,7 @@ dependencies:
   - psutil=5.5.1=py36h14c3975_0
   - psycopg2=2.7.6.1=py27h1ba5d50_0
   - ptyprocess=0.6.0=py36_1000
-  - py=1.6.0=py27_0
+  - py=1.8.0=py36_0
   - pycairo=1.18.0=py36h1b9232e_1000
   - pycodestyle=2.5.0=py_0
   - pycosat=0.6.3=py36h14c3975_1001
@@ -210,8 +215,10 @@ dependencies:
   - pyproj=1.9.5.1=py36h2944ce7_1006
   - pyqt=5.9.2=py36h05f1152_2
   - pyrsistent=0.14.11=py36h14c3975_0
+  - pyshp=2.0.1=py36_0
   - pysocks=1.6.8=py36_1002
-  - pytest=3.8.0=py27_0
+  - pytables=3.4.4=py36ha205bf6_0
+  - pytest=4.3.1=py36_0
   - python=3.6.8=h0371630_0
   - python-dateutil=2.7.3=py_0
   - python-igraph=0.7.1.post6=py36h14c3975_1005
@@ -229,11 +236,13 @@ dependencies:
   - rope=0.10.7=py_1
   - ruamel_yaml=0.15.71=py36h14c3975_1000
   - scandir=1.9.0=py27h14c3975_0
+  - scikit-learn=0.20.3=py36hd81dba3_0
   - scipy=1.2.1=py36h7c811a0_0
   - secretstorage=3.1.1=py36_0
   - setuptools=40.8.0=py36_0
   - sip=4.19.8=py36hf484d3e_1000
   - six=1.12.0=py36_1000
+  - snappy=1.1.7=hbae5bb6_3
   - snowballstemmer=1.2.1=py_1
   - sortedcontainers=2.1.0=py_0
   - sphinx=1.8.4=py36_0
