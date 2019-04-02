@@ -40,3 +40,19 @@ def generateFileName(variable, dataset, processed='', suffix=None):
         filename = '.'.join([filename, suffix])
 
     return filename
+
+
+def scale(x):
+    """
+    scale a time series
+    """
+    return (x-x.mean())/x.std()
+
+
+def scaleMax(x):
+    """
+    sacle timeseries by absolute maximum
+    """
+    return x/np.max(np.abs(x))
+
+

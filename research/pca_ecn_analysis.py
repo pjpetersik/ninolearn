@@ -3,25 +3,33 @@ import matplotlib.pyplot as plt
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.nino_timeseries import nino_background
 from ninolearn.utils import print_header
-from ninolearn.postprocess.pca import pca_component
+from ninolearn.postprocess.pca import pca
 from ninolearn.postprocess.network import networkMetricsSeries
 # =============================================================================
 # =============================================================================
 # # Compute PCA
 # =============================================================================
 # =============================================================================
+pca_sat = pca(n_components=6)
+pca_sat.load_data('air', 'NCEP', processed="anom",
+                  startyear=1948, endyear=2018, lon_min=120, lon_max=280,
+                  lat_min=-30, lat_max=30)
+pca_sat.compute_pca()
+pca_sat.save()
 
-pca_component('air', 'NCEP', processed="anom",
-              startyear=1948, endyear=2018, lon_min=120, lon_max=280,
-              lat_min=-30, lat_max=30)
+pca_sat = pca(n_components=6)
+pca_sat.load_data('uwnd', 'NCEP', processed="anom",
+                  startyear=1948, endyear=2018, lon_min=120, lon_max=280,
+                  lat_min=-30, lat_max=30)
+pca_sat.compute_pca()
+pca_sat.save()
 
-pca_component('uwnd', 'NCEP', processed="anom",
-              startyear=1948, endyear=2018, lon_min=120, lon_max=280,
-              lat_min=-30, lat_max=30)
-
-pca_component('vwnd', 'NCEP', processed="anom",
-              startyear=1948, endyear=2018, lon_min=120, lon_max=280,
-              lat_min=-30, lat_max=30)
+pca_sat = pca(n_components=6)
+pca_sat.load_data('vwnd', 'NCEP', processed="anom",
+                  startyear=1948, endyear=2018, lon_min=120, lon_max=280,
+                  lat_min=-30, lat_max=30)
+pca_sat.compute_pca()
+pca_sat.save()
 
 
 # %% ==========================================================================
