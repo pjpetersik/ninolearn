@@ -25,6 +25,14 @@ def largest_indices(ary, n):
     return np.unravel_index(indices, ary.shape)
 
 
+def lowest_indices(ary, n):
+    """Returns the n lowest indices from a numpy array."""
+    flat = ary.flatten()
+    indices = np.argpartition(flat, n)[:n]
+    indices = indices[np.argsort(flat[indices])]
+    return np.unravel_index(indices, ary.shape)
+
+
 def generateFileName(variable, dataset, processed='', suffix=None):
     """
     generates a file name
