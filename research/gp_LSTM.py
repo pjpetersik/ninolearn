@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from keras.layers import LSTM, GRU, SimpleRNN, Dense
+import copy
 
 from ninolearn.learn.rnn import Data, RNNmodel
 from ninolearn.plot.evaluation import (plot_explained_variance,
@@ -33,16 +34,43 @@ pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily',
         'pca3': ['pca', 'pca2', 'uwnd', 'anom', 'NCEP'],
         }
 
-# before evolution
-lead_time = 3
-
 
 class Genome(object):
     def __init__(self, genes_dict):
         self.genes = genes_dict
+        self.gene_names = genes_dict.keys()
 
     def __getitem__(self, key):
         return self.genes[key]
+
+    def mutant(self, sginstance, strength=0.2):
+        """
+        Returns a mutant genome of this genome
+        """
+        assert isinstance(sginstance, SuperGenome)
+
+        mutant_dict = {}
+
+        for name in self.gene_names:
+            maxmutation = (sginstance.bp_genome[name][1] -
+                           sginstance.bp_genome[name][0])
+
+            mutation = maxmutation * np.random.uniform(low=-strength,
+                                                       high=strength)
+
+            if type(self.genes[name]) == float:
+                mutant_dict[name] = self.genes[name] + mutation
+
+            elif type(self.genes[name]) == int:
+                mutant_dict[name] = int(self.genes[name] + mutation)
+
+            mutant_dict[name] = max(mutant_dict[name],
+                                    sginstance.bp_genome[name][0])
+
+            mutant_dict[name] = min(mutant_dict[name],
+                                    sginstance.bp_genome[name][1])
+
+        return Genome(mutant_dict)
 
 
 class SuperGenome(object):
@@ -58,7 +86,7 @@ class SuperGenome(object):
         assert type(blue_print_genome) is dict
 
         self.n_genes = len(blue_print_genome)
-        self.genes_names = blue_print_genome.keys()
+        self.gene_names = blue_print_genome.keys()
         self.bp_genome = blue_print_genome
 
     def randomGenome(self):
@@ -67,7 +95,7 @@ class SuperGenome(object):
         """
         genes = {}
 
-        for name in self.genes_names:
+        for name in self.gene_names:
             genes[name] = self.randomGeneValue(self.bp_genome[name])
         return Genome(genes)
 
@@ -88,7 +116,7 @@ class SuperGenome(object):
         return value
 
 
-class poplulation(object):
+class Population(object):
     """
     A population is a collection of collection of multiple genomes.
     """
@@ -121,7 +149,7 @@ class poplulation(object):
         assert type(fitnessScore) == np.ndarray
         self.fitness = fitnessScore
 
-    def survivors(self):
+    def survival_of_the_fittest(self):
         """
         Genrate a new  population based on the fitness score
         """
@@ -131,7 +159,43 @@ class poplulation(object):
         for i in il:
             self.survivor_population.append(self.population[i])
 
+    def makeNewPopulation(self):
+        """
+        generate a new population by cloning, pairing and mutation
+        """
+        self.new_population = []
+        self.make_clones()
+        self.make_offsprings()
+        self.make_new_Genome()
+        assert id(self.new_population) != id(self.survivor_population)
 
+    def make_clones(self):
+        """
+        clone and mutate the survivor population
+        """
+        for i in range(len(self.survivor_population)):
+            clone_genome = self.survivor_population[i].mutant(self.superGenome)
+            self.new_population.append(clone_genome)
+
+    def make_offsprings(self, number=5):
+        for i in range(number):
+            self.new_population.append(self._copulation(self.survivor_population))
+
+    def make_new_Genome(self, number=2):
+        for i in range(number):
+            self.new_population.append(self.superGenome.randomGenome())
+
+    def _copulation(self, population):
+        """
+        Let the entire population have some GREAT fun.
+        """
+        offspring_genome = {}
+
+        for name in self.superGenome.gene_names:
+            parent = np.random.randint(len(population))
+            offspring_genome[name] = population[parent].genes[name]
+
+        return Genome(offspring_genome).mutant(self.superGenome)
 
 bp_dict = {'window_size': [6, 36],
            'n_neurons': [5, 50],
@@ -142,57 +206,62 @@ bp_dict = {'window_size': [6, 36],
            }
 
 sg = SuperGenome(bp_dict)
-pop = poplulation(5, sg)
-fitness = np.array([0.1,0.6,0.5,0.4,0.2])
+pop = Population(5, sg)
+fitness = np.array([0.1, 0.6, 0.5, 0.4, 0.2])
 pop.getFitness(fitness)
-pop.survivors()
+pop.survival_of_the_fittest()
+pop.makeNewPopulation()
 
 
 #%%
-# the gene:
-window_size = 6
-n_neurons = 10
-Dropout = 0.2
-lr = 0.01
-batch_size = 100
-es_epochs = 20
+if __name__ == "__maian__":
+
+    # before evolution
+    lead_time = 3
+
+    window_size = 6
+    n_neurons = 10
+    Dropout = 0.2
+    lr = 0.01
+    batch_size = 100
+    es_epochs = 20
 
 
-LAYER = LSTM
-data_obj = Data(label_name="nino34", data_pool_dict=pool,
-                window_size=window_size, lead_time=lead_time,
-                startdate='1980-01', train_frac=0.6)
+    LAYER = LSTM
+    data_obj = Data(label_name="nino34", data_pool_dict=pool,
+                    window_size=window_size, lead_time=lead_time,
+                    startdate='1980-01', train_frac=0.6)
 
 
-data_obj.load_features(['wwv',  # 'nino34',
-                        'pca1', 'pca2', 'pca3',
-                        'c2_air',  'c3_air', 'c5_air',
-                        'S', 'H', 'tau', 'C', 'L'
-                        ])
+    data_obj.load_features(['wwv',  # 'nino34',
+                            'pca1', 'pca2', 'pca3',
+                            'c2_air',  'c3_air', 'c5_air',
+                            'S', 'H', 'tau', 'C', 'L'
+                            ])
 
-model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[10], Dropout=0.0,
-                 lr=0.0001, epochs=500, batch_size=100, es_epochs=20)
+    model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[10], Dropout=0.0,
+                     lr=0.0001, epochs=500, batch_size=100, es_epochs=20)
 
-model.fit()
-model.predict()
+    model.fit()
+    model.predict()
 
-trainRMSE, trainNRMSE = model.get_scores('train')
-testRMSE, testNRMSE = model.get_scores('test')
-shiftRMSE, shiftNRMSE = model.get_scores('shift')
+    trainRMSE, trainNRMSE = model.get_scores('train')
+    testRMSE, testNRMSE = model.get_scores('test')
+    shiftRMSE, shiftNRMSE = model.get_scores('shift')
 
-print('Train Score: %.2f MSE, %.2f NMSE' % (trainRMSE**2, trainNRMSE))
-print('Test Score: %.2f MSE, %.2f NMSE' % (testRMSE**2, testNRMSE))
-print('Shift Score: %.2f MSE, %.2f NMSE' % (shiftRMSE**2, shiftNRMSE))
+    print('Train Score: %.2f MSE, %.2f NMSE' % (trainRMSE**2, trainNRMSE))
+    print('Test Score: %.2f MSE, %.2f NMSE' % (testRMSE**2, testNRMSE))
+    print('Shift Score: %.2f MSE, %.2f NMSE' % (shiftRMSE**2, shiftNRMSE))
 
-# %%
+    # %%
 
-plt.close("all")
-model.plot_history()
-model.plot_prediction()
+    plt.close("all")
+    model.plot_history()
+    model.plot_prediction()
 
-plot_explained_variance(model.testY, model.testPredict[:, 0], model.testYtime)
-plt.title(f"Lead time: {model.Data.lead_time} month")
+    plot_explained_variance(model.testY, model.testPredict[:, 0], model.testYtime)
+    plt.title(f"Lead time: {model.Data.lead_time} month")
 
-plot_correlations(model.testY, model.testPredict[:, 0], model.testYtime)
-# -*- coding: utf-8 -*-
+    plot_correlations(model.testY, model.testPredict[:, 0], model.testYtime)
+    # -*- coding: utf-8 -*-
 
