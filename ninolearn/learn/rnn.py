@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 import pandas as pd
 import math
 
+import keras.backend as K
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
@@ -219,7 +220,7 @@ class Data(object):
 
 class RNNmodel(object):
     def __init__(self, DataInstance, Layers=LSTM, n_neurons=[10], Dropout=0.2,
-                 lr=0.001, epochs=200, batch_size=20, es_epochs=20):
+                 lr=0.001, epochs=200, batch_size=20, es_epochs=20, verbose=1):
         """
         A class to build and fit a recurrent neural network as well as use the
         RNN for predictions.
@@ -248,7 +249,13 @@ class RNNmodel(object):
 
         :type es_epochs: int
         :param es_epochs: number of epochs for early stopping
+
+        :param verbose: the verbose argument for the model compile
         """
+
+        # clear memory
+        K.clear_session()
+
         assert isinstance(DataInstance, Data)
         self.layer_names = []
         for i in range(len(Layers)):
@@ -286,6 +293,8 @@ class RNNmodel(object):
 
         self.es = EarlyStopping(monitor='val_loss', min_delta=0.0,
                                 patience=es_epochs, verbose=0, mode='auto')
+
+        self.verbose = verbose
 
         # extract some data form the Data instance
         self.trainY = self.Data.trainY
@@ -330,7 +339,8 @@ class RNNmodel(object):
         """
         self.history = self.model.fit(self.Data.trainX, self.Data.trainY,
                                       epochs=self.epochs,
-                                      batch_size=self.batch_size, verbose=2,
+                                      batch_size=self.batch_size,
+                                      verbose=self.verbose,
                                       validation_data=(self.Data.testX,
                                                        self.Data.testY),
                                       callbacks=[self.es],
