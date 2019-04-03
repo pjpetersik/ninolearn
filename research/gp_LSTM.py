@@ -43,26 +43,33 @@ class Genome(object):
         mutant_dict = {}
 
         for name in self.gene_names:
+            if name != "features":
+                # calculate the strength of the mutation
+                maxmutation = (SGinstance.bp_genome[name][1] -
+                               SGinstance.bp_genome[name][0])
 
-            # calculate the strength of the mutation
-            maxmutation = (SGinstance.bp_genome[name][1] -
-                           SGinstance.bp_genome[name][0])
+                mutation = maxmutation * np.random.uniform(low=-strength,
+                                                           high=strength)
 
-            mutation = maxmutation * np.random.uniform(low=-strength,
-                                                       high=strength)
+                # apply the mutation to the corresponding gene
+                if type(self.genes[name]) == float:
+                    mutant_dict[name] = self.genes[name] + mutation
 
-            # apply the mutation to the corresponding gene
-            if type(self.genes[name]) == float:
-                mutant_dict[name] = self.genes[name] + mutation
+                elif type(self.genes[name]) == int:
+                    mutant_dict[name] = int(self.genes[name] + mutation)
 
-            elif type(self.genes[name]) == int:
-                mutant_dict[name] = int(self.genes[name] + mutation)
+                # make sure that the mutated gene stays in the correct range
+                mutant_dict[name] = max(mutant_dict[name],
+                                        SGinstance.bp_genome[name][0])
+                mutant_dict[name] = min(mutant_dict[name],
+                                        SGinstance.bp_genome[name][1])
+            elif name == "features":
+                mutant_dict[name] = self.genes[name].copy()
+                i = np.random.randint(len(mutant_dict[name]))
+                j =  np.random.randint(len(SGinstance.bp_genome[name]))
 
-            # make sure that the mutated gene stays in the correct range
-            mutant_dict[name] = max(mutant_dict[name],
-                                    SGinstance.bp_genome[name][0])
-            mutant_dict[name] = min(mutant_dict[name],
-                                    SGinstance.bp_genome[name][1])
+                if  mutant_dict[name][i] != SGinstance.bp_genome[name][j]:
+                    mutant_dict[name][i] = SGinstance.bp_genome[name][j]
 
         return Genome(mutant_dict)
 
@@ -90,8 +97,19 @@ class SuperGenome(object):
         genes = {}
 
         for name in self.gene_names:
-            genes[name] = self.randomGeneValue(self.bp_genome[name])
+            if name=='features':
+                genes[name] = self.randomSelection(self.bp_genome[name])
+            else:
+                genes[name] = self.randomGeneValue(self.bp_genome[name])
         return Genome(genes)
+
+    def randomSelection(self, blue_print_gene_list):
+        """
+        Selection a certain number of genes randomly from a list
+        """
+        selection = np.random.choice(blue_print_gene_list, size=4,
+                                     replace=False).tolist()
+        return selection
 
     def randomGeneValue(self, blue_print_gene_value):
         """
@@ -100,10 +118,12 @@ class SuperGenome(object):
         """
         assert type(blue_print_gene_value) is list
 
+        # for float number use continuous  uniform distribution
         if type(blue_print_gene_value[0]) is float:
             value = np.random.uniform(low=blue_print_gene_value[0],
                                       high=blue_print_gene_value[1])
 
+        # for discrete numbers use discrete unifrom distribution
         elif type(blue_print_gene_value[0]) is int:
             value = np.random.randint(low=blue_print_gene_value[0],
                                       high=blue_print_gene_value[1] + 1)
@@ -206,7 +226,6 @@ class Population(object):
         for name in self.superGenome.gene_names:
             parent = np.random.randint(len(population))
             offspring_genome[name] = population[parent].genes[name]
-
         return Genome(offspring_genome).mutant(self.superGenome)
 
     def make_new_Genome(self, number):
@@ -260,7 +279,10 @@ if __name__ == "__main__":
                'Dropout': [0.0, 0.5],
                'lr': [0.00001, 0.001],
                'batch_size': [1, 100],
-               'es_epochs': [5, 50]
+               'es_epochs': [5, 50],
+               'features': ['wwv',   'nino34', 'pca1', 'pca2', 'pca3',
+                            'c2_air',  'c3_air', 'c5_air',
+                            'S', 'H', 'tau', 'C', 'L']
                }
     sg = SuperGenome(bp_dict)
 
@@ -287,11 +309,7 @@ if __name__ == "__main__":
                             startdate='1980-01', train_frac=0.6)
 
 
-            data_obj.load_features(['wwv',  # 'nino34',
-                                    #'pca1', 'pca2', 'pca3',
-                                    'c2_air',  'c3_air', 'c5_air',
-                                    'S', 'H', 'tau', 'C', 'L'
-                                    ])
+            data_obj.load_features(genome['features'])
 
             model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[n_neurons],
                              Dropout=Dropout, lr=lr, epochs=500,
