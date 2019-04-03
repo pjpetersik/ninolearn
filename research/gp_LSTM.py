@@ -43,7 +43,7 @@ class Genome(object):
         mutant_dict = {}
 
         for name in self.gene_names:
-            if name != "features":
+            if SGinstance.bp_gene_type[name] != list:
                 # calculate the strength of the mutation
                 maxmutation = (SGinstance.bp_genome[name][1] -
                                SGinstance.bp_genome[name][0])
@@ -63,13 +63,19 @@ class Genome(object):
                                         SGinstance.bp_genome[name][0])
                 mutant_dict[name] = min(mutant_dict[name],
                                         SGinstance.bp_genome[name][1])
-            elif name == "features":
-                mutant_dict[name] = self.genes[name].copy()
-                i = np.random.randint(len(mutant_dict[name]))
-                j =  np.random.randint(len(SGinstance.bp_genome[name]))
 
-                if  mutant_dict[name][i] != SGinstance.bp_genome[name][j]:
-                    mutant_dict[name][i] = SGinstance.bp_genome[name][j]
+            elif SGinstance.bp_gene_type[name] == list:
+                # replace one entry by another from the blue print list that
+                # is not already in the mutant genome
+                mutant_dict[name] = self.genes[name].copy()
+
+                i = np.random.randint(len(mutant_dict[name]))
+                j =  np.random.randint(len(SGinstance.bp_genome[name][0]))
+
+                while SGinstance.bp_genome[name][0][j] in mutant_dict[name]:
+                    j =  np.random.randint(len(SGinstance.bp_genome[name][0]))
+
+                mutant_dict[name][i] = SGinstance.bp_genome[name][0][j]
 
         return Genome(mutant_dict)
 
@@ -90,6 +96,10 @@ class SuperGenome(object):
         self.gene_names = blue_print_genome.keys()
         self.bp_genome = blue_print_genome
 
+        self.bp_gene_type = {}
+        for name in self.gene_names:
+            self.bp_gene_type[name] = type(self.bp_genome[name][0])
+
     def randomGenome(self):
         """
         Returns a random Gen instance.
@@ -97,7 +107,7 @@ class SuperGenome(object):
         genes = {}
 
         for name in self.gene_names:
-            if name=='features':
+            if self.bp_gene_type[name] == list:
                 genes[name] = self.randomSelection(self.bp_genome[name])
             else:
                 genes[name] = self.randomGeneValue(self.bp_genome[name])
@@ -107,7 +117,12 @@ class SuperGenome(object):
         """
         Selection a certain number of genes randomly from a list
         """
-        selection = np.random.choice(blue_print_gene_list, size=4,
+        assert type(blue_print_gene_list) == list
+        assert type(blue_print_gene_list[0]) == list
+        assert type(blue_print_gene_list[1]) == int
+
+        selection = np.random.choice(blue_print_gene_list[0],
+                                     size=blue_print_gene_list[1],
                                      replace=False).tolist()
         return selection
 
@@ -134,7 +149,8 @@ class Population(object):
     """
     A population is a collection of collection of multiple genomes.
     """
-    def __init__(self, size, superGenomeInstanace):
+    def __init__(self, superGenomeInstanace, size = 15, n_survivors = 5,
+                 n_offsprings=5, n_random_new = 5):
         """
 
         :type size: int
@@ -142,7 +158,12 @@ class Population(object):
 
         :param superGenomeInstanace: An instance of the SuperGenome class.
         """
+        assert size == n_survivors + n_offsprings + n_random_new
+
         self.size = size
+        self.n_survivors = n_survivors
+        self.n_offsprings = n_offsprings
+        self.n_random_new = n_random_new
 
         assert isinstance(superGenomeInstanace, SuperGenome)
         self.superGenome = superGenomeInstanace
@@ -171,7 +192,7 @@ class Population(object):
         assert type(fitnessScore) == np.ndarray
         self.fitness = fitnessScore
 
-    def survival_of_the_fittest(self, size=2):
+    def survival_of_the_fittest(self):
         """
         Let evolution decide which model survives and can later generate clones
         and offsprings.
@@ -181,11 +202,11 @@ class Population(object):
         """
         self.survivor_population = []
 
-        il = lowest_indices(self.fitness, size)[0]
+        il = lowest_indices(self.fitness, self.n_survivors)[0]
         for i in il:
             self.survivor_population.append(self.population[i])
 
-    def makeNewPopulation(self, offsprings=2, random=2):
+    def makeNewPopulation(self):
         """
         Generate a new population by cloning, pairing and mutation as well as
         random new genomes
@@ -195,23 +216,25 @@ class Population(object):
         self.make_clones()
         assert id(self.new_population) != id(self.survivor_population)
 
-        self.make_offsprings(offsprings)
-        self.make_new_Genome(random)
+        self.make_offsprings()
+        self.make_new_Genome()
 
     def make_clones(self):
         """
         Clone and mutate the survivor population.
         """
-        for i in range(len(self.survivor_population)):
+        assert self.n_survivors == len(self.survivor_population)
+
+        for i in range(self.n_survivors):
             clone_genome = self.survivor_population[i].mutant(self.superGenome)
             self.new_population.append(clone_genome)
 
-    def make_offsprings(self, number):
+    def make_offsprings(self):
         """
         Make some offsprings from the surviror population and append them to
         the new population list.
         """
-        for i in range(number):
+        for i in range(self.n_offsprings):
             off_spring_genomes = self._copulation(self.survivor_population)
             self.new_population.append(off_spring_genomes)
 
@@ -228,22 +251,24 @@ class Population(object):
             offspring_genome[name] = population[parent].genes[name]
         return Genome(offspring_genome).mutant(self.superGenome)
 
-    def make_new_Genome(self, number):
+    def make_new_Genome(self):
         """
         Make some totally new Genomes.
         """
-        for i in range(number):
+        for i in range(self.n_random_new):
             self.new_population.append(self.superGenome.randomGenome())
 
     def start_new_generation(self):
         """
         Overwrite the old population list with the new population.
         """
+        self.makeNewPopulation()
         self.population = self.new_population.copy()
 
 
 
 if __name__ == "__main__":
+
     pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily',
                    'anom', 'NCEP'],
             'c3_air': ['network_metrics', 'fraction_clusters_size_3', 'air_daily',
@@ -272,22 +297,30 @@ if __name__ == "__main__":
 
     lead_time = 6
 
-    generations = 10
-
+    # Define the SuperGenome
     bp_dict = {'window_size': [1, 36],
                'n_neurons': [5, 50],
                'Dropout': [0.0, 0.5],
                'lr': [0.00001, 0.001],
                'batch_size': [1, 100],
                'es_epochs': [5, 50],
-               'features': ['wwv',   'nino34', 'pca1', 'pca2', 'pca3',
+               'features': [['wwv',   'nino34', 'pca1', 'pca2', 'pca3',
                             'c2_air',  'c3_air', 'c5_air',
-                            'S', 'H', 'tau', 'C', 'L']
-               }
+                            'S', 'H', 'tau', 'C', 'L'], 5]}
+
     sg = SuperGenome(bp_dict)
 
-    population_size = 8
-    p = Population(population_size, sg)
+    # Set the evolution parameters
+    population_size = 30
+    survivors = 10
+    offsprings = 10
+    random = 10
+
+    generations = 10
+
+    # Initialize the population
+    p = Population(sg, size=population_size, n_survivors=survivors,
+                   n_offsprings=offsprings, n_random_new=random)
 
     for n in range(generations):
         print_header(f" Generation Nr. {n} ")
@@ -337,20 +370,22 @@ if __name__ == "__main__":
             #del data_obj
 
         print("############################")
-
-        print(f"FITNESS :{fitness}")
+        print()
+        print(f"FITNESS: {fitness}")
         print()
 
         p.getFitness(np.array(fitness))
-
-        p.survival_of_the_fittest(size=2)
-        p.makeNewPopulation(offsprings=4, random=2)
+        p.survival_of_the_fittest()
         p.start_new_generation()
 
+        print()
+        print(f"SURVIVORS: ")
+        print()
         for i in range(len(p.survivor_population)):
             print(p.survivor_population[i].genes)
 
         print()
-
+        print(f"NEW POPULATION:")
+        print()
         for i in range(len(p.new_population)):
             print(p.new_population[i].genes)
