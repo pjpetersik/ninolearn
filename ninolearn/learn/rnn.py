@@ -316,12 +316,12 @@ class RNNmodel(object):
             if i == 0 and self.n_recurrent > 1:
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
-                               return_sequences=True))
+                               return_sequences=True, activation="relu"))
 
             elif i == (self.n_recurrent - 1):
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
-                               return_sequences=False))
+                               return_sequences=False, activation="relu"))
 
             else:
                 self.model.add(self.Layers[i](self.n_neurons[i],
