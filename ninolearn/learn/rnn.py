@@ -26,7 +26,7 @@ from scipy import interpolate
 from ninolearn.IO.read_post import (data_reader, csv_vars)
 
 
-def window_warping(ts, window_size = [3,12] , strength=[0.3, 0.5], amount = 12):
+def window_warping(ts, window_size = [12, 18] , strength=[0.5, 0.8], amount = 12):
     """
     window warping for data augmentation of time series.
 
@@ -130,7 +130,31 @@ class Data(object):
 
                 self.features = np.concatenate((self.features, new_feature),
                                                axis=2)
-        self._create_feature_set()
+
+        self.__trainX, self.__testX = self._create_feature_set(self.features)
+        self.trainXorg, self.testXorg = self.__trainX.copy(), self.__testX.copy()
+
+        if True:
+            for _ in range(20):
+                first = True
+                for key in self.feature_keys:
+                    self.features_df[key] = self._read_wrapper(key)
+                    feature_values = self.features_df[key].values
+                    feature_warped = window_warping(feature_values)
+
+                    if first:
+                        features = self._prepare_feature(key, feature_warped)
+                        first = False
+                    else:
+                        new_feature = self._prepare_feature(key, feature_warped)
+
+                        features = np.concatenate((features, new_feature),
+                                                       axis=2)
+                warped_trainX, warped_testX = self._create_feature_set(features)
+
+                self.__trainX = np.concatenate((self.__trainX, warped_trainX), axis = 0)
+                self.__testX = np.concatenate((self.__testX, warped_testX), axis = 0)
+
 
     def load_label(self, key):
         """
@@ -142,13 +166,22 @@ class Data(object):
         dictionary
         """
         self.label_df = self._read_wrapper(key)
-        label_warped = window_warping(self.label_df.values)
-        #self.label = self._prepare_label(key, label_warped)#self.label_df.values)
-        self.label = self._prepare_label(key, self.label_df.values)
-
+        label_values = self.label_df.values
+        self.label = self._prepare_label(label_values)
         self.n_samples = self.label.shape[0]
 
-        self._create_label_set()
+        self.__trainY, self.__testY = self._create_label_set(self.label)
+        self.trainYorg, self.testYorg = self.__trainY.copy(), self.__testY.copy()
+
+        if True:
+            for _ in range(20):
+                label_warped = window_warping(label_values)
+                label = self._prepare_label(label_warped)
+                warped_trainY, warped_testY = self._create_label_set(label)
+
+                self.__trainY = np.concatenate((self.__trainY, warped_trainY), axis = 0)
+                self.__testY = np.concatenate((self.__testY, warped_testY), axis = 0)
+
 
     def _read_wrapper(self, key):
         """
@@ -192,7 +225,7 @@ class Data(object):
         feature = feature.reshape(len(feature), 1, 1)
         return feature
 
-    def _prepare_label(self, key, label):
+    def _prepare_label(self, label):
         """
         squashes label and reshapes it to the shape needed for the LSTM
         """
@@ -239,21 +272,24 @@ class Data(object):
             dataTime.append(time[i + self.window_size - 1])
         return pd.to_datetime(dataTime)
 
-    def _create_feature_set(self):
-        trainX, testX = self._split(self.features)
+    def _create_feature_set(self, features):
+        trainX, testX = self._split(features)
 
-        self.__trainX = self._restructure_feature(trainX)
-        self.__testX = self._restructure_feature(testX)
+        trainX = self._restructure_feature(trainX)
+        testX = self._restructure_feature(testX)
 
-    def _create_label_set(self):
-        trainY, testY = self._split(self.label)
+        return trainX, testX
+
+    def _create_label_set(self, label):
+        trainY, testY = self._split(label)
         trainYtime, testYtime = self._split(self.label_df.index)
 
-        self.__trainY = self._restructure_label(trainY)
+        trainY = self._restructure_label(trainY)
         self.trainYtime = self._restructure_time(trainYtime)
 
-        self.__testY = self._restructure_label(testY)
+        testY = self._restructure_label(testY)
         self.testYtime = self._restructure_time(testYtime)
+        return trainY, testY
 
     @property
     def trainX(self):
@@ -322,6 +358,9 @@ class RNNmodel(object):
 
         self.n_neurons = n_neurons
         self.n_layers = len(n_neurons)
+
+        assert len(self.Layers) == len(self.n_neurons)
+
         self.Dropout = Dropout
         self.architecture = {'layers': self.n_layers,
                              'n_neurons': self.n_neurons,
@@ -380,7 +419,7 @@ class RNNmodel(object):
             else:
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                               return_sequences=True))
-            self.model.add(GaussianNoise(self.Dropout))
+            self.model.add(Dropout(self.Dropout))
 
         for j in np.arange(self.n_recurrent, self.n_layers):
             self.model.add(self.Layers[j](self.n_neurons[j], activation="relu"))
@@ -404,8 +443,8 @@ class RNNmodel(object):
         """
         Wrapper function of the .predict() method of the keras model
         """
-        self.trainPredict = self.model.predict(self.Data.trainX)
-        self.testPredict = self.model.predict(self.Data.testX)
+        self.trainPredict = self.model.predict(self.Data.trainXorg)
+        self.testPredict = self.model.predict(self.Data.testXorg)
 
         shiftPredict = np.roll(self.Data.label, self.Data.lead_time)
         self.shiftY = self.Data.label[self.Data.lead_time:]
@@ -424,11 +463,11 @@ class RNNmodel(object):
         :return: Returns the RMSE and NRMSE
         """
         if part == 'train':
-            RMSE = self._rmse(self.trainY, self.trainPredict[:, 0])
-            NRMSE = self._nrmse(self.trainY, self.trainPredict[:, 0])
+            RMSE = self._rmse(self.Data.trainYorg, self.trainPredict[:, 0])
+            NRMSE = self._nrmse(self.Data.trainYorg, self.trainPredict[:, 0])
         elif part == 'test':
-            RMSE = self._rmse(self.testY, self.testPredict[:, 0])
-            NRMSE = self._nrmse(self.testY, self.testPredict[:, 0])
+            RMSE = self._rmse(self.Data.testYorg, self.testPredict[:, 0])
+            NRMSE = self._nrmse(self.Data.testYorg, self.testPredict[:, 0])
         elif part == 'shift':
             RMSE = self._rmse(self.shiftY, self.shiftPredict)
             NRMSE = self._nrmse(self.shiftY, self.shiftPredict)

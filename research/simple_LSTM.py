@@ -39,14 +39,14 @@ data_obj = Data(label_name="nino34", data_pool_dict=pool,
                 window_size=window_size, lead_time=lead_time,
                 startdate='1980-01', train_frac=0.6)
 
-data_obj.load_features(['nino34','wwv'
-                        #'pca1', 'pca2', 'pca3',
-                        #  'c3_air', 'c5_air' ,'c2_air',
-                        #'S', 'H', 'tau', 'C', 'L'
+data_obj.load_features(['nino34', 'wwv',
+                        'pca1', 'pca2', 'pca3',
+                         'c3_air', 'c5_air' ,'c2_air',
+                        'S', 'H', 'tau', 'C', 'L'
                         ])
 
-model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[1], Dropout=0.0,
-                 lr=0.02, epochs=50, batch_size=100, es_epochs=200, verbose=2)
+model = RNNmodel(data_obj, Layers=[LSTM,LSTM,Dense], n_neurons=[10,10,10], Dropout=0.5,
+                 lr=0.005, epochs=1000, batch_size=100, es_epochs=50, verbose=2)
 
 model.fit()
 model.predict()
@@ -65,7 +65,7 @@ plt.close("all")
 model.plot_history()
 model.plot_prediction()
 
-plot_explained_variance(model.testY, model.testPredict[:, 0], model.testYtime)
+plot_explained_variance(model.Data.testYorg, model.testPredict[:, 0], model.testYtime)
 plt.title(f"Lead time: {model.Data.lead_time} month")
 
-plot_correlations(model.testY, model.testPredict[:, 0], model.testYtime)
+plot_correlations(model.Data.testYorg, model.testPredict[:, 0], model.testYtime)

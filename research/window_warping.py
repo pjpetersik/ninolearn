@@ -49,7 +49,7 @@ data_obj.load_features(['nino34',
                         #'S', 'H', 'tau', 'C', 'L'
                         ])
 
-def window_warping(ts, window_size = [3,12] , strength=[0.3, 0.8], amount = 12):
+def window_warping(ts, window_size = [12,18] , strength=[0.5, 0.8], amount = 12):
     """
     window warping for data augmentation of time series.
 
