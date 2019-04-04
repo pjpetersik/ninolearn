@@ -134,7 +134,7 @@ class Data(object):
         self.__trainX, self.__testX = self._create_feature_set(self.features)
         self.trainXorg, self.testXorg = self.__trainX.copy(), self.__testX.copy()
 
-        if True:
+        if False:
             for _ in range(20):
                 first = True
                 for key in self.feature_keys:
@@ -173,7 +173,7 @@ class Data(object):
         self.__trainY, self.__testY = self._create_label_set(self.label)
         self.trainYorg, self.testYorg = self.__trainY.copy(), self.__testY.copy()
 
-        if True:
+        if False:
             for _ in range(20):
                 label_warped = window_warping(label_values)
                 label = self._prepare_label(label_warped)
