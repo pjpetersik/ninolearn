@@ -52,27 +52,22 @@ nms.computeTimeSeries()
 # =============================================================================
 # =============================================================================
 
-reader = data_reader(startdate='1950-01', enddate='2018-12')
+reader = data_reader(startdate='1980-01', enddate='2018-12')
 
-nwm_daily = reader.read_network_metrics('air_daily',
+nwm_daily = reader.read_statistic('network_metrics', 'air_daily',
                                         dataset='NCEP',
                                         processed='anom')
-nino34 = reader.nino34_anom()
+nino34 = reader.read_csv('nino34')
+wwv = reader.read_csv('wwv')
 
 plt.close("all")
 
+plt.plot(nino34/max(nino34))
+plt.plot(wwv/max(wwv))
+
 plt.figure(figsize=(7, 1.5))
 nwm_daily['fraction_clusters_size_2'].plot(c='k')
-nino_background(nino34)
+nino_background(nino34, nino_treshold=1.)
 
-"""
-'global_transitivity'
-'avelocal_transmissivity'
-'fraction_clusters_size_2'
-'fraction_clusters_size_3'
-'fraction_clusters_size_5'
-'fraction_giant_component'
-'average_path_length'
-'hamming_distance'
-'corrected_hamming_distance'
-"""
+
+

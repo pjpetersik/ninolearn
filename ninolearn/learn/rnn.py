@@ -21,8 +21,58 @@ from keras.callbacks import EarlyStopping
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
+from scipy import interpolate
 
 from ninolearn.IO.read_post import (data_reader, csv_vars)
+
+
+def window_warping(ts, window_size = [3,12] , strength=[0.3, 0.5], amount = 12):
+    """
+    window warping for data augmentation of time series.
+
+    :param ts: the timeseries as a 1D np.ndarray
+
+    :param window_size: Half the size of a window size for the warping.
+
+    :param strength: the strength of the stretching/compressing. Float between
+    0 and 1.
+
+    :param amount: The amount how often a random window of the time series
+    should be warped
+    """
+    assert type(ts) is np.ndarray
+
+    len_ts = len(ts)
+    x = np.arange(len_ts)
+    f = interpolate.interp1d(x, ts)
+    new_ts = np.zeros_like(ts)
+    new_ts[:] = ts
+
+    if type(window_size) == list:
+        ws = np.random.randint(window_size[0], window_size[1])
+    else:
+        ws = window_size
+
+    if type(strength) == list:
+        s = np.random.uniform(strength[0], strength[1])
+    else:
+        s = strength
+
+
+    for _ in range(amount):
+        middle = np.random.randint(ws,len_ts-ws)
+        begin = middle - ws
+        end = middle + ws
+
+        x_middle_shifted = x[middle] + ws * s * np.random.choice([-1,1])
+
+        x1= np.linspace(x[begin], x_middle_shifted, ws, endpoint=False)
+        x2 = np.linspace(x_middle_shifted, x[end], ws)
+
+        new_ts[begin:middle] = f(x1)
+        new_ts[middle:end] = f(x2)
+
+    return new_ts
 
 
 class Data(object):
@@ -69,6 +119,7 @@ class Data(object):
 
         for key in self.feature_keys:
             self.features_df[key] = self._read_wrapper(key)
+
             if first:
                 self.features = self._prepare_feature(key,
                                                       self.features_df[key].values)
@@ -91,9 +142,12 @@ class Data(object):
         dictionary
         """
         self.label_df = self._read_wrapper(key)
-
+        label_warped = window_warping(self.label_df.values)
+        #self.label = self._prepare_label(key, label_warped)#self.label_df.values)
         self.label = self._prepare_label(key, self.label_df.values)
+
         self.n_samples = self.label.shape[0]
+
         self._create_label_set()
 
     def _read_wrapper(self, key):
@@ -316,17 +370,17 @@ class RNNmodel(object):
             if i == 0 and self.n_recurrent > 1:
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
-                               return_sequences=True, activation="relu"))
+                               return_sequences=True))
 
             elif i == (self.n_recurrent - 1):
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                input_shape=(self.window_size, self.n_features),
-                               return_sequences=False, activation="relu"))
+                               return_sequences=False))
 
             else:
                 self.model.add(self.Layers[i](self.n_neurons[i],
                                               return_sequences=True))
-            self.model.add(Dropout(self.Dropout))
+            self.model.add(GaussianNoise(self.Dropout))
 
         for j in np.arange(self.n_recurrent, self.n_layers):
             self.model.add(self.Layers[j](self.n_neurons[j], activation="relu"))

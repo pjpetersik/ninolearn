@@ -66,8 +66,9 @@ class Genome(object):
                 i = np.random.randint(len(mutant_dict[name]))
                 j =  np.random.randint(len(SGinstance.bp_genome[name][0]))
 
-                while SGinstance.bp_genome[name][0][j] in mutant_dict[name]:
-                    j =  np.random.randint(len(SGinstance.bp_genome[name][0]))
+                for _ in range(len(SGinstance.bp_genome[name][0])):
+                    if not SGinstance.bp_genome[name][0][j] in mutant_dict[name]:
+                        j =  np.random.randint(len(SGinstance.bp_genome[name][0]))
 
                 mutant_dict[name][i] = SGinstance.bp_genome[name][0][j]
 

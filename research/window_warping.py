@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import matplotlib.pyplot as plt
 import numpy as np
 from keras.layers import LSTM, GRU, SimpleRNN, Dense
+
+from scipy import interpolate
 
 from ninolearn.learn.rnn import Data, RNNmodel
 from ninolearn.plot.evaluation import (plot_explained_variance,
@@ -39,33 +43,66 @@ data_obj = Data(label_name="nino34", data_pool_dict=pool,
                 window_size=window_size, lead_time=lead_time,
                 startdate='1980-01', train_frac=0.6)
 
-data_obj.load_features(['nino34','wwv'
+data_obj.load_features(['nino34',
                         #'pca1', 'pca2', 'pca3',
                         #  'c3_air', 'c5_air' ,'c2_air',
                         #'S', 'H', 'tau', 'C', 'L'
                         ])
 
-model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[1], Dropout=0.0,
-                 lr=0.02, epochs=50, batch_size=100, es_epochs=200, verbose=2)
+def window_warping(ts, window_size = [3,12] , strength=[0.3, 0.8], amount = 12):
+    """
+    window warping for data augmentation of time series.
 
-model.fit()
-model.predict()
+    :param ts: the timeseries as a 1D np.ndarray
 
-trainRMSE, trainNRMSE = model.get_scores('train')
-testRMSE, testNRMSE = model.get_scores('test')
-shiftRMSE, shiftNRMSE = model.get_scores('shift')
+    :param window_size: Half the size of a window size for the warping.
 
-print('Train Score: %.2f MSE, %.2f NMSE' % (trainRMSE**2, trainNRMSE))
-print('Test Score: %.2f MSE, %.2f NMSE' % (testRMSE**2, testNRMSE))
-print('Shift Score: %.2f MSE, %.2f NMSE' % (shiftRMSE**2, shiftNRMSE))
+    :param strength: the strength of the stretching/compressing. Float between
+    0 and 1.
 
-# %%
+    :param amount: The amount how often a random window of the time series
+    should be warped
+    """
+    assert type(ts) is np.ndarray
+
+    len_ts = len(ts)
+    x = np.arange(len_ts)
+    f = interpolate.interp1d(x, ts)
+    new_ts = np.zeros_like(ts)
+    new_ts[:] = ts
+
+    if type(window_size) == list:
+        ws = np.random.randint(window_size[0], window_size[1])
+    else:
+        ws = window_size
+
+    if type(strength) == list:
+        s = np.random.uniform(strength[0], strength[1])
+    else:
+        s = strength
+
+
+    for _ in range(amount):
+        middle = np.random.randint(ws,len_ts-ws)
+        begin = middle - ws
+        end = middle + ws
+
+        x_middle_shifted = x[middle] + ws * s * np.random.choice([-1,1])
+
+        x1= np.linspace(x[begin], x_middle_shifted, ws, endpoint=False)
+        x2 = np.linspace(x_middle_shifted, x[end], ws)
+
+        new_ts[begin:middle] = f(x1)
+        new_ts[middle:end] = f(x2)
+
+    return new_ts
+
+
+
+a = np.zeros_like(data_obj.label[:,0])
+a[:] = data_obj.label[:,0]
+a_new = window_warping(a)
 
 plt.close("all")
-model.plot_history()
-model.plot_prediction()
-
-plot_explained_variance(model.testY, model.testPredict[:, 0], model.testYtime)
-plt.title(f"Lead time: {model.Data.lead_time} month")
-
-plot_correlations(model.testY, model.testPredict[:, 0], model.testYtime)
+plt.plot(a)
+plt.plot(a_new)

@@ -35,23 +35,24 @@ pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily',
 lead_time = 6
 
 # Define the SuperGenome
-bp_dict = {'window_size': [1, 36],
-           'n_neurons': [5, 50],
+bp_dict = {'window_size': [1, 60],
+           'n_neurons': [1, 50],
            'Dropout': [0.0, 0.5],
-           'lr': [0.00001, 0.001],
+           'lr': [0.0001, 0.1],
            'batch_size': [1, 100],
-           'es_epochs': [5, 50],
-           'features': [['wwv',   'nino34', 'pca1', 'pca2', 'pca3',
-                        'c2_air',  'c3_air', 'c5_air',
-                        'S', 'H', 'tau', 'C', 'L'], 5]}
+           'es_epochs': [50, 200],
+           'features': [['wwv',   'nino34'], 1]}
+#           'features': [['wwv',   'nino34', 'pca1', 'pca2', 'pca3',
+#                        'c2_air',  'c3_air', 'c5_air',
+#                        'S', 'H', 'tau', 'C', 'L'], 5]}
 
 sg = SuperGenome(bp_dict)
 
 # Set the evolution parameters
-population_size = 30
-survivors = 10
-offsprings = 10
-random = 10
+population_size = 15
+survivors = 5
+offsprings = 5
+random = 5
 
 generations = 10
 
@@ -82,7 +83,7 @@ for n in range(generations):
         data_obj.load_features(genome['features'])
 
         model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[n_neurons],
-                         Dropout=Dropout, lr=lr, epochs=500,
+                         Dropout=Dropout, lr=lr, epochs=5000,
                          batch_size=batch_size, es_epochs=es_epochs,
                          verbose=0)
 
@@ -102,9 +103,6 @@ for n in range(generations):
 
         fitness.append(testNRMSE)
         i += 1
-
-        #del model
-        #del data_obj
 
     print("############################")
     print()
