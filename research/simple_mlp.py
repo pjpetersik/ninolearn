@@ -55,13 +55,13 @@ def include_time_lag(X, max_lag=0):
 # =============================================================================
 # #%% read data
 # =============================================================================
-reader = data_reader(startdate='1950-01')
+reader = data_reader(startdate='1980-01')
 
 nino34 = reader.read_csv('nino34')
 len_ts = len(nino34)
 sc = np.sin(np.arange(len_ts)/12*2*np.pi)
 
-#wwv = reader.read_csv('wwv')
+wwv = reader.read_csv('wwv')
 network = reader.read_statistic('network_metrics', variable='air',
                            dataset='NCEP', processed="anom")
 
@@ -94,13 +94,13 @@ pca3_v = pca_v['pca3']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 1
-lead_time = 12
+time_lag = 2
+lead_time = 3
 
 scaler = MinMaxScaler(feature_range=(-1,1))
-feature_unscaled = np.stack((nino34.values, sc, nwt.values,#, c2.values, c3.values, c5.values,
+feature_unscaled = np.stack((nino34.values, wwv.values,sc #, c2.values, c3.values, c5.values,
 #                             S.values, H.values, T.values, C.values, L.values,
-                            pca1_air.values, pca2_air.values, pca3_air.values,
+#                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values
                              ), axis=1)
@@ -140,26 +140,34 @@ model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
 
 es = EarlyStopping(monitor='val_loss',
                           min_delta=0.0,
-                          patience=20,
+                          patience=40,
                           verbose=0, mode='auto')
 
-history = model.fit(trainX, trainy, epochs=500, batch_size=40,verbose=2,
+history = model.fit(trainX, trainy, epochs=500, batch_size=20,verbose=0,
                     shuffle=True, callbacks=[es],
                     validation_data=(testX, testy))
 
 predicty = model.predict(testX)
+
 score = nrmse(testy, predicty[:,0])
 
-print(score)
-
-# =============================================================================
+print(f"NRMSE: {score}")
+corr = np.corrcoef(testy, predicty[:,0])[0,1]
+print(f"R^2: {corr}")
+#%% =============================================================================
 # # plot
 # =============================================================================
 plt.close("all")
-plt.plot(testtimey,testy)
-plt.plot(testtimey,predicty)
+plt.plot(testtimey,predicty, "r")
+from ninolearn.plot.evaluation  import plot_explained_variance
+#for _ in range(100):
+#    predicty = model.predict(np.clip(testX+np.random.uniform(-0.5,0.5, size=testX.shape), -1,1))
+#    plt.plot(testtimey,predicty, "r")
 
+plt.plot(testtimey,testy, "k")
 plt.subplots()
 plt.plot(history.history['val_loss'],label = "val")
 plt.plot(history.history['loss'], label= "train")
 plt.legend()
+
+plot_explained_variance(testy, predicty[:,0], testtimey)
