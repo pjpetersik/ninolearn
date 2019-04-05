@@ -26,7 +26,7 @@ def nino_background(nino_data, nino_treshold=0.8):
             windowmax = abs(nino_data.loc[start_date:end_date]).max()
             sign = nino_color.loc[start_date]
 
-            alpha = (windowmax - nino_treshold)/(ninomax-nino_treshold) * 0.8
+            alpha = (windowmax - nino_treshold)/(ninomax-nino_treshold) * 0.5
 
             if sign > 0:
                 plt.axvspan(start_date, end_date, facecolor='red', alpha=alpha)

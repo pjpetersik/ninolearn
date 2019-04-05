@@ -45,7 +45,7 @@ data_obj.load_features(['nino34', 'wwv',
                         #'S', 'H', 'tau', 'C', 'L'
                         ])
 
-model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[10], Dropout=0.5,
+model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[20], Dropout=0.2,
                  lr=0.005, epochs=100, batch_size=100, es_epochs=50, verbose=2)
 
 model.fit()

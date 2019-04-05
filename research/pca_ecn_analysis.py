@@ -39,8 +39,8 @@ pca_sat.save()
 # =============================================================================
 print_header("Network Metrics")
 
-nms = networkMetricsSeries('sst', 'ERSSTv5', processed="anom",
-                           threshold=0.99, startyear=1948, endyear=2018,
+nms = networkMetricsSeries('air', 'NCEP', processed="anom",
+                           edge_density=0.002, startyear=1948, endyear=2018,
                            window_size=12, lon_min=120, lon_max=280,
                            lat_min=-30, lat_max=30, verbose=1)
 nms.computeTimeSeries()
@@ -52,22 +52,22 @@ nms.computeTimeSeries()
 # =============================================================================
 # =============================================================================
 
-reader = data_reader(startdate='1980-01', enddate='2018-12')
+reader = data_reader(startdate='1950-01', enddate='2018-12')
 
-nwm_daily = reader.read_statistic('network_metrics', 'air_daily',
+nwm_daily = reader.read_statistic('network_metrics', 'air',
                                         dataset='NCEP',
                                         processed='anom')
 nino34 = reader.read_csv('nino34')
-wwv = reader.read_csv('wwv')
+#wwv = reader.read_csv('wwv')
 
 plt.close("all")
 
 plt.plot(nino34/max(nino34))
-plt.plot(wwv/max(wwv))
+#plt.plot(wwv/max(wwv))
 
 plt.figure(figsize=(7, 1.5))
-nwm_daily['fraction_clusters_size_2'].plot(c='k')
-nino_background(nino34, nino_treshold=1.)
+nwm_daily['threshold'].plot(c='k')
+nino_background(nino34, nino_treshold=0.5)
 
 
 
