@@ -64,9 +64,14 @@ class data_reader(object):
 
         self._check_dates(data, f'{filename[:-3]}')
 
-        if variable != 'ssh':
+        if variable != 'ssh' and variable != 'sshg':
             return data.loc[self.startdate:self.enddate,
                             self.lat_max:self.lat_min,
+                            self.lon_min:self.lon_max]
+
+        elif variable == 'sshg':
+            return data.loc[self.startdate:self.enddate,
+                            self.lat_min:self.lat_max,
                             self.lon_min:self.lon_max]
         else:
             return data.loc[self.startdate: self.enddate, :, :].where(
@@ -84,7 +89,7 @@ class data_reader(object):
 
         data = pd.read_csv(join(postdir, filename),
                            index_col=0, parse_dates=True)
-        # self._check_dates(data, "WWV")
+        self._check_dates(data, f"{variable} - {statistic}" )
         return data.loc[self.startdate:self.enddate]
 
     def _check_dates(self, data, name):
@@ -96,7 +101,9 @@ class data_reader(object):
             if self.startdate < data.time.values.min():
                 raise IndexError("The startdate is out of\
                                  bounds for %s data!" % name)
-            if self.enddate > data.time.values.max():
+            if self.enddate > pd.to_datetime(data.time.values.max()) + pd.tseries.offsets.MonthEnd(0):
+                print(data.time.values.max())
+                print(self.enddate)
                 raise IndexError("The enddate is out of\
                                  bounds for %s data!" % name)
 
@@ -110,10 +117,6 @@ class data_reader(object):
 
 
 if __name__ == "__main__":
-    reader = data_reader(startdate="1981-01", enddate='1990-12')
-    nino34 = reader.nino34_anom()
-    # wwv = reader.wwv_anom()
-    # data = reader.read_netcdf('air', 'NCEP','norm')
-
-    nwm = reader.read_network_metrics('air', dataset='NCEP',
-                                      processed='deviation')
+    reader = data_reader(startdate="1981-01", enddate='2018-12',
+                         lon_min=120, lon_max=380, lat_min=-30, lat_max=30)
+    data = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')

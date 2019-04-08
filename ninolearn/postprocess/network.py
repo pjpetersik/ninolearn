@@ -290,9 +290,14 @@ class networkMetricsSeries(object):
         # Correlation matrix
         logger.debug("- Compute Correlation matrix")
 
-        # Numpy
+        # just consider grid points that are finite
         data2Darr = data2Darr[:, np.isfinite(data2Darr).any(axis=0)]
+
         corrcoef = np.corrcoef(data2Darr.T)
+
+        # correlations with std = 0 will have a corrcoef of nan. Therefore,
+        # set NANs to 0
+        corrcoef[np.isnan(corrcoef)] = 0
 
         end = timer()
         elapsed = round(end - start, 1)

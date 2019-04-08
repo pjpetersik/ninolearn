@@ -34,15 +34,16 @@ def season_to_month(season):
 
     return switcher[season]
 
-
-def prep_nino34():
+def prep_nino_seasonal():
     """
     Add a time axis corresponding to the first day of the central month of a
     3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
     some axis.
     """
     print("Prepare Nino3.4 timeseries.")
-    data = read_raw.nino34_anom()
+    index="3.4"
+    period ="S"
+    data = read_raw.nino_anom(index=index, period=period, detrend=False)
 
     df = ({'year': data.YR.values,
            'month': data.SEAS.apply(season_to_month).values,
@@ -52,8 +53,39 @@ def prep_nino34():
     data.index = dti
     data.index.name = 'time'
     data = data.rename(index=str, columns={'ANOM': 'anom'})
-    data.to_csv(join(postdir, 'nino34.csv'))
+    data.to_csv(join(postdir, f'nino{index}{period}.csv'))
 
+def prep_nino_month(index="3.4", detrend=False):
+    """
+    Add a time axis corresponding to the first day of the central month.
+    """
+    print("Prepare monthly Nino3.4 timeseries.")
+    period ="M"
+
+    rawdata = read_raw.nino_anom(index=index, period=period, detrend=detrend)
+    rawdata = rawdata.rename(index=str, columns={'ANOM': 'anomNINO1+2',
+                                                 'ANOM.1': 'anomNINO3',
+                                                 'ANOM.2': 'anomNINO4',
+                                                 'ANOM.3': 'anomNINO3.4'})
+
+    dftime = ({'year': rawdata.YR.values,
+           'month': rawdata.MON.values,
+           'day': rawdata.YR.values/rawdata.YR.values})
+    dti = pd.to_datetime(dftime)
+
+    data = pd.DataFrame(data=rawdata[f"anomNINO{index}"])
+
+    data.index = dti
+    data.index.name = 'time'
+    data = data.rename(index=str, columns={f'anomNINO{index}': 'anom'})
+
+    filename = f"nino{index}{period}"
+
+    if detrend:
+        filename = ''.join(filename, "detrend")
+    filename = ''.join((filename,'.csv'))
+
+    data.to_csv(join(postdir, filename))
 
 def prep_wwv():
     """
@@ -76,5 +108,6 @@ def prep_wwv():
 
 
 if __name__ == "__main__":
-    prep_nino34()
+    prep_nino_seasonal()
     prep_wwv()
+    prep_nino_month()

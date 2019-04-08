@@ -1,4 +1,3 @@
-le
 from ninolearn.download import downloadFileFTP, downloadFileHTTP, unzip_gz
 from ninolearn.private import CMEMS_password, CMEMS_username
 from ninolearn.utils import print_header
@@ -29,7 +28,20 @@ NINO34_dict = {
         'filename': 'nino34.txt'
         }
 
+NINO34detrend_dict = {
+        'url': 'https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/detrend.nino34.ascii.txt',
+        'filename': 'nino34detrend.txt'
+        }
+
+NINOindeces_dict = {
+        'url': 'https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.81-10.ascii',
+        'filename': 'nino_1_4.txt'
+        }
+
+
 downloadFileHTTP(NINO34_dict)
+downloadFileHTTP(NINO34detrend_dict)
+downloadFileHTTP(NINOindeces_dict)
 
 # =============================================================================
 # HadISST1
@@ -66,7 +78,14 @@ for year_int in range(1979, 2014):
         downloadFileFTP(ORAP50_dict, outdir='ssh',
                         username=CMEMS_username, password=CMEMS_password)
 
+GODAS_dict = {'filename': 'sshg.1980.nc',
+              'host': 'ftp.cdc.noaa.gov',
+              'location': '/Datasets/godas/'
+              }
 
+for i in range(1980,2019):
+    GODAS_dict['filename'] = f'sshg.{i}.nc'
+    downloadFileFTP(GODAS_dict, outdir = 'ssh_godas')
 # =============================================================================
 # WWV
 # =============================================================================
@@ -125,14 +144,18 @@ downloadFileFTP(SATmon_dict)
 # =============================================================================
 # =============================================================================
 print_header("Postprocess Data")
-from ninolearn.postprocess.prepare import prep_nino34, prep_wwv
+from ninolearn.postprocess.prepare import prep_nino_seasonal, prep_nino_month, prep_wwv
 
-prep_nino34()
+prep_nino_seasonal()
+prep_nino_month(index="3.4")
+prep_nino_month(index="3")
+prep_nino_month(index="1+2")
+prep_nino_month(index="4")
 prep_wwv()
 
 from ninolearn.IO import read_raw
 from ninolearn.postprocess.anomaly import postprocess
-
+from ninolearn.postprocess.regrid import to2_5x2_5
 # postprocess sst data from ERSSTv5
 sst_ERSSTv5 = read_raw.sst_ERSSTv5()
 postprocess(sst_ERSSTv5)
@@ -158,3 +181,8 @@ postprocess(sat_daily)
 # postprocess ssh values from ORAP5
 ssh = read_raw.ssh()
 postprocess(ssh)
+
+#%% post process values from GODAS
+ssh_godas = read_raw.ssh_godas()
+ssh_godas_regrid = to2_5x2_5(ssh_godas)
+postprocess(ssh_godas_regrid)

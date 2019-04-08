@@ -12,6 +12,33 @@ def nino34_anom():
     data = pd.read_csv(join(rawdir, "nino34.txt"), delim_whitespace=True)
     return data
 
+def nino_anom(index="3.4", period ="S", detrend=False):
+    """
+    read various Nino indeces from the raw directory
+    """
+    try:
+        if period == "S":
+            if index == "3.4" and not detrend:
+                data = pd.read_csv(join(rawdir, "nino34.txt"),
+                                   delim_whitespace=True)
+            else:
+                msg = "Only not detrended Nino3.4 index is available for seasonal records"
+                raise Exception(msg)
+
+
+        elif period == "M":
+            if detrend and index == "3.4":
+                data = pd.read_csv(join(rawdir, "nino34detrend.txt"),
+                               delim_whitespace=True)
+            elif not detrend:
+                data = pd.read_csv(join(rawdir, "nino_1_4.txt"),
+                                           delim_whitespace=True)
+
+        return data
+
+    except UnboundLocalError:
+        raise Exception("The desired NINO index is not available.")
+
 
 def wwv_anom():
     """
@@ -97,3 +124,10 @@ def ssh():
     data_return.attrs['dataset'] = 'ORAP5'
     data_return.name = 'ssh'
     return data_return
+
+def ssh_godas():
+    data = xr.open_mfdataset(join(rawdir, 'ssh_godas', '*.nc'),
+                             concat_dim='time')
+    data = data.load()
+    data.sshg.attrs['dataset'] = 'GODAS'
+    return data.sshg

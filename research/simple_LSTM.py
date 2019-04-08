@@ -32,8 +32,8 @@ pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily',
         'pca3': ['pca', 'pca2', 'uwnd', 'anom', 'NCEP'],
         }
 
-window_size = 1
-lead_time = 6
+window_size = 2
+lead_time = 12
 
 data_obj = Data(label_name="nino34", data_pool_dict=pool,
                 window_size=window_size, lead_time=lead_time,
@@ -41,12 +41,12 @@ data_obj = Data(label_name="nino34", data_pool_dict=pool,
 
 data_obj.load_features(['nino34', 'wwv',
                         #'pca1', 'pca2', 'pca3',
-                        # 'c3_air', 'c5_air' ,'c2_air',
+                         'c3_air', 'c5_air' ,'c2_air',
                         #'S', 'H', 'tau', 'C', 'L'
                         ])
 
 model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[20], Dropout=0.2,
-                 lr=0.005, epochs=100, batch_size=100, es_epochs=50, verbose=2)
+                 lr=0.001, epochs=500, batch_size=20, es_epochs=20, verbose=0)
 
 model.fit()
 model.predict()

@@ -110,13 +110,27 @@ def plot_confMat(y, pred, labels):
 # =============================================================================
 # #%% read data
 # =============================================================================
-reader = data_reader(startdate="1950-01")
+reader = data_reader(startdate="1981-01")
 
-nino34 = reader.read_csv('nino34')
+nino4 = reader.read_csv('nino4M')
+nino34 = reader.read_csv('nino3.4M')
+nino12 = reader.read_csv('nino1+2M')
+nino3 = reader.read_csv('nino3M')
 
-#wwv = reader.read_csv('wwv')
-network = reader.read_statistic('network_metrics', variable='air',
+len_ts = len(nino34)
+sc = np.cos(np.arange(len_ts)/12*2*np.pi)
+yr =  np.arange(len_ts) % 12
+yr3 = np.arange(len_ts) % 36
+yr4 = np.arange(len_ts) % 48
+yr5 = np.arange(len_ts) % 60
+
+
+wwv = reader.read_csv('wwv')
+network = reader.read_statistic('network_metrics', variable='air_daily',
                            dataset='NCEP', processed="anom")
+
+network_ssh = reader.read_statistic('network_metrics', variable='sshg',
+                           dataset='GODAS', processed="anom")
 
 pca_air = reader.read_statistic('pca', variable='air',
                            dataset='NCEP', processed="anom")
@@ -145,11 +159,13 @@ pca1_v = pca_v['pca1']
 pca2_v = pca_v['pca2']
 pca3_v = pca_v['pca3']
 
+c2ssh = network_ssh['fraction_clusters_size_2']
+
 #%% =============================================================================
 # # process data
 # =============================================================================
 time_lag = 6
-lead_time = 6
+lead_time = 12
 #classes = 3
 threshold = 0.5
 class_labels = ['La nina', 'Neutral','El Nino']
@@ -157,11 +173,12 @@ class_labels = ['La nina', 'Neutral','El Nino']
 #class_labels = ['Strong La nina', 'Weak La nina',
                 #'Neutral','Weak El Nino', 'Strong El Nino']
 
-feature_unscaled = np.stack((nino34.values, nwt.values, #c2.values, c3.values, c5.values,
-                             S.values, H.values, T.values, C.values, L.values,
-                             pca1_air.values, pca2_air.values, pca3_air.values,
-                             pca1_u.values, pca2_u.values, pca3_u.values,
-                             pca1_v.values, pca2_v.values, pca3_v.values
+feature_unscaled = np.stack((nino34.values, nino12.values , nino3.values, nino4.values,
+                             wwv.values, sc,  c2ssh.values, #yr # nwt.values#, c2.values, ,c3.values, c5.values,
+#                             S.values, H.values, T.values, C.values, L.values,
+#                            pca1_air.values, pca2_air.values, pca3_air.values,
+#                             pca1_u.values, pca2_u.values, pca3_u.values,
+#                             pca1_v.values, pca2_v.values, pca3_v.values
                              ), axis=1)
 
 scaler = MinMaxScaler(feature_range=(-1,1))
@@ -193,9 +210,9 @@ nino34trainy, nino34testy = nino34y[:train_end], nino34y[train_end:]
 # =============================================================================
 model = Sequential()
 
-model.add(Dense(32, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1(0.003)))
+model.add(Dense(32, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l2(0.005)))
 model.add(Dropout(0.2))
-model.add(Dense(16, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1(0.003)))
+model.add(Dense(16, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l2(0.005)))
 model.add(Dropout(0.2))
 model.add(Dense(3, activation='softmax'))
 
@@ -206,7 +223,7 @@ model.compile(loss="sparse_categorical_crossentropy", optimizer="adam",
 
 es = EarlyStopping(monitor='val_acc',
                           min_delta=0.0,
-                          patience=20,
+                          patience=40,
                           verbose=0, mode='auto')
 
 history = model.fit(trainX, trainy, epochs=250, batch_size=20,verbose=0,
