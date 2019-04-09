@@ -6,7 +6,8 @@ import gc
 from ninolearn.pathes import postdir
 from ninolearn.utils import generateFileName
 
-csv_vars = ['nino34', 'wwv']
+#TODO: Write a routine that generates this list
+csv_vars = ['nino3.4M','nino3.4S', 'wwv']
 
 
 class data_reader(object):
