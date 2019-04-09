@@ -80,12 +80,12 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 12
-lead_time = 5
+time_lag = 6
+lead_time = 6
 train_frac = 0.7
 feature_unscaled = np.stack((nino34.values,c2ssh.values, # nino12.values , nino3.values, nino4.values,
                              wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
-                            S.values, H.values, T.values, C.values, L.values,
+#                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values
@@ -121,23 +121,73 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 # =============================================================================
 model = Sequential()
 
-model.add(Dense(32, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l2(0.005)))
-model.add(Dropout(0.2))
-model.add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l2(0.005)))
-model.add(Dropout(0.2))
+model.add(Dense(16, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
 model.add(Dense(2, activation='linear'))
 
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
+def nll_gaussian(y_true, y_pred):
+    """
+    Negative - log -likelihood
+    """
+    first  =  0.5 * K.log(K.square(y_pred[:,1]))
+    second =  K.square(y_pred[:,0] - y_true[:,0]) / (2  * K.square(y_pred[:,1]))
+    summed = first + second
 
-# TODO: Write a loss function that optimizes the NN based on a PDF function
-model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
+    nll =  K.mean(summed, axis=-1)
+
+    return nll
+
+model.compile(loss=nll_gaussian, optimizer=optimizer)
 
 es = EarlyStopping(monitor='val_loss',
                           min_delta=0.0,
-                          patience=20,
+                          patience=50,
                           verbose=0, mode='auto')
 
-history = model.fit(trainX, trainy, epochs=500, batch_size=20,verbose=1,
+history = model.fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                     shuffle=True, callbacks=[es],
                     validation_data=(testX, testy))
+
+predicty = model.predict(testX)
+predicttrainy = model.predict(trainX)
+predictfuturey = model.predict(futureX)
+
+
+
+#%% =============================================================================
+# Plot
+# =============================================================================
+plt.close("all")
+plt.subplots()
+plt.plot(history.history['val_loss'],label = "val")
+plt.plot(history.history['loss'], label= "train")
+plt.legend()
+
+
+plt.subplots(figsize=(12,4))
+std = 1
+predicty_max = predicty[:,0] + std * np.abs(predicty[:,1])
+predicty_min = predicty[:,0] - std * np.abs(predicty[:,1])
+
+plt.plot(testtimey,predicty[:,0], "b")
+plt.fill_between(testtimey,predicty_min,predicty_max ,facecolor='blue', alpha=0.3)
+
+
+predicttrainy_max = predicttrainy[:,0] + std * np.abs(predicttrainy[:,1])
+predicttrainy_min = predicttrainy[:,0] - std * np.abs(predicttrainy[:,1])
+
+plt.plot(traintimey, predicttrainy[:,0], "lime")
+plt.fill_between(traintimey,predicttrainy_min,predicttrainy_max ,facecolor='lime', alpha=0.3)
+
+plt.plot(timey, y, "k")
+
+in_or_out = np.zeros((len(predicty)))
+in_or_out[(testy>predicty_min) & (testy<predicty_max)] = 1
+in_frac = np.sum(in_or_out)/len(testy)
+
+in_or_out_train = np.zeros((len(predicttrainy)))
+in_or_out_train[(trainy>predicttrainy_min) & (trainy<predicttrainy_max)] = 1
+in_frac_train = np.sum(in_or_out_train)/len(trainy)
+
+plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%")
