@@ -81,11 +81,11 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 2
-lead_time = 3
+time_lag = 6
+lead_time = 12
 train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, #c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
+feature_unscaled = np.stack((nino34.values, c2ssh.values,  #nino12.values , nino3.values, nino4.values,
+                             wwv.values, #sc,   yr ,#nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
@@ -122,10 +122,14 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 # =============================================================================
 model = Sequential()
 
-model.add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.1,0.1)))
+model.add(Dense(32, input_dim=X.shape[1],activation='relu',
+                kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
+model.add(Dropout(0.2))
+model.add(Dense(8, input_dim=X.shape[1],activation='relu',
+                kernel_regularizer=regularizers.l1_l2(0.00,0.001)))
 model.add(Dense(2, activation='linear'))
 
-optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
 
 
 model.compile(loss=nll_gaussian, optimizer=optimizer)
@@ -133,7 +137,8 @@ model.compile(loss=nll_gaussian, optimizer=optimizer)
 es = EarlyStopping(monitor='val_loss',
                           min_delta=0.0,
                           patience=20,
-                          verbose=0, mode='auto')
+                          verbose=0, mode='auto',
+                          restore_best_weights=True)
 
 history = model.fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                     shuffle=True, callbacks=[es],
@@ -180,4 +185,7 @@ in_or_out_train = np.zeros((len(predicttrainy)))
 in_or_out_train[(trainy>predicttrainy_min) & (trainy<predicttrainy_max)] = 1
 in_frac_train = np.sum(in_or_out_train)/len(trainy)
 
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%")
+pred_nrmse = round(nrmse(testy, predicty[:,0]),2)
+
+plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%, NRMSE (of mean): {pred_nrmse}")
+

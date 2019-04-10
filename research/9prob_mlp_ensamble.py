@@ -18,12 +18,13 @@ from sklearn.preprocessing import MinMaxScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
-from ninolearn.learn.evaluation import nrmse
+from ninolearn.learn.evaluation import nrmse, rmse
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
+from ninolearn.utils import print_header
 K.clear_session()
 
-# =============================================================================
+#%% =============================================================================
 # #%% read data
 # =============================================================================
 reader = data_reader(startdate='1981-01')
@@ -80,10 +81,10 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 2
-lead_time = 3
+time_lag = 3
+lead_time = 12
 train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, #c2ssh.values, # nino12.values , nino3.values, nino4.values,
+feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
                              wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
@@ -120,27 +121,38 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 # # neural network
 # =============================================================================
 
-n_ens = 10
+n_ens = 3
 model_ens = []
 optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
                               patience=20,
-                              verbose=0, mode='auto')
-for i in range(n_ens):
+                              verbose=0,
+                              mode='min',
+                              restore_best_weights=True)
+n_ens_sel = 0
+while n_ens_sel<n_ens:
     model_ens.append(Sequential())
 
-    model_ens[i].add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.1,0.1)))
-    model_ens[i].add(Dense(2, activation='linear'))
+    model_ens[-1].add(Dense(8, input_dim=X.shape[1],activation='relu',
+                            kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
+    model_ens[-1].add(Dense(2, activation='linear'))
 
-    model_ens[i].compile(loss=nll_gaussian, optimizer=optimizer)
+    model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
 
-    history = model_ens[i].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
+    history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
                         validation_data=(testX, testy))
 
 
+    mem_pred = model_ens[-1].predict(trainX)
+    mem_std = np.abs(mem_pred[:,1])
 
+    if mem_std.mean() > trainy.std():
+        print_header("Pop this model.")
+        model_ens.pop()
+
+    n_ens_sel = len(model_ens)
 #%%
 def mixture(pred):
     """
@@ -153,11 +165,11 @@ def mixture(pred):
 
 
 
-pred_ens = np.zeros((len(testy),2, n_ens))
-predtrain_ens = np.zeros((len(trainy),2, n_ens))
-predfuture_ens = np.zeros((lead_time,2, n_ens))
+pred_ens = np.zeros((len(testy),2, n_ens_sel))
+predtrain_ens = np.zeros((len(trainy),2, n_ens_sel))
+predfuture_ens = np.zeros((lead_time,2, n_ens_sel))
 
-for i in range(n_ens):
+for i in range(n_ens_sel):
     pred_ens[:,:,i] = model_ens[i].predict(testX)
     predtrain_ens[:,:,i] = model_ens[i].predict(trainX)
     predfuture_ens[:,:,i] = model_ens[i].predict(futureX)
@@ -179,24 +191,45 @@ plt.legend()
 
 
 
-plt.subplots(figsize=(12,4))
+plt.subplots(figsize=(15,3.5))
+plt.axhspan(-0.5,
+            -6,
+            facecolor='blue',
+            alpha=0.15,zorder=0)
 
+plt.axhspan(0.5,
+            6,
+            facecolor='red',
+            alpha=0.15,zorder=0)
 
-std = 1
+plt.xlim(timey[0],futuretime[-1])
+plt.ylim(-3,3)
+
+std = 2.
+
+# test
 predicty_max = pred_mean + std * np.abs(pred_std)
 predicty_min = pred_mean - std * np.abs(pred_std)
 
+
+plt.fill_between(testtimey,predicty_min,predicty_max , facecolor='aqua', alpha=0.5)
 plt.plot(testtimey,pred_mean, "b")
-plt.fill_between(testtimey,predicty_min,predicty_max ,facecolor='blue', alpha=0.3)
 
-
-
-
+# train
 predicttrainy_max = predtrain_mean + std * np.abs(predtrain_std)
 predicttrainy_min = predtrain_mean - std * np.abs(predtrain_std)
 
-plt.plot(traintimey, predtrain_mean, "lime")
-plt.fill_between(traintimey,predicttrainy_min,predicttrainy_max ,facecolor='lime', alpha=0.3)
+plt.plot(traintimey, predtrain_mean, "g")
+plt.fill_between(traintimey,predicttrainy_min,predicttrainy_max ,facecolor='lime', alpha=0.5)
+
+# future
+predictfuturey_max = predfuture_mean + std * np.abs(predfuture_std)
+predictfuturey_min = predfuture_mean - std * np.abs(predfuture_std)
+
+plt.fill_between(futuretime, predictfuturey_min, predictfuturey_max , facecolor='orange', alpha=0.5)
+plt.plot(futuretime, predfuture_mean, "darkorange")
+
+
 
 plt.plot(timey, y, "k")
 
@@ -208,4 +241,7 @@ in_or_out_train = np.zeros((len(predtrain_mean)))
 in_or_out_train[(trainy>predicttrainy_min) & (trainy<predicttrainy_max)] = 1
 in_frac_train = np.sum(in_or_out_train)/len(trainy)
 
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%")
+pred_nrmse = round(nrmse(testy, pred_mean),2)
+
+plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%, NRMSE (of mean): {pred_nrmse}")
+plt.grid()
