@@ -20,6 +20,7 @@ from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
 from ninolearn.learn.evaluation import nrmse
 from ninolearn.learn.mlp import include_time_lag
+from ninolearn.learn.losses import nll_gaussian
 
 K.clear_session()
 
@@ -80,10 +81,10 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 6
-lead_time = 6
+time_lag = 2
+lead_time = 3
 train_frac = 0.7
-feature_unscaled = np.stack((nino34.values,c2ssh.values, # nino12.values , nino3.values, nino4.values,
+feature_unscaled = np.stack((nino34.values, #c2ssh.values, # nino12.values , nino3.values, nino4.values,
                              wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
@@ -121,28 +122,17 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 # =============================================================================
 model = Sequential()
 
-model.add(Dense(16, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
+model.add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.1,0.1)))
 model.add(Dense(2, activation='linear'))
 
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
-def nll_gaussian(y_true, y_pred):
-    """
-    Negative - log -likelihood
-    """
-    first  =  0.5 * K.log(K.square(y_pred[:,1]))
-    second =  K.square(y_pred[:,0] - y_true[:,0]) / (2  * K.square(y_pred[:,1]))
-    summed = first + second
-
-    nll =  K.mean(summed, axis=-1)
-
-    return nll
 
 model.compile(loss=nll_gaussian, optimizer=optimizer)
 
 es = EarlyStopping(monitor='val_loss',
                           min_delta=0.0,
-                          patience=50,
+                          patience=20,
                           verbose=0, mode='auto')
 
 history = model.fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
