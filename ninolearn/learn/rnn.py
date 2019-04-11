@@ -221,7 +221,7 @@ class Data(object):
         """
         dataTime = []
         for i in range(len(time) - self.window_size - self.lead_time + 1):
-            dataTime.append(time[i + self.window_size - 1])
+            dataTime.append(time[i + self.window_size + self.lead_time - 1])
         return pd.to_datetime(dataTime)
 
     def _create_feature_set(self, features):
@@ -359,22 +359,22 @@ class RNNmodel(object):
 
         for i in range(self.n_recurrent):
             if i == 0 and self.n_recurrent > 1:
-                self.model.add(self.Layers[i](self.n_neurons[i],
+                self.model.add(self.Layers[i](self.n_neurons[i], activation="tanh",
                                input_shape=(self.window_size, self.n_features),
                                return_sequences=True))
 
             elif i == (self.n_recurrent - 1):
-                self.model.add(self.Layers[i](self.n_neurons[i],
+                self.model.add(self.Layers[i](self.n_neurons[i], activation="tanh",
                                input_shape=(self.window_size, self.n_features),
                                return_sequences=False))
 
             else:
-                self.model.add(self.Layers[i](self.n_neurons[i],
+                self.model.add(self.Layers[i](self.n_neurons[i], activation="tanh",
                                               return_sequences=True))
             self.model.add(Dropout(self.Dropout))
 
         for j in np.arange(self.n_recurrent, self.n_layers):
-            self.model.add(self.Layers[j](self.n_neurons[j], activation="relu"))
+            self.model.add(self.Layers[j](self.n_neurons[j], activation="tanh"))
 
         self.model.add(Dense(1, activation="linear"))
 
@@ -458,9 +458,7 @@ class RNNmodel(object):
         plt.legend()
 
     def plot_prediction(self):
-        """
-        P
-        """
+
         # shift train predictions for plotting
         trainPredictPlot = np.empty_like(self.Data.label)
         trainPredictPlot[:, :] = np.nan

@@ -12,6 +12,8 @@ pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily',
                    'anom', 'NCEP'],
         'c5_air': ['network_metrics', 'fraction_clusters_size_5', 'air_daily',
                    'anom', 'NCEP'],
+        'c2_ssh': ['network_metrics', 'fraction_clusters_size_2', 'sshg',
+                   'anom', 'GODAS'],
         'tau': ['network_metrics', 'global_transitivity', 'air_daily', 'anom',
                 'NCEP'],
         'C': ['network_metrics', 'avelocal_transmissivity', 'air_daily',
@@ -25,28 +27,28 @@ pool = {'c2_air': ['network_metrics', 'fraction_clusters_size_2', 'air_daily',
         'Hstar': ['network_metrics', 'corrected_hamming_distance', 'air_daily',
                   'anom',
                   'NCEP'],
-        'nino34': [None, None, 'nino34', 'anom', None],
+        'nino34': [None, None, 'nino3.4M', 'anom', None],
         'wwv': [None, None, 'wwv', 'anom', None],
         'pca1': ['pca', 'pca1', 'air', 'anom', 'NCEP'],
         'pca2': ['pca', 'pca2', 'vwnd', 'anom', 'NCEP'],
         'pca3': ['pca', 'pca2', 'uwnd', 'anom', 'NCEP'],
         }
 
-window_size = 2
-lead_time = 12
+window_size = 4
+lead_time = 6
 
 data_obj = Data(label_name="nino34", data_pool_dict=pool,
                 window_size=window_size, lead_time=lead_time,
-                startdate='1980-01', train_frac=0.6)
+                startdate='1981-01', train_frac=0.67)
 
-data_obj.load_features(['nino34', 'wwv',
+data_obj.load_features(['nino34', 'wwv', 'c2_ssh'
                         #'pca1', 'pca2', 'pca3',
-                         'c3_air', 'c5_air' ,'c2_air',
+                        # 'c3_air', 'c5_air' ,'c2_air',
                         #'S', 'H', 'tau', 'C', 'L'
                         ])
 
-model = RNNmodel(data_obj, Layers=[LSTM], n_neurons=[20], Dropout=0.2,
-                 lr=0.001, epochs=500, batch_size=20, es_epochs=20, verbose=0)
+model = RNNmodel(data_obj, Layers=[SimpleRNN,SimpleRNN], n_neurons=[32,8], Dropout=0.2,
+                 lr=0.0001, epochs=500, batch_size=2, es_epochs=20, verbose=1)
 
 model.fit()
 model.predict()
@@ -68,4 +70,4 @@ model.plot_prediction()
 plot_explained_variance(model.Data.testYorg, model.testPredict[:, 0], model.testYtime)
 plt.title(f"Lead time: {model.Data.lead_time} month")
 
-plot_correlations(model.Data.testYorg, model.testPredict[:, 0], model.testYtime)
+#plot_correlations(model.Data.testYorg, model.testPredict[:, 0], model.testYtime)

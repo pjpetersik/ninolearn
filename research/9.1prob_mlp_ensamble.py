@@ -14,14 +14,16 @@ from keras.callbacks import EarlyStopping
 from keras import regularizers
 from keras.layers.core import Lambda
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler,StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
 from ninolearn.learn.evaluation import nrmse, rmse
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
+from ninolearn.learn.augment import window_warping
 from ninolearn.utils import print_header
+
 K.clear_session()
 
 #%% =============================================================================
@@ -81,17 +83,16 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 3
-lead_time = 12
+time_lag = 6
+lead_time = 6
 train_frac = 0.7
 feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
+                             wwv.values, # sc #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values
                              ), axis=1)
-
 
 scaler = MinMaxScaler(feature_range=(-1,1))
 Xorg = scaler.fit_transform(feature_unscaled)
@@ -120,10 +121,20 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 #%% =============================================================================
 # # neural network
 # =============================================================================
+def inside_fraction(ytrue, ypred_mean, y_std, std_level=1):
+    ypred_max = ypred_mean + y_std * std_level
+    ypred_min = ypred_mean - y_std * std_level
 
-n_ens = 3
+    in_or_out = np.zeros((len(ypred_mean)))
+    in_or_out[(ytrue>ypred_min) & (ytrue<ypred_max)] = 1
+    in_frac = np.sum(in_or_out)/len(ytrue)
+    return in_frac
+
+n_ens = 1
 model_ens = []
+
 optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
                               patience=20,
@@ -131,14 +142,20 @@ es = EarlyStopping(monitor='val_loss',
                               mode='min',
                               restore_best_weights=True)
 n_ens_sel = 0
+
 while n_ens_sel<n_ens:
     model_ens.append(Sequential())
 
+    model_ens[-1].add(Dense(32, input_dim=X.shape[1],activation='relu',
+                            kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
+    model_ens[-1].add(Dropout(0.2))
     model_ens[-1].add(Dense(8, input_dim=X.shape[1],activation='relu',
                             kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
     model_ens[-1].add(Dense(2, activation='linear'))
 
     model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
+
+    print_header("Train")
 
     history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
@@ -146,10 +163,21 @@ while n_ens_sel<n_ens:
 
 
     mem_pred = model_ens[-1].predict(trainX)
+    mem_mean = mem_pred[:,0]
     mem_std = np.abs(mem_pred[:,1])
 
-    if mem_std.mean() > trainy.std():
-        print_header("Pop this model.")
+    in_frac = inside_fraction(trainy, mem_mean, mem_std)
+
+    if in_frac > 0.8 or in_frac < 0.55:
+        print_header("Reject this model. Unreasonable stds.")
+        model_ens.pop()
+
+    elif rmse(trainy, mem_mean)>0.8:
+        print_header("Reject this model. Unreasonalble rmse")
+        model_ens.pop()
+
+    elif np.min(history.history["loss"])>1:
+        print_header("Reject this model. High minimum loss.")
         model_ens.pop()
 
     n_ens_sel = len(model_ens)
@@ -162,7 +190,6 @@ def mixture(pred):
     mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
     mix_std = np.sqrt(mix_var)
     return mix_mean, mix_std
-
 
 
 pred_ens = np.zeros((len(testy),2, n_ens_sel))
@@ -205,7 +232,7 @@ plt.axhspan(0.5,
 plt.xlim(timey[0],futuretime[-1])
 plt.ylim(-3,3)
 
-std = 2.
+std = 1.
 
 # test
 predicty_max = pred_mean + std * np.abs(pred_std)

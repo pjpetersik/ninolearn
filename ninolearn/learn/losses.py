@@ -11,9 +11,8 @@ def nll_gaussian(y_true, y_pred):
     second =  K.square(mean - y_true[:,0]) / (2  * K.square(sigma))
     summed = first + second
 
-    nll =  K.mean(summed, axis=-1)
-    return nll
-
+    loss =  K.mean(summed, axis=-1)
+    return loss
 
 def nll_skew_gaussian(ytrue, pred):
     """

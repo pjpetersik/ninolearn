@@ -126,7 +126,7 @@ model.add(Dense(32, input_dim=X.shape[1],activation='relu',
                 kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
 model.add(Dropout(0.2))
 model.add(Dense(8, input_dim=X.shape[1],activation='relu',
-                kernel_regularizer=regularizers.l1_l2(0.00,0.001)))
+                kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
 model.add(Dense(2, activation='linear'))
 
 optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
