@@ -80,10 +80,10 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 3
-lead_time = 6
+time_lag = 12
+lead_time = 12
 train_frac = 0.67
-feature_unscaled = np.stack((nino34.values,c2ssh.values, # nino12.values , nino3.values, nino4.values,
+feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
                              wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
@@ -121,22 +121,24 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 # =============================================================================
 model = Sequential()
 
-model.add(Dense(32, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+model.add(Dense(32, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.00,0.01)))
 model.add(Lambda(lambda x: K.dropout(x, level=0.2)))
-model.add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+#model.add(Dropout(0.2))
+model.add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.00,0.01)))
 model.add(Lambda(lambda x: K.dropout(x, level=0.2)))
-model.add(Dropout(0.2))
+#model.add(Dropout(0.2))
 model.add(Dense(1, activation='linear'))
 
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 
 model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
 
 es = EarlyStopping(monitor='val_loss',
                           min_delta=0.0,
-                          patience=20,
-                          verbose=0, mode='auto')
+                          patience=10,
+                          verbose=0, mode='auto',
+                          restore_best_weights=True)
 
 history = model.fit(trainX, trainy, epochs=500, batch_size=20,verbose=1,
                     shuffle=True, callbacks=[es],
@@ -158,7 +160,7 @@ print(f"R^2: {corr}")
 # =============================================================================
 plt.close("all")
 plot_explained_variance(testy, predicty[:,0], testtimey)
-
+plt.title(f"{lead_time}-month lead time")
 plt.subplots()
 plt.plot(history.history['val_loss'],label = "val")
 plt.plot(history.history['loss'], label= "train")
@@ -166,7 +168,7 @@ plt.legend()
 
 plt.subplots(figsize=(12,4))
 
-n_ens = 10000
+n_ens = 1000
 
 predict_ens = np.zeros((len(predicty),n_ens))
 in_or_out = np.zeros((len(predicty)))
@@ -181,7 +183,7 @@ predicty_mean = predict_ens.mean(axis=1)
 in_or_out[(testy>predicty_min) & (testy<predicty_max)] = 1
 in_frac = np.sum(in_or_out)/len(testy)
 
-plt.title(f"{round(in_frac,2)*100}%")
+plt.title(f"{lead_time}-month lead time, NRMSE:{round(score,2)}, r^2:{round(corr,2)}, inside uncertainty: {round(in_frac*100,2)}%")
 
 plt.plot(testtimey,predicty_mean, "b")
 plt.fill_between(testtimey,predicty_min,predicty_max ,facecolor='blue', alpha=0.3)

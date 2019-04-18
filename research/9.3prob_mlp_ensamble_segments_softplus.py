@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import keras.backend as K
-from keras.models import Sequential
-from keras.layers import Dense
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input, concatenate
 from keras.layers import LSTM
 from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
@@ -84,10 +84,10 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 # # process data
 # =============================================================================
 time_lag = 6
-lead_time = 18
+lead_time = 6
 train_frac = 0.7
 feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values,  sc #yr # nwt.values#, c2.values,c3.values, c5.values,
+                             wwv.values,  #sc #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
@@ -133,7 +133,7 @@ def inside_fraction(ytrue, ypred_mean, y_std, std_level=1):
 n_ens = 1
 model_ens = []
 
-optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
@@ -144,19 +144,26 @@ es = EarlyStopping(monitor='val_loss',
 n_ens_sel = 0
 
 while n_ens_sel<n_ens:
-    model_ens.append(Sequential())
 
-    model_ens[-1].add(Dense(32, input_dim=X.shape[1],activation='relu',
-                            kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
-    #model_ens[-1].add(Dropout(0.2))
-    model_ens[-1].add(Dense(8, input_dim=X.shape[1],activation='relu',
-                            kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
-    model_ens[-1].add(Dense(2, activation='linear'))
+    # define the model
+    inputs = Input(shape=(trainX.shape[1],))
+    h = Dense(8, activation='relu',
+              kernel_regularizer=regularizers.l1_l2(0.01,0.2))(inputs)
+#    h = Dropout(0.2)(h)
+#    h = Dense(8, input_dim=X.shape[1],activation='relu',
+#                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
 
+    mu = Dense(1, activation='linear')(h)
+    sigma = Dense(1, activation='softplus')(h)
+
+    outputs = concatenate([mu, sigma])
+
+    model_ens.append(Model(inputs=inputs, outputs=outputs))
     model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
 
-    print_header("Train")
 
+
+    print_header("Train")
     history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
                         validation_data=(testX, testy))
@@ -220,12 +227,12 @@ plt.subplots(figsize=(15,3.5))
 plt.axhspan(-0.5,
             -6,
             facecolor='blue',
-            alpha=0.15,zorder=0)
+            alpha=0.1,zorder=0)
 
 plt.axhspan(0.5,
             6,
             facecolor='red',
-            alpha=0.15,zorder=0)
+            alpha=0.1,zorder=0)
 
 plt.xlim(timey[0],futuretime[-1])
 plt.ylim(-3,3)
@@ -239,9 +246,9 @@ predicty_p2std = pred_mean + 2 * np.abs(pred_std)
 predicty_m2std = pred_mean - 2 * np.abs(pred_std)
 
 
-plt.fill_between(testtimey,predicty_m1std, predicty_p1std , facecolor='aqua', alpha=0.5)
-plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='aqua', alpha=0.2)
-plt.plot(testtimey,pred_mean, "b")
+plt.fill_between(testtimey,predicty_m1std, predicty_p1std , facecolor='royalblue', alpha=0.7)
+plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='royalblue', alpha=0.3)
+plt.plot(testtimey,pred_mean, "navy")
 
 # train
 predicttrainy_p1std = predtrain_mean +  np.abs(predtrain_std)
@@ -259,8 +266,8 @@ predictfuturey_m1std = predfuture_mean - np.abs(predfuture_std)
 predictfuturey_p2std = predfuture_mean + 2 * np.abs(predfuture_std)
 predictfuturey_m2std = predfuture_mean - 2 * np.abs(predfuture_std)
 
-plt.fill_between(futuretime, predictfuturey_m1std, predictfuturey_p1std , facecolor='orange', alpha=0.5)
-plt.fill_between(futuretime, predictfuturey_m2std, predictfuturey_p2std , facecolor='orange', alpha=0.2)
+plt.fill_between(futuretime, predictfuturey_m1std, predictfuturey_p1std , facecolor='orange', alpha=0.7)
+plt.fill_between(futuretime, predictfuturey_m2std, predictfuturey_p2std , facecolor='orange', alpha=0.3)
 plt.plot(futuretime, predfuture_mean, "darkorange")
 
 

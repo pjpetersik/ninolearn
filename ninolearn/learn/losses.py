@@ -14,8 +14,22 @@ def nll_gaussian(y_true, y_pred):
     loss =  K.mean(summed, axis=-1)
     return loss
 
-def nll_skew_gaussian(ytrue, pred):
+def l_uniform(ytrue, pred):
     """
     TO BE DONE
     """
-    pass
+    mu = pred[:,0]
+    w = pred[:,1]
+
+    a = mu - w
+    b = mu + w
+
+    comparison1 = K.less_equal(a, ytrue[:,0])
+    comparison2 = K.greater_equal(b, ytrue[:,0])
+
+    comparison = K.stack([comparison1,comparison2], axis=0)
+
+    loss =  K.switch(K.all(comparison, axis=0), 1/(2*w), a * 0.)
+
+    return  -loss
+

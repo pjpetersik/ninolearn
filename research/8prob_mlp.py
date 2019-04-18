@@ -81,10 +81,10 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 6
-lead_time = 12
+time_lag = 1
+lead_time = 3
 train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, c2ssh.values,  #nino12.values , nino3.values, nino4.values,
+feature_unscaled = np.stack((nino34.values, #c2ssh.values,  #nino12.values , nino3.values, nino4.values,
                              wwv.values, #sc,   yr ,#nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,

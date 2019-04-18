@@ -76,8 +76,8 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 3
-lead_time = 6
+time_lag = 6
+lead_time = 12
 
 classes = 3
 class_labels = ['La nina', 'Neutral','El Nino']
@@ -85,7 +85,7 @@ threshold = 0.5
 
 train_frac = 0.7
 
-feature_unscaled = np.stack((nino34.values, nino12.values , nino3.values, nino4.values,
+feature_unscaled = np.stack((nino34.values, #nino12.values , nino3.values, nino4.values,
                              wwv.values, sc,  c2ssh.values, # yr,  nwt.values,
 #                             c2.values, ,c3.values, c5.values,
 #                             S.values, H.values, T.values, C.values, L.values,
@@ -136,7 +136,8 @@ model.compile(loss="sparse_categorical_crossentropy", optimizer="adam",
 es = EarlyStopping(monitor='val_acc',
                           min_delta=0.0,
                           patience=20,
-                          verbose=0, mode='auto')
+                          verbose=0, mode='auto',
+                          restore_best_weights=True)
 
 history = model.fit(trainX, trainy, epochs=250, batch_size=20,verbose=0,
                     shuffle=True, callbacks=[es],
@@ -150,6 +151,7 @@ predicty = model.predict(testX)
 plt.close("all")
 from ninolearn.plot.nino_timeseries import nino_background
 plt.figure(1)
+plt.title(f"Lead time: {lead_time} month")
 plt.plot(testtimey, predicty[:,0], label="La Nina", c="blue", marker="x")
 plt.plot(testtimey, predicty[:,1], label="Neutral", c="k")
 plt.plot(testtimey, predicty[:,2], label="El Nino", c="r", marker="x")
@@ -175,4 +177,6 @@ predict_cat = np.argmax(predicty,axis=1)
 prec, recall, fscore, support = precision_recall_fscore_support(testy, predict_cat)
 
 plot_confMat(testy, predict_cat, class_labels)
+plt.title(f"Confusion Matrix, lead time: {lead_time} month")
 plot_confMat(testy, yshift_predict[train_end:], class_labels)
+plt.title(f"Confusion Matrix (persistance), lead time: {lead_time} month")

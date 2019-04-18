@@ -8,7 +8,7 @@ import keras.backend as K
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from keras.layers import Dropout, GaussianNoise
+from keras.layers import Dropout, GaussianNoise, BatchNormalization
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
@@ -83,11 +83,11 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 3
-lead_time = 6
+time_lag = 6
+lead_time = 3
 train_frac = 0.7
 feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values, #sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
+                             wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
@@ -157,6 +157,7 @@ while i<segments:
     model_ens[-1].add(Dropout(0.2))
     model_ens[-1].add(Dense(8, input_dim=X.shape[1],activation='relu',
                         kernel_regularizer=regularizers.l1_l2(0.01,0.01)))
+    model_ens[-1].add(Dropout(0.2))
     model_ens[-1].add(Dense(2, activation='linear'))
 
     model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
@@ -225,8 +226,6 @@ plt.plot(history.history['val_loss'],label = "val")
 plt.plot(history.history['loss'], label= "train")
 plt.legend()
 
-
-
 plt.subplots(figsize=(15,3.5))
 plt.axhspan(-0.5,
             -6,
@@ -244,25 +243,34 @@ plt.ylim(-3,3)
 std = 1.
 
 # test
-predicty_max = pred_mean + std * np.abs(pred_std)
-predicty_min = pred_mean - std * np.abs(pred_std)
+predicty_p1std = pred_mean + np.abs(pred_std)
+predicty_m1std = pred_mean - np.abs(pred_std)
+predicty_p2std = pred_mean + 2 * np.abs(pred_std)
+predicty_m2std = pred_mean - 2 * np.abs(pred_std)
 
 
-plt.fill_between(testtimey,predicty_min,predicty_max , facecolor='aqua', alpha=0.5)
+plt.fill_between(testtimey,predicty_m1std, predicty_p1std , facecolor='aqua', alpha=0.5)
+plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='aqua', alpha=0.2)
 plt.plot(testtimey,pred_mean, "b")
 
 # train
-predicttrainy_max = predtrain_mean + std * np.abs(predtrain_std)
-predicttrainy_min = predtrain_mean - std * np.abs(predtrain_std)
+predicttrainy_p1std = predtrain_mean +  np.abs(predtrain_std)
+predicttrainy_m1std = predtrain_mean -  np.abs(predtrain_std)
+predicttrainy_p2std = predtrain_mean + 2 * np.abs(predtrain_std)
+predicttrainy_m2std = predtrain_mean - 2 * np.abs(predtrain_std)
 
+plt.fill_between(traintimey,predicttrainy_m1std,predicttrainy_p1std ,facecolor='lime', alpha=0.5)
+plt.fill_between(traintimey,predicttrainy_m2std,predicttrainy_p2std ,facecolor='lime', alpha=0.2)
 plt.plot(traintimey, predtrain_mean, "g")
-plt.fill_between(traintimey,predicttrainy_min,predicttrainy_max ,facecolor='lime', alpha=0.5)
 
 # future
-predictfuturey_max = predfuture_mean + std * np.abs(predfuture_std)
-predictfuturey_min = predfuture_mean - std * np.abs(predfuture_std)
+predictfuturey_p1std = predfuture_mean + np.abs(predfuture_std)
+predictfuturey_m1std = predfuture_mean - np.abs(predfuture_std)
+predictfuturey_p2std = predfuture_mean + 2 * np.abs(predfuture_std)
+predictfuturey_m2std = predfuture_mean - 2 * np.abs(predfuture_std)
 
-plt.fill_between(futuretime, predictfuturey_min, predictfuturey_max , facecolor='orange', alpha=0.5)
+plt.fill_between(futuretime, predictfuturey_m1std, predictfuturey_p1std , facecolor='orange', alpha=0.5)
+plt.fill_between(futuretime, predictfuturey_m2std, predictfuturey_p2std , facecolor='orange', alpha=0.2)
 plt.plot(futuretime, predfuture_mean, "darkorange")
 
 
@@ -270,11 +278,11 @@ plt.plot(futuretime, predfuture_mean, "darkorange")
 plt.plot(timey, y, "k")
 
 in_or_out = np.zeros((len(pred_mean)))
-in_or_out[(testy>predicty_min) & (testy<predicty_max)] = 1
+in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
 in_frac = np.sum(in_or_out)/len(testy)
 
 in_or_out_train = np.zeros((len(predtrain_mean)))
-in_or_out_train[(trainy>predicttrainy_min) & (trainy<predicttrainy_max)] = 1
+in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
 in_frac_train = np.sum(in_or_out_train)/len(trainy)
 
 pred_nrmse = round(nrmse(testy, pred_mean),2)

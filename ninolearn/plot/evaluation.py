@@ -51,7 +51,7 @@ def plot_confMat(y, pred, labels):
     :param pred: The prediction.
     :param labels: The names of the classes.
     """
-    cm = confusion_matrix(y, pred).T
+    cm = confusion_matrix(y, pred)#.T
     cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
     fig, ax = plt.subplots()
