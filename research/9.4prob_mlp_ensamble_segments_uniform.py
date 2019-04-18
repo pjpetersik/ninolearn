@@ -133,7 +133,7 @@ def inside_fraction(ytrue, ypred_mean, y_std, std_level=1):
 n_ens = 1
 model_ens = []
 
-optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.1, amsgrad=False)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.1, amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
@@ -149,9 +149,9 @@ while n_ens_sel<n_ens:
     inputs = Input(shape=(trainX.shape[1],))
     h = Dense(4, activation='relu',
               kernel_regularizer=regularizers.l1_l2(0.0,0.))(inputs)
-#    h = Dropout(0.2)(h)
-#    h = Dense(8, input_dim=X.shape[1],activation='relu',
-#                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
+    h = Dropout(0.2)(h)
+    h = Dense(2, input_dim=X.shape[1],activation='relu',
+                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
 
     mu = Dense(1, activation='linear')(h)
     w = Dense(1, activation='softplus')(h)
@@ -162,9 +162,8 @@ while n_ens_sel<n_ens:
     model_ens[-1].compile(loss=l_uniform, optimizer=optimizer)
 
 
-
     print_header("Train")
-    history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=50,verbose=1,
+    history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
                         validation_data=(testX, testy))
 

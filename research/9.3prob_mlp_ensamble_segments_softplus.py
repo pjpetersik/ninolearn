@@ -84,10 +84,10 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 # # process data
 # =============================================================================
 time_lag = 6
-lead_time = 6
+lead_time = 36
 train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values,  #sc #yr # nwt.values#, c2.values,c3.values, c5.values,
+feature_unscaled = np.stack((nino34.values, c2ssh.values,  nino12.values, nino3.values, nino4.values,
+                             wwv.values,  sc #yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
@@ -130,7 +130,7 @@ def inside_fraction(ytrue, ypred_mean, y_std, std_level=1):
     in_frac = np.sum(in_or_out)/len(ytrue)
     return in_frac
 
-n_ens = 1
+n_ens = 5
 model_ens = []
 
 optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
@@ -142,13 +142,12 @@ es = EarlyStopping(monitor='val_loss',
                               mode='min',
                               restore_best_weights=True)
 n_ens_sel = 0
-
 while n_ens_sel<n_ens:
 
     # define the model
     inputs = Input(shape=(trainX.shape[1],))
     h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(0.01,0.2))(inputs)
+              kernel_regularizer=regularizers.l1_l2(0.01,0.4))(inputs)
 #    h = Dropout(0.2)(h)
 #    h = Dense(8, input_dim=X.shape[1],activation='relu',
 #                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
@@ -179,8 +178,8 @@ while n_ens_sel<n_ens:
         print_header("Reject this model. Unreasonable stds.")
         model_ens.pop()
 
-    elif rmse(trainy, mem_mean)>0.8:
-        print_header("Reject this model. Unreasonalble rmse")
+    elif rmse(trainy, mem_mean)>0.9:
+        print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
         model_ens.pop()
 
     elif np.min(history.history["loss"])>1:
