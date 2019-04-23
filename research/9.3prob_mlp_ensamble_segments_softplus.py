@@ -85,11 +85,11 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 # # process data
 # =============================================================================
 time_lag = 6
-lead_time = 8
-train_frac = 0.667
-feature_unscaled = np.stack((nino34.values, c2ssh.values,  #nino12.values, nino3.values, nino4.values,
-                             wwv.values,  yr, iod.values, sc, # nwt.values#, c2.values,c3.values, c5.values,
-#                            S.values,# H.values, T.values, C.values, L.values,
+lead_time = 12
+
+feature_unscaled = np.stack((nino34.values, #c2ssh.values,  #nino12.values, nino3.values, nino4.values,
+                             wwv.values, # yr, iod.values, sc, # nwt.values#, c2.values,c3.values, c5.values,
+#                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values
@@ -113,11 +113,18 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
+#train_frac = 0.667
+#train_end = int(train_frac * X.shape[0])
+#
+#trainX, testX = X[:train_end,:], X[train_end:,:]
+#trainy, testy= y[:train_end], y[train_end:]
+#traintimey, testtimey = timey[:train_end], timey[train_end:]
 
-train_end = int(train_frac * X.shape[0])
-trainX, testX = X[:train_end,:], X[train_end:,:]
-trainy, testy= y[:train_end], y[train_end:]
-traintimey, testtimey = timey[:train_end], timey[train_end:]
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+train_indeces = np.invert(test_indeces)
+
+trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
+testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
 #%% =============================================================================
 # # neural network
@@ -148,11 +155,7 @@ while n_ens_sel<n_ens:
     # define the model
     inputs = Input(shape=(trainX.shape[1],))
     h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(0.02,0.2))(inputs)
-#    h = Dropout(0.2)(h)
-#    h = Dense(8, input_dim=X.shape[1],activation='relu',
-#                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
-
+              kernel_regularizer=regularizers.l1_l2(0.01,0.2))(inputs)
     mu = Dense(1, activation='linear')(h)
     sigma = Dense(1, activation='softplus')(h)
 
@@ -258,6 +261,8 @@ plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='royalblue
 plt.plot(testtimey,pred_mean, "navy")
 
 # train
+predtrain_mean[traintimey=='2001-12-01'] = np.nan
+
 predicttrainy_p1std = predtrain_mean +  np.abs(predtrain_std)
 predicttrainy_m1std = predtrain_mean -  np.abs(predtrain_std)
 predicttrainy_p2std = predtrain_mean + 2 * np.abs(predtrain_std)
@@ -265,6 +270,8 @@ predicttrainy_m2std = predtrain_mean - 2 * np.abs(predtrain_std)
 
 plt.fill_between(traintimey,predicttrainy_m1std,predicttrainy_p1std ,facecolor='lime', alpha=0.5)
 plt.fill_between(traintimey,predicttrainy_m2std,predicttrainy_p2std ,facecolor='lime', alpha=0.2)
+
+
 plt.plot(traintimey, predtrain_mean, "g")
 
 # future
@@ -290,7 +297,7 @@ in_frac_train = np.sum(in_or_out_train)/len(trainy)
 
 pred_nrmse = round(nrmse(testy, pred_mean),2)
 
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%, NRMSE (of mean): {pred_nrmse}")
+plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, NRMSE (of mean): {pred_nrmse}")
 plt.grid()
 
 # =============================================================================
