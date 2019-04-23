@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import xarray as xr
 
 import keras.backend as K
 from keras.models import Sequential, Model
@@ -37,7 +38,7 @@ nino12 = reader.read_csv('nino1+2M')
 nino3 = reader.read_csv('nino3M')
 
 len_ts = len(nino34)
-sc = np.cos(np.arange(len_ts)/12*2*np.pi)
+sc = np.sin(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
 yr3 = np.arange(len_ts) % 36
 yr4 = np.arange(len_ts) % 48
@@ -87,7 +88,7 @@ time_lag = 6
 lead_time = 36
 train_frac = 0.7
 feature_unscaled = np.stack((nino34.values, c2ssh.values,  nino12.values, nino3.values, nino4.values,
-                             wwv.values,  sc #yr # nwt.values#, c2.values,c3.values, c5.values,
+                             wwv.values,  yr #sc, yr # nwt.values#, c2.values,c3.values, c5.values,
 #                            S.values, H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
@@ -147,7 +148,7 @@ while n_ens_sel<n_ens:
     # define the model
     inputs = Input(shape=(trainX.shape[1],))
     h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(0.01,0.4))(inputs)
+              kernel_regularizer=regularizers.l1_l2(0.01,0.2))(inputs)
 #    h = Dropout(0.2)(h)
 #    h = Dense(8, input_dim=X.shape[1],activation='relu',
 #                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
@@ -217,11 +218,18 @@ predfuture_mean, predfuture_std = mixture(predfuture_ens)
 # Plot
 # =============================================================================
 plt.close("all")
+
+# =============================================================================
+# Loss during trianing
+# =============================================================================
 plt.subplots()
 plt.plot(history.history['val_loss'],label = "val")
 plt.plot(history.history['loss'], label= "train")
 plt.legend()
 
+# =============================================================================
+# Predictions
+# =============================================================================
 plt.subplots(figsize=(15,3.5))
 plt.axhspan(-0.5,
             -6,
@@ -284,3 +292,18 @@ pred_nrmse = round(nrmse(testy, pred_mean),2)
 
 plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%, NRMSE (of mean): {pred_nrmse}")
 plt.grid()
+
+# =============================================================================
+# Seaonality of Standard deviations
+# =============================================================================
+plt.subplots()
+
+xr_nino34 = xr.DataArray(nino34)
+std_data = xr_nino34.groupby('time.month').std(dim='time')
+
+pd_pred_std = pd.Series(data=pred_std, index = testtimey)
+xr_pred_std = xr.DataArray(pd_pred_std)
+std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
+
+std_data.plot()
+std_pred.plot()
