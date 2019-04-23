@@ -1,6 +1,7 @@
 import pandas as pd
 from os.path import join, exists
 from os import mkdir
+import numpy as np
 
 from ninolearn.IO import read_raw
 from ninolearn.pathes import postdir
@@ -106,8 +107,25 @@ def prep_wwv():
     data = data.rename(index=str, columns={'Anomaly': 'anom'})
     data.to_csv(join(postdir, 'wwv.csv'))
 
+def prep_iod():
+    """
+    Prepare the IOD index dataframe
+    """
+    print("Prepare IOD timeseries.")
+
+    data = read_raw.iod()
+    data = data.T.unstack()
+    data = data.replace(-999, np.nan)
+
+    dti = pd.date_range(start='1870-01-01', end='2018-12-01', freq='MS')
+
+    df = pd.DataFrame(data=data.values,index=dti, columns=['anom'])
+    df.index.name = 'time'
+
+    df.to_csv(join(postdir, 'iod.csv'))
 
 if __name__ == "__main__":
-    prep_nino_seasonal()
-    prep_wwv()
-    prep_nino_month()
+#    prep_nino_seasonal()
+#    prep_wwv()
+#    prep_nino_month()
+    a=prep_iod()

@@ -37,13 +37,14 @@ nino34 = reader.read_csv('nino3.4M')
 nino12 = reader.read_csv('nino1+2M')
 nino3 = reader.read_csv('nino3M')
 
+iod = reader.read_csv('iod')
+
 len_ts = len(nino34)
-sc = np.sin(np.arange(len_ts)/12*2*np.pi)
+sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
 yr3 = np.arange(len_ts) % 36
 yr4 = np.arange(len_ts) % 48
 yr5 = np.arange(len_ts) % 60
-
 
 wwv = reader.read_csv('wwv')
 network = reader.read_statistic('network_metrics', variable='air',
@@ -58,7 +59,6 @@ pca_u = reader.read_statistic('pca', variable='uwnd',
                            dataset='NCEP', processed="anom")
 pca_v = reader.read_statistic('pca', variable='vwnd',
                            dataset='NCEP', processed="anom")
-
 
 c2 = network['fraction_clusters_size_2']
 c3 = network['fraction_clusters_size_3']
@@ -85,11 +85,11 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 # # process data
 # =============================================================================
 time_lag = 6
-lead_time = 36
-train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, c2ssh.values,  nino12.values, nino3.values, nino4.values,
-                             wwv.values,  yr #sc, yr # nwt.values#, c2.values,c3.values, c5.values,
-#                            S.values, H.values, T.values, C.values, L.values,
+lead_time = 8
+train_frac = 0.667
+feature_unscaled = np.stack((nino34.values, c2ssh.values,  #nino12.values, nino3.values, nino4.values,
+                             wwv.values,  yr, iod.values, sc, # nwt.values#, c2.values,c3.values, c5.values,
+#                            S.values,# H.values, T.values, C.values, L.values,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values
@@ -138,7 +138,7 @@ optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsg
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
-                              patience=20,
+                              patience=10,
                               verbose=0,
                               mode='min',
                               restore_best_weights=True)
@@ -148,7 +148,7 @@ while n_ens_sel<n_ens:
     # define the model
     inputs = Input(shape=(trainX.shape[1],))
     h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(0.01,0.2))(inputs)
+              kernel_regularizer=regularizers.l1_l2(0.02,0.2))(inputs)
 #    h = Dropout(0.2)(h)
 #    h = Dense(8, input_dim=X.shape[1],activation='relu',
 #                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
@@ -307,3 +307,9 @@ std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
 
 std_data.plot()
 std_pred.plot()
+
+# =============================================================================
+# plot explained variance
+# =============================================================================
+
+plot_explained_variance(testy, pred_mean, testtimey)

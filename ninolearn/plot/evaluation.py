@@ -42,6 +42,8 @@ def plot_explained_variance(y, pred, time):
                         'J', 'A', 'S', 'O', 'N', 'D'])
     ax.set_xlabel("month")
     ax.set_ylabel(f"$r^2$")
+    ax.set_title(f"$r^2 =$ {round(np.corrcoef(y,pred)[0,1], 2)}")
+
 
 def plot_confMat(y, pred, labels):
     """

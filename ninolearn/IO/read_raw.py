@@ -48,6 +48,15 @@ def wwv_anom():
                        delim_whitespace=True, header=4)
     return data
 
+def iod():
+    """
+    get IOD index data
+    """
+    data = pd.read_csv(join(rawdir, "iod.txt"),
+                       delim_whitespace=True, header=None, skiprows=1, skipfooter=7,
+                       index_col=0, engine='python')
+    return data
+
 
 def sst_ERSSTv5():
     """

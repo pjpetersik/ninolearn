@@ -105,16 +105,16 @@ class data_reader(object):
             if self.enddate > pd.to_datetime(data.time.values.max()) + pd.tseries.offsets.MonthEnd(0):
                 print(data.time.values.max())
                 print(self.enddate)
-                raise IndexError("The enddate is out of\
-                                 bounds for %s data!" % name)
+                raise IndexError("The enddate is out of bounds for %s data!" % name)
 
         if isinstance(data, pd.DataFrame):
             if self.startdate < data.index.values.min():
                 msg = f"The startdate is out of bounds for {name} data!"
                 raise IndexError(msg)
-            if self.enddate > data.index.values.max():
-                raise IndexError("The enddate is out of\
-                                 bounds for %s data!" % name)
+            if self.enddate > pd.to_datetime(data.index.values.max()) + pd.tseries.offsets.MonthEnd(0):
+                print( self.enddate )
+                print(data.index.values.max())
+                raise IndexError("The enddate is out of bounds for %s data!" % name)
 
 
 if __name__ == "__main__":
