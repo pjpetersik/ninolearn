@@ -63,7 +63,9 @@ class pca(PCA):
                         pd.tseries.offsets.YearEnd(0))
 
         self.reader = data_reader(startdate=self.startdate,
-                                  enddate=self.enddate)
+                                  enddate=self.enddate,
+                                  lon_min=lon_min, lon_max=lon_max,
+                                  lat_min=lat_min, lat_max=lat_max)
         data = self.reader.read_netcdf(variable, dataset, processed)
 
         self.time = data['time']
@@ -113,7 +115,10 @@ class pca(PCA):
         """
         lon2, lat2 = np.meshgrid(self.lon, self.lat)
 
-        nino34 = self.reader.read_csv('nino34')
+        try:
+            nino34 = self.reader.read_csv('nino3.4M')
+        except IndexError:
+            pass
 
         fig = plt.figure(figsize=(15, 7))
 
@@ -139,13 +144,16 @@ class pca(PCA):
         for i in range(0, 2):
             fig.add_subplot(223+i)
             projection = np.matmul(self.EOFarr, self.components_[i, :])
-            nino_background(nino34)
+            try:
+                nino_background(nino34)
+            except:
+                pass
             plt.plot(self.time, projection)
 
 
-if __name__ == "__main__":
-    pca_obj = pca(n_components=6)
-    pca_obj.load_data('air', 'NCEP', 'anom', startyear=1950, endyear=2018)
-    pca_obj.compute_pca()
-    pca_obj.save()
-    pca_obj.plot_eof()
+#if __name__ == "__main__":
+#    pca_obj = pca(n_components=6)
+#    pca_obj.load_data('air', 'NCEP', 'anom', startyear=1950, endyear=2018)
+#    pca_obj.compute_pca()
+#    pca_obj.save()
+#    pca_obj.plot_eof()

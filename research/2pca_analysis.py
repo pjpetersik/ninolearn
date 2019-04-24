@@ -36,3 +36,5 @@ pca_sat_gfdl.load_data('tas', 'GFDL-CM3', processed="anom",
 
 pca_sat_gfdl.compute_pca()
 pca_sat_gfdl.save()
+
+pca_sat_gfdl.plot_eof()

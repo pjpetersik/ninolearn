@@ -20,6 +20,16 @@ nms = networkMetricsSeries('sshg', 'GODAS', processed="anom",
 nms.computeTimeSeries()
 
 
+#%% =============================================================================
+# GFDL Data
+# =============================================================================
+nms = networkMetricsSeries('zos', 'GFDL-CM3', processed="anom",
+                           threshold=0.9, startyear=1700, endyear=2199,
+                           window_size=12, lon_min=120, lon_max=280,
+                           lat_min=-30, lat_max=30, verbose=1)
+nms.computeTimeSeries()
+
+
 # %% ==========================================================================
 # =============================================================================
 # # Plot Network Metrics

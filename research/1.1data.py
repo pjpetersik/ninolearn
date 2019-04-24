@@ -199,7 +199,7 @@ downloadFileHTTP(IOD_dict)
 # =============================================================================
 # =============================================================================
 print_header("Postprocess Data")
-from ninolearn.postprocess.prepare import prep_nino_seasonal, prep_nino_month, prep_wwv
+from ninolearn.postprocess.prepare import prep_nino_seasonal, prep_nino_month, prep_wwv, prep_iod
 
 prep_nino_seasonal()
 prep_nino_month(index="3.4")
@@ -207,6 +207,7 @@ prep_nino_month(index="3")
 prep_nino_month(index="1+2")
 prep_nino_month(index="4")
 prep_wwv()
+prep_iod()
 
 from ninolearn.IO import read_raw
 from ninolearn.postprocess.anomaly import postprocess
@@ -254,3 +255,4 @@ postprocess(sst_gfdl_regrid, ref_period=False)
 ssh_gfdl = read_raw.ssh_gfdl()
 ssh_gfdl_regrid = to2_5x2_5(ssh_gfdl)
 postprocess(ssh_gfdl_regrid, ref_period=False)
+
