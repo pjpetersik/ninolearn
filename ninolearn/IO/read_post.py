@@ -65,16 +65,16 @@ class data_reader(object):
 
         self._check_dates(data, f'{filename[:-3]}')
 
-        if variable != 'ssh' and variable != 'sshg':
+        if dataset!='ORAP5' and dataset!='GODAS' and  dataset != 'GFDL-CM3':
             return data.loc[self.startdate:self.enddate,
                             self.lat_max:self.lat_min,
                             self.lon_min:self.lon_max]
 
-        elif variable == 'sshg':
+        elif dataset=='GODAS' or dataset == 'GFDL-CM3':
             return data.loc[self.startdate:self.enddate,
                             self.lat_min:self.lat_max,
                             self.lon_min:self.lon_max]
-        else:
+        elif dataset=='ORAP5':
             return data.loc[self.startdate: self.enddate, :, :].where(
                    (data.nav_lat > self.lat_min) &
                    (data.nav_lat < self.lat_max) &
@@ -120,4 +120,7 @@ class data_reader(object):
 if __name__ == "__main__":
     reader = data_reader(startdate="1981-01", enddate='2018-12',
                          lon_min=120, lon_max=380, lat_min=-30, lat_max=30)
+
     data = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+    data2 = reader.read_netcdf('zos', dataset='GFDL-CM3', processed='anom')
+

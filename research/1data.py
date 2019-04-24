@@ -253,5 +253,4 @@ postprocess(sst_gfdl_regrid, ref_period=False)
 
 ssh_gfdl = read_raw.ssh_gfdl()
 ssh_gfdl_regrid = to2_5x2_5(ssh_gfdl)
-
 postprocess(ssh_gfdl_regrid, ref_period=False)
