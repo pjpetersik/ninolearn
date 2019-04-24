@@ -1,3 +1,5 @@
+import numpy as np
+
 from ninolearn.download import downloadFileFTP, downloadFileHTTP, unzip_gz
 from ninolearn.private import CMEMS_password, CMEMS_username
 from ninolearn.utils import print_header
@@ -55,6 +57,20 @@ HadISST1_dict = {
 downloadFileHTTP(HadISST1_dict)
 unzip_gz(HadISST1_dict)
 
+
+SST_GFDL_dict = {
+        'filename': 'tos_Omon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
+        'host': 'nomads.gfdl.noaa.gov',
+        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/ocean/Omon/r1i1p1/v20110601/tos/'
+        }
+
+for year_int in np.arange(1,500,5):
+    year_start = f"{year_int:03d}"
+    year_end = f"{year_int+4:03d}"
+
+    SST_GFDL_dict['filename'] = f'tos_Omon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
+    downloadFileFTP(SST_GFDL_dict, outdir='sst_gfdl')
+
 # =============================================================================
 # ORAP5.0 SSH
 # =============================================================================
@@ -86,6 +102,21 @@ GODAS_dict = {'filename': 'sshg.1980.nc',
 for i in range(1980,2019):
     GODAS_dict['filename'] = f'sshg.{i}.nc'
     downloadFileFTP(GODAS_dict, outdir = 'ssh_godas')
+
+
+
+SSH_GFDL_dict = {
+        'filename': 'zos_Omon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
+        'host': 'nomads.gfdl.noaa.gov',
+        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/ocean/Omon/r1i1p1/v20110601/zos/'
+        }
+
+for year_int in np.arange(1,500,5):
+    year_start = f"{year_int:03d}"
+    year_end = f"{year_int+4:03d}"
+
+    SSH_GFDL_dict['filename'] = f'zos_Omon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
+    downloadFileFTP(SSH_GFDL_dict, outdir='ssh_gfdl')
 # =============================================================================
 # WWV
 # =============================================================================
@@ -137,6 +168,19 @@ SATmon_dict = {
 
 downloadFileFTP(SATmon_dict)
 
+SAT_GFDL_dict = {
+        'filename': 'tas_Amon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
+        'host': 'nomads.gfdl.noaa.gov',
+        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/atmos/Amon/r1i1p1/v20110601/tas/'
+        }
+
+for year_int in np.arange(1,500,5):
+    year_start = f"{year_int:03d}"
+    year_end = f"{year_int+4:03d}"
+
+    SAT_GFDL_dict['filename'] = f'tas_Amon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
+    downloadFileFTP(SAT_GFDL_dict, outdir='sat_gfdl')
+
 # =============================================================================
 # indian ocean dipole  (IOD) index
 # =============================================================================
@@ -146,6 +190,8 @@ IOD_dict = {
         }
 
 downloadFileHTTP(IOD_dict)
+
+
 
 # =============================================================================
 # =============================================================================
@@ -165,33 +211,47 @@ prep_wwv()
 from ninolearn.IO import read_raw
 from ninolearn.postprocess.anomaly import postprocess
 from ninolearn.postprocess.regrid import to2_5x2_5
-# postprocess sst data from ERSSTv5
-sst_ERSSTv5 = read_raw.sst_ERSSTv5()
-postprocess(sst_ERSSTv5)
+## postprocess sst data from ERSSTv5
+#sst_ERSSTv5 = read_raw.sst_ERSSTv5()
+#postprocess(sst_ERSSTv5)
+#
+## postprocess data from NCEP/NCAR reanalysis
+#uwind = read_raw.uwind()
+#postprocess(uwind)
+#
+#vwind = read_raw.vwind()
+#postprocess(vwind)
+#
+#sat = read_raw.sat(mean='monthly')
+#postprocess(sat)
+#
+## postprocess sst date from HadISST date set
+#sst_HadISST = read_raw.sst_HadISST()
+#postprocess(sst_HadISST)
+#
+## postprocess sat daily values from NCEP/NCAR reanalysis
+#sat_daily = read_raw.sat(mean='daily')
+#postprocess(sat_daily)
+#
+## postprocess ssh values from ORAP5
+#ssh = read_raw.ssh()
+#postprocess(ssh)
+#
+##%% post process values from GODAS
+#ssh_godas = read_raw.ssh_godas()
+#ssh_godas_regrid = to2_5x2_5(ssh_godas)
+#postprocess(ssh_godas_regrid)
 
-# postprocess data from NCEP/NCAR reanalysis
-uwind = read_raw.uwind()
-postprocess(uwind)
+#%% post process values for GFDL control run
+sat_gfdl = read_raw.sat_gfdl()
+sat_gfdl_regrid = to2_5x2_5(sat_gfdl)
+postprocess(sat_gfdl_regrid, ref_period=False)
 
-vwind = read_raw.vwind()
-postprocess(vwind)
+sst_gfdl = read_raw.sst_gfdl()
+sst_gfdl_regrid = to2_5x2_5(sst_gfdl)
+postprocess(sst_gfdl_regrid, ref_period=False)
 
-sat = read_raw.sat(mean='monthly')
-postprocess(sat)
+ssh_gfdl = read_raw.ssh_gfdl()
+ssh_gfdl_regrid = to2_5x2_5(ssh_gfdl)
 
-# postprocess sst date from HadISST date set
-sst_HadISST = read_raw.sst_HadISST()
-postprocess(sst_HadISST)
-
-# postprocess sat daily values from NCEP/NCAR reanalysis
-sat_daily = read_raw.sat(mean='daily')
-postprocess(sat_daily)
-
-# postprocess ssh values from ORAP5
-ssh = read_raw.ssh()
-postprocess(ssh)
-
-#%% post process values from GODAS
-ssh_godas = read_raw.ssh_godas()
-ssh_godas_regrid = to2_5x2_5(ssh_godas)
-postprocess(ssh_godas_regrid)
+postprocess(ssh_gfdl_regrid, ref_period=False)

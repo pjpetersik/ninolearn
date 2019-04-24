@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import xarray as xr
 
 import keras.backend as K
 from keras.models import Sequential, Model
@@ -18,13 +19,22 @@ from sklearn.preprocessing import MinMaxScaler,StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
-from ninolearn.learn.evaluation import nrmse, rmse
+from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
-from ninolearn.learn.losses import nll_gaussian, l_uniform
+from ninolearn.learn.losses import nll_gaussian
 from ninolearn.learn.augment import window_warping
 from ninolearn.utils import print_header
 
 K.clear_session()
+
+def mixture(pred):
+    """
+    returns the ensemble mixture results
+    """
+    mix_mean = pred[:,0,:].mean(axis=1)
+    mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
+    mix_std = np.sqrt(mix_var)
+    return mix_mean, mix_std
 
 #%% =============================================================================
 # #%% read data
@@ -36,13 +46,14 @@ nino34 = reader.read_csv('nino3.4M')
 nino12 = reader.read_csv('nino1+2M')
 nino3 = reader.read_csv('nino3M')
 
+iod = reader.read_csv('iod')
+
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
 yr3 = np.arange(len_ts) % 36
 yr4 = np.arange(len_ts) % 48
 yr5 = np.arange(len_ts) % 60
-
 
 wwv = reader.read_csv('wwv')
 network = reader.read_statistic('network_metrics', variable='air',
@@ -57,7 +68,6 @@ pca_u = reader.read_statistic('pca', variable='uwnd',
                            dataset='NCEP', processed="anom")
 pca_v = reader.read_statistic('pca', variable='vwnd',
                            dataset='NCEP', processed="anom")
-
 
 c2 = network['fraction_clusters_size_2']
 c3 = network['fraction_clusters_size_3']
@@ -83,19 +93,27 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 6
-lead_time = 1
-train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values,  #sc #yr # nwt.values#, c2.values,c3.values, c5.values,
-#                            S.values, H.values, T.values, C.values, L.values,
-#                            pca1_air.values, pca2_air.values, pca3_air.values,
+time_lag = 12
+lead_time = 6
+
+feature_unscaled = np.stack((nino34.values, sc, c2.values,c3.values, c5.values,
+
+
+#                             c2ssh.values,  #nino12.values, nino3.values, nino4.values,
+
+
+#                             wwv.values, sc, iod.values, # nwt.values#, c2.values,c3.values, c5.values,
+                           S.values, H.values, T.values, C.values, L.values,
+                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values
                              ), axis=1)
 
-scaler = MinMaxScaler(feature_range=(-1,1))
+
+scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
+
+Xorg = np.nan_to_num(Xorg)
 
 X = Xorg[:-lead_time,:]
 futureX = Xorg[-lead_time-time_lag:,:]
@@ -112,61 +130,64 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
+#train_frac = 0.667
+#train_end = int(train_frac * X.shape[0])
+#
+#trainX, testX = X[:train_end,:], X[train_end:,:]
+#trainy, testy= y[:train_end], y[train_end:]
+#traintimey, testtimey = timey[:train_end], timey[train_end:]
 
-train_end = int(train_frac * X.shape[0])
-trainX, testX = X[:train_end,:], X[train_end:,:]
-trainy, testy= y[:train_end], y[train_end:]
-traintimey, testtimey = timey[:train_end], timey[train_end:]
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+train_indeces = np.invert(test_indeces)
+
+trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
+testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
 #%% =============================================================================
 # # neural network
 # =============================================================================
-def inside_fraction(ytrue, ypred_mean, y_std, std_level=1):
-    ypred_max = ypred_mean + y_std * std_level
-    ypred_min = ypred_mean - y_std * std_level
-
-    in_or_out = np.zeros((len(ypred_mean)))
-    in_or_out[(ytrue>ypred_min) & (ytrue<ypred_max)] = 1
-    in_frac = np.sum(in_or_out)/len(ytrue)
-    return in_frac
-
-n_ens = 1
+n_ens = 3
 model_ens = []
 
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.1, amsgrad=False)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
-                              patience=20,
+                              patience=10,
                               verbose=0,
                               mode='min',
                               restore_best_weights=True)
 n_ens_sel = 0
 
+l1 = 0.01
+l2 = 0.1
+
+l1_out = 0.0
+l2_out = 0.1
+
+
 while n_ens_sel<n_ens:
 
     # define the model
     inputs = Input(shape=(trainX.shape[1],))
-    h = Dense(4, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(0.0,0.))(inputs)
+    h = GaussianNoise(0.1)(inputs)
+
+    h = Dense(8, activation='relu',
+              kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
     h = Dropout(0.2)(h)
-    h = Dense(2, input_dim=X.shape[1],activation='relu',
-                            kernel_regularizer=regularizers.l1_l2(0.,0.1))(h)
 
-    mu = Dense(1, activation='linear')(h)
-    w = Dense(1, activation='softplus')(h)
+    mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+    sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
 
-    outputs = concatenate([mu, w])
+    outputs = concatenate([mu, sigma])
 
     model_ens.append(Model(inputs=inputs, outputs=outputs))
-    model_ens[-1].compile(loss=l_uniform, optimizer=optimizer)
-
+    model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
 
     print_header("Train")
     history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
                         validation_data=(testX, testy))
-
 
     mem_pred = model_ens[-1].predict(trainX)
     mem_mean = mem_pred[:,0]
@@ -174,28 +195,20 @@ while n_ens_sel<n_ens:
 
     in_frac = inside_fraction(trainy, mem_mean, mem_std)
 
-#    if in_frac > 0.8 or in_frac < 0.55:
-#        print_header("Reject this model. Unreasonable stds.")
-#        model_ens.pop()
-#
-#    elif rmse(trainy, mem_mean)>0.8:
-#        print_header("Reject this model. Unreasonalble rmse")
-#        model_ens.pop()
-#
-#    elif np.min(history.history["loss"])>1:
-#        print_header("Reject this model. High minimum loss.")
-#        model_ens.pop()
+    if in_frac > 0.8 or in_frac < 0.55:
+        print_header("Reject this model. Unreasonable stds.")
+        model_ens.pop()
+
+    elif rmse(trainy, mem_mean)>0.9:
+        print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
+        model_ens.pop()
+
+    elif np.min(history.history["loss"])>1:
+        print_header("Reject this model. High minimum loss.")
+        model_ens.pop()
 
     n_ens_sel = len(model_ens)
 #%%
-def mixture(pred):
-    """
-    returns the ensemble mixture results
-    """
-    mix_mean = pred[:,0,:].mean(axis=1)
-    mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
-    mix_std = np.sqrt(mix_var)
-    return mix_mean, mix_std
 
 
 pred_ens = np.zeros((len(testy),2, n_ens_sel))
@@ -217,11 +230,18 @@ predfuture_mean, predfuture_std = mixture(predfuture_ens)
 # Plot
 # =============================================================================
 plt.close("all")
+
+# =============================================================================
+# Loss during trianing
+# =============================================================================
 plt.subplots()
 plt.plot(history.history['val_loss'],label = "val")
 plt.plot(history.history['loss'], label= "train")
 plt.legend()
 
+# =============================================================================
+# Predictions
+# =============================================================================
 plt.subplots(figsize=(15,3.5))
 plt.axhspan(-0.5,
             -6,
@@ -250,6 +270,8 @@ plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='royalblue
 plt.plot(testtimey,pred_mean, "navy")
 
 # train
+predtrain_mean[traintimey=='2001-12-01'] = np.nan
+
 predicttrainy_p1std = predtrain_mean +  np.abs(predtrain_std)
 predicttrainy_m1std = predtrain_mean -  np.abs(predtrain_std)
 predicttrainy_p2std = predtrain_mean + 2 * np.abs(predtrain_std)
@@ -257,6 +279,8 @@ predicttrainy_m2std = predtrain_mean - 2 * np.abs(predtrain_std)
 
 plt.fill_between(traintimey,predicttrainy_m1std,predicttrainy_p1std ,facecolor='lime', alpha=0.5)
 plt.fill_between(traintimey,predicttrainy_m2std,predicttrainy_p2std ,facecolor='lime', alpha=0.2)
+
+
 plt.plot(traintimey, predtrain_mean, "g")
 
 # future
@@ -282,5 +306,48 @@ in_frac_train = np.sum(in_or_out_train)/len(trainy)
 
 pred_nrmse = round(nrmse(testy, pred_mean),2)
 
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac,2)*100}%, NRMSE (of mean): {pred_nrmse}")
+plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, NRMSE (of mean): {pred_nrmse}")
 plt.grid()
+
+# =============================================================================
+# Seaonality of Standard deviations
+# =============================================================================
+plt.subplots()
+
+xr_nino34 = xr.DataArray(nino34)
+std_data = xr_nino34.groupby('time.month').std(dim='time')
+
+pd_pred_std = pd.Series(data=pred_std, index = testtimey)
+xr_pred_std = xr.DataArray(pd_pred_std)
+std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
+
+std_data.plot()
+std_pred.plot()
+
+# =============================================================================
+# plot explained variance
+# =============================================================================
+
+plot_explained_variance(testy, pred_mean, testtimey)
+
+# =============================================================================
+# Error distribution
+# =============================================================================
+plt.subplots()
+plt.title("Error distribution")
+error = pred_mean - testy
+
+plt.hist(error, bins=16)
+
+# =============================================================================
+# ayer weight
+# =============================================================================
+weights = model_ens[1].get_weights()
+max_w = np.max(np.abs(weights[0]))
+M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
+plt.colorbar(M1, extend="both")
+
+max_w2 = np.max(np.abs(weights[1]))
+M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
+                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
+plt.colorbar(M2, extend="both")

@@ -41,3 +41,25 @@ def nrmse(y, predict):
         """
         return rmse(y, predict) / (np.max([y, predict])
                                          - np.min([y, predict]))
+
+
+def inside_fraction(ytrue, ypred_mean, ypred_std, std_level=1):
+    """
+    Returns the fraction of how much of the true observation stayed in the
+    confindence interval.
+
+    :param ytrue: The true observation.
+    :param ypred_mean: The mean of the prediction.
+    :param ypred_std: The standard deviation of the prediction.
+    :param std_level: The standard deviation of the confidence interval
+    :return: The fraction  of the observation that is in the confidence
+    interval
+    """
+    ypred_max = ypred_mean + ypred_std * std_level
+    ypred_min = ypred_mean - ypred_std * std_level
+
+    in_or_out = np.zeros((len(ypred_mean)))
+    in_or_out[(ytrue>ypred_min) & (ytrue<ypred_max)] = 1
+    in_frac = np.sum(in_or_out)/len(ytrue)
+
+    return in_frac

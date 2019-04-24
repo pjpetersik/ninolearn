@@ -39,8 +39,14 @@ def computeMeanClimatology(data):
         print(f"- Compute {data.name} climatetology")
         period = _get_period(data)
         print(f"- Data has {period} period")
-        meanclim = data.loc['1948-01-01':'2018-12-31']. \
-            groupby(f'time.{period}').mean(dim="time")
+
+        if reference_period:
+            meanclim = data.loc['1948-01-01':'2018-12-31']. \
+                groupby(f'time.{period}').mean(dim="time")
+        else:
+            print("Use the entire time series for the Mean Climatology")
+            meanclim = data.groupby(f'time.{period}').mean(dim="time")
+
         meanclim.to_netcdf(path)
     else:
         print(f"- Read {data.name} climatetology")
@@ -50,7 +56,7 @@ def computeMeanClimatology(data):
 
 def computeStdClimatology(data):
     """
-    Monthly means
+    Monthly stds
     """
     filename = generateFileName(data.name, dataset=data.dataset,
                                 processed='stdclim', suffix='nc')
@@ -60,8 +66,13 @@ def computeStdClimatology(data):
         print(f"- Compute {data.name} climatetology")
         period = _get_period(data)
         print(f"- Data has {period} period")
-        stdclim = data.loc['1948-01-01':'2018-12-31']. \
-            groupby(f'time.{period}').std(dim="time")
+        if reference_period:
+            stdclim = data.loc['1948-01-01':'2018-12-31']. \
+                groupby(f'time.{period}').std(dim="time")
+        else:
+            print("Use the entire time series for the Std Climatology")
+            stdclim = data.groupby(f'time.{period}').std(dim="time")
+
         stdclim.to_netcdf(path)
     else:
         print(f"- Read {data.name} climatetology")
@@ -187,7 +198,7 @@ def saveNormAnomaly(data, new):
         normanom.to_netcdf(path)
 
 
-def postprocess(data, new=False):
+def postprocess(data, new=False, ref_period = True):
     """
     combine all the postprocessing functions in one data routine
     :param data: xarray data array
@@ -196,5 +207,8 @@ def postprocess(data, new=False):
     small_print_header(f"Process {data.name} from {data.dataset}")
     toPostDir(data)
     # TODO: Read from postdir?
+
+    global reference_period
+    reference_period = ref_period
     saveAnomaly(data, new)
     saveNormAnomaly(data, new)

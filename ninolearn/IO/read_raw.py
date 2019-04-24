@@ -140,3 +140,31 @@ def ssh_godas():
     data = data.load()
     data.sshg.attrs['dataset'] = 'GODAS'
     return data.sshg
+
+def sat_gfdl():
+    data = xr.open_mfdataset(join(rawdir, 'sat_gfdl', '*.nc'),
+                             concat_dim='time')
+
+    data = data.load()
+    data.tas.attrs['dataset'] = 'GFDL-CM3'
+
+    return data.tas
+
+def ssh_gfdl():
+    data = xr.open_mfdataset(join(rawdir, 'ssh_gfdl', '*.nc'),
+                             concat_dim='time')
+
+    #data = data.load()
+    data.zos.attrs['dataset'] = 'GFDL-CM3'
+
+    return data.zos
+
+
+def sst_gfdl():
+    data = xr.open_mfdataset(join(rawdir, 'sst_gfdl', '*.nc'),
+                             concat_dim='time')
+
+    #data = data.load()
+    data.tos.attrs['dataset'] = 'GFDL-CM3'
+
+    return data.tos
