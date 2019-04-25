@@ -1,28 +1,29 @@
-# -*- coding: utf-8 -*-
-
+"""
+In this script, I want to build a deep ensemble that is first trained on the GFDL data
+and then trained on the observations
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 
 import keras.backend as K
-from keras.models import Sequential, Model
+from keras.models import Model
+
 from keras.layers import Dense, Input, concatenate
-from keras.layers import LSTM
-from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
-from keras import regularizers
-from keras.layers.core import Lambda
+from keras.models import model_from_json
+from keras.regularizers import l1_l2
+from keras.utils import plot_model
 
-from sklearn.preprocessing import MinMaxScaler,StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
 from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
-from ninolearn.learn.augment import window_warping
 from ninolearn.utils import print_header
 
 K.clear_session()
@@ -39,53 +40,38 @@ def mixture(pred):
 #%% =============================================================================
 # #%% read data
 # =============================================================================
-reader = data_reader(startdate='1981-01')
+reader = data_reader(startdate='1981-01', enddate='2018-12')
 
-nino4 = reader.read_csv('nino4M')
+# Some indeces
 nino34 = reader.read_csv('nino3.4M')
-nino12 = reader.read_csv('nino1+2M')
-nino3 = reader.read_csv('nino3M')
-
+wwv = reader.read_csv('wwv')
 iod = reader.read_csv('iod')
+
+#PCA data
+pca_air = reader.read_statistic('pca', variable='air',
+                           dataset='NCEP', processed="anom")
+
+pca1_air = pca_air['pca1']
+pca2_air = pca_air['pca2']
+pca3_air = pca_air['pca3']
+
+# Network metics
+nwm_ssh = reader.read_statistic('network_metrics', variable='sshg',
+                           dataset='GODAS', processed="anom")
+
+c2 = nwm_ssh['fraction_clusters_size_2']
+c3 = nwm_ssh['fraction_clusters_size_3']
+c5 = nwm_ssh['fraction_clusters_size_5']
+S = nwm_ssh['fraction_giant_component']
+H = nwm_ssh['corrected_hamming_distance']
+T = nwm_ssh['global_transitivity']
+C = nwm_ssh['avelocal_transmissivity']
+L = nwm_ssh['average_path_length']
+nwt = nwm_ssh['threshold']
 
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
-
-wwv = reader.read_csv('wwv')
-network = reader.read_statistic('network_metrics', variable='air',
-                           dataset='NCEP', processed="anom")
-
-network_ssh = reader.read_statistic('network_metrics', variable='sshg',
-                           dataset='GODAS', processed="anom")
-
-pca_air = reader.read_statistic('pca', variable='air',
-                           dataset='NCEP', processed="anom")
-pca_u = reader.read_statistic('pca', variable='uwnd',
-                           dataset='NCEP', processed="anom")
-pca_v = reader.read_statistic('pca', variable='vwnd',
-                           dataset='NCEP', processed="anom")
-
-c2 = network['fraction_clusters_size_2']
-c3 = network['fraction_clusters_size_3']
-c5 = network['fraction_clusters_size_5']
-S = network['fraction_giant_component']
-H = network['corrected_hamming_distance']
-T = network['global_transitivity']
-C = network['avelocal_transmissivity']
-L = network['average_path_length']
-nwt = network['threshold']
-pca1_air = pca_air['pca1']
-pca2_air = pca_air['pca2']
-pca3_air = pca_air['pca3']
-pca1_u = pca_u['pca1']
-pca2_u = pca_u['pca2']
-pca3_u = pca_u['pca3']
-pca1_v = pca_v['pca1']
-pca2_v = pca_v['pca2']
-pca3_v = pca_v['pca3']
-
-c2ssh = network_ssh['fraction_clusters_size_2']
 
 #%% =============================================================================
 # # process data
@@ -93,26 +79,29 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 time_lag = 12
 lead_time = 6
 
-feature_unscaled = np.stack((nino34, sc, yr, c2ssh.values,  #nino12.values, nino3.values, nino4.values,
-                             wwv.values, sc, iod.values, # nwt.values#, c2.values,c3.values, c5.values,
-#                           S, H, T, C, L,
-#                           pca1_air, pca2_air, pca3_air,
-#                             pca1_u.values, pca2_u.values, pca3_u.values,
-#                             pca1_v.values, pca2_v.values, pca3_v.values
-                             ), axis=1)
+def make_feature(*args):
+    """
+    function to generate a scaled feature
+    """
+    feature_unscaled = np.stack(*args, axis=1)
+    scaler = StandardScaler()
+    Xorg = scaler.fit_transform(feature_unscaled)
 
+    Xorg = np.nan_to_num(Xorg)
 
-scaler = StandardScaler()
-Xorg = scaler.fit_transform(feature_unscaled)
+    X = Xorg[:-lead_time,:]
+    futureX = Xorg[-lead_time-time_lag:,:]
 
-Xorg = np.nan_to_num(Xorg)
+    X = include_time_lag(X, max_lag=time_lag)
+    futureX =  include_time_lag(futureX, max_lag=time_lag)
 
-X = Xorg[:-lead_time,:]
-futureX = Xorg[-lead_time-time_lag:,:]
+    return X, futureX
 
-X = include_time_lag(X, max_lag=time_lag)
-futureX =  include_time_lag(futureX, max_lag=time_lag)
+X, futureX = make_feature((nino34, sc, yr,
+                             c2, c3, c5, S, H, T, C, L,
+                             pca1_air, pca2_air, pca3_air))
 
+X2, futureX2 = make_feature((wwv, iod))
 
 yorg = nino34.values
 y = yorg[lead_time + time_lag:]
@@ -122,25 +111,16 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-#train_frac = 0.667
-#train_end = int(train_frac * X.shape[0])
-#
-#trainX, testX = X[:train_end,:], X[train_end:,:]
-#trainy, testy= y[:train_end], y[train_end:]
-#traintimey, testtimey = timey[:train_end], timey[train_end:]
-
 test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
 
-trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
-testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
+trainX, trainX2, trainy, traintimey = X[train_indeces,:], X2[train_indeces,:], y[train_indeces], timey[train_indeces]
+
+testX, testX2, testy, testtimey = X[test_indeces,:], X2[test_indeces,:], y[test_indeces], timey[test_indeces]
 
 #%% =============================================================================
 # # neural network
 # =============================================================================
-n_ens = 3
-model_ens = []
-
 optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
@@ -149,72 +129,80 @@ es = EarlyStopping(monitor='val_loss',
                               verbose=0,
                               mode='min',
                               restore_best_weights=True)
-n_ens_sel = 0
 
-l1 = 0.01
-l2 = 0.1
 
-l1_out = 0.0
-l2_out = 0.1
 
-while n_ens_sel<n_ens:
+rejected = True
+while rejected:
+    # load json and create model
+    json_file = open('model.json', 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    loaded_model = model_from_json(loaded_model_json)
+    # load weights into new model
+    loaded_model.load_weights("model.h5")
+    plot_model(loaded_model, to_file='loaded_model_full')
+    loaded_model.layers.pop()
+    loaded_model.layers.pop()
+    loaded_model.layers.pop()
+    plot_model(loaded_model, to_file='loaded_model_reduced')
 
-    # define the model
+    # pretrained model as layer
     inputs = Input(shape=(trainX.shape[1],))
-    h = GaussianNoise(0.1)(inputs)
+    loaded_model_output = loaded_model(inputs)
 
-    h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
-    h = Dropout(0.2)(h)
 
-    mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
-    sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+    # add a new input layer
+    new_inputs = Input(shape=(trainX2.shape[1],))
+
+    h = concatenate([loaded_model_output, new_inputs])
+
+    h = Dense(4, activation='relu',
+              kernel_regularizer=l1_l2(0.01, 0.02))(h)
+
+    mu = Dense(1, activation='linear', kernel_regularizer=l1_l2(0, 0.01))(h)
+    sigma = Dense(1, activation='softplus', kernel_regularizer=l1_l2(0, 0.01))(h)
 
     outputs = concatenate([mu, sigma])
 
-    model_ens.append(Model(inputs=inputs, outputs=outputs))
-    model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
+    model = Model(inputs=[inputs, new_inputs], outputs=outputs)
+    model.compile(loss=nll_gaussian, optimizer=optimizer)
 
     print_header("Train")
-    history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
+    history = model.fit([trainX, trainX2], trainy, epochs=30, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
-                        validation_data=(testX, testy))
+                        validation_data=([testX, testX2], testy))
 
-    mem_pred = model_ens[-1].predict(trainX)
+    mem_pred = model.predict([trainX, trainX2])
     mem_mean = mem_pred[:,0]
     mem_std = np.abs(mem_pred[:,1])
 
     in_frac = inside_fraction(trainy, mem_mean, mem_std)
 
-    if in_frac > 0.8 or in_frac < 0.55:
+    if in_frac > 0.85 or in_frac < 0.45:
         print_header("Reject this model. Unreasonable stds.")
-        model_ens.pop()
 
-    elif rmse(trainy, mem_mean)>0.9:
+    elif rmse(trainy, mem_mean)>1.:
         print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
-        model_ens.pop()
 
     elif np.min(history.history["loss"])>1:
         print_header("Reject this model. High minimum loss.")
-        model_ens.pop()
 
-    n_ens_sel = len(model_ens)
-#%%
-
-
-pred_ens = np.zeros((len(testy),2, n_ens_sel))
-predtrain_ens = np.zeros((len(trainy),2, n_ens_sel))
-predfuture_ens = np.zeros((lead_time,2, n_ens_sel))
-
-for i in range(n_ens_sel):
-    pred_ens[:,:,i] = model_ens[i].predict(testX)
-    predtrain_ens[:,:,i] = model_ens[i].predict(trainX)
-    predfuture_ens[:,:,i] = model_ens[i].predict(futureX)
+    else:
+        rejected = False
 
 
-pred_mean, pred_std = mixture(pred_ens)
-predtrain_mean, predtrain_std = mixture(predtrain_ens)
-predfuture_mean, predfuture_std = mixture(predfuture_ens)
+#%% =============================================================================
+# predict
+# =============================================================================
+predtest = model.predict([testX,testX2])
+pred_mean, pred_std = predtest[:,0], predtest[:,1]
+
+predtrain = model.predict([trainX,trainX2])
+predtrain_mean, predtrain_std = predtrain[:,0], predtrain[:,1]
+
+predfuture = model.predict([futureX,futureX2])
+predfuture_mean, predfuture_std = predfuture[:,0], predfuture[:,1]
 
 
 #%% =============================================================================
@@ -270,8 +258,8 @@ predicttrainy_m2std = predtrain_mean - 2 * np.abs(predtrain_std)
 
 plt.fill_between(traintimey,predicttrainy_m1std,predicttrainy_p1std ,facecolor='lime', alpha=0.5)
 plt.fill_between(traintimey,predicttrainy_m2std,predicttrainy_p2std ,facecolor='lime', alpha=0.2)
-
 plt.plot(traintimey, predtrain_mean, "g")
+
 
 # future
 predictfuturey_p1std = predfuture_mean + np.abs(predfuture_std)
@@ -329,14 +317,6 @@ error = pred_mean - testy
 plt.hist(error, bins=16)
 
 # =============================================================================
-# ayer weight
+# Plot the model
 # =============================================================================
-weights = model_ens[1].get_weights()
-max_w = np.max(np.abs(weights[0]))
-M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
-plt.colorbar(M1, extend="both")
-
-max_w2 = np.max(np.abs(weights[1]))
-M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
-                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
-plt.colorbar(M2, extend="both")
+plot_model(model,rankdir='LR')

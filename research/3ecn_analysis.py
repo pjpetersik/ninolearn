@@ -36,25 +36,42 @@ nms.computeTimeSeries()
 # =============================================================================
 # =============================================================================
 plt.close("all")
-reader = data_reader(startdate='1981-01', enddate='2018-12')
+var = 'fraction_clusters_size_3'
+#var = 'corrected_hamming_distance'
+var = 'avelocal_transmissivity'
+var = 'average_path_length'
+# =============================================================================
+# GFDL
+# =============================================================================
+readergfdl = data_reader(startdate='1701-01', enddate='2199-12')
+
+nwm_gfdl = readergfdl.read_statistic('network_metrics', 'zos',
+                                        dataset='GFDL-CM3',
+                                        processed='anom')
+
+nino34gfdl = readergfdl.read_csv('nino3.4M_gfdl')
 
 
-nwm = reader.read_statistic('network_metrics', 'sshg',
+plt.figure(figsize=(7, 1.5))
+nwm_gfdl[var].plot(c='k')
+nino_background(nino34gfdl, nino_treshold=0.5)
+
+plt.subplots()
+plt.xcorr(nino34gfdl, nwm_gfdl[var], maxlags=48)
+
+# =============================================================================
+# Observations
+# =============================================================================
+readerobs = data_reader(startdate='1981-01', enddate='2018-12')
+nwm_obs = readerobs.read_statistic('network_metrics', 'sshg',
                                         dataset='GODAS',
                                         processed='anom')
-nwm2 = reader.read_statistic('network_metrics', 'air_daily',
-                                        dataset='NCEP',
-                                        processed='anom')
 
+nino34 = readerobs.read_csv('nino3.4M')
 
-nino34 = reader.read_csv('nino3.4M')
-
-#plt.close("all")
-#
-#plt.plot(nino34/max(nino34))
-##plt.plot(wwv/max(wwv))
-#
-#plt.figure(figsize=(7, 1.5))
-nwm['fraction_clusters_size_2'].plot(c='k')
-#nwm2['fraction_clusters_size_2'].plot(c='g')
+plt.figure(figsize=(7, 1.5))
+nwm_obs[var].plot(c='k')
 nino_background(nino34, nino_treshold=0.5)
+
+plt.subplots()
+plt.xcorr(nino34, nwm_obs[var], maxlags=48)
