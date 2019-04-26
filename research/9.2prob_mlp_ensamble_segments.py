@@ -45,10 +45,8 @@ yr5 = np.arange(len_ts) % 60
 
 
 wwv = reader.read_csv('wwv')
-network = reader.read_statistic('network_metrics', variable='air',
-                           dataset='NCEP', processed="anom")
 
-network_ssh = reader.read_statistic('network_metrics', variable='sshg',
+network= reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
 
 pca_air = reader.read_statistic('pca', variable='air',
@@ -78,7 +76,7 @@ pca1_v = pca_v['pca1']
 pca2_v = pca_v['pca2']
 pca3_v = pca_v['pca3']
 
-c2ssh = network_ssh['fraction_clusters_size_2']
+
 
 #%% =============================================================================
 # # process data
@@ -86,9 +84,9 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 time_lag = 6
 lead_time = 3
 train_frac = 0.7
-feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
-                             wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
-#                            S.values, H.values, T.values, C.values, L.values,
+feature_unscaled = np.stack((nino34, # nino12.values , nino3.values, nino4.values,
+                             wwv, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
+                             S, H, T, C, L,
 #                            pca1_air.values, pca2_air.values, pca3_air.values,
 #                             pca1_u.values, pca2_u.values, pca3_u.values,
 #                             pca1_v.values, pca2_v.values, pca3_v.values

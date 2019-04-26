@@ -21,7 +21,7 @@ nms.computeTimeSeries()
 
 
 #%% =============================================================================
-# GFDL Data
+# GFDL Data zos
 # =============================================================================
 nms = networkMetricsSeries('zos', 'GFDL-CM3', processed="anom",
                            threshold=0.9, startyear=1700, endyear=2199,
@@ -29,6 +29,14 @@ nms = networkMetricsSeries('zos', 'GFDL-CM3', processed="anom",
                            lat_min=-30, lat_max=30, verbose=1)
 nms.computeTimeSeries()
 
+#%% =============================================================================
+# GFDL Data tas
+# =============================================================================
+nms = networkMetricsSeries('tas', 'GFDL-CM3', processed="anom",
+                           threshold=0.9, startyear=1700, endyear=2199,
+                           window_size=12, lon_min=120, lon_max=280,
+                           lat_min=-30, lat_max=30, verbose=1)
+nms.computeTimeSeries()
 
 # %% ==========================================================================
 # =============================================================================

@@ -47,17 +47,28 @@ nino12 = reader.read_csv('nino1+2M')
 nino3 = reader.read_csv('nino3M')
 
 iod = reader.read_csv('iod')
+wwv = reader.read_csv('wwv')
 
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
 
-wwv = reader.read_csv('wwv')
-network = reader.read_statistic('network_metrics', variable='air',
-                           dataset='NCEP', processed="anom")
-
 network_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
+
+network_sst = reader.read_statistic('network_metrics', variable='sshg',
+                           dataset='GODAS', processed="anom")
+
+c2_ssh = network_ssh['fraction_clusters_size_2']
+S_ssh = network_ssh['fraction_giant_component']
+H_ssh = network_ssh['corrected_hamming_distance']
+T_ssh = network_ssh['global_transitivity']
+C_ssh = network_ssh['avelocal_transmissivity']
+L_ssh = network_ssh['average_path_length']
+
+C_sst = network_sst['avelocal_transmissivity']
+H_sst = network_ssh['corrected_hamming_distance']
+
 
 pca_air = reader.read_statistic('pca', variable='air',
                            dataset='NCEP', processed="anom")
@@ -65,42 +76,27 @@ pca_u = reader.read_statistic('pca', variable='uwnd',
                            dataset='NCEP', processed="anom")
 pca_v = reader.read_statistic('pca', variable='vwnd',
                            dataset='NCEP', processed="anom")
+pca_sst = reader.read_statistic('pca', variable='sst',
+                           dataset='ERSSTv5', processed="anom")
 
-c2 = network['fraction_clusters_size_2']
-c3 = network['fraction_clusters_size_3']
-c5 = network['fraction_clusters_size_5']
-S = network['fraction_giant_component']
-H = network['corrected_hamming_distance']
-T = network['global_transitivity']
-C = network['avelocal_transmissivity']
-L = network['average_path_length']
-nwt = network['threshold']
-pca1_air = pca_air['pca1']
 pca2_air = pca_air['pca2']
-pca3_air = pca_air['pca3']
-pca1_u = pca_u['pca1']
 pca2_u = pca_u['pca2']
-pca3_u = pca_u['pca3']
-pca1_v = pca_v['pca1']
 pca2_v = pca_v['pca2']
-pca3_v = pca_v['pca3']
-
-c2ssh = network_ssh['fraction_clusters_size_2']
+pca2_sst = pca_sst['pca2']
 
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 12
+time_lag = 6
 lead_time = 6
 
-feature_unscaled = np.stack((nino34, sc, yr, c2ssh.values,  #nino12.values, nino3.values, nino4.values,
-                             wwv.values, sc, iod.values, # nwt.values#, c2.values,c3.values, c5.values,
-#                           S, H, T, C, L,
-#                           pca1_air, pca2_air, pca3_air,
-#                             pca1_u.values, pca2_u.values, pca3_u.values,
-#                             pca1_v.values, pca2_v.values, pca3_v.values
+feature_unscaled = np.stack((nino34,
+                             sc,
+                             wwv, iod,
+                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+                             C_sst, H_sst,
+                             pca2_u, pca2_v, pca2_air, pca2_sst
                              ), axis=1)
-
 
 scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
@@ -113,7 +109,6 @@ futureX = Xorg[-lead_time-time_lag:,:]
 X = include_time_lag(X, max_lag=time_lag)
 futureX =  include_time_lag(futureX, max_lag=time_lag)
 
-
 yorg = nino34.values
 y = yorg[lead_time + time_lag:]
 
@@ -121,13 +116,6 @@ timey = nino34.index[lead_time + time_lag:]
 futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
-
-#train_frac = 0.667
-#train_end = int(train_frac * X.shape[0])
-#
-#trainX, testX = X[:train_end,:], X[train_end:,:]
-#trainy, testy= y[:train_end], y[train_end:]
-#traintimey, testtimey = timey[:train_end], timey[train_end:]
 
 test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
@@ -138,10 +126,8 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 #%% =============================================================================
 # # neural network
 # =============================================================================
-n_ens = 3
-model_ens = []
 
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
@@ -149,7 +135,11 @@ es = EarlyStopping(monitor='val_loss',
                               verbose=0,
                               mode='min',
                               restore_best_weights=True)
-n_ens_sel = 0
+
+model_ens = []
+n_ens = 5
+segment_len = trainX.shape[0]//n_ens
+n_ens_sel=0
 
 l1 = 0.01
 l2 = 0.1
@@ -166,7 +156,6 @@ while n_ens_sel<n_ens:
     h = Dense(8, activation='relu',
               kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
     h = Dropout(0.2)(h)
-
     mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
     sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
 
@@ -175,10 +164,15 @@ while n_ens_sel<n_ens:
     model_ens.append(Model(inputs=inputs, outputs=outputs))
     model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
 
-    print_header("Train")
-    history = model_ens[-1].fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
-                        shuffle=True, callbacks=[es],
-                        validation_data=(testX, testy))
+    print_header(f"Train Iteration Nr {n_ens_sel}")
+    start_ind = n_ens_sel * segment_len
+    end_ind = (n_ens_sel+1) * segment_len
+
+    history = model_ens[-1].fit(np.delete(trainX, np.s_[start_ind:end_ind], axis=0),
+                                np.delete(trainy, np.s_[start_ind:end_ind]),
+                                epochs=300, batch_size=10, verbose=1,
+                                shuffle=True, callbacks=[es],
+                                validation_data=(trainX[start_ind:end_ind], trainy[start_ind:end_ind]))
 
     mem_pred = model_ens[-1].predict(trainX)
     mem_mean = mem_pred[:,0]
@@ -190,7 +184,7 @@ while n_ens_sel<n_ens:
         print_header("Reject this model. Unreasonable stds.")
         model_ens.pop()
 
-    elif rmse(trainy, mem_mean)>0.9:
+    elif rmse(trainy, mem_mean)>1.:
         print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
         model_ens.pop()
 
@@ -199,6 +193,7 @@ while n_ens_sel<n_ens:
         model_ens.pop()
 
     n_ens_sel = len(model_ens)
+
 #%%
 
 

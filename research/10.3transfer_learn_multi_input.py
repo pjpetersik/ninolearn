@@ -7,10 +7,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 
-import keras.backend as K
-from keras.models import Model
+from os.path import join
 
-from keras.layers import Dense, Input, concatenate
+import keras.backend as K
+from keras.models import Model, load_model
+from keras.layers import Dense, Input, concatenate, Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.models import model_from_json
@@ -25,17 +26,27 @@ from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
 from ninolearn.utils import print_header
+from ninolearn.pathes import modeldir
 
 K.clear_session()
 
-def mixture(pred):
+def make_feature(*args):
     """
-    returns the ensemble mixture results
+    function to generate a scaled feature
     """
-    mix_mean = pred[:,0,:].mean(axis=1)
-    mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
-    mix_std = np.sqrt(mix_var)
-    return mix_mean, mix_std
+    feature_unscaled = np.stack(*args, axis=1)
+    scaler = StandardScaler()
+    Xorg = scaler.fit_transform(feature_unscaled)
+
+    Xorg = np.nan_to_num(Xorg)
+
+    X = Xorg[:-lead_time,:]
+    futureX = Xorg[-lead_time-time_lag:,:]
+
+    X = include_time_lag(X, max_lag=time_lag)
+    futureX =  include_time_lag(futureX, max_lag=time_lag)
+
+    return X, futureX
 
 #%% =============================================================================
 # #%% read data
@@ -50,10 +61,15 @@ iod = reader.read_csv('iod')
 #PCA data
 pca_air = reader.read_statistic('pca', variable='air',
                            dataset='NCEP', processed="anom")
-
 pca1_air = pca_air['pca1']
 pca2_air = pca_air['pca2']
 pca3_air = pca_air['pca3']
+
+pca_u = reader.read_statistic('pca', variable='uwnd',
+                           dataset='NCEP', processed="anom")
+pca1_u = pca_u['pca1']
+pca2_u = pca_u['pca2']
+pca3_u = pca_u['pca3']
 
 # Network metics
 nwm_ssh = reader.read_statistic('network_metrics', variable='sshg',
@@ -77,31 +93,15 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
-
-def make_feature(*args):
-    """
-    function to generate a scaled feature
-    """
-    feature_unscaled = np.stack(*args, axis=1)
-    scaler = StandardScaler()
-    Xorg = scaler.fit_transform(feature_unscaled)
-
-    Xorg = np.nan_to_num(Xorg)
-
-    X = Xorg[:-lead_time,:]
-    futureX = Xorg[-lead_time-time_lag:,:]
-
-    X = include_time_lag(X, max_lag=time_lag)
-    futureX =  include_time_lag(futureX, max_lag=time_lag)
-
-    return X, futureX
+lead_time = 9
 
 X, futureX = make_feature((nino34, sc, yr,
                              c2, c3, c5, S, H, T, C, L,
                              pca1_air, pca2_air, pca3_air))
 
-X2, futureX2 = make_feature((wwv, iod))
+X2, futureX2 = make_feature((nino34, sc, yr, c2,
+                             wwv, sc, iod
+                             ))
 
 yorg = nino34.values
 y = yorg[lead_time + time_lag:]
@@ -111,7 +111,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainX2, trainy, traintimey = X[train_indeces,:], X2[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -121,7 +121,7 @@ testX, testX2, testy, testtimey = X[test_indeces,:], X2[test_indeces,:], y[test_
 #%% =============================================================================
 # # neural network
 # =============================================================================
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
@@ -130,60 +130,65 @@ es = EarlyStopping(monitor='val_loss',
                               mode='min',
                               restore_best_weights=True)
 
-
-
 rejected = True
+
 while rejected:
     # load json and create model
-    json_file = open('model.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    loaded_model = model_from_json(loaded_model_json)
-    # load weights into new model
-    loaded_model.load_weights("model.h5")
+    path_h5 = join(modeldir, f"model2{lead_time}.h5")
+    loaded_model = load_model(path_h5)
+
     plot_model(loaded_model, to_file='loaded_model_full')
+
+    #remove layers from the loaded model
     loaded_model.layers.pop()
     loaded_model.layers.pop()
     loaded_model.layers.pop()
+#    loaded_model.layers.pop()
+
     plot_model(loaded_model, to_file='loaded_model_reduced')
 
     # pretrained model as layer
-    inputs = Input(shape=(trainX.shape[1],))
-    loaded_model_output = loaded_model(inputs)
-
+    inputs1 = Input(shape=(trainX.shape[1],))
+    h1 = loaded_model(inputs1)
+    h1 = Model(inputs=inputs1, outputs=h1)
 
     # add a new input layer
-    new_inputs = Input(shape=(trainX2.shape[1],))
+    inputs2 = Input(shape=(trainX2.shape[1],))
+    h2 = GaussianNoise(0.2)(inputs2)
+    h2 = Dense(8, activation='relu',
+              kernel_regularizer=l1_l2(0.01, 0.1))(h2)
+    h2 = Dropout(0.2)(h2)
+    h2 = Model(inputs=inputs2, outputs=h2)
 
-    h = concatenate([loaded_model_output, new_inputs])
+    # concatante the two branches
+    h = concatenate([h1.output, h2.output])
 
-    h = Dense(4, activation='relu',
-              kernel_regularizer=l1_l2(0.01, 0.02))(h)
-
-    mu = Dense(1, activation='linear', kernel_regularizer=l1_l2(0, 0.01))(h)
-    sigma = Dense(1, activation='softplus', kernel_regularizer=l1_l2(0, 0.01))(h)
+    mu = Dense(1, activation='linear', kernel_regularizer=l1_l2(0.0, 0.01))(h)
+    sigma = Dense(1, activation='softplus', kernel_regularizer=l1_l2(0.0, 0.01))(h)
 
     outputs = concatenate([mu, sigma])
 
-    model = Model(inputs=[inputs, new_inputs], outputs=outputs)
+    model = Model(inputs=[inputs1, inputs2], outputs=outputs)
+    model.get_layer('model_1').trainable = False
+
     model.compile(loss=nll_gaussian, optimizer=optimizer)
 
     print_header("Train")
-    history = model.fit([trainX, trainX2], trainy, epochs=30, batch_size=1,verbose=1,
+    history = model.fit([trainX, trainX2], trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
                         validation_data=([testX, testX2], testy))
 
-    mem_pred = model.predict([trainX, trainX2])
-    mem_mean = mem_pred[:,0]
-    mem_std = np.abs(mem_pred[:,1])
+    pred = model.predict([trainX, trainX2])
+    mean = pred[:,0]
+    std = np.abs(pred[:,1])
 
-    in_frac = inside_fraction(trainy, mem_mean, mem_std)
+    in_frac = inside_fraction(trainy, mean, std)
 
     if in_frac > 0.85 or in_frac < 0.45:
         print_header("Reject this model. Unreasonable stds.")
 
-    elif rmse(trainy, mem_mean)>1.:
-        print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
+    elif rmse(trainy, mean)>1.:
+        print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mean)}")
 
     elif np.min(history.history["loss"])>1:
         print_header("Reject this model. High minimum loss.")
@@ -320,3 +325,16 @@ plt.hist(error, bins=16)
 # Plot the model
 # =============================================================================
 plot_model(model,rankdir='LR')
+
+# =============================================================================
+# layer weight
+# =============================================================================
+weights = model.get_layer('model_1').get_weights()
+max_w = np.max(np.abs(weights[0]))
+M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
+plt.colorbar(M1, extend="both")
+
+max_w2 = np.max(np.abs(weights[1]))
+M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
+                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
+plt.colorbar(M2, extend="both")

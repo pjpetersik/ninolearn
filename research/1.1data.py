@@ -212,36 +212,38 @@ prep_iod()
 from ninolearn.IO import read_raw
 from ninolearn.postprocess.anomaly import postprocess
 from ninolearn.postprocess.regrid import to2_5x2_5
-## postprocess sst data from ERSSTv5
-#sst_ERSSTv5 = read_raw.sst_ERSSTv5()
-#postprocess(sst_ERSSTv5)
-#
-## postprocess data from NCEP/NCAR reanalysis
-#uwind = read_raw.uwind()
-#postprocess(uwind)
-#
-#vwind = read_raw.vwind()
-#postprocess(vwind)
-#
-#sat = read_raw.sat(mean='monthly')
-#postprocess(sat)
-#
-## postprocess sst date from HadISST date set
-#sst_HadISST = read_raw.sst_HadISST()
-#postprocess(sst_HadISST)
-#
-## postprocess sat daily values from NCEP/NCAR reanalysis
-#sat_daily = read_raw.sat(mean='daily')
-#postprocess(sat_daily)
-#
-## postprocess ssh values from ORAP5
-#ssh = read_raw.ssh()
-#postprocess(ssh)
-#
-##%% post process values from GODAS
-#ssh_godas = read_raw.ssh_godas()
-#ssh_godas_regrid = to2_5x2_5(ssh_godas)
-#postprocess(ssh_godas_regrid)
+# postprocess sst data from ERSSTv5
+sst_ERSSTv5 = read_raw.sst_ERSSTv5()
+sst_ERSSTv5_regrid = to2_5x2_5(sst_ERSSTv5)
+postprocess(sst_ERSSTv5_regrid)
+
+# postprocess data from NCEP/NCAR reanalysis
+uwind = read_raw.uwind()
+postprocess(uwind)
+
+vwind = read_raw.vwind()
+postprocess(vwind)
+
+sat = read_raw.sat(mean='monthly')
+postprocess(sat)
+
+# postprocess sst date from HadISST date set
+sst_HadISST = read_raw.sst_HadISST()
+sst_HadISST_regrid = to2_5x2_5(sst_HadISST)
+postprocess(sst_HadISST_regrid)
+
+# postprocess sat daily values from NCEP/NCAR reanalysis
+sat_daily = read_raw.sat(mean='daily')
+postprocess(sat_daily)
+
+# postprocess ssh values from ORAP5
+ssh = read_raw.ssh()
+postprocess(ssh)
+
+#%% post process values from GODAS
+ssh_godas = read_raw.ssh_godas()
+ssh_godas_regrid = to2_5x2_5(ssh_godas)
+postprocess(ssh_godas_regrid)
 
 #%% post process values for GFDL control run
 sat_gfdl = read_raw.sat_gfdl()

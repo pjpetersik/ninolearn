@@ -7,11 +7,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 
+from os.path import join, exists
+from os import remove, mkdir
+
 import keras.backend as K
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
-from keras.models import model_from_json
-from keras.regularizers import l1_l2
+from keras.models import model_from_json, load_model, save_model
+from keras.regularizers import l1_l2, l1
 
 from sklearn.preprocessing import StandardScaler
 
@@ -21,6 +24,7 @@ from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
 from ninolearn.utils import print_header
+from ninolearn.pathes import modeldir
 
 K.clear_session()
 
@@ -97,7 +101,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -117,16 +121,15 @@ es = EarlyStopping(monitor='val_loss',
 
 rejected = True
 while rejected:
-
     # load json and create model
-    json_file = open('model.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    # load weights into new model
-    model.load_weights("model.h5")
+    path_h5 = join(modeldir, f"model{lead_time}.h5")
+    model = load_model(path_h5)
 
-    model.get_layer('dense_1').kernel_regularizer = l1_l2(0.1, 0.4)
+    model.get_layer('dense_1').kernel_regularizer = l1_l2(0.02, 0.05)
+    model.save("temp_path.h5")
+    model = load_model("temp_path.h5")
+    remove("temp_path.h5")
+
     #model.get_layer('dense_1').trainable = False
 
     model.compile(loss=nll_gaussian, optimizer=optimizer)
@@ -155,6 +158,18 @@ while rejected:
 
     else:
         rejected = False
+
+#%% =============================================================================
+# Save
+# =============================================================================
+
+if not exists(modeldir):
+    mkdir(modeldir)
+
+path_h5 = join(modeldir, f"model2{lead_time}.h5")
+save_model(model, path_h5, include_optimizer=False)
+
+print("Saved model to disk")
 
 
 #%% =============================================================================
@@ -280,3 +295,17 @@ plt.title("Error distribution")
 error = pred_mean - testy
 
 plt.hist(error, bins=16)
+
+# =============================================================================
+# layer weight
+# =============================================================================
+weights = model.get_weights()
+
+max_w = np.max(np.abs(weights[0]))
+M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
+plt.colorbar(M1, extend="both")
+
+max_w2 = np.max(np.abs(weights[1]))
+M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
+                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
+plt.colorbar(M2, extend="both")

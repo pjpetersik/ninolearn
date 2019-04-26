@@ -7,8 +7,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 
+from os.path import exists, join
+from os import mkdir
+
 import keras.backend as K
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, save_model
 from keras.layers import Dense, Input, concatenate
 from keras.layers import LSTM
 from keras.layers import Dropout, GaussianNoise
@@ -16,6 +19,7 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
 from keras.layers.core import Lambda
+
 
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 
@@ -26,6 +30,7 @@ from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
 from ninolearn.learn.augment import window_warping
 from ninolearn.utils import print_header
+from ninolearn.pathes import modeldir
 
 K.clear_session()
 
@@ -77,7 +82,7 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
+lead_time = 9
 
 feature_unscaled = np.stack((nino34, sc, yr,
                              c2, c3, c5, S, H, T, C, L,
@@ -121,8 +126,8 @@ es = EarlyStopping(monitor='val_loss',
                               mode='min',
                               restore_best_weights=True)
 
-l1 = 0.001
-l2 = 0.001
+l1 = 0.01
+l2 = 0.1
 
 l1_out = 0.0
 l2_out = 0.01
@@ -132,11 +137,8 @@ while rejected:
 
     # define the model
     inputs = Input(shape=(trainX.shape[1],))
-    h = GaussianNoise(0.1)(inputs)
+    h = GaussianNoise(0.2)(inputs)
 
-    h = Dense(16, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
-    h = Dropout(0.2)(h)
     h = Dense(8, activation='relu',
               kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
     h = Dropout(0.2)(h)
@@ -178,11 +180,13 @@ while rejected:
 #%% =============================================================================
 # Save
 # =============================================================================
-model_json = model.to_json()
-with open("model.json", "w") as json_file:
-    json_file.write(model_json)
-# serialize weights to HDF5
-model.save_weights("model.h5")
+
+if not exists(modeldir):
+    mkdir(modeldir)
+
+path_h5 = join(modeldir, f"model{lead_time}.h5")
+save_model(model, path_h5, include_optimizer=False)
+
 print("Saved model to disk")
 
 #%% =============================================================================
@@ -295,7 +299,7 @@ error = pred_mean - testy
 plt.hist(error, bins=16)
 
 # =============================================================================
-# ayer weight
+# layer weight
 # =============================================================================
 weights = model.get_weights()
 max_w = np.max(np.abs(weights[0]))

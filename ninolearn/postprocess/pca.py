@@ -6,6 +6,7 @@ from os.path import join
 from sklearn.decomposition.pca import PCA
 from mpl_toolkits.basemap import Basemap
 from matplotlib import cm
+from scipy.signal import detrend
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.pathes import postdir
@@ -66,6 +67,7 @@ class pca(PCA):
                                   enddate=self.enddate,
                                   lon_min=lon_min, lon_max=lon_max,
                                   lat_min=lat_min, lat_max=lat_max)
+
         data = self.reader.read_netcdf(variable, dataset, processed)
 
         self.time = data['time']
@@ -81,13 +83,16 @@ class pca(PCA):
         self.EOFarr = EOFarr.reshape((self.len_time,
                                       self.len_lat * self.len_lon))
 
+        self.EOFarr[np.isnan(self.EOFarr)] = 0
+        self.EOFarr = detrend(self.EOFarr, axis=0)
+
     def compute_pca(self):
         """
         Simple wrapper around the PCA.fit() method.
         """
         self.fit(self.EOFarr)
 
-    def save(self):
+    def save(self, extension=''):
         """
         save the first three pca components to a csvfile
         """
@@ -104,7 +109,8 @@ class pca(PCA):
         df = pd.DataFrame({'pca1': pca1, 'pca2': pca2, 'pca3': pca3})
 
         filename = generateFileName(self.variable, self.dataset,
-                                    self.processed, suffix='csv')
+                                    ''.join((self.processed,extension)),
+                                    suffix='csv')
         filename = '-'.join(['pca', filename])
 
         df.to_csv(join(postdir, filename))
