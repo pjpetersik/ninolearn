@@ -56,8 +56,11 @@ yr =  np.arange(len_ts) % 12
 network_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
 
-network_sst = reader.read_statistic('network_metrics', variable='sshg',
-                           dataset='GODAS', processed="anom")
+network_sst = reader.read_statistic('network_metrics', variable='sst',
+                           dataset='ERSSTv5', processed="anom")
+
+network_sat = reader.read_statistic('network_metrics', variable='air',
+                           dataset='NCEP', processed="anom")
 
 c2_ssh = network_ssh['fraction_clusters_size_2']
 S_ssh = network_ssh['fraction_giant_component']
@@ -68,6 +71,9 @@ L_ssh = network_ssh['average_path_length']
 
 C_sst = network_sst['avelocal_transmissivity']
 H_sst = network_ssh['corrected_hamming_distance']
+
+S_air = network_ssh['fraction_giant_component']
+T_air = network_ssh['global_transitivity']
 
 
 pca_air = reader.read_statistic('pca', variable='air',
@@ -87,14 +93,15 @@ pca2_sst = pca_sst['pca2']
 #%% =============================================================================
 # # process data
 # =============================================================================
-time_lag = 6
-lead_time = 6
+time_lag = 12
+lead_time = 12
 
 feature_unscaled = np.stack((nino34,
                              sc,
                              wwv, iod,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
                              C_sst, H_sst,
+                             S_air, T_air,
                              pca2_u, pca2_v, pca2_air, pca2_sst
                              ), axis=1)
 
@@ -127,7 +134,7 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # # neural network
 # =============================================================================
 
-optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
 es = EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
@@ -137,16 +144,18 @@ es = EarlyStopping(monitor='val_loss',
                               restore_best_weights=True)
 
 model_ens = []
+
 n_ens = 5
 segment_len = trainX.shape[0]//n_ens
 n_ens_sel=0
 
-l1 = 0.01
+l1 = 0.08
 l2 = 0.1
 
 l1_out = 0.0
 l2_out = 0.1
 
+# TODO: Loop over ensembles and segments
 while n_ens_sel<n_ens:
 
     # define the model
@@ -170,7 +179,7 @@ while n_ens_sel<n_ens:
 
     history = model_ens[-1].fit(np.delete(trainX, np.s_[start_ind:end_ind], axis=0),
                                 np.delete(trainy, np.s_[start_ind:end_ind]),
-                                epochs=300, batch_size=10, verbose=1,
+                                epochs=300, batch_size=1, verbose=1,
                                 shuffle=True, callbacks=[es],
                                 validation_data=(trainX[start_ind:end_ind], trainy[start_ind:end_ind]))
 

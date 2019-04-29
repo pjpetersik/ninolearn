@@ -48,7 +48,7 @@ data_obj.load_features(['nino34', 'wwv', 'c2_ssh'
                         ])
 
 model = RNNmodel(data_obj, Layers=[SimpleRNN,SimpleRNN], n_neurons=[32,8], Dropout=0.2,
-                 lr=0.0001, epochs=500, batch_size=2, es_epochs=20, verbose=1)
+                 lr=0.01, epochs=500, batch_size=2, es_epochs=20, verbose=1)
 
 model.fit()
 model.predict()

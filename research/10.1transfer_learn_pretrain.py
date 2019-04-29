@@ -11,7 +11,7 @@ from os.path import exists, join
 from os import mkdir
 
 import keras.backend as K
-from keras.models import Sequential, Model, save_model
+from keras.models import Sequential, Model, save_model, load_model
 from keras.layers import Dense, Input, concatenate
 from keras.layers import LSTM
 from keras.layers import Dropout, GaussianNoise
@@ -19,7 +19,6 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
 from keras.layers.core import Lambda
-
 
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 
@@ -49,29 +48,39 @@ def mixture(pred):
 reader = data_reader(startdate='1701-01', enddate='2199-12')
 
 nino34 = reader.read_csv('nino3.4M_gfdl')
+iod = reader.read_csv('iod_gfdl')
 
 # PCA data
 pca_air = reader.read_statistic('pca', variable='tas',
                            dataset='GFDL-CM3', processed="anom")
 
-pca1_air = pca_air['pca1']
 pca2_air = pca_air['pca2']
-pca3_air = pca_air['pca3']
 
 # Network metics
 nwm_ssh = reader.read_statistic('network_metrics', 'zos',
                                         dataset='GFDL-CM3',
                                         processed='anom')
 
-c2 = nwm_ssh['fraction_clusters_size_2']
-c3 = nwm_ssh['fraction_clusters_size_3']
-c5 = nwm_ssh['fraction_clusters_size_5']
-S = nwm_ssh['fraction_giant_component']
-H = nwm_ssh['corrected_hamming_distance']
-T = nwm_ssh['global_transitivity']
-C = nwm_ssh['avelocal_transmissivity']
-L = nwm_ssh['average_path_length']
-nwt = nwm_ssh['threshold']
+c2_ssh = nwm_ssh['fraction_clusters_size_2']
+S_ssh = nwm_ssh['fraction_giant_component']
+H_ssh = nwm_ssh['corrected_hamming_distance']
+T_ssh = nwm_ssh['global_transitivity']
+C_ssh = nwm_ssh['avelocal_transmissivity']
+L_ssh = nwm_ssh['average_path_length']
+
+nwm_air = reader.read_statistic('network_metrics', 'tas',
+                                        dataset='GFDL-CM3',
+                                        processed='anom')
+
+S_air = nwm_air['fraction_giant_component']
+T_air = nwm_air['global_transitivity']
+
+nwm_sst = reader.read_statistic('network_metrics', 'tos',
+                                        dataset='GFDL-CM3',
+                                        processed='anom')
+
+S_sst = nwm_sst['fraction_giant_component']
+C_sst = nwm_sst['avelocal_transmissivity']
 
 # artificiial data
 len_ts = len(nino34)
@@ -82,11 +91,15 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 9
+lead_time = 12
 
-feature_unscaled = np.stack((nino34, sc, yr,
-                             c2, c3, c5, S, H, T, C, L,
-                             pca1_air, pca2_air, pca3_air), axis=1)
+feature_unscaled = np.stack((nino34, sc, #yr,
+                            iod,
+                            c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
+#                            S_air, T_air,
+#                            C_sst, S_sst,
+#                            pca2_air
+                             ), axis=1)
 
 
 scaler = StandardScaler()
@@ -99,7 +112,6 @@ futureX = Xorg[-lead_time-time_lag:,:]
 
 X = include_time_lag(X, max_lag=time_lag)
 futureX =  include_time_lag(futureX, max_lag=time_lag)
-
 
 yorg = nino34.values
 y = yorg[lead_time + time_lag:]
@@ -117,81 +129,83 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 #%% =============================================================================
 # # neural network
 # =============================================================================
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
-es = EarlyStopping(monitor='val_loss',
-                              min_delta=0.0,
-                              patience=10,
-                              verbose=0,
-                              mode='min',
-                              restore_best_weights=True)
+score_best = np.inf
 
-l1 = 0.01
-l2 = 0.1
+for iteration in range(100):
+    # Cross-validation
+    l1 = np.random.uniform(0, 0.1)
+    l2 = np.random.uniform(0, 0.05)
 
-l1_out = 0.0
-l2_out = 0.01
+    l1_out = np.random.uniform(0, 0.01)
+    l2_out = np.random.uniform(0, 0.01)
 
-rejected = True
-while rejected:
+    neurons = np.random.choice([8, 16, 32])
+
+    noise =  np.random.uniform(0, 0.2)
+    dropout = np.random.uniform(0, 0.1)
+
 
     # define the model
+    optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+
+    es = EarlyStopping(monitor='val_nll_gaussian', min_delta=0.0, patience=10,
+                              verbose=0, mode='min', restore_best_weights=True)
+
     inputs = Input(shape=(trainX.shape[1],))
-    h = GaussianNoise(0.2)(inputs)
-
-    h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
-    h = Dropout(0.2)(h)
-
-    mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
-    sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
-
+    h = GaussianNoise(noise)(inputs)
+    h = Dense(neurons, activation='relu', kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
+    h = Dropout(dropout)(h)
+    h1 = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+    h2 = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+    mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h1)
+    sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h2)
     outputs = concatenate([mu, sigma])
 
     model = Model(inputs=inputs, outputs=outputs)
-    model.compile(loss=nll_gaussian, optimizer=optimizer)
 
-    print_header("Train")
-    history = model.fit(trainX, trainy, epochs=300, batch_size=10,verbose=1,
+    model.compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
+
+    print_header(f"Train No. {iteration}")
+    history = model.fit(trainX, trainy, epochs=1000, batch_size=10,verbose=0,
                         shuffle=True, callbacks=[es],
                         validation_data=(testX, testy))
 
-    mem_pred = model.predict(trainX)
-    mem_mean = mem_pred[:,0]
-    mem_std = np.abs(mem_pred[:,1])
+    pred = model.predict(trainX)
+    mean = pred[:,0]
+    std = np.abs(pred[:,1])
 
-    in_frac = inside_fraction(trainy, mem_mean, mem_std)
+    in_frac = inside_fraction(trainy, mean, std)
 
-    if in_frac > 0.8 or in_frac < 0.55:
-        print_header("Reject this model. Unreasonable stds.")
+    score = model.evaluate(testX, testy)[1]
+    print(score)
+    if score < score_best:
+        score_best = score
+
+        l1_b, l2_b, l1_out_b, l2_out_b = l1, l2, l1_out, l2_out,
+        neurons_b, noise_b, dropout_b = neurons, noise, dropout
+
+        print ("New best:")
+        print([l1_b, l2_b, l1_out_b, l2_out_b, neurons_b, noise_b, dropout_b])
+
+        if not exists(modeldir):
+            mkdir(modeldir)
+
+        path_h5 = join(modeldir, f"model{lead_time}.h5")
+        save_model(model, path_h5, include_optimizer=False)
+
+        print("Saved model to disk")
+
+    K.clear_session()
 
 
-    elif rmse(trainy, mem_mean)>1.:
-        print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
-
-
-    elif np.min(history.history["loss"])>1:
-        print_header("Reject this model. High minimum loss.")
-
-    else:
-        rejected = False
-
-
-#%% =============================================================================
-# Save
-# =============================================================================
-
-if not exists(modeldir):
-    mkdir(modeldir)
-
-path_h5 = join(modeldir, f"model{lead_time}.h5")
-save_model(model, path_h5, include_optimizer=False)
-
-print("Saved model to disk")
 
 #%% =============================================================================
 # predict
 # =============================================================================
+path_pretrained = join(modeldir, f"model{lead_time}.h5")
+model = load_model(path_pretrained)
+
 predtest = model.predict(testX)
 pred_mean, pred_std = predtest[:,0], predtest[:,1]
 
@@ -206,9 +220,13 @@ plt.close("all")
 # =============================================================================
 # Loss during trianing
 # =============================================================================
-plt.subplots()
-plt.plot(history.history['val_loss'],label = "val")
-plt.plot(history.history['loss'], label= "train")
+fig, ax = plt.subplots(nrows=1, ncols=2)
+ax[0].plot(history.history['val_loss'],label = "val")
+ax[0].plot(history.history['loss'], label= "train")
+ax[0].legend()
+
+ax[1].plot(history.history['val_nll_gaussian'],label = "val")
+ax[1].plot(history.history['nll_gaussian'], label= "train")
 plt.legend()
 
 # =============================================================================
@@ -268,45 +286,45 @@ pred_nrmse = round(nrmse(testy, pred_mean),2)
 plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, NRMSE (of mean): {pred_nrmse}")
 plt.grid()
 
-# =============================================================================
-# Seaonality of Standard deviations
-# =============================================================================
-plt.subplots()
-
-xr_nino34 = xr.DataArray(nino34)
-std_data = xr_nino34.groupby('time.month').std(dim='time')
-
-pd_pred_std = pd.Series(data=pred_std, index = testtimey)
-xr_pred_std = xr.DataArray(pd_pred_std)
-std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
-
-std_data.plot()
-std_pred.plot()
-
+## =============================================================================
+## Seaonality of Standard deviations
+## =============================================================================
+#plt.subplots()
+#
+#xr_nino34 = xr.DataArray(nino34)
+#std_data = xr_nino34.groupby('time.month').std(dim='time')
+#
+#pd_pred_std = pd.Series(data=pred_std, index = testtimey)
+#xr_pred_std = xr.DataArray(pd_pred_std)
+#std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
+#
+#std_data.plot()
+#std_pred.plot()
+#
 # =============================================================================
 # plot explained variance
 # =============================================================================
 
 plot_explained_variance(testy, pred_mean, testtimey)
-
-# =============================================================================
-# Error distribution
-# =============================================================================
-plt.subplots()
-plt.title("Error distribution")
-error = pred_mean - testy
-
-plt.hist(error, bins=16)
-
-# =============================================================================
-# layer weight
-# =============================================================================
-weights = model.get_weights()
-max_w = np.max(np.abs(weights[0]))
-M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
-plt.colorbar(M1, extend="both")
-
-max_w2 = np.max(np.abs(weights[1]))
-M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
-                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
-plt.colorbar(M2, extend="both")
+#
+## =============================================================================
+## Error distribution
+## =============================================================================
+#plt.subplots()
+#plt.title("Error distribution")
+#error = pred_mean - testy
+#
+#plt.hist(error, bins=16)
+#
+## =============================================================================
+## layer weight
+## =============================================================================
+#weights = model.get_weights()
+#max_w = np.max(np.abs(weights[0]))
+#M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
+#plt.colorbar(M1, extend="both")
+#
+#max_w2 = np.max(np.abs(weights[1]))
+#M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
+#                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
+#plt.colorbar(M2, extend="both")

@@ -61,29 +61,28 @@ iod = reader.read_csv('iod')
 #PCA data
 pca_air = reader.read_statistic('pca', variable='air',
                            dataset='NCEP', processed="anom")
-pca1_air = pca_air['pca1']
 pca2_air = pca_air['pca2']
-pca3_air = pca_air['pca3']
 
 pca_u = reader.read_statistic('pca', variable='uwnd',
                            dataset='NCEP', processed="anom")
-pca1_u = pca_u['pca1']
 pca2_u = pca_u['pca2']
-pca3_u = pca_u['pca3']
 
 # Network metics
 nwm_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
 
-c2 = nwm_ssh['fraction_clusters_size_2']
-c3 = nwm_ssh['fraction_clusters_size_3']
-c5 = nwm_ssh['fraction_clusters_size_5']
-S = nwm_ssh['fraction_giant_component']
-H = nwm_ssh['corrected_hamming_distance']
-T = nwm_ssh['global_transitivity']
-C = nwm_ssh['avelocal_transmissivity']
-L = nwm_ssh['average_path_length']
-nwt = nwm_ssh['threshold']
+c2_ssh = nwm_ssh['fraction_clusters_size_2']
+S_ssh = nwm_ssh['fraction_giant_component']
+H_ssh = nwm_ssh['corrected_hamming_distance']
+T_ssh = nwm_ssh['global_transitivity']
+C_ssh = nwm_ssh['avelocal_transmissivity']
+L_ssh = nwm_ssh['average_path_length']
+
+nwm_air = reader.read_statistic('network_metrics', variable='air',
+                           dataset='NCEP', processed="anom")
+
+S_air = nwm_air['fraction_giant_component']
+T_air = nwm_air['global_transitivity']
 
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
@@ -93,14 +92,16 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 9
+lead_time = 6
 
-X, futureX = make_feature((nino34, sc, yr,
-                             c2, c3, c5, S, H, T, C, L,
-                             pca1_air, pca2_air, pca3_air))
+X, futureX = make_feature((nino34, sc, #yr,
+                           iod,
+                             c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
+#                             S_air, T_air,
+#                             pca2_air
+                           ))
 
-X2, futureX2 = make_feature((nino34, sc, yr, c2,
-                             wwv, sc, iod
+X2, futureX2 = make_feature((wwv,
                              ))
 
 yorg = nino34.values
@@ -121,9 +122,9 @@ testX, testX2, testy, testtimey = X[test_indeces,:], X2[test_indeces,:], y[test_
 #%% =============================================================================
 # # neural network
 # =============================================================================
-optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
+optimizer = Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
-es = EarlyStopping(monitor='val_loss',
+es = EarlyStopping(monitor='val_nll_gaussian',
                               min_delta=0.0,
                               patience=10,
                               verbose=0,
@@ -143,7 +144,7 @@ while rejected:
     loaded_model.layers.pop()
     loaded_model.layers.pop()
     loaded_model.layers.pop()
-#    loaded_model.layers.pop()
+    loaded_model.layers.pop()
 
     plot_model(loaded_model, to_file='loaded_model_reduced')
 
@@ -154,24 +155,25 @@ while rejected:
 
     # add a new input layer
     inputs2 = Input(shape=(trainX2.shape[1],))
-    h2 = GaussianNoise(0.2)(inputs2)
-    h2 = Dense(8, activation='relu',
-              kernel_regularizer=l1_l2(0.01, 0.1))(h2)
-    h2 = Dropout(0.2)(h2)
+    h2 = GaussianNoise(0.1)(inputs2)
+    h2 = Dense(4, activation='relu',
+              kernel_regularizer=l1_l2(0.0, 0.0),
+              kernel_initializer='zeros',
+              bias_initializer='zeros')(h2)
     h2 = Model(inputs=inputs2, outputs=h2)
 
     # concatante the two branches
     h = concatenate([h1.output, h2.output])
 
-    mu = Dense(1, activation='linear', kernel_regularizer=l1_l2(0.0, 0.01))(h)
-    sigma = Dense(1, activation='softplus', kernel_regularizer=l1_l2(0.0, 0.01))(h)
+    mu = Dense(1, activation='linear', kernel_regularizer=l1_l2(0.0, 0.0))(h)
+    sigma = Dense(1, activation='softplus', kernel_regularizer=l1_l2(0., 0.0))(h)
 
     outputs = concatenate([mu, sigma])
 
     model = Model(inputs=[inputs1, inputs2], outputs=outputs)
     model.get_layer('model_1').trainable = False
 
-    model.compile(loss=nll_gaussian, optimizer=optimizer)
+    model.compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
 
     print_header("Train")
     history = model.fit([trainX, trainX2], trainy, epochs=300, batch_size=1,verbose=1,
@@ -189,9 +191,6 @@ while rejected:
 
     elif rmse(trainy, mean)>1.:
         print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mean)}")
-
-    elif np.min(history.history["loss"])>1:
-        print_header("Reject this model. High minimum loss.")
 
     else:
         rejected = False

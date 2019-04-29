@@ -43,28 +43,31 @@ def mixture(pred):
 reader = data_reader(startdate='1981-01', enddate='2018-12')
 
 nino34 = reader.read_csv('nino3.4M')
+wwv = reader.read_csv('wwv')
+iod = reader.read_csv('iod')
 
 #PCA data
 pca_air = reader.read_statistic('pca', variable='air',
                            dataset='NCEP', processed="anom")
 
-pca1_air = pca_air['pca1']
 pca2_air = pca_air['pca2']
-pca3_air = pca_air['pca3']
 
 # Network metics
 nwm_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
 
-c2 = nwm_ssh['fraction_clusters_size_2']
-c3 = nwm_ssh['fraction_clusters_size_3']
-c5 = nwm_ssh['fraction_clusters_size_5']
-S = nwm_ssh['fraction_giant_component']
-H = nwm_ssh['corrected_hamming_distance']
-T = nwm_ssh['global_transitivity']
-C = nwm_ssh['avelocal_transmissivity']
-L = nwm_ssh['average_path_length']
-nwt = nwm_ssh['threshold']
+c2_ssh = nwm_ssh['fraction_clusters_size_2']
+S_ssh = nwm_ssh['fraction_giant_component']
+H_ssh = nwm_ssh['corrected_hamming_distance']
+T_ssh = nwm_ssh['global_transitivity']
+C_ssh = nwm_ssh['avelocal_transmissivity']
+L_ssh = nwm_ssh['average_path_length']
+
+nwm_air = reader.read_statistic('network_metrics', variable='air',
+                           dataset='NCEP', processed="anom")
+
+S_air = nwm_air['fraction_giant_component']
+T_air = nwm_air['global_transitivity']
 
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
@@ -74,11 +77,14 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
+lead_time = 12
 
-feature_unscaled = np.stack((nino34, sc, yr,
-                             c2, c3, c5, S, H, T, C, L,
-                             pca1_air, pca2_air, pca3_air), axis=1)
+feature_unscaled = np.stack((nino34,  sc,# yr,
+                            iod,
+                            c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
+#                             S_air, T_air,
+#                             pca2_air
+                             ), axis=1)
 
 
 scaler = StandardScaler()
@@ -101,7 +107,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -112,7 +118,7 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
-es = EarlyStopping(monitor='val_loss',
+es = EarlyStopping(monitor='val_nll_gaussian',
                               min_delta=0.0,
                               patience=10,
                               verbose=0,
@@ -121,21 +127,24 @@ es = EarlyStopping(monitor='val_loss',
 
 rejected = True
 while rejected:
-    # load json and create model
-    path_h5 = join(modeldir, f"model{lead_time}.h5")
-    model = load_model(path_h5)
+    # load  model
+    path_pretrained = join(modeldir, f"model{lead_time}.h5")
+    model = load_model(path_pretrained)
 
-    model.get_layer('dense_1').kernel_regularizer = l1_l2(0.02, 0.05)
+    model.get_layer('dense_1').kernel_regularizer = l1_l2(0.1, 0.1)
+    model.get_layer('dense_2').kernel_regularizer = l1_l2(0.1, 0.1)
+    model.get_layer('dense_3').kernel_regularizer = l1_l2(0.1, 0.1)
     model.save("temp_path.h5")
     model = load_model("temp_path.h5")
     remove("temp_path.h5")
 
-    #model.get_layer('dense_1').trainable = False
+    model.compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
 
-    model.compile(loss=nll_gaussian, optimizer=optimizer)
+    eva = model.evaluate(testX, testy)
+    print(eva)
 
     print_header("Train")
-    history = model.fit(trainX, trainy, epochs=30, batch_size=1,verbose=1,
+    history = model.fit(trainX, trainy, epochs=300, batch_size=1,verbose=1,
                         shuffle=True, callbacks=[es],
                         validation_data=(testX, testy))
 
@@ -152,10 +161,6 @@ while rejected:
     elif rmse(trainy, mem_mean)>1.:
         print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
 
-
-    elif np.min(history.history["loss"])>1:
-        print_header("Reject this model. High minimum loss.")
-
     else:
         rejected = False
 
@@ -166,8 +171,8 @@ while rejected:
 if not exists(modeldir):
     mkdir(modeldir)
 
-path_h5 = join(modeldir, f"model2{lead_time}.h5")
-save_model(model, path_h5, include_optimizer=False)
+path_trained = join(modeldir, f"model2{lead_time}.h5")
+save_model(model, path_trained, include_optimizer=False)
 
 print("Saved model to disk")
 
@@ -193,10 +198,15 @@ plt.close("all")
 # =============================================================================
 # Loss during trianing
 # =============================================================================
-plt.subplots()
-plt.plot(history.history['val_loss'],label = "val")
-plt.plot(history.history['loss'], label= "train")
+fig, ax = plt.subplots(nrows=1, ncols=2)
+ax[0].plot(history.history['val_loss'],label = "val")
+ax[0].plot(history.history['loss'], label= "train")
+ax[0].legend()
+
+ax[1].plot(history.history['val_nll_gaussian'],label = "val")
+ax[1].plot(history.history['nll_gaussian'], label= "train")
 plt.legend()
+
 
 # =============================================================================
 # Predictions
@@ -299,10 +309,14 @@ plt.hist(error, bins=16)
 # =============================================================================
 # layer weight
 # =============================================================================
+pretrained_model = load_model(path_pretrained)
+weights_pre = pretrained_model.get_weights()
 weights = model.get_weights()
 
+weight_diff =weights[0]# weights_pre[0] -
+
 max_w = np.max(np.abs(weights[0]))
-M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
+M1=plt.matshow(weight_diff, vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
 plt.colorbar(M1, extend="both")
 
 max_w2 = np.max(np.abs(weights[1]))

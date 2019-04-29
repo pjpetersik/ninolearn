@@ -16,7 +16,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Dropout, GaussianNoise
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from keras.callbacks import EarlyStopping
 
 from sklearn.preprocessing import MinMaxScaler
@@ -329,8 +329,9 @@ class RNNmodel(object):
 
         self.build_model()
 
-        self.optimizer = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-                              decay=0.0, amsgrad=False)
+#        self.optimizer = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
+#                              decay=0.0, amsgrad=False)
+        self.optimizer = RMSprop(lr=lr, rho=0.9, epsilon=None, decay=0.0)
 
         self.model.compile(loss="mean_squared_error",
                            optimizer=self.optimizer,
