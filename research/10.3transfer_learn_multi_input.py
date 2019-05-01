@@ -1,4 +1,4 @@
-"""
+    """
 In this script, I want to build a deep ensemble that is first trained on the GFDL data
 and then trained on the observations
 """
@@ -21,7 +21,7 @@ from keras.utils import plot_model
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
-from ninolearn.plot.evaluation  import plot_explained_variance
+from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
@@ -84,6 +84,12 @@ nwm_air = reader.read_statistic('network_metrics', variable='air',
 S_air = nwm_air['fraction_giant_component']
 T_air = nwm_air['global_transitivity']
 
+nwm_sst = reader.read_statistic('network_metrics', variable='sst',
+                           dataset='ERSSTv5', processed="anom")
+
+S_sst = nwm_sst['fraction_giant_component']
+C_sst = nwm_sst['avelocal_transmissivity']
+
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
@@ -94,11 +100,11 @@ yr =  np.arange(len_ts) % 12
 time_lag = 12
 lead_time = 6
 
-X, futureX = make_feature((nino34, sc, #yr,
-                           iod,
-                             c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
-#                             S_air, T_air,
-#                             pca2_air
+X, futureX = make_feature((nino34,  sc, # yr,
+                            iod,
+                            c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
+                            S_air, T_air,
+                            C_sst, S_sst,
                            ))
 
 X2, futureX2 = make_feature((wwv,
@@ -122,7 +128,7 @@ testX, testX2, testy, testtimey = X[test_indeces,:], X2[test_indeces,:], y[test_
 #%% =============================================================================
 # # neural network
 # =============================================================================
-optimizer = Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 es = EarlyStopping(monitor='val_nll_gaussian',
                               min_delta=0.0,
@@ -138,42 +144,39 @@ while rejected:
     path_h5 = join(modeldir, f"model2{lead_time}.h5")
     loaded_model = load_model(path_h5)
 
-    plot_model(loaded_model, to_file='loaded_model_full')
+    plot_model(loaded_model, to_file='loaded_model')
 
     #remove layers from the loaded model
     loaded_model.layers.pop()
     loaded_model.layers.pop()
     loaded_model.layers.pop()
     loaded_model.layers.pop()
+    loaded_model.layers.pop()
+    loaded_model.layers.pop()
 
-    plot_model(loaded_model, to_file='loaded_model_reduced')
-
-    # pretrained model as layer
-    inputs1 = Input(shape=(trainX.shape[1],))
-    h1 = loaded_model(inputs1)
-    h1 = Model(inputs=inputs1, outputs=h1)
+    model1 = Model(inputs=loaded_model.input, outputs=loaded_model.layers[-1].output)
 
     # add a new input layer
-    inputs2 = Input(shape=(trainX2.shape[1],))
-    h2 = GaussianNoise(0.1)(inputs2)
-    h2 = Dense(4, activation='relu',
-              kernel_regularizer=l1_l2(0.0, 0.0),
-              kernel_initializer='zeros',
-              bias_initializer='zeros')(h2)
-    h2 = Model(inputs=inputs2, outputs=h2)
+    inputs2 = Input(shape=(trainX2.shape[1],),name='input_wwv')
+    h2 = GaussianNoise(0.1, name='gaussian_noise_wwv')(inputs2)
+    outputs2 = Dense(2, activation='relu',
+              kernel_regularizer=l1_l2(0.01, 0.01), name='dense_wwv')(h2)
+    model2 = Model(inputs=inputs2, outputs=outputs2)
 
     # concatante the two branches
-    h = concatenate([h1.output, h2.output])
+    h = concatenate([model1.output, model2.output], name='concatenate_models')
 
-    mu = Dense(1, activation='linear', kernel_regularizer=l1_l2(0.0, 0.0))(h)
-    sigma = Dense(1, activation='softplus', kernel_regularizer=l1_l2(0., 0.0))(h)
+    mu = Dense(1, activation='linear', name='mean', kernel_regularizer=l1_l2(0.2, 0.2))(h)
+    sigma = Dense(1, activation='softplus', name='std', kernel_regularizer=l1_l2(0.2, 0.2))(h)
 
-    outputs = concatenate([mu, sigma])
+    outputs = concatenate([mu, sigma],  name='concatenate_output')
 
-    model = Model(inputs=[inputs1, inputs2], outputs=outputs)
-    model.get_layer('model_1').trainable = False
+    model = Model(inputs=[loaded_model.input, inputs2], outputs=outputs)
+    model.get_layer('dense_1').trainable = False
 
     model.compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
+
+    plot_model(model)
 
     print_header("Train")
     history = model.fit([trainX, trainX2], trainy, epochs=300, batch_size=1,verbose=1,
@@ -309,7 +312,7 @@ std_pred.plot()
 # plot explained variance
 # =============================================================================
 
-plot_explained_variance(testy, pred_mean, testtimey)
+plot_correlation(testy, pred_mean, testtimey)
 
 # =============================================================================
 # Error distribution
@@ -321,19 +324,9 @@ error = pred_mean - testy
 plt.hist(error, bins=16)
 
 # =============================================================================
-# Plot the model
-# =============================================================================
-plot_model(model,rankdir='LR')
-
-# =============================================================================
 # layer weight
 # =============================================================================
-weights = model.get_layer('model_1').get_weights()
+weights = model.get_layer('dense_1').get_weights()
 max_w = np.max(np.abs(weights[0]))
 M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
 plt.colorbar(M1, extend="both")
-
-max_w2 = np.max(np.abs(weights[1]))
-M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
-                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
-plt.colorbar(M2, extend="both")

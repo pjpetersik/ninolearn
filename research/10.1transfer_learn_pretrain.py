@@ -4,30 +4,25 @@ and then trained on the observations
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-import xarray as xr
 
 from os.path import exists, join
 from os import mkdir
 
 import keras.backend as K
-from keras.models import Sequential, Model, save_model, load_model
+from keras.models import  Model, save_model, load_model
 from keras.layers import Dense, Input, concatenate
-from keras.layers import LSTM
 from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
-from keras.layers.core import Lambda
 
-from sklearn.preprocessing import MinMaxScaler,StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
-from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
+from ninolearn.learn.evaluation import nrmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
-from ninolearn.learn.augment import window_warping
 from ninolearn.utils import print_header
 from ninolearn.pathes import modeldir
 
@@ -87,7 +82,7 @@ len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
 
-#%% =============================================================================
+#%% ===========================================================================
 # # process data
 # =============================================================================
 time_lag = 12
@@ -96,8 +91,8 @@ lead_time = 12
 feature_unscaled = np.stack((nino34, sc, #yr,
                             iod,
                             c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
-#                            S_air, T_air,
-#                            C_sst, S_sst,
+                            S_air, T_air,
+                            C_sst, S_sst,
 #                            pca2_air
                              ), axis=1)
 

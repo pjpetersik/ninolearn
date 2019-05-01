@@ -6,38 +6,28 @@ import pandas as pd
 import xarray as xr
 
 import keras.backend as K
-from keras.models import Sequential, Model
-from keras.layers import Dense, Input, concatenate
-from keras.layers import LSTM
+from keras.models import Model
+from keras.layers import Dense, Input, concatenate, LeakyReLU
 from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
-from keras.layers.core import Lambda
 
-from sklearn.preprocessing import MinMaxScaler,StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
-from ninolearn.plot.evaluation  import plot_explained_variance
+from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
+from ninolearn.learn.den import predict_ens, evaluate_ens
 from ninolearn.learn.losses import nll_gaussian
-from ninolearn.learn.augment import window_warping
 from ninolearn.utils import print_header
 
+#%%
 K.clear_session()
 
-def mixture(pred):
-    """
-    returns the ensemble mixture results
-    """
-    mix_mean = pred[:,0,:].mean(axis=1)
-    mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
-    mix_std = np.sqrt(mix_var)
-    return mix_mean, mix_std
-
 #%% =============================================================================
-# #%% read data
+# read data
 # =============================================================================
 reader = data_reader(startdate='1981-01')
 
@@ -51,7 +41,7 @@ wwv = reader.read_csv('wwv')
 
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
-yr =  np.arange(len_ts) % 12
+yr = np.arange(len_ts) % 12
 
 network_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
@@ -75,34 +65,16 @@ H_sst = network_ssh['corrected_hamming_distance']
 S_air = network_ssh['fraction_giant_component']
 T_air = network_ssh['global_transitivity']
 
-
-pca_air = reader.read_statistic('pca', variable='air',
-                           dataset='NCEP', processed="anom")
-pca_u = reader.read_statistic('pca', variable='uwnd',
-                           dataset='NCEP', processed="anom")
-pca_v = reader.read_statistic('pca', variable='vwnd',
-                           dataset='NCEP', processed="anom")
-pca_sst = reader.read_statistic('pca', variable='sst',
-                           dataset='ERSSTv5', processed="anom")
-
-pca2_air = pca_air['pca2']
-pca2_u = pca_u['pca2']
-pca2_v = pca_v['pca2']
-pca2_sst = pca_sst['pca2']
-
 #%% =============================================================================
-# # process data
+#  process data
 # =============================================================================
 time_lag = 12
-lead_time = 12
+lead_time = 8
 
-feature_unscaled = np.stack((nino34,
-                             sc,
-                             wwv, iod,
+feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
                              C_sst, H_sst,
                              S_air, T_air,
-                             pca2_u, pca2_v, pca2_air, pca2_sst
                              ), axis=1)
 
 scaler = StandardScaler()
@@ -124,102 +96,109 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
 testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
 #%% =============================================================================
-# # neural network
+# neural network
 # =============================================================================
 
 optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
-es = EarlyStopping(monitor='val_loss',
-                              min_delta=0.0,
-                              patience=10,
-                              verbose=0,
-                              mode='min',
-                              restore_best_weights=True)
+es = EarlyStopping(monitor='val_loss', min_delta=0.0, patience=10, verbose=0,
+                   mode='min', restore_best_weights=True)
 
-model_ens = []
-
-n_ens = 5
-segment_len = trainX.shape[0]//n_ens
-n_ens_sel=0
-
-l1 = 0.08
+l1 = 0.1
 l2 = 0.1
 
 l1_out = 0.0
 l2_out = 0.1
 
-# TODO: Loop over ensembles and segments
-while n_ens_sel<n_ens:
+model_ens = []
 
-    # define the model
-    inputs = Input(shape=(trainX.shape[1],))
-    h = GaussianNoise(0.1)(inputs)
+ens_per_segment = 5
+segments = 10
+segment_len = trainX.shape[0]//segments
 
-    h = Dense(8, activation='relu',
-              kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
-    h = Dropout(0.2)(h)
-    mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
-    sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+i = 0
+while i<ens_per_segment:
+    j=0
+    while j<segments:
+        n_ens_sel = len(model_ens)
+        print_header(f"Train iteration Nr {n_ens_sel}")
 
-    outputs = concatenate([mu, sigma])
+        # define the model
+        inputs = Input(shape=(trainX.shape[1],))
+        h = GaussianNoise(0.1)(inputs)
 
-    model_ens.append(Model(inputs=inputs, outputs=outputs))
-    model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer)
+        h = Dense(16, activation='relu', kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
+        h = Dropout(0.2)(h)
 
-    print_header(f"Train Iteration Nr {n_ens_sel}")
-    start_ind = n_ens_sel * segment_len
-    end_ind = (n_ens_sel+1) * segment_len
+        mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+        sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
 
-    history = model_ens[-1].fit(np.delete(trainX, np.s_[start_ind:end_ind], axis=0),
-                                np.delete(trainy, np.s_[start_ind:end_ind]),
-                                epochs=300, batch_size=1, verbose=1,
-                                shuffle=True, callbacks=[es],
-                                validation_data=(trainX[start_ind:end_ind], trainy[start_ind:end_ind]))
+        outputs = concatenate([mu, sigma])
 
-    mem_pred = model_ens[-1].predict(trainX)
-    mem_mean = mem_pred[:,0]
-    mem_std = np.abs(mem_pred[:,1])
+        model_ens.append(Model(inputs=inputs, outputs=outputs))
+        model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
 
-    in_frac = inside_fraction(trainy, mem_mean, mem_std)
+        # validate on the spare segment
+        if segments!=1:
+            start_ind = j * segment_len
+            end_ind = (j+1) * segment_len
 
-    if in_frac > 0.8 or in_frac < 0.55:
-        print_header("Reject this model. Unreasonable stds.")
-        model_ens.pop()
+            trainXens = np.delete(trainX, np.s_[start_ind:end_ind], axis=0)
+            trainyens = np.delete(trainy, np.s_[start_ind:end_ind])
+            valXens = trainX[start_ind:end_ind]
+            valyens = trainy[start_ind:end_ind]
 
-    elif rmse(trainy, mem_mean)>1.:
-        print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
-        model_ens.pop()
+        # validate on test data set
+        elif segments==1:
+            trainXens = trainX
+            trainyens = trainy
+            valXens = testX
+            valyens = testy
+            print("Validation and test data set are the same!")
 
-    elif np.min(history.history["loss"])>1:
-        print_header("Reject this model. High minimum loss.")
-        model_ens.pop()
+        history = model_ens[-1].fit(trainXens, trainyens,
+                                    epochs=300, batch_size=1, verbose=1,
+                                    shuffle=True, callbacks=[es],
+                                    validation_data=(valXens, valyens))
 
-    n_ens_sel = len(model_ens)
+        mem_pred = model_ens[-1].predict(trainX)
+        mem_mean = mem_pred[:,0]
+        mem_std = np.abs(mem_pred[:,1])
 
-#%%
+        in_frac = inside_fraction(trainy, mem_mean, mem_std)
 
+        if in_frac > 0.8 or in_frac < 0.55:
+            print_header("Reject this model. Unreasonable stds.")
+            model_ens.pop()
 
-pred_ens = np.zeros((len(testy),2, n_ens_sel))
-predtrain_ens = np.zeros((len(trainy),2, n_ens_sel))
-predfuture_ens = np.zeros((lead_time,2, n_ens_sel))
+        elif rmse(trainy, mem_mean)>1.:
+            print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
+            model_ens.pop()
 
-for i in range(n_ens_sel):
-    pred_ens[:,:,i] = model_ens[i].predict(testX)
-    predtrain_ens[:,:,i] = model_ens[i].predict(trainX)
-    predfuture_ens[:,:,i] = model_ens[i].predict(futureX)
+        elif np.min(history.history["loss"])>1:
+            print_header("Reject this model. High minimum loss.")
+            model_ens.pop()
 
+        else:
+            j+=1
+    i+=1
 
-pred_mean, pred_std = mixture(pred_ens)
-predtrain_mean, predtrain_std = mixture(predtrain_ens)
-predfuture_mean, predfuture_std = mixture(predfuture_ens)
+#%% =============================================================================
+# Predictions
+# =============================================================================
+pred_mean, pred_std = predict_ens(model_ens, testX)
+predtrain_mean, predtrain_std =  predict_ens(model_ens, trainX)
+predfuture_mean, predfuture_std = predict_ens(model_ens, futureX)
 
+nll = evaluate_ens(testy, pred_mean, pred_std)
+print(f"Negative-log-likelihood: {nll}")
 
 #%% =============================================================================
 # Plot
@@ -259,7 +238,6 @@ predicty_m1std = pred_mean - np.abs(pred_std)
 predicty_p2std = pred_mean + 2 * np.abs(pred_std)
 predicty_m2std = pred_mean - 2 * np.abs(pred_std)
 
-
 plt.fill_between(testtimey,predicty_m1std, predicty_p1std , facecolor='royalblue', alpha=0.7)
 plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='royalblue', alpha=0.3)
 plt.plot(testtimey,pred_mean, "navy")
@@ -297,9 +275,9 @@ in_or_out_train = np.zeros((len(predtrain_mean)))
 in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
 in_frac_train = np.sum(in_or_out_train)/len(trainy)
 
-pred_nrmse = round(nrmse(testy, pred_mean),2)
+pred_rmse = round(rmse(testy, pred_mean),2)
 
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, NRMSE (of mean): {pred_nrmse}")
+plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
 # =============================================================================
@@ -321,7 +299,7 @@ std_pred.plot()
 # plot explained variance
 # =============================================================================
 
-plot_explained_variance(testy, pred_mean, testtimey)
+plot_correlation(testy, pred_mean, testtimey)
 
 # =============================================================================
 # Error distribution
@@ -331,16 +309,3 @@ plt.title("Error distribution")
 error = pred_mean - testy
 
 plt.hist(error, bins=16)
-
-# =============================================================================
-# ayer weight
-# =============================================================================
-weights = model_ens[1].get_weights()
-max_w = np.max(np.abs(weights[0]))
-M1=plt.matshow(weights[0], vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
-plt.colorbar(M1, extend="both")
-
-max_w2 = np.max(np.abs(weights[1]))
-M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
-                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
-plt.colorbar(M2, extend="both")

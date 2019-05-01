@@ -42,7 +42,7 @@ var.plot(c='r')
 nino.plot(c='k')
 
 plt.subplots()
-plt.xcorr(nino, var, maxlags=180)
+plt.xcorr(nino, var, maxlags=80)
 plt.vlines(12,-1,1, colors="r")
 plt.vlines(6,-1,1, colors="b")
 plt.vlines(0,-1,1, colors="k")
@@ -52,15 +52,12 @@ plt.ylim(-1,1)
 #%% =============================================================================
 # GFDL
 # =============================================================================
-reader = data_reader(startdate='2001-01', enddate='2199-12')
+reader = data_reader(startdate='1701-01', enddate='2199-12')
 
 nino34gfdl = reader.read_csv('nino3.4M_gfdl')
 iodgfdl = reader.read_csv('iod_gfdl')
 network = reader.read_statistic('network_metrics', variable='tos',
                            dataset='GFDL-CM3', processed="anom")
-#
-#network = reader.read_statistic('network_metrics', variable='tas',
-#                           dataset='GFDL-CM3', processed="anom")
 
 pca = reader.read_statistic('pca', variable='tas',
                            dataset='GFDL-CM3', processed="anom")

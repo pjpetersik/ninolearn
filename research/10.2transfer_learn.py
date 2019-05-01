@@ -19,7 +19,7 @@ from keras.regularizers import l1_l2, l1
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
-from ninolearn.plot.evaluation  import plot_explained_variance
+from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.losses import nll_gaussian
@@ -43,8 +43,8 @@ def mixture(pred):
 reader = data_reader(startdate='1981-01', enddate='2018-12')
 
 nino34 = reader.read_csv('nino3.4M')
-wwv = reader.read_csv('wwv')
 iod = reader.read_csv('iod')
+wwv = reader.read_csv('wwv')
 
 #PCA data
 pca_air = reader.read_statistic('pca', variable='air',
@@ -69,6 +69,12 @@ nwm_air = reader.read_statistic('network_metrics', variable='air',
 S_air = nwm_air['fraction_giant_component']
 T_air = nwm_air['global_transitivity']
 
+nwm_sst = reader.read_statistic('network_metrics', variable='sst',
+                           dataset='ERSSTv5', processed="anom")
+
+S_sst = nwm_sst['fraction_giant_component']
+C_sst = nwm_sst['avelocal_transmissivity']
+
 len_ts = len(nino34)
 sc = np.cos(np.arange(len_ts)/12*2*np.pi)
 yr =  np.arange(len_ts) % 12
@@ -77,12 +83,13 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 12
+lead_time = 6
 
-feature_unscaled = np.stack((nino34,  sc,# yr,
+feature_unscaled = np.stack((nino34,  sc, # yr,
                             iod,
                             c2_ssh, S_ssh, H_ssh, T_ssh, C_ssh, L_ssh,
-#                             S_air, T_air,
+                            S_air, T_air,
+                            C_sst, S_sst,
 #                             pca2_air
                              ), axis=1)
 
@@ -107,7 +114,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -123,7 +130,7 @@ es = EarlyStopping(monitor='val_nll_gaussian',
                               patience=10,
                               verbose=0,
                               mode='min',
-                              restore_best_weights=True)
+                              restore_best_weights=False)
 
 rejected = True
 while rejected:
@@ -131,12 +138,20 @@ while rejected:
     path_pretrained = join(modeldir, f"model{lead_time}.h5")
     model = load_model(path_pretrained)
 
-    model.get_layer('dense_1').kernel_regularizer = l1_l2(0.1, 0.1)
-    model.get_layer('dense_2').kernel_regularizer = l1_l2(0.1, 0.1)
-    model.get_layer('dense_3').kernel_regularizer = l1_l2(0.1, 0.1)
+    model.get_layer('dense_1').kernel_regularizer = l1_l2(0.2, 0.1)
+    model.get_layer('dense_2').kernel_regularizer = l1_l2(0.2, 0.1)
+    model.get_layer('dense_3').kernel_regularizer = l1_l2(0.2, 0.1)
+    model.get_layer('dense_4').kernel_regularizer = l1_l2(0.2, 0.1)
+    model.get_layer('dense_5').kernel_regularizer = l1_l2(0.2, 0.1)
+
+    sess = K.get_session()
+    model.get_layer('dense_4').kernel.initializer.run(session=sess)
+    model.get_layer('dense_5').kernel.initializer.run(session=sess)
+
     model.save("temp_path.h5")
     model = load_model("temp_path.h5")
     remove("temp_path.h5")
+
 
     model.compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
 
@@ -295,7 +310,7 @@ std_pred.plot()
 # plot explained variance
 # =============================================================================
 
-plot_explained_variance(testy, pred_mean, testtimey)
+plot_correlation(testy, pred_mean, testtimey)
 
 # =============================================================================
 # Error distribution
@@ -313,13 +328,13 @@ pretrained_model = load_model(path_pretrained)
 weights_pre = pretrained_model.get_weights()
 weights = model.get_weights()
 
-weight_diff =weights[0]# weights_pre[0] -
+weight_diff = np.abs(weights[0]) - np.abs(weights_pre[0])
 
 max_w = np.max(np.abs(weights[0]))
 M1=plt.matshow(weight_diff, vmin=-max_w,vmax=max_w,cmap=plt.cm.seismic)
 plt.colorbar(M1, extend="both")
-
-max_w2 = np.max(np.abs(weights[1]))
-M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
-                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
-plt.colorbar(M2, extend="both")
+#
+#max_w2 = np.max(np.abs(weights[1]))
+#M2 = plt.matshow(np.concatenate((weights[2],weights[4]),axis=1),
+#                 vmin=-max_w2,vmax=max_w2,cmap=plt.cm.seismic)
+#plt.colorbar(M2, extend="both")

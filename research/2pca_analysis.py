@@ -76,3 +76,12 @@ pca_sat_gfdl.load_data('tas', 'GFDL-CM3', processed="anom",
 pca_sat_gfdl.compute_pca()
 pca_sat_gfdl.save()
 
+pca_sst_gfdl = pca(n_components=6)
+pca_sst_gfdl.load_data('tos', 'GFDL-CM3', processed="anom",
+                  startyear=1700, endyear=2199, lon_min=120, lon_max=280,
+                  lat_min=-30, lat_max=30)
+
+pca_sst_gfdl.compute_pca()
+pca_sst_gfdl.plot_eof()
+pca_sst_gfdl.save()
+
