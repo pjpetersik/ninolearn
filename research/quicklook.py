@@ -35,7 +35,7 @@ L = network['average_path_length']
 pca2 = pca['pca2']
 
 plt.subplots()
-var = scale(C)
+var = scale(c2)
 nino = scale(nino34)
 
 var.plot(c='r')

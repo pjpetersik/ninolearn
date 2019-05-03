@@ -4,18 +4,21 @@ here I want to implement the code for the deep ensemble
 import numpy as np
 
 import keras.backend as K
-from keras.models import Model
+from keras.models import Model, save_model, load_model
 from keras.layers import Dense, Input, concatenate
 from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
 
-from sklearn.preprocessing import StandardScaler
+from os.path import join, exists
+from os import mkdir, listdir, getcwd
+from shutil import rmtree
 
 from ninolearn.learn.losses import nll_gaussian
-from ninolearn.utils import print_header
+from ninolearn.utils import print_header, small_print_header
 
+import warnings
 def _mixture(pred):
     """
     returns the ensemble mixture results
@@ -52,27 +55,21 @@ def evaluate_ens(mean_y, mean_pred, std_pred):
     return loss
 
 class DEM(object):
-    def __init__(self, neurons=16, dropout=0.2, noise=0.1,
+    def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
                  l1_hidden=0.1, l2_hidden=0.1, l1_out=0.0, l2_out=0.1,
-                 n_segments=5, n_members_segment=1, lr=0.001, patience = 10, epochs=300):
+                 n_segments=5, n_members_segment=1, lr=0.001, patience = 10, epochs=300,
+                 verbose=0):
         """
         A deep ensemble model (DEM) predicting mean and standard deviation with one hidden
         layer having the ReLU function as activation for the hidden layer. It
         is trained using the negative-log-likelihood of a gaussian distribution.
-
-        :type X: np.ndarray
-        :param X: The feature vector of shape (samples, features). Does not need to be scaled. It will be scaled
-        internally.
-
-        :type X: np.ndarray
-        :param y: The target vector of shape (samples,) .
-
         :type int:
         :param neurons: Number of neurons.
 
         :type dropout: float
         :param dropout: Dropout rate.
         """
+        self.layers = layers
         self.neurons = neurons
         self.dropout = dropout
         self.noise = noise
@@ -83,9 +80,10 @@ class DEM(object):
         self.lr = lr
         self.patience = patience
         self.epochs = epochs
+        self.verbose = verbose
 
         self.optimizer = Adam(lr=self.lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
-        self.es = EarlyStopping(monitor='val_loss', min_delta=0.0, patience=self.patience, verbose=0,
+        self.es = EarlyStopping(monitor='val_nll_gaussian', min_delta=0.0, patience=self.patience, verbose=0,
                    mode='min', restore_best_weights=True)
 
         self.n_segments = n_segments
@@ -93,8 +91,6 @@ class DEM(object):
 
 
         self.n_members = self.n_segments * self.n_members_segments
-        self.ensemble = []
-        self.history = []
 
     def build_model(self, n_features):
         """
@@ -103,8 +99,9 @@ class DEM(object):
         inputs = Input(shape=(n_features,))
         h = GaussianNoise(self.noise)(inputs)
 
-        h = Dense(self.neurons, activation='relu', kernel_regularizer=regularizers.l1_l2(self.l1_hidden, self.l2_hidden))(h)
-        h = Dropout(self.dropout)(h)
+        for _ in range(self.layers):
+            h = Dense(self.neurons, activation='relu', kernel_regularizer=regularizers.l1_l2(self.l1_hidden, self.l2_hidden))(h)
+            h = Dropout(self.dropout)(h)
 
         mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
         sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
@@ -115,14 +112,20 @@ class DEM(object):
 
 
     def fit(self, trainX, trainy, valX=None, valy=None):
+        self.ensemble = []
+        self.history = []
+
         self.segment_len = trainX.shape[0]//self.n_segments
+
+        if self.n_segments==1 and (valX is not None or valy is not None):
+             warnings.warn("Validation and test data set are the same if n_segements is 1!")
 
         i = 0
         while i<self.n_members_segments:
             j=0
             while j<self.n_segments:
                 n_ens_sel = len(self.ensemble)
-                print_header(f"Train iteration Nr {n_ens_sel}")
+                small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
 
                 ensemble_member = self.build_model(trainX.shape[1])
                 ensemble_member.compile(loss=nll_gaussian, optimizer=self.optimizer, metrics=[nll_gaussian])
@@ -130,7 +133,7 @@ class DEM(object):
                 # validate on the spare segment
                 if self.n_segments!=1:
                     if valX is not None or valy is not None:
-                        raise Warning("Validation data set will be one of the segments. The provided validation data set is not used!")
+                        warnings.warn("Validation data set will be one of the segments. The provided validation data set is not used!")
 
                     start_ind = j * self.segment_len
                     end_ind = (j+1) *  self.segment_len
@@ -148,10 +151,10 @@ class DEM(object):
                     trainyens = trainy
                     valXens = valX
                     valyens = valy
-                    print("Validation and test data set are the same!")
+
 
                 history = ensemble_member.fit(trainXens, trainyens,
-                                            epochs=300, batch_size=1, verbose=1,
+                                            epochs=300, batch_size=1, verbose=self.verbose,
                                             shuffle=True, callbacks=[self.es],
                                             validation_data=(valXens, valyens))
 
@@ -163,7 +166,7 @@ class DEM(object):
 
     def predict(self, X):
         """
-        generates the ensemble prediction of a model ensemble
+        Senerates the ensemble prediction of a model ensemble
 
         :param model_ens: list of ensemble models
         :param X: the features
@@ -198,5 +201,32 @@ class DEM(object):
         loss =  np.mean(summed, axis=-1)
         return loss
 
+    def save(self, location='', dir_name='ensemble'):
+        """
+        Save the ensemble
+        """
+        path = join(location, dir_name)
+        if not exists(path):
+            mkdir(path)
+        else:
+            rmtree(path)
+            mkdir(path)
 
+        for i in range(self.n_members):
+            path_h5 = join(path, f"member{i}.h5")
+            save_model(self.ensemble[i], path_h5, include_optimizer=False)
 
+    def load(self, location=None,  dir_name='ensemble'):
+        """
+        Load the ensemble
+        """
+        if location is None:
+            location = getcwd()
+        path = join(location, dir_name)
+        files = listdir(path)
+        self.n_members = len(files)
+        self.ensemble = []
+
+        for file in files:
+            file_path = join(path, file)
+            self.ensemble.append(load_model(file_path))

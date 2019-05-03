@@ -3,9 +3,6 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 
 from ninolearn.learn.evaluation import explained_variance, correlation
-from ninolearn.utils import scale
-
-
 
 def plot_explained_variance(y, pred, time):
     """

@@ -10,11 +10,8 @@ def print_header(string):
 
 
 def small_print_header(string):
-    print()
-    print("--------------------------------------")
     print(string)
     print("--------------------------------------")
-    print()
 
 
 def largest_indices(ary, n):

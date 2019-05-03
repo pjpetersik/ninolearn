@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
+import time
 
 import keras.backend as K
 
@@ -100,25 +101,31 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 
 # Cross validation of model
-n_cv = 5
+n_cv = 20
 dropout, noise, l1_hidden, l2_hidden, l1_out, l2_out, lr, nll = \
                         list(map(lambda x: np.zeros(x), [n_cv, n_cv, n_cv,n_cv, n_cv,n_cv, n_cv,n_cv]))
-
 models = []
 
 for i in range(n_cv):
-    dropout[i] = np.random.uniform(0, 0.5)
-    noise[i] = np.random.uniform(0, 1.)
-    l1_hidden[i] = np.random.uniform(0, 0.2)
-    l2_hidden[i] = np.random.uniform(0, 0.2)
+    # clear the tenserflow graphs to avoid slow down of computation
+    K.clear_session()
 
-    l1_out[i] = np.random.uniform(0, 0.05)
+    print_header(f"Model Nr {i+1}/{n_cv}")
+
+    t0 = time.time()
+
+    dropout[i] = np.random.uniform(0, 0.3)
+    noise[i] = np.random.uniform(0, 1.)
+    l1_hidden[i] = np.random.uniform(0, 0.3)
+    l2_hidden[i] = np.random.uniform(0, 0.3)
+
+    l1_out[i] = np.random.uniform(0, 0.1)
     l2_out[i] = np.random.uniform(0, 0.1)
-    lr[i] = np.exp(np.random.uniform(-8, -5))
+    lr[i] = np.exp(np.random.uniform(-9, -6))
 
     model = DEM(dropout=dropout[i], noise=noise[i], l1_hidden=l1_hidden[i],
                 l2_hidden=l2_hidden[i], l1_out=l1_out[i], l2_out=l2_out[i],
-                lr=lr[i], n_segments=10)
+                lr=lr[i], n_segments=5)
 
     model.fit(trainX, trainy)
     models.append(model)
@@ -128,9 +135,12 @@ for i in range(n_cv):
     nll[i] = model.evaluate(testy, pred_mean, pred_std)
     print_header(f"Negative-log-likelihood: {nll}")
 
+    t1 = time.time()
+    print(f"Time passed: {round(t1-t0,1)}")
+
 #%%
 
-best_index = np.argmin(nll)
+best_index = np.argmin(nll[:17])
 best_model = models[best_index]
 
 pred_mean, pred_std = best_model.predict(testX)
@@ -140,9 +150,11 @@ predfuture_mean, predfuture_std =  best_model.predict(futureX)
 #%% =============================================================================
 # Plot
 # =============================================================================
+
 plt.close("all")
-
-
+# Cross validation
+plt.plot(l2_hidden, nll)
+#%%
 # Scores during trianing
 plt.subplots()
 
@@ -150,8 +162,8 @@ for h in best_model.history:
     plt.plot(h.history['val_nll_gaussian'], c='k')
     plt.plot(h.history['nll_gaussian'], c='r')
 
-plt.plot(np.nan, c='k', label='train')
-plt.plot(np.nan, c='r', label='test')
+plt.plot(np.nan, c='k', label='test')
+plt.plot(np.nan, c='r', label='train')
 plt.legend()
 
 
