@@ -130,7 +130,7 @@ es = EarlyStopping(monitor='val_nll_gaussian',
                               patience=10,
                               verbose=0,
                               mode='min',
-                              restore_best_weights=False)
+                              restore_best_weights=True)
 
 rejected = True
 while rejected:
@@ -144,9 +144,9 @@ while rejected:
     model.get_layer('dense_4').kernel_regularizer = l1_l2(0.2, 0.1)
     model.get_layer('dense_5').kernel_regularizer = l1_l2(0.2, 0.1)
 
-    sess = K.get_session()
-    model.get_layer('dense_4').kernel.initializer.run(session=sess)
-    model.get_layer('dense_5').kernel.initializer.run(session=sess)
+#    sess = K.get_session()
+#    model.get_layer('dense_4').kernel.initializer.run(session=sess)
+#    model.get_layer('dense_5').kernel.initializer.run(session=sess)
 
     model.save("temp_path.h5")
     model = load_model("temp_path.h5")

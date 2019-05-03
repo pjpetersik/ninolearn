@@ -6,21 +6,14 @@ import pandas as pd
 import xarray as xr
 
 import keras.backend as K
-from keras.models import Model
-from keras.layers import Dense, Input, concatenate, LeakyReLU
-from keras.layers import Dropout, GaussianNoise
-from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
-from keras import regularizers
 
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
-from ninolearn.learn.evaluation import nrmse, rmse, inside_fraction
+from ninolearn.learn.evaluation import rmse
 from ninolearn.learn.mlp import include_time_lag
-from ninolearn.learn.den import predict_ens, evaluate_ens
-from ninolearn.learn.losses import nll_gaussian
+from ninolearn.learn.dem import DEM
 from ninolearn.utils import print_header
 
 #%%
@@ -69,7 +62,7 @@ T_air = network_ssh['global_transitivity']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 8
+lead_time = 6
 
 feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
@@ -103,119 +96,66 @@ trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_i
 testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
 #%% =============================================================================
-# neural network
+# Deep ensemble
 # =============================================================================
 
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+# Cross validation of model
+n_cv = 5
+dropout, noise, l1_hidden, l2_hidden, l1_out, l2_out, lr, nll = \
+                        list(map(lambda x: np.zeros(x), [n_cv, n_cv, n_cv,n_cv, n_cv,n_cv, n_cv,n_cv]))
 
-es = EarlyStopping(monitor='val_loss', min_delta=0.0, patience=10, verbose=0,
-                   mode='min', restore_best_weights=True)
+models = []
 
-l1 = 0.1
-l2 = 0.1
+for i in range(n_cv):
+    dropout[i] = np.random.uniform(0, 0.5)
+    noise[i] = np.random.uniform(0, 1.)
+    l1_hidden[i] = np.random.uniform(0, 0.2)
+    l2_hidden[i] = np.random.uniform(0, 0.2)
 
-l1_out = 0.0
-l2_out = 0.1
+    l1_out[i] = np.random.uniform(0, 0.05)
+    l2_out[i] = np.random.uniform(0, 0.1)
+    lr[i] = np.exp(np.random.uniform(-8, -5))
 
-model_ens = []
+    model = DEM(dropout=dropout[i], noise=noise[i], l1_hidden=l1_hidden[i],
+                l2_hidden=l2_hidden[i], l1_out=l1_out[i], l2_out=l2_out[i],
+                lr=lr[i], n_segments=10)
 
-ens_per_segment = 5
-segments = 10
-segment_len = trainX.shape[0]//segments
+    model.fit(trainX, trainy)
+    models.append(model)
 
-i = 0
-while i<ens_per_segment:
-    j=0
-    while j<segments:
-        n_ens_sel = len(model_ens)
-        print_header(f"Train iteration Nr {n_ens_sel}")
+    pred_mean, pred_std = model.predict(testX)
 
-        # define the model
-        inputs = Input(shape=(trainX.shape[1],))
-        h = GaussianNoise(0.1)(inputs)
+    nll[i] = model.evaluate(testy, pred_mean, pred_std)
+    print_header(f"Negative-log-likelihood: {nll}")
 
-        h = Dense(16, activation='relu', kernel_regularizer=regularizers.l1_l2(l1, l2))(h)
-        h = Dropout(0.2)(h)
+#%%
 
-        mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
-        sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(l1_out, l2_out))(h)
+best_index = np.argmin(nll)
+best_model = models[best_index]
 
-        outputs = concatenate([mu, sigma])
-
-        model_ens.append(Model(inputs=inputs, outputs=outputs))
-        model_ens[-1].compile(loss=nll_gaussian, optimizer=optimizer, metrics=[nll_gaussian])
-
-        # validate on the spare segment
-        if segments!=1:
-            start_ind = j * segment_len
-            end_ind = (j+1) * segment_len
-
-            trainXens = np.delete(trainX, np.s_[start_ind:end_ind], axis=0)
-            trainyens = np.delete(trainy, np.s_[start_ind:end_ind])
-            valXens = trainX[start_ind:end_ind]
-            valyens = trainy[start_ind:end_ind]
-
-        # validate on test data set
-        elif segments==1:
-            trainXens = trainX
-            trainyens = trainy
-            valXens = testX
-            valyens = testy
-            print("Validation and test data set are the same!")
-
-        history = model_ens[-1].fit(trainXens, trainyens,
-                                    epochs=300, batch_size=1, verbose=1,
-                                    shuffle=True, callbacks=[es],
-                                    validation_data=(valXens, valyens))
-
-        mem_pred = model_ens[-1].predict(trainX)
-        mem_mean = mem_pred[:,0]
-        mem_std = np.abs(mem_pred[:,1])
-
-        in_frac = inside_fraction(trainy, mem_mean, mem_std)
-
-        if in_frac > 0.8 or in_frac < 0.55:
-            print_header("Reject this model. Unreasonable stds.")
-            model_ens.pop()
-
-        elif rmse(trainy, mem_mean)>1.:
-            print_header(f"Reject this model. Unreasonalble rmse of {rmse(trainy, mem_mean)}")
-            model_ens.pop()
-
-        elif np.min(history.history["loss"])>1:
-            print_header("Reject this model. High minimum loss.")
-            model_ens.pop()
-
-        else:
-            j+=1
-    i+=1
-
-#%% =============================================================================
-# Predictions
-# =============================================================================
-pred_mean, pred_std = predict_ens(model_ens, testX)
-predtrain_mean, predtrain_std =  predict_ens(model_ens, trainX)
-predfuture_mean, predfuture_std = predict_ens(model_ens, futureX)
-
-nll = evaluate_ens(testy, pred_mean, pred_std)
-print(f"Negative-log-likelihood: {nll}")
+pred_mean, pred_std = best_model.predict(testX)
+predtrain_mean, predtrain_std = best_model.predict(trainX)
+predfuture_mean, predfuture_std =  best_model.predict(futureX)
 
 #%% =============================================================================
 # Plot
 # =============================================================================
 plt.close("all")
 
-# =============================================================================
-# Loss during trianing
-# =============================================================================
+
+# Scores during trianing
 plt.subplots()
-plt.plot(history.history['val_loss'],label = "val")
-plt.plot(history.history['loss'], label= "train")
+
+for h in best_model.history:
+    plt.plot(h.history['val_nll_gaussian'], c='k')
+    plt.plot(h.history['nll_gaussian'], c='r')
+
+plt.plot(np.nan, c='k', label='train')
+plt.plot(np.nan, c='r', label='test')
 plt.legend()
 
-# =============================================================================
+
 # Predictions
-# =============================================================================
 plt.subplots(figsize=(15,3.5))
 plt.axhspan(-0.5,
             -6,
@@ -280,9 +220,8 @@ pred_rmse = round(rmse(testy, pred_mean),2)
 plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
-# =============================================================================
+
 # Seaonality of Standard deviations
-# =============================================================================
 plt.subplots()
 
 xr_nino34 = xr.DataArray(nino34)
@@ -295,15 +234,12 @@ std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
 std_data.plot()
 std_pred.plot()
 
-# =============================================================================
-# plot explained variance
-# =============================================================================
 
+# plot explained variance
 plot_correlation(testy, pred_mean, testtimey)
 
-# =============================================================================
+
 # Error distribution
-# =============================================================================
 plt.subplots()
 plt.title("Error distribution")
 error = pred_mean - testy

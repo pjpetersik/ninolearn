@@ -5,20 +5,20 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import keras.backend as K
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input
 from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
 from keras.layers.core import Lambda
+from keras.regularizers import l2
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
-from ninolearn.learn.evaluation import nrmse
+from ninolearn.learn.evaluation import rmse
 from ninolearn.learn.mlp import include_time_lag
 
 K.clear_session()
@@ -81,7 +81,7 @@ c2ssh = network_ssh['fraction_clusters_size_2']
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 12
+lead_time = 6
 train_frac = 0.67
 feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino3.values, nino4.values,
                              wwv.values, sc,   #yr # nwt.values#, c2.values,c3.values, c5.values,
@@ -92,7 +92,7 @@ feature_unscaled = np.stack((nino34.values, c2ssh.values, # nino12.values , nino
                              ), axis=1)
 
 
-scaler = MinMaxScaler(feature_range=(-1,1))
+scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
 
 X = Xorg[:-lead_time,:]
@@ -119,24 +119,21 @@ traintimey, testtimey = timey[:train_end], timey[train_end:]
 #%% =============================================================================
 # # neural network
 # =============================================================================
-model = Sequential()
-
-model.add(Dense(32, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.00,0.01)))
-model.add(Lambda(lambda x: K.dropout(x, level=0.2)))
-#model.add(Dropout(0.2))
-model.add(Dense(8, input_dim=X.shape[1],activation='relu', kernel_regularizer=regularizers.l1_l2(0.00,0.01)))
-model.add(Lambda(lambda x: K.dropout(x, level=0.2)))
-#model.add(Dropout(0.2))
-model.add(Dense(1, activation='linear'))
+inputs = Input(shape=(trainX.shape[1],))
+inter = Dropout(0.2)(inputs, training=False)
+inter = Dense(50, activation='relu', W_regularizer=l2(0.0))(inter)
+inter = Dropout(0.2)(inter, training=False)
+outputs = Dense(1, W_regularizer=l2(0.2))(inter)
+model = Model(inputs, outputs)
 
 optimizer = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 
 model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
 
-es = EarlyStopping(monitor='val_loss',
+es = EarlyStopping(monitor='val_mean_squared_error',
                           min_delta=0.0,
-                          patience=10,
+                          patience=50,
                           verbose=0, mode='auto',
                           restore_best_weights=True)
 
@@ -144,54 +141,49 @@ history = model.fit(trainX, trainy, epochs=500, batch_size=20,verbose=1,
                     shuffle=True, callbacks=[es],
                     validation_data=(testX, testy))
 
-predicty = model.predict(testX)
 predicttrainy = model.predict(trainX)
 predictfuturey = model.predict(futureX)
-
-score = nrmse(testy, predicty[:,0])
-
-print(f"NRMSE: {score}")
-corr = np.corrcoef(testy, predicty[:,0])[0,1]
-print(f"R^2: {corr}")
 
 
 #%% =============================================================================
 # # plot
 # =============================================================================
 plt.close("all")
-plot_explained_variance(testy, predicty[:,0], testtimey)
-plt.title(f"{lead_time}-month lead time")
-plt.subplots()
-plt.plot(history.history['val_loss'],label = "val")
-plt.plot(history.history['loss'], label= "train")
-plt.legend()
-
 plt.subplots(figsize=(12,4))
 
 n_ens = 1000
 
-predict_ens = np.zeros((len(predicty),n_ens))
-in_or_out = np.zeros((len(predicty)))
+predict_ens = np.zeros((len(testy),n_ens))
+in_or_out = np.zeros((len(testy)))
 
 for i in range(n_ens):
-    predict_ens[:,i] = model.predict(testX)[:,0]
+    predict_ens[:,i] = model.predict(testX+ np.random.normal(0, 1, size=testX.shape))[:,0]
 
-predicty_max = predict_ens.max(axis=1)
-predicty_min = predict_ens.min(axis=1)
 predicty_mean = predict_ens.mean(axis=1)
+predicty_std = predict_ens.std(axis=1)
+predicty_max = predicty_mean + predicty_std
+predicty_min = predicty_mean - predicty_std
+
 
 in_or_out[(testy>predicty_min) & (testy<predicty_max)] = 1
 in_frac = np.sum(in_or_out)/len(testy)
 
-plt.title(f"{lead_time}-month lead time, NRMSE:{round(score,2)}, r^2:{round(corr,2)}, inside uncertainty: {round(in_frac*100,2)}%")
+score = rmse(testy, predicty_mean)
+corr = np.corrcoef(testy, predicty_mean)[0,1]
+plt.title(f"{lead_time}-month lead time, RMSE:{round(score,2)}, inside uncertainty: {round(in_frac*100,2)}%")
 
 plt.plot(testtimey,predicty_mean, "b")
 plt.fill_between(testtimey,predicty_min,predicty_max ,facecolor='blue', alpha=0.3)
 
-
 plt.plot(timey, y, "k")
-
 plt.plot(traintimey,predicttrainy, "lime")
 plt.plot(futuretime,predictfuturey, "b--")
-
 plt.ylim(-4,4)
+
+
+plot_explained_variance(testy, predicty_mean, testtimey)
+plt.title(f"{lead_time}-month lead time, r:{round(corr,2)}")
+plt.subplots()
+plt.plot(history.history['val_loss'],label = "val")
+plt.plot(history.history['loss'], label= "train")
+plt.legend()
