@@ -63,7 +63,7 @@ T_air = network_ssh['global_transitivity']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
+lead_time = 9
 
 feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
@@ -90,7 +90,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-02-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]

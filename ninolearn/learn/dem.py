@@ -16,6 +16,7 @@ from os import mkdir, listdir, getcwd
 from shutil import rmtree
 
 from ninolearn.learn.losses import nll_gaussian
+from ninolearn.learn.evaluation import rmse
 from ninolearn.utils import print_header, small_print_header
 
 import warnings
@@ -58,9 +59,9 @@ class DEM(object):
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
                  l1_hidden=0.1, l2_hidden=0.1, l1_out=0.0, l2_out=0.1,
                  n_segments=5, n_members_segment=1, lr=0.001, patience = 10, epochs=300,
-                 verbose=0):
+                 verbose=0, std=True):
         """
-        A deep ensemble model (DEM) predicting mean and standard deviation with one hidden
+        A deep ensemble model (DEM) predicting mean (and standard deviation) with one hidden
         layer having the ReLU function as activation for the hidden layer. It
         is trained using the negative-log-likelihood of a gaussian distribution.
         :type int:
@@ -77,20 +78,28 @@ class DEM(object):
         self.l2_hidden = l2_hidden
         self.l1_out = l1_out
         self.l2_out = l2_out
+        self.std = std
         self.lr = lr
         self.patience = patience
         self.epochs = epochs
         self.verbose = verbose
 
-        self.optimizer = Adam(lr=self.lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
-        self.es = EarlyStopping(monitor='val_nll_gaussian', min_delta=0.0, patience=self.patience, verbose=0,
-                   mode='min', restore_best_weights=True)
-
         self.n_segments = n_segments
         self.n_members_segments = n_members_segment
 
-
         self.n_members = self.n_segments * self.n_members_segments
+        self.std = std
+        if self.std:
+            self.loss = nll_gaussian
+            self.loss_name = 'nll_gaussian'
+        else:
+            self.loss = 'mse'
+            self.loss_name = 'mean_squared_error'
+
+
+        self.optimizer = Adam(lr=self.lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=0,
+                   mode='min', restore_best_weights=True)
 
     def build_model(self, n_features):
         """
@@ -104,9 +113,13 @@ class DEM(object):
             h = Dropout(self.dropout)(h)
 
         mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
-        sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
+        if self.std:
+            sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
+            outputs = concatenate([mu, sigma])
 
-        outputs = concatenate([mu, sigma])
+        else:
+            outputs = mu
+
         model = Model(inputs=inputs, outputs=outputs)
         return model
 
@@ -128,7 +141,8 @@ class DEM(object):
                 small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
 
                 ensemble_member = self.build_model(trainX.shape[1])
-                ensemble_member.compile(loss=nll_gaussian, optimizer=self.optimizer, metrics=[nll_gaussian])
+
+                ensemble_member.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.loss])
 
                 # validate on the spare segment
                 if self.n_segments!=1:
@@ -164,42 +178,54 @@ class DEM(object):
                 j+=1
             i+=1
 
-    def predict(self, X):
+    def predict(self, X, std=True):
         """
         Senerates the ensemble prediction of a model ensemble
 
         :param model_ens: list of ensemble models
         :param X: the features
         """
-        pred_ens = np.zeros((X.shape[0], 2, self.n_members))
+        if std:
+            pred_ens = np.zeros((X.shape[0], 2, self.n_members))
+        else:
+            pred_ens = np.zeros((X.shape[0], 1, self.n_members))
 
         for i in range(self.n_members):
             pred_ens[:,:,i] = self.ensemble[i].predict(X)
-        return self._mixture(pred_ens)
+        return self._mixture(pred_ens, std)
 
 
-    def _mixture(self, pred):
+    def _mixture(self, pred, std):
         """
         returns the ensemble mixture results
         """
         mix_mean = pred[:,0,:].mean(axis=1)
-        mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
-        mix_std = np.sqrt(mix_var)
+        if std:
+            mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
+            mix_std = np.sqrt(mix_var)
+
+        else:
+            mix_std = None
+
         return mix_mean, mix_std
 
-    def evaluate(self, ytrue, mean_pred, std_pred):
+    def evaluate(self, ytrue, mean_pred, std_pred=False):
         """
         Negative - log -likelihood for the prediction of a gaussian probability
         """
-        mean = mean_pred
-        sigma = std_pred + 1e-6 # adding 1-e6 for numerical stability reasons
+        if  std_pred is None:
+            return rmse(ytrue, mean_pred)
 
-        first  =  0.5 * np.log(np.square(sigma))
-        second =  np.square(mean - ytrue) / (2  * np.square(sigma))
-        summed = first + second
+        else:
+            mean = mean_pred
+            sigma = std_pred + 1e-6 # adding 1-e6 for numerical stability reasons
 
-        loss =  np.mean(summed, axis=-1)
-        return loss
+            first  =  0.5 * np.log(np.square(sigma))
+            second =  np.square(mean - ytrue) / (2  * np.square(sigma))
+            summed = first + second
+
+            loss =  np.mean(summed, axis=-1)
+            return loss
 
     def save(self, location='', dir_name='ensemble'):
         """

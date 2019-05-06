@@ -59,7 +59,9 @@ T_air = network_ssh['global_transitivity']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time_arr = np.array([1, 2, 3, 4, 5, 6, 9, 12])
+lead_time_arr = np.array([0, 3, 4, 5, 6, 9])
+shift = 2 # actually 3
+
 n_pred = len(lead_time_arr)
 all_season_corr = np.zeros(n_pred)
 all_season_rmse = np.zeros(n_pred)
@@ -84,23 +86,24 @@ for i in range(n_pred):
     Xorg = scaler.fit_transform(feature_unscaled)
     Xorg = np.nan_to_num(Xorg)
 
-    X = Xorg[:-lead_time,:]
+    X = Xorg[: - lead_time - shift, :]
     X = include_time_lag(X, max_lag=time_lag)
 
 
     yorg = nino34.values
-    y = yorg[time_lag +  lead_time:]
+    y = yorg[time_lag + lead_time + shift:]
 
-    ypres = yorg[time_lag:-lead_time]
 
-    timey = nino34.index[lead_time + time_lag:]
+    y_persistance = yorg[time_lag: - lead_time - shift]
 
-    test_indeces = (timey>='2002-01-01') & (timey<='2011-03-01')
+    timey = nino34.index[lead_time + time_lag + shift:]
+
+    test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
     train_indeces = np.invert(test_indeces)
 
     testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
-    pred_pres = ypres[test_indeces]
+    pred_persistance = y_persistance[test_indeces]
     #%% ===========================================================================
     # Deep ensemble
     # =============================================================================
@@ -113,10 +116,10 @@ for i in range(n_pred):
 
     # all seasons skills
     all_season_corr[i] = np.corrcoef(testy, pred_mean)[0,1]
-    all_season_corr_pres[i] = np.corrcoef(testy, pred_pres)[0,1]
+    all_season_corr_pres[i] = np.corrcoef(testy, pred_persistance)[0,1]
 
     all_season_rmse[i] = rmse(testy, pred_mean)
-    all_season_rmse_pres[i] = rmse(testy, pred_pres)
+    all_season_rmse_pres[i] = rmse(testy, pred_persistance)
 
     all_season_nll[i] = model.evaluate(testy, pred_mean, pred_std)
 
@@ -133,8 +136,8 @@ nll_nino = model.evaluate(testy, nino_mean, nino_std)
 plt.close("all")
 
 ax = plt.figure().gca()
-plt.plot(lead_time_arr - 1, all_season_corr, label="Deep Ensemble Mean")
-plt.plot(lead_time_arr - 1, all_season_corr_pres, label="Persistence")
+plt.plot(lead_time_arr, all_season_corr, label="Deep Ensemble Mean")
+plt.plot(lead_time_arr, all_season_corr_pres, label="Persistence")
 plt.ylim(-0.2,1)
 plt.xlim(0,8)
 plt.xlabel('lead time')
@@ -145,9 +148,9 @@ plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
 ax = plt.figure().gca()
-plt.plot(lead_time_arr - 1, all_season_rmse, label="Deep Ensemble Mean")
-plt.plot(lead_time_arr - 1, all_season_rmse_pres, label="Persistence")
-plt.ylim(0.,1)
+plt.plot(lead_time_arr, all_season_rmse, label="Deep Ensemble Mean")
+plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence")
+plt.ylim(0.,1.8)
 plt.xlim(0,8)
 plt.xlabel('lead time')
 plt.ylabel('RMSE')
@@ -158,7 +161,7 @@ ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
 
 ax = plt.figure().gca()
-plt.plot(lead_time_arr - 1, all_season_nll, label="Deep Ensemble")
+plt.plot(lead_time_arr, all_season_nll, label="Deep Ensemble")
 plt.hlines(nll_nino,0,12, label='Nino3.4 mean/std', color='orange')
 plt.ylim(-0.5,0.5)
 plt.xlim(0.,8)
@@ -169,5 +172,5 @@ plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-plot_monthly_skill(lead_time_arr-1, monthly_corr.T)
-plot_monthly_skill(lead_time_arr-1, monthly_rmse.T, vmin=0, vmax=1)
+plot_monthly_skill(lead_time_arr, monthly_corr.T)
+plot_monthly_skill(lead_time_arr, monthly_rmse.T, vmin=0, vmax=2, cmap=plt.cm.Reds)

@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
+from ninolearn.plot.prediction import plot_prediction
 from ninolearn.learn.evaluation import rmse
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.dem import DEM
@@ -63,8 +64,8 @@ T_air = network_ssh['global_transitivity']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 0
-shift = 3
+lead_time = 6
+shift = 2
 
 feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
@@ -84,14 +85,14 @@ X = include_time_lag(X, max_lag=time_lag)
 futureX =  include_time_lag(futureX, max_lag=time_lag)
 
 yorg = nino34.values
-y = yorg[lead_time + time_lag+shift:]
+y = yorg[lead_time + time_lag + shift:]
 
 timey = nino34.index[lead_time + time_lag + shift:]
 futuretime = pd.date_range(start='2019-01-01',
-                                        end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
+                                        end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -100,18 +101,19 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-model = DEM()
+with_std = True
 
-model.set_parameters(layers=1, dropout=0.05, noise=0.6, l1_hidden=0.15,
-            l2_hidden=0.15, l1_out=0.08, l2_out=0.02,
-            lr=0.0001, n_segments=5, n_members_segment=1, patience=30, verbose=1)
+model = DEM()
+model.set_parameters(layers=1, dropout=0.2, noise=0.02, l1_hidden=0.01,
+            l2_hidden=0.0, l1_out=0.00, l2_out=0.001,
+            lr=0.0001, n_segments=10, n_members_segment=1, patience=10, verbose=1, std=with_std)
 
 model.fit(trainX, trainy)
+#%%
+pred_mean, pred_std = model.predict(testX, std=with_std)
 
-pred_mean, pred_std = model.predict(testX)
-
-nll = model.evaluate(testy, pred_mean, pred_std)
-print_header(f"Negative-log-likelihood: {nll}")
+score = model.evaluate(testy, pred_mean, pred_std)
+print_header(f"Score: {score}")
 
 model.save(location=modeldir, dir_name=f'ensemble_lead{lead_time}')
 
@@ -119,12 +121,13 @@ model.save(location=modeldir, dir_name=f'ensemble_lead{lead_time}')
 # Plots
 # =============================================================================
 plt.close("all")
+
 # Scores during trianing
 plt.subplots()
 
 for h in model.history:
-    plt.plot(h.history['val_nll_gaussian'], c='k')
-    plt.plot(h.history['nll_gaussian'], c='r')
+    plt.plot(h.history[f'val_{model.loss_name}'], c='k')
+    plt.plot(h.history[f'{model.loss_name}'], c='r')
 
 plt.plot(np.nan, c='k', label='test')
 plt.plot(np.nan, c='r', label='train')
@@ -135,9 +138,9 @@ del model
 model = DEM()
 model.load(location=modeldir, dir_name=f'ensemble_lead{lead_time}')
 
-pred_mean, pred_std = model.predict(testX)
-predtrain_mean, predtrain_std = model.predict(trainX)
-predfuture_mean, predfuture_std =  model.predict(futureX)
+pred_mean, pred_std = model.predict(testX, std=with_std)
+predtrain_mean, predtrain_std = model.predict(trainX, std=with_std)
+predfuture_mean, predfuture_std =  model.predict(futureX, std=with_std)
 
 # Predictions
 plt.subplots(figsize=(15,3.5))
@@ -154,54 +157,30 @@ plt.axhspan(0.5,
 plt.xlim(timey[0],futuretime[-1])
 plt.ylim(-3,3)
 
-std = 1.
-
 # test
-predicty_p1std = pred_mean + np.abs(pred_std)
-predicty_m1std = pred_mean - np.abs(pred_std)
-predicty_p2std = pred_mean + 2 * np.abs(pred_std)
-predicty_m2std = pred_mean - 2 * np.abs(pred_std)
-
-plt.fill_between(testtimey,predicty_m1std, predicty_p1std , facecolor='royalblue', alpha=0.7)
-plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='royalblue', alpha=0.3)
-plt.plot(testtimey,pred_mean, "navy")
+plot_prediction(testtimey, pred_mean, std=pred_std, facecolor='royalblue', line_color='navy')
 
 # train
-predtrain_mean[traintimey=='2001-12-01'] = np.nan
-
-predicttrainy_p1std = predtrain_mean +  np.abs(predtrain_std)
-predicttrainy_m1std = predtrain_mean -  np.abs(predtrain_std)
-predicttrainy_p2std = predtrain_mean + 2 * np.abs(predtrain_std)
-predicttrainy_m2std = predtrain_mean - 2 * np.abs(predtrain_std)
-
-plt.fill_between(traintimey,predicttrainy_m1std,predicttrainy_p1std ,facecolor='lime', alpha=0.5)
-plt.fill_between(traintimey,predicttrainy_m2std,predicttrainy_p2std ,facecolor='lime', alpha=0.2)
-
-plt.plot(traintimey, predtrain_mean, "g")
+predtrain_mean[traintimey=='2002-02-01'] = np.nan
+plot_prediction(traintimey, predtrain_mean, std=predtrain_std, facecolor='lime', line_color='g')
 
 # future
-predictfuturey_p1std = predfuture_mean + np.abs(predfuture_std)
-predictfuturey_m1std = predfuture_mean - np.abs(predfuture_std)
-predictfuturey_p2std = predfuture_mean + 2 * np.abs(predfuture_std)
-predictfuturey_m2std = predfuture_mean - 2 * np.abs(predfuture_std)
+plot_prediction(futuretime, predfuture_mean, std=predfuture_std, facecolor='orange', line_color='darkorange')
 
-plt.fill_between(futuretime, predictfuturey_m1std, predictfuturey_p1std , facecolor='orange', alpha=0.7)
-plt.fill_between(futuretime, predictfuturey_m2std, predictfuturey_p2std , facecolor='orange', alpha=0.3)
-plt.plot(futuretime, predfuture_mean, "darkorange")
-
+# observation
 plt.plot(timey, y, "k")
-
-in_or_out = np.zeros((len(pred_mean)))
-in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
-in_frac = np.sum(in_or_out)/len(testy)
-
-in_or_out_train = np.zeros((len(predtrain_mean)))
-in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
-in_frac_train = np.sum(in_or_out_train)/len(trainy)
+#
+#in_or_out = np.zeros((len(pred_mean)))
+#in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
+#in_frac = np.sum(in_or_out)/len(testy)
+#
+#in_or_out_train = np.zeros((len(predtrain_mean)))
+#in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
+#in_frac_train = np.sum(in_or_out_train)/len(trainy)
+#plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
 
 pred_rmse = round(rmse(testy, pred_mean),2)
-
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
+plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
 
