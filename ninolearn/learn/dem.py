@@ -40,7 +40,7 @@ def predict_ens(model_ens, X):
         pred_ens[:,:,i] = model_ens[i].predict(X)
     return _mixture(pred_ens)
 
-def evaluate_ens(mean_y, mean_pred, std_pred):
+def nll(mean_y, mean_pred, std_pred):
     """
     Negative - log -likelihood for the prediction of a gaussian probability
     """

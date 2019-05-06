@@ -33,6 +33,21 @@ def correlation(y, pred, time):
         r[i] = np.corrcoef(y_sel, pred_sel)[0, 1]
     return r
 
+def rmse_mon(y, pred, time):
+    """
+    Returns the correlation (r) for each month in a time series
+    """
+    RMSE = np.zeros(12)
+
+    for i in range(12):
+        month = (time.month == i+1)
+
+        y_sel = y[month]
+        pred_sel = pred[month]
+        RMSE[i] = rmse(y_sel, pred_sel)
+    return RMSE
+
+
 def rmse(y, predict):
     """
     Computes the root mean square error (RMSE)

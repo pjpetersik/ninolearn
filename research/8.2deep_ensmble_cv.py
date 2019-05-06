@@ -150,8 +150,8 @@ predfuture_mean, predfuture_std =  best_model.predict(futureX)
 #%% =============================================================================
 # Plot
 # =============================================================================
-
 plt.close("all")
+
 # Cross validation
 plt.plot(l2_hidden, nll)
 #%%

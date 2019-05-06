@@ -3,22 +3,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import xarray as xr
 
-import keras.backend as K
+from keras import backend as K
 
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
-from ninolearn.plot.evaluation  import plot_correlation
-from ninolearn.learn.evaluation import rmse
+
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.dem import DEM
-from ninolearn.utils import print_header
 from ninolearn.pathes import modeldir
 
-#%%
-K.clear_session()
 
 #%% =============================================================================
 # read data
@@ -99,16 +94,25 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-predfuture_mean = np.zeros(3)
-predfuture_std = np.zeros(3)
-lead_time = np.array([1,2,3,6,9,12])
-predtime = []
+plt.close("all")
+index = -1
 
-for i in range(len(lead_time)):
+lead_time = np.array([0, 1,2, 3, 4, 5, 6, 9,12, 18])
+n_pred = len(lead_time)
+
+predfuture_mean = np.zeros(n_pred)
+predfuture_std = np.zeros(n_pred)
+
+
+predfuture_mean[0]  = nino34[index]
+predtime = [time[index]+pd.tseries.offsets.MonthBegin(1)]
+
+for i in range(1, n_pred):
+    K.clear_session()
     model = DEM()
     model.load(location=modeldir, dir_name=f'ensemble_lead{lead_time[i]}')
-    predfuture_mean[i], predfuture_std[i] =  model.predict(futureX[-1:,:])
-    predtime.append(time[-1]+pd.tseries.offsets.MonthBegin(lead_time[i]+1))
+    predfuture_mean[i], predfuture_std[i] =  model.predict(futureX[index:,:])
+    predtime.append(time[index]+pd.tseries.offsets.MonthBegin(lead_time[i]+1))
 
 predtime = pd.DatetimeIndex(predtime)
 
@@ -138,3 +142,4 @@ predictfuturey_m2std = predfuture_mean - 2 * np.abs(predfuture_std)
 plt.fill_between(predtime, predictfuturey_m1std, predictfuturey_p1std , facecolor='orange', alpha=0.7)
 plt.fill_between(predtime, predictfuturey_m2std, predictfuturey_p2std , facecolor='orange', alpha=0.3)
 plt.plot(predtime, predfuture_mean, "darkorange")
+plt.grid()

@@ -26,7 +26,7 @@ K.clear_session()
 reader = data_reader(startdate='1981-01')
 
 nino4 = reader.read_csv('nino4M')
-nino34 = reader.read_csv('nino3.4M')
+nino34 = reader.read_csv('nino3.4S')
 nino12 = reader.read_csv('nino1+2M')
 nino3 = reader.read_csv('nino3M')
 
@@ -63,7 +63,9 @@ T_air = network_ssh['global_transitivity']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 18
+lead_time = 0
+shift = 3
+
 feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
                              C_sst, H_sst,
@@ -75,16 +77,16 @@ Xorg = scaler.fit_transform(feature_unscaled)
 
 Xorg = np.nan_to_num(Xorg)
 
-X = Xorg[:-lead_time,:]
-futureX = Xorg[-lead_time-time_lag:,:]
+X = Xorg[:-lead_time-shift,:]
+futureX = Xorg[-lead_time-shift-time_lag:,:]
 
 X = include_time_lag(X, max_lag=time_lag)
 futureX =  include_time_lag(futureX, max_lag=time_lag)
 
 yorg = nino34.values
-y = yorg[lead_time + time_lag:]
+y = yorg[lead_time + time_lag+shift:]
 
-timey = nino34.index[lead_time + time_lag:]
+timey = nino34.index[lead_time + time_lag + shift:]
 futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
                                         freq='MS')
@@ -102,9 +104,9 @@ model = DEM()
 
 model.set_parameters(layers=1, dropout=0.05, noise=0.6, l1_hidden=0.15,
             l2_hidden=0.15, l1_out=0.08, l2_out=0.02,
-            lr=0.0001, n_segments=1, n_members_segment=1, patience=30, verbose=1)
+            lr=0.0001, n_segments=5, n_members_segment=1, patience=30, verbose=1)
 
-model.fit(trainX, trainy, testX, testy)
+model.fit(trainX, trainy)
 
 pred_mean, pred_std = model.predict(testX)
 

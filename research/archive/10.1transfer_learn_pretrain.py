@@ -86,7 +86,7 @@ yr =  np.arange(len_ts) % 12
 # # process data
 # =============================================================================
 time_lag = 12
-lead_time = 12
+lead_time = 6
 
 feature_unscaled = np.stack((nino34, sc, #yr,
                             iod,

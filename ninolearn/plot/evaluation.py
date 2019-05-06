@@ -71,3 +71,20 @@ def plot_confMat(y, pred, labels):
                     ha="center", va="center",
                     color="black" if cm[i, j] > thresh else "black")
     fig.tight_layout()
+
+
+def plot_monthly_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=plt.cm.bwr):
+    fig, ax = plt.subplots()
+    m = np.arange(1,13)
+
+    levels = np.linspace(vmin, vmax, nlevels+1)
+    C = ax.contourf(m,lead_time, data, levels=levels,
+                 vmin=vmin, vmax=vmax,
+                 cmap=cmap, extend='both')
+
+    ax.set_xticks(m)
+    ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J',
+                        'J', 'A', 'S', 'O', 'N', 'D'])
+    ax.set_xlabel('Target month')
+    ax.set_ylabel('lead time')
+    plt.colorbar(C)
