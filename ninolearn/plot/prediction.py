@@ -3,8 +3,6 @@ import numpy as np
 
 def plot_prediction(time, mean, std=None, std_level=1, facecolor='royalblue', line_color="navy"):
     if std is not None:
-        std = 1.
-
         p1std = mean + np.abs(std)
         m1std = mean - np.abs(std)
         p2std = mean + 2 * np.abs(std)

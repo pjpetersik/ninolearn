@@ -10,17 +10,17 @@ reader = data_reader(startdate='1981-01', enddate='2017-12')
 iod = reader.read_csv('iod')
 wwv = reader.read_csv('wwv')
 
-nino34 = reader.read_csv('nino3.4M')
+nino34 = reader.read_csv('nino3.4S')
 nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')
 
-network = reader.read_statistic('network_metrics', variable='sst',
-                           dataset='ERSSTv5', processed="anom")
+network = reader.read_statistic('network_metrics', variable='sshg',
+                           dataset='GODAS', processed="anom")
 
 #network = reader.read_statistic('network_metrics', variable='air',
 #                           dataset='NCEP', processed="anom")
 
-pca = reader.read_statistic('pca', variable='air',
+pca = reader.read_statistic('pca', variable='vwnd',
                            dataset='NCEP', processed="anom")
 
 c2 = network['fraction_clusters_size_2']

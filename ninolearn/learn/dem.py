@@ -55,15 +55,18 @@ def nll(mean_y, mean_pred, std_pred):
     loss =  np.mean(summed, axis=-1)
     return loss
 
+class MissingArgumentError(ValueError):
+    pass
+
 class DEM(object):
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
-                 l1_hidden=0.1, l2_hidden=0.1, l1_out=0.0, l2_out=0.1,
-                 n_segments=5, n_members_segment=1, lr=0.001, patience = 10, epochs=300,
-                 verbose=0, std=True):
+                 l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
+                 l2_sigma=0.1, n_segments=5, n_members_segment=1, lr=0.001,
+                 patience = 10, epochs=300, verbose=0, std=True):
         """
-        A deep ensemble model (DEM) predicting mean (and standard deviation) with one hidden
+        A deep ensemble model (DEM) predicting  either mean or mean and standard deviation with one hidden
         layer having the ReLU function as activation for the hidden layer. It
-        is trained using the negative-log-likelihood of a gaussian distribution.
+        is trained using the MSE or negative-log-likelihood of a gaussian distribution, respectively.
         :type int:
         :param neurons: Number of neurons.
 
@@ -76,8 +79,10 @@ class DEM(object):
         self.noise = noise
         self.l1_hidden = l1_hidden
         self.l2_hidden = l2_hidden
-        self.l1_out = l1_out
-        self.l2_out = l2_out
+        self.l1_mu = l1_mu
+        self.l2_mu = l2_mu
+        self.l1_sigma = l1_sigma
+        self.l2_sigma = l2_sigma
         self.std = std
         self.lr = lr
         self.patience = patience
@@ -112,9 +117,9 @@ class DEM(object):
             h = Dense(self.neurons, activation='relu', kernel_regularizer=regularizers.l1_l2(self.l1_hidden, self.l2_hidden))(h)
             h = Dropout(self.dropout)(h)
 
-        mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
+        mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(self.l1_mu, self.l2_mu))(h)
         if self.std:
-            sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(self.l1_out, self.l2_out))(h)
+            sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(self.l1_sigma, self.l2_sigma))(h)
             outputs = concatenate([mu, sigma])
 
         else:
@@ -160,7 +165,7 @@ class DEM(object):
                 # validate on test data set
                 elif self.n_segments==1:
                     if valX is None or valy is None:
-                        raise ValueError("When segments length is 1, a validation data set must be provided")
+                        raise MissingArgumentError("When segments length is 1, a validation data set must be provided.")
                     trainXens = trainX
                     trainyens = trainy
                     valXens = valX
@@ -178,29 +183,29 @@ class DEM(object):
                 j+=1
             i+=1
 
-    def predict(self, X, std=True):
+    def predict(self, X):
         """
         Senerates the ensemble prediction of a model ensemble
 
         :param model_ens: list of ensemble models
         :param X: the features
         """
-        if std:
+        if self.std:
             pred_ens = np.zeros((X.shape[0], 2, self.n_members))
         else:
             pred_ens = np.zeros((X.shape[0], 1, self.n_members))
 
         for i in range(self.n_members):
             pred_ens[:,:,i] = self.ensemble[i].predict(X)
-        return self._mixture(pred_ens, std)
+        return self._mixture(pred_ens)
 
 
-    def _mixture(self, pred, std):
+    def _mixture(self, pred):
         """
         returns the ensemble mixture results
         """
         mix_mean = pred[:,0,:].mean(axis=1)
-        if std:
+        if self.std:
             mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
             mix_std = np.sqrt(mix_var)
 
@@ -256,3 +261,9 @@ class DEM(object):
         for file in files:
             file_path = join(path, file)
             self.ensemble.append(load_model(file_path))
+
+        output_neurons = self.ensemble[0].get_output_shape_at(0)[1]
+        if output_neurons==2:
+            self.std = True
+        else:
+            self.std = False

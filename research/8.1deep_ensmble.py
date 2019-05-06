@@ -60,14 +60,20 @@ H_sst = network_ssh['corrected_hamming_distance']
 S_air = network_ssh['fraction_giant_component']
 T_air = network_ssh['global_transitivity']
 
+pca_u = reader.read_statistic('pca', variable='uwnd', dataset='NCEP', processed='anom')
+pca2_u = pca_u['pca2']
+
 #%% =============================================================================
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
-shift = 2
+lead_time = 3
+shift = 2 # actually 3
 
-feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
+feature_unscaled = np.stack((nino34, nino12, nino3, nino4,
+                             sc, yr,
+                             wwv, iod,
+                             pca2_u,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
                              C_sst, H_sst,
                              S_air, T_air,
@@ -93,6 +99,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         freq='MS')
 
 test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
+#test_indeces = (timey>='2002-03-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -101,21 +108,26 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-with_std = True
-
 model = DEM()
-model.set_parameters(layers=1, dropout=0.2, noise=0.02, l1_hidden=0.01,
-            l2_hidden=0.0, l1_out=0.00, l2_out=0.001,
-            lr=0.0001, n_segments=10, n_members_segment=1, patience=10, verbose=1, std=with_std)
+
+model.set_parameters(layers=1, dropout=0.05, noise=0.6, l1_hidden=0.15,
+            l2_hidden=0.08, l1_mu=0.1, l2_mu=0.1, l1_sigma=0.0, l2_sigma=0.1,
+            lr=0.001, n_segments=5, n_members_segment=1, patience=30, verbose=0, std=True)
 
 model.fit(trainX, trainy)
 #%%
-pred_mean, pred_std = model.predict(testX, std=with_std)
+pred_mean, pred_std = model.predict(testX)
 
 score = model.evaluate(testy, pred_mean, pred_std)
 print_header(f"Score: {score}")
 
-model.save(location=modeldir, dir_name=f'ensemble_lead{lead_time}')
+if model.std:
+    ens_dir=f'ensemble_lead{lead_time}'
+else:
+    ens_dir=f'simple_ensemble_lead{lead_time}'
+
+model.save(location=modeldir, dir_name=ens_dir)
+
 
 #%% =============================================================================
 # Plots
@@ -136,11 +148,11 @@ plt.legend()
 #%% just for testing the loading function delete and load the model
 del model
 model = DEM()
-model.load(location=modeldir, dir_name=f'ensemble_lead{lead_time}')
+model.load(location=modeldir, dir_name=ens_dir)
 
-pred_mean, pred_std = model.predict(testX, std=with_std)
-predtrain_mean, predtrain_std = model.predict(trainX, std=with_std)
-predfuture_mean, predfuture_std =  model.predict(futureX, std=with_std)
+pred_mean, pred_std = model.predict(testX)
+predtrain_mean, predtrain_std = model.predict(trainX)
+predfuture_mean, predfuture_std =  model.predict(futureX)
 
 # Predictions
 plt.subplots(figsize=(15,3.5))
