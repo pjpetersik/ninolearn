@@ -67,16 +67,17 @@ pca2_u = pca_u['pca2']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 3
-shift = 2 # actually 3
+lead_time = 0
+shift = 3 # actually 3
 
-feature_unscaled = np.stack((nino34, nino12, nino3, nino4,
-                             sc, yr,
+feature_unscaled = np.stack((nino34, #nino12, nino3, nino4,
+                             sc, #yr,
                              wwv, iod,
                              pca2_u,
-                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
-                             C_sst, H_sst,
-                             S_air, T_air,
+                             c2_ssh,
+#                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+#                             C_sst, H_sst,
+#                             S_air, T_air,
                              ), axis=1)
 
 scaler = StandardScaler()
@@ -98,8 +99,9 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
-#test_indeces = (timey>='2002-03-01') & (timey<='2018-12-01')
+#test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
+
+test_indeces = (timey>='1982-01-01') & (timey<='1992-01-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -110,11 +112,15 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 model = DEM()
 
-model.set_parameters(layers=1, dropout=0.05, noise=0.6, l1_hidden=0.15,
-            l2_hidden=0.08, l1_mu=0.1, l2_mu=0.1, l1_sigma=0.0, l2_sigma=0.1,
-            lr=0.001, n_segments=5, n_members_segment=1, patience=30, verbose=0, std=True)
+model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
+            l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
+            lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=1, std=True)
 
-model.fit(trainX, trainy)
+#model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
+
+model.fit(trainX, trainy, testX, testy, use_pretrained=False)
+
+
 #%%
 pred_mean, pred_std = model.predict(testX)
 

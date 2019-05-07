@@ -65,12 +65,14 @@ class data_reader(object):
 
         self._check_dates(data, f'{filename[:-3]}')
 
-        if dataset!='ORAP5' and dataset!='GODAS' and  dataset != 'GFDL-CM3':
+        regrided = ['GODAS', 'ERSSTv5']
+
+        if dataset not in regrided  and dataset!='ORAP5' and  dataset != 'GFDL-CM3':
             return data.loc[self.startdate:self.enddate,
                             self.lat_max:self.lat_min,
                             self.lon_min:self.lon_max]
 
-        elif dataset=='GODAS' or dataset == 'GFDL-CM3':
+        elif dataset in regrided or dataset == 'GFDL-CM3':
             return data.loc[self.startdate:self.enddate,
                             self.lat_min:self.lat_max,
                             self.lon_min:self.lon_max]

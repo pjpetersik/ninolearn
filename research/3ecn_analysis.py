@@ -13,11 +13,60 @@ from ninolearn.postprocess.network import networkMetricsSeries
 # =============================================================================
 print_header("Network Metrics")
 
-nms = networkMetricsSeries('sshg', 'GODAS', processed="anom",
+nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
                            threshold=0.9, startyear=1980, endyear=2018,
                            window_size=12, lon_min=120, lon_max=280,
                            lat_min=-30, lat_max=30, verbose=1)
-nms.computeTimeSeries()
+nms_ssh.computeTimeSeries()
+
+
+nms_air = networkMetricsSeries('air', 'NCEP', processed="anom",
+                           threshold=0.9, startyear=1980, endyear=2018,
+                           window_size=12, lon_min=120, lon_max=280,
+                           lat_min=-30, lat_max=30, verbose=1)
+nms_air.computeTimeSeries()
+
+nms_sst = networkMetricsSeries('sst', 'ERSSTv5', processed="anom",
+                           threshold=0.9, startyear=1980, endyear=2018,
+                           window_size=12, lon_min=120, lon_max=280,
+                           lat_min=-30, lat_max=30, verbose=1)
+nms_sst.computeTimeSeries()
+
+
+
+# %% ==========================================================================
+# =============================================================================
+# # Plot Network Metrics
+# =============================================================================
+# =============================================================================
+plt.close("all")
+var = 'fraction_clusters_size_3'
+#var = 'corrected_hamming_distance'
+var = 'avelocal_transmissivity'
+var = 'average_path_length'
+
+readerobs = data_reader(startdate='1981-01', enddate='2018-12')
+nwm_obs = readerobs.read_statistic('network_metrics', 'sshg',
+                                        dataset='GODAS',
+                                        processed='anom')
+
+nino34 = readerobs.read_csv('nino3.4M')
+
+plt.figure(figsize=(7, 1.5))
+nwm_obs[var].plot(c='k')
+nino_background(nino34, nino_treshold=0.5)
+
+plt.subplots()
+plt.xcorr(nino34, nwm_obs[var], maxlags=48)
+
+
+
+
+
+
+
+"""
+ARCHIVED
 
 
 #%% =============================================================================
@@ -47,16 +96,10 @@ nms = networkMetricsSeries('tas', 'GFDL-CM3', processed="anom",
                            lat_min=-30, lat_max=30, verbose=1)
 nms.computeTimeSeries()
 
-# %% ==========================================================================
-# =============================================================================
-# # Plot Network Metrics
-# =============================================================================
-# =============================================================================
-plt.close("all")
-var = 'fraction_clusters_size_3'
-#var = 'corrected_hamming_distance'
-var = 'avelocal_transmissivity'
-var = 'average_path_length'
+
+
+
+
 # =============================================================================
 # GFDL
 # =============================================================================
@@ -79,16 +122,5 @@ plt.xcorr(nino34gfdl, nwm_gfdl[var], maxlags=48)
 # =============================================================================
 # Observations
 # =============================================================================
-readerobs = data_reader(startdate='1981-01', enddate='2018-12')
-nwm_obs = readerobs.read_statistic('network_metrics', 'sshg',
-                                        dataset='GODAS',
-                                        processed='anom')
 
-nino34 = readerobs.read_csv('nino3.4M')
-
-plt.figure(figsize=(7, 1.5))
-nwm_obs[var].plot(c='k')
-nino_background(nino34, nino_treshold=0.5)
-
-plt.subplots()
-plt.xcorr(nino34, nwm_obs[var], maxlags=48)
+"""

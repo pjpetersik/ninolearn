@@ -54,38 +54,53 @@ H_sst = network_ssh['corrected_hamming_distance']
 S_air = network_ssh['fraction_giant_component']
 T_air = network_ssh['global_transitivity']
 
+pca_u = reader.read_statistic('pca', variable='uwnd', dataset='NCEP', processed='anom')
+pca2_u = pca_u['pca2']
+
 #%% =============================================================================
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
+lead_time = 9
+shift = 3 # actually 3
 
-feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
+feature_unscaled = np.stack((nino34, nino12, nino3, nino4,
+                             sc, yr,
+                             wwv, iod,
+                             pca2_u,
                              L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
                              C_sst, H_sst,
                              S_air, T_air,
                              ), axis=1)
+
+#feature_unscaled = np.stack((nino34,
+#                             sc, yr,
+#                             iod,
+#                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+#                             C_sst, H_sst,
+#                             S_air, T_air,
+#                             ), axis=1)
 
 scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
 
 Xorg = np.nan_to_num(Xorg)
 
-X = Xorg[:-lead_time,:]
-futureX = Xorg[-lead_time-time_lag:,:]
+X = Xorg[:-lead_time-shift,:]
+futureX = Xorg[-lead_time-shift-time_lag:,:]
 
 X = include_time_lag(X, max_lag=time_lag)
 futureX =  include_time_lag(futureX, max_lag=time_lag)
 
 yorg = nino34.values
-y = yorg[lead_time + time_lag:]
-time =  nino34.index
-timey = nino34.index[lead_time + time_lag:]
+y = yorg[lead_time + time_lag + shift:]
+
+timey = nino34.index[lead_time + time_lag + shift:]
 futuretime = pd.date_range(start='2019-01-01',
-                                        end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
+                                        end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -95,24 +110,24 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # Deep ensemble
 # =============================================================================
 plt.close("all")
-index = -1
+index = -2
 
-lead_time = np.array([0, 1,2, 3, 4, 5, 6, 9,12, 18])
+lead_time = np.array([0, 3, 6, 9])
 n_pred = len(lead_time)
 
 predfuture_mean = np.zeros(n_pred)
 predfuture_std = np.zeros(n_pred)
 
-
 predfuture_mean[0]  = nino34[index]
-predtime = [time[index]+pd.tseries.offsets.MonthBegin(1)]
+predtime = [timey[index]+pd.tseries.offsets.MonthBegin(1)]
 
 for i in range(1, n_pred):
     K.clear_session()
     model = DEM()
     model.load(location=modeldir, dir_name=f'ensemble_lead{lead_time[i]}')
-    predfuture_mean[i], predfuture_std[i] =  model.predict(futureX[index:,:])
-    predtime.append(time[index]+pd.tseries.offsets.MonthBegin(lead_time[i]+1))
+    predfuture_mean[i], predfuture_std[i] =  model.predict(futureX[index:index+1,:])
+
+    predtime.append(timey[index]+pd.tseries.offsets.MonthBegin(lead_time[i]))
 
 predtime = pd.DatetimeIndex(predtime)
 

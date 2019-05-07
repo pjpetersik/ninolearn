@@ -61,8 +61,8 @@ class MissingArgumentError(ValueError):
 class DEM(object):
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
                  l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
-                 l2_sigma=0.1, n_segments=5, n_members_segment=1, lr=0.001,
-                 patience = 10, epochs=300, verbose=0, std=True):
+                 l2_sigma=0.1, batch_size=10, n_segments=5, n_members_segment=1,
+                 lr=0.001, patience = 10, epochs=300, verbose=0, std=True):
         """
         A deep ensemble model (DEM) predicting  either mean or mean and standard deviation with one hidden
         layer having the ReLU function as activation for the hidden layer. It
@@ -73,6 +73,7 @@ class DEM(object):
         :type dropout: float
         :param dropout: Dropout rate.
         """
+        # hyperparameters
         self.layers = layers
         self.neurons = neurons
         self.dropout = dropout
@@ -83,28 +84,46 @@ class DEM(object):
         self.l2_mu = l2_mu
         self.l1_sigma = l1_sigma
         self.l2_sigma = l2_sigma
-        self.std = std
         self.lr = lr
+        self.n_segments = n_segments
+        self.n_members_segments = n_members_segment
+        self.batch_size = batch_size
+        # derived parameters
+        self.n_members = self.n_segments * self.n_members_segments
+
+        # training settings
         self.patience = patience
         self.epochs = epochs
         self.verbose = verbose
 
-        self.n_segments = n_segments
-        self.n_members_segments = n_members_segment
-
-        self.n_members = self.n_segments * self.n_members_segments
+        # model choice
         self.std = std
+
         if self.std:
             self.loss = nll_gaussian
             self.loss_name = 'nll_gaussian'
+
         else:
             self.loss = 'mse'
             self.loss_name = 'mean_squared_error'
 
-
-        self.optimizer = Adam(lr=self.lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+        # initialize optimizer and early stopping
+        self.optimizer = Adam(lr=self.lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
         self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=0,
                    mode='min', restore_best_weights=True)
+
+    def get_pretrained_weights(self, location=None,  dir_name='pre_ensemble'):
+        """
+        loads weights from a pretrained model
+        """
+        if location is None:
+            location = getcwd()
+        path = join(location, dir_name)
+        file = listdir(path)[0]
+        file_path = join(path, file)
+
+        self.pretrained_weights =  file_path
+
 
     def build_model(self, n_features):
         """
@@ -129,7 +148,10 @@ class DEM(object):
         return model
 
 
-    def fit(self, trainX, trainy, valX=None, valy=None):
+    def fit(self, trainX, trainy, valX=None, valy=None, use_pretrained=False):
+        """
+        Fit the model to training data
+        """
         self.ensemble = []
         self.history = []
 
@@ -146,6 +168,9 @@ class DEM(object):
                 small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
 
                 ensemble_member = self.build_model(trainX.shape[1])
+
+                if use_pretrained:
+                    ensemble_member.load_weights(self.pretrained_weights)
 
                 ensemble_member.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.loss])
 
@@ -173,7 +198,7 @@ class DEM(object):
 
 
                 history = ensemble_member.fit(trainXens, trainyens,
-                                            epochs=300, batch_size=1, verbose=self.verbose,
+                                            epochs=self.epochs, batch_size=self.batch_size, verbose=self.verbose,
                                             shuffle=True, callbacks=[self.es],
                                             validation_data=(valXens, valyens))
 
@@ -182,6 +207,19 @@ class DEM(object):
                 self.ensemble.append(ensemble_member)
                 j+=1
             i+=1
+
+    def cv_fit(self, trainX, trainy, valX=None, valy=None, use_pretrained=False):
+        """
+        Fit the model multiple times using cross-validation and returning the
+        best fit model.
+        """
+
+
+        self.set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
+                 l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
+                 l2_sigma=0.1, n_segments=5, n_members_segment=1, lr=0.001,
+                 patience = 10, epochs=300, verbose=0, std=True)
+
 
     def predict(self, X):
         """
@@ -246,6 +284,21 @@ class DEM(object):
         for i in range(self.n_members):
             path_h5 = join(path, f"member{i}.h5")
             save_model(self.ensemble[i], path_h5, include_optimizer=False)
+
+    def save_weights(self, location='', dir_name='ensemble'):
+        """
+        Saves the weights
+        """
+        path = join(location, dir_name)
+        if not exists(path):
+            mkdir(path)
+        else:
+            rmtree(path)
+            mkdir(path)
+
+        for i in range(self.n_members):
+            path_h5 = join(path, f"member{i}.h5")
+            self.ensemble[i].save_weights(path_h5)
 
     def load(self, location=None,  dir_name='ensemble'):
         """

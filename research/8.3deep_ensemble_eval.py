@@ -55,12 +55,15 @@ H_sst = network_ssh['corrected_hamming_distance']
 S_air = network_ssh['fraction_giant_component']
 T_air = network_ssh['global_transitivity']
 
+pca_u = reader.read_statistic('pca', variable='uwnd', dataset='NCEP', processed='anom')
+pca2_u = pca_u['pca2']
+
 #%% =============================================================================
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time_arr = np.array([0, 3, 4, 5, 6, 9])
-shift = 2 # actually 3
+lead_time_arr = np.array([0, 3, 6, 9])
+shift = 3 # actually 3
 
 n_pred = len(lead_time_arr)
 all_season_corr = np.zeros(n_pred)
@@ -70,17 +73,20 @@ all_season_rmse_pres = np.zeros(n_pred)
 all_season_nll = np.zeros(n_pred)
 
 monthly_corr = np.zeros((12, n_pred))
+monthly_corr_pers = np.zeros((12, n_pred))
 monthly_rmse = np.zeros((12, n_pred))
 
 
 for i in range(n_pred):
     K.clear_session()
     lead_time = lead_time_arr[i]
-    feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
-                                 L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
-                                 C_sst, H_sst,
-                                 S_air, T_air,
-                                 ), axis=1)
+    feature_unscaled = np.stack((nino34, nino12, nino3, nino4,
+                             sc, yr,
+                             wwv, iod,
+                             pca2_u,
+                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+                             C_sst, H_sst,
+                             S_air, T_air,), axis=1)
 
     scaler = StandardScaler()
     Xorg = scaler.fit_transform(feature_unscaled)
@@ -92,11 +98,9 @@ for i in range(n_pred):
 
     yorg = nino34.values
     y = yorg[time_lag + lead_time + shift:]
-
+    timey = nino34.index[lead_time + time_lag + shift:]
 
     y_persistance = yorg[time_lag: - lead_time - shift]
-
-    timey = nino34.index[lead_time + time_lag + shift:]
 
     test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
     train_indeces = np.invert(test_indeces)
@@ -125,6 +129,7 @@ for i in range(n_pred):
 
     # monthly skills
     monthly_corr[:, i] = correlation(testy, pred_mean, testtimey)
+    monthly_corr_pers[:, i] = correlation(testy, pred_persistance, testtimey)
     monthly_rmse[:, i] = rmse_mon(testy, pred_mean, testtimey)
 
 nino_mean = np.mean(yorg)
@@ -159,7 +164,6 @@ plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-
 ax = plt.figure().gca()
 plt.plot(lead_time_arr, all_season_nll, label="Deep Ensemble")
 plt.hlines(nll_nino,0,12, label='Nino3.4 mean/std', color='orange')
@@ -172,5 +176,6 @@ plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-plot_monthly_skill(lead_time_arr, monthly_corr.T)
-plot_monthly_skill(lead_time_arr, monthly_rmse.T, vmin=0, vmax=2, cmap=plt.cm.Reds)
+plot_monthly_skill(lead_time_arr, monthly_corr.T,  vmin=0, vmax=1)
+plot_monthly_skill(lead_time_arr, monthly_corr_pers.T,  vmin=0, vmax=1)
+plot_monthly_skill(lead_time_arr, monthly_rmse.T, vmin=0, vmax=1, cmap=plt.cm.Reds)

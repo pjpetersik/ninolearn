@@ -80,6 +80,14 @@ def sst_HadISST():
     data.sst.attrs['dataset'] = 'HadISST'
     return data.sst
 
+def ustr():
+    """
+    get u-wind stress from ICOADS 1-degree Enhanced
+
+    """
+    data = xr.open_dataset(join(rawdir, "upstr.mean.nc"))
+    data.upstr.attrs['dataset'] = 'ICOADS'
+    return data.upstr
 
 def uwind():
     """

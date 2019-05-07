@@ -5,17 +5,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 import time
-
 import keras.backend as K
 
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
+from ninolearn.plot.prediction import plot_prediction
 from ninolearn.learn.evaluation import rmse
 from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.dem import DEM
 from ninolearn.utils import print_header
+from ninolearn.pathes import modeldir
 
 #%%
 K.clear_session()
@@ -26,7 +27,7 @@ K.clear_session()
 reader = data_reader(startdate='1981-01')
 
 nino4 = reader.read_csv('nino4M')
-nino34 = reader.read_csv('nino3.4M')
+nino34 = reader.read_csv('nino3.4S')
 nino12 = reader.read_csv('nino1+2M')
 nino3 = reader.read_csv('nino3M')
 
@@ -59,38 +60,54 @@ H_sst = network_ssh['corrected_hamming_distance']
 S_air = network_ssh['fraction_giant_component']
 T_air = network_ssh['global_transitivity']
 
+pca_u = reader.read_statistic('pca', variable='uwnd', dataset='NCEP', processed='anom')
+pca2_u = pca_u['pca2']
+
 #%% =============================================================================
 #  process data
 # =============================================================================
 time_lag = 12
 lead_time = 9
+shift = 2 # actually 3
 
-feature_unscaled = np.stack((nino34, sc, yr, iod, wwv,
-                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
-                             C_sst, H_sst,
-                             S_air, T_air,
+feature_unscaled = np.stack((nino34, #nino12, nino3, nino4,
+                             sc, #yr,
+                             wwv, #iod,
+                             pca2_u,
+                             c2_ssh,
+#                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+#                             C_sst, H_sst,
+#                             S_air, T_air,
                              ), axis=1)
+
+#feature_unscaled = np.stack((nino34,
+#                             sc, yr,
+#                             iod,
+#                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+#                             C_sst, H_sst,
+#                             S_air, T_air,
+#                             ), axis=1)
 
 scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
 
 Xorg = np.nan_to_num(Xorg)
 
-X = Xorg[:-lead_time,:]
-futureX = Xorg[-lead_time-time_lag:,:]
+X = Xorg[:-lead_time-shift,:]
+futureX = Xorg[-lead_time-shift-time_lag:,:]
 
 X = include_time_lag(X, max_lag=time_lag)
 futureX =  include_time_lag(futureX, max_lag=time_lag)
 
 yorg = nino34.values
-y = yorg[lead_time + time_lag:]
+y = yorg[lead_time + time_lag + shift:]
 
-timey = nino34.index[lead_time + time_lag:]
+timey = nino34.index[lead_time + time_lag + shift:]
 futuretime = pd.date_range(start='2019-01-01',
-                                        end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time),
+                                        end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-02-01')
+test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -99,12 +116,9 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-
-# Cross validation of model
-n_cv = 20
-dropout, noise, l1_hidden, l2_hidden, l1_out, l2_out, lr, nll = \
-                        list(map(lambda x: np.zeros(x), [n_cv, n_cv, n_cv,n_cv, n_cv,n_cv, n_cv,n_cv]))
-models = []
+n_cv = 100
+dropout, noise, l1_hidden, l2_hidden, l1_mu, l2_mu, l1_sigma, l2_sigma, lr, score = \
+                        list(map(lambda x: np.zeros(x), [n_cv,n_cv,n_cv, n_cv, n_cv,n_cv, n_cv,n_cv, n_cv,n_cv]))
 
 for i in range(n_cv):
     # clear the tenserflow graphs to avoid slow down of computation
@@ -119,53 +133,78 @@ for i in range(n_cv):
     l1_hidden[i] = np.random.uniform(0, 0.3)
     l2_hidden[i] = np.random.uniform(0, 0.3)
 
-    l1_out[i] = np.random.uniform(0, 0.1)
-    l2_out[i] = np.random.uniform(0, 0.1)
+    l1_mu[i] = np.random.uniform(0, 0.1)
+    l2_mu[i] = np.random.uniform(0, 0.1)
+    l1_sigma[i] = np.random.uniform(0, 0.1)
+    l2_sigma[i] = np.random.uniform(0, 0.1)
     lr[i] = np.exp(np.random.uniform(-9, -6))
 
-    model = DEM(dropout=dropout[i], noise=noise[i], l1_hidden=l1_hidden[i],
-                l2_hidden=l2_hidden[i], l1_out=l1_out[i], l2_out=l2_out[i],
-                lr=lr[i], n_segments=5)
+    model = DEM()
+    model.set_parameters(layers=1, dropout=dropout[i], noise=noise[i], l1_hidden=l1_hidden[i],
+                l2_hidden=l2_hidden[i], l1_mu=l1_mu[i], l2_mu=l2_mu[i], l1_sigma=l1_sigma[i], l2_sigma= l2_sigma[i],
+                lr=lr[i], n_segments=5, n_members_segment=1, patience=30, verbose=0, std=True)
 
-    model.fit(trainX, trainy)
-    models.append(model)
+    #model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
+
+    model.fit(trainX, trainy, testX, testy, use_pretrained=False)
 
     pred_mean, pred_std = model.predict(testX)
-
-    nll[i] = model.evaluate(testy, pred_mean, pred_std)
-    print_header(f"Negative-log-likelihood: {nll}")
+    score[i] = model.evaluate(testy, pred_mean, pred_std)
+    print_header(f"Score: {score}")
 
     t1 = time.time()
-    print(f"Time passed: {round(t1-t0,1)}")
+#%%
+print_header("Best model")
+del model
+
+best_index = np.argmin(score)
+model = DEM()
+model.set_parameters(layers=1, dropout=dropout[best_index], noise=noise[best_index],
+                     l1_hidden=l1_hidden[best_index], l2_hidden=l2_hidden[best_index],
+                     l1_mu=l1_mu[best_index], l2_mu=l2_mu[best_index],
+                     l1_sigma=l1_sigma[best_index], l2_sigma= l2_sigma[best_index],
+                     lr=lr[best_index], n_segments=5, n_members_segment=1, patience=30, verbose=0, std=True)
+
+model.fit(trainX, trainy, testX, testy, use_pretrained=False)
+
+pred_mean, pred_std = model.predict(testX)
+score_best= model.evaluate(testy, pred_mean, pred_std)
+print_header(f"Score: {score_best}")
+
 
 #%%
 
-best_index = np.argmin(nll[:17])
-best_model = models[best_index]
+if model.std:
+    ens_dir=f'cv_ensemble_lead{lead_time}'
+else:
+    ens_dir=f'cv_simple_ensemble_lead{lead_time}'
 
-pred_mean, pred_std = best_model.predict(testX)
-predtrain_mean, predtrain_std = best_model.predict(trainX)
-predfuture_mean, predfuture_std =  best_model.predict(futureX)
+model.save(location=modeldir, dir_name=ens_dir)
 
 #%% =============================================================================
-# Plot
+# Plots
 # =============================================================================
 plt.close("all")
 
-# Cross validation
-plt.plot(l2_hidden, nll)
-#%%
 # Scores during trianing
 plt.subplots()
 
-for h in best_model.history:
-    plt.plot(h.history['val_nll_gaussian'], c='k')
-    plt.plot(h.history['nll_gaussian'], c='r')
+for h in model.history:
+    plt.plot(h.history[f'val_{model.loss_name}'], c='k')
+    plt.plot(h.history[f'{model.loss_name}'], c='r')
 
 plt.plot(np.nan, c='k', label='test')
 plt.plot(np.nan, c='r', label='train')
 plt.legend()
 
+#%% just for testing the loading function delete and load the model
+del model
+model = DEM()
+model.load(location=modeldir, dir_name=ens_dir)
+
+pred_mean, pred_std = model.predict(testX)
+predtrain_mean, predtrain_std = model.predict(trainX)
+predfuture_mean, predfuture_std =  model.predict(futureX)
 
 # Predictions
 plt.subplots(figsize=(15,3.5))
@@ -182,54 +221,30 @@ plt.axhspan(0.5,
 plt.xlim(timey[0],futuretime[-1])
 plt.ylim(-3,3)
 
-std = 1.
-
 # test
-predicty_p1std = pred_mean + np.abs(pred_std)
-predicty_m1std = pred_mean - np.abs(pred_std)
-predicty_p2std = pred_mean + 2 * np.abs(pred_std)
-predicty_m2std = pred_mean - 2 * np.abs(pred_std)
-
-plt.fill_between(testtimey,predicty_m1std, predicty_p1std , facecolor='royalblue', alpha=0.7)
-plt.fill_between(testtimey,predicty_m2std, predicty_p2std , facecolor='royalblue', alpha=0.3)
-plt.plot(testtimey,pred_mean, "navy")
+plot_prediction(testtimey, pred_mean, std=pred_std, facecolor='royalblue', line_color='navy')
 
 # train
-predtrain_mean[traintimey=='2001-12-01'] = np.nan
-
-predicttrainy_p1std = predtrain_mean +  np.abs(predtrain_std)
-predicttrainy_m1std = predtrain_mean -  np.abs(predtrain_std)
-predicttrainy_p2std = predtrain_mean + 2 * np.abs(predtrain_std)
-predicttrainy_m2std = predtrain_mean - 2 * np.abs(predtrain_std)
-
-plt.fill_between(traintimey,predicttrainy_m1std,predicttrainy_p1std ,facecolor='lime', alpha=0.5)
-plt.fill_between(traintimey,predicttrainy_m2std,predicttrainy_p2std ,facecolor='lime', alpha=0.2)
-
-plt.plot(traintimey, predtrain_mean, "g")
+predtrain_mean[traintimey=='2002-02-01'] = np.nan
+plot_prediction(traintimey, predtrain_mean, std=predtrain_std, facecolor='lime', line_color='g')
 
 # future
-predictfuturey_p1std = predfuture_mean + np.abs(predfuture_std)
-predictfuturey_m1std = predfuture_mean - np.abs(predfuture_std)
-predictfuturey_p2std = predfuture_mean + 2 * np.abs(predfuture_std)
-predictfuturey_m2std = predfuture_mean - 2 * np.abs(predfuture_std)
+plot_prediction(futuretime, predfuture_mean, std=predfuture_std, facecolor='orange', line_color='darkorange')
 
-plt.fill_between(futuretime, predictfuturey_m1std, predictfuturey_p1std , facecolor='orange', alpha=0.7)
-plt.fill_between(futuretime, predictfuturey_m2std, predictfuturey_p2std , facecolor='orange', alpha=0.3)
-plt.plot(futuretime, predfuture_mean, "darkorange")
-
+# observation
 plt.plot(timey, y, "k")
-
-in_or_out = np.zeros((len(pred_mean)))
-in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
-in_frac = np.sum(in_or_out)/len(testy)
-
-in_or_out_train = np.zeros((len(predtrain_mean)))
-in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
-in_frac_train = np.sum(in_or_out_train)/len(trainy)
+#
+#in_or_out = np.zeros((len(pred_mean)))
+#in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
+#in_frac = np.sum(in_or_out)/len(testy)
+#
+#in_or_out_train = np.zeros((len(predtrain_mean)))
+#in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
+#in_frac_train = np.sum(in_or_out_train)/len(trainy)
+#plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
 
 pred_rmse = round(rmse(testy, pred_mean),2)
-
-plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
+plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
 

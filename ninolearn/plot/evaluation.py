@@ -1,8 +1,15 @@
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
 from ninolearn.learn.evaluation import explained_variance, correlation
+
+seismic = plt.cm.get_cmap('seismic', 256)
+newcolors = seismic(np.linspace(0, 1, 256))
+grey = np.array([192/256, 192/256, 192/256, 1])
+newcolors[:1, :] = grey
+newcmp = ListedColormap(newcolors)
 
 def plot_explained_variance(y, pred, time):
     """
@@ -73,18 +80,21 @@ def plot_confMat(y, pred, labels):
     fig.tight_layout()
 
 
-def plot_monthly_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=plt.cm.bwr):
+def plot_monthly_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp):
     fig, ax = plt.subplots()
     m = np.arange(1,13)
 
     levels = np.linspace(vmin, vmax, nlevels+1)
     C = ax.contourf(m,lead_time, data, levels=levels,
                  vmin=vmin, vmax=vmax,
-                 cmap=cmap, extend='both')
+                 cmap=cmap, extend='min')
 
     ax.set_xticks(m)
     ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J',
                         'J', 'A', 'S', 'O', 'N', 'D'])
     ax.set_xlabel('Target month')
     ax.set_ylabel('lead time')
-    plt.colorbar(C)
+    plt.colorbar(C, ticks=np.arange(0,1.1,0.1))
+
+
+
