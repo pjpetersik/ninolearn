@@ -96,7 +96,7 @@ class pca(PCA):
         """
         save the first three pca components to a csvfile
         """
-        # save data to first day of month ahead
+        # save data to first day of month ahead?
         save_index = self.time.to_index()+pd.tseries.offsets.MonthBegin(1)
 
         pca1 = pd.Series(np.matmul(self.EOFarr, self.components_[0, :]),

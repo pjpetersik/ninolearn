@@ -11,6 +11,12 @@ grey = np.array([192/256, 192/256, 192/256, 1])
 newcolors[:1, :] = grey
 newcmp = ListedColormap(newcolors)
 
+seas_ticks = ['DJF', 'JFM', 'FMA', 'MAM', 'AMJ', 'MJJ',
+                        'JJA', 'JAS', 'ASO', 'SON', 'OND', 'NDJ']
+
+mon_ticks = ['J', 'F', 'M', 'A', 'M', 'J',
+                        'J', 'A', 'S', 'O', 'N', 'D']
+
 def plot_explained_variance(y, pred, time):
     """
     make a bar plot of the explained varince between y and the prediction
@@ -23,9 +29,8 @@ def plot_explained_variance(y, pred, time):
     ax.set_ylim(0, 1)
     ax.bar(m, rsq)
     ax.set_xticks(m)
-    ax.set_xticklabels(['DJF', 'JFM', 'FMA', 'MAM', 'MMJ', 'MJJ',
-                        'JJA', 'JAS', 'ASO', 'SON', 'OND', 'NDJ'])
-    ax.set_xlabel("month")
+    ax.set_xticklabels(seas_ticks)
+    ax.set_xlabel("season")
     ax.set_ylabel(f"$r^2$")
     ax.set_title(f"$r^2 =$ {round(np.corrcoef(y,pred)[0,1]**2, 2)}")
 
@@ -41,9 +46,8 @@ def plot_correlation(y, pred, time):
     ax.set_ylim(0, 1)
     ax.bar(m, rsq)
     ax.set_xticks(m)
-    ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J',
-                        'J', 'A', 'S', 'O', 'N', 'D'])
-    ax.set_xlabel("month")
+    ax.set_xticklabels(seas_ticks)
+    ax.set_xlabel("season")
     ax.set_ylabel(f"$r$")
     ax.set_title(f"$r =$ {round(np.corrcoef(y,pred)[0,1], 2)}")
 
@@ -80,7 +84,7 @@ def plot_confMat(y, pred, labels):
     fig.tight_layout()
 
 
-def plot_monthly_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp):
+def plot_seasonal_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp):
     fig, ax = plt.subplots()
     m = np.arange(1,13)
 
@@ -90,9 +94,8 @@ def plot_monthly_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp
                  cmap=cmap, extend='min')
 
     ax.set_xticks(m)
-    ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J',
-                        'J', 'A', 'S', 'O', 'N', 'D'])
-    ax.set_xlabel('Target month')
+    ax.set_xticklabels(seas_ticks)
+    ax.set_xlabel('Target season')
     ax.set_ylabel('lead time')
     plt.colorbar(C, ticks=np.arange(0,1.1,0.1))
 

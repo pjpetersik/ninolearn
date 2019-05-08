@@ -68,17 +68,10 @@ pca2_u = pca_u['pca2']
 # =============================================================================
 time_lag = 12
 lead_time = 9
-shift = 3 # actually 3
+shift = 3
 
-feature_unscaled = np.stack((nino34, #nino12, nino3, nino4,
-                             sc, #yr,
-                             wwv, iod,
-                             pca2_u,
-                             c2_ssh,
-                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
-                             C_sst, H_sst,
-                             S_air, T_air,
-                             ), axis=1)
+feature_unscaled = np.stack((nino34, sc, wwv, pca2_u, c2_ssh),
+                            axis=1)
 
 scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
@@ -99,9 +92,9 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+#test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
 
-#test_indeces = (timey>='1982-01-01') & (timey<='1992-01-01')
+test_indeces = (timey>='1992-01-01') & (timey<='2002-01-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -179,7 +172,7 @@ plt.ylim(-3,3)
 plot_prediction(testtimey, pred_mean, std=pred_std, facecolor='royalblue', line_color='navy')
 
 # train
-predtrain_mean[traintimey=='2002-02-01'] = np.nan
+#predtrain_mean[traintimey=='2002-02-01'] = np.nan
 plot_prediction(traintimey, predtrain_mean, std=predtrain_std, facecolor='lime', line_color='g')
 
 # future
@@ -187,15 +180,6 @@ plot_prediction(futuretime, predfuture_mean, std=predfuture_std, facecolor='oran
 
 # observation
 plt.plot(timey, y, "k")
-#
-#in_or_out = np.zeros((len(pred_mean)))
-#in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
-#in_frac = np.sum(in_or_out)/len(testy)
-#
-#in_or_out_train = np.zeros((len(predtrain_mean)))
-#in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
-#in_frac_train = np.sum(in_or_out_train)/len(trainy)
-#plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
 
 pred_rmse = round(rmse(testy, pred_mean),2)
 plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
@@ -217,7 +201,7 @@ std_pred.plot()
 
 
 # plot explained variance
-plot_correlation(testy, pred_mean, testtimey)
+plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(2))
 
 
 # Error distribution
@@ -226,3 +210,16 @@ plt.title("Error distribution")
 error = pred_mean - testy
 
 plt.hist(error, bins=16)
+
+
+"""
+Archived:
+#in_or_out = np.zeros((len(pred_mean)))
+#in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
+#in_frac = np.sum(in_or_out)/len(testy)
+#
+#in_or_out_train = np.zeros((len(predtrain_mean)))
+#in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
+#in_frac_train = np.sum(in_or_out_train)/len(trainy)
+#plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
+"""
