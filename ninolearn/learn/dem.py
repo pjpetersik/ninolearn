@@ -162,7 +162,7 @@ class DEM(object):
 
         i = 0
         while i<self.n_members_segments:
-            j=0
+            j = 0
             while j<self.n_segments:
                 n_ens_sel = len(self.ensemble)
                 small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
@@ -196,7 +196,6 @@ class DEM(object):
                     valXens = valX
                     valyens = valy
 
-
                 history = ensemble_member.fit(trainXens, trainyens,
                                             epochs=self.epochs, batch_size=self.batch_size, verbose=self.verbose,
                                             shuffle=True, callbacks=[self.es],
@@ -207,19 +206,6 @@ class DEM(object):
                 self.ensemble.append(ensemble_member)
                 j+=1
             i+=1
-
-    def cv_fit(self, trainX, trainy, valX=None, valy=None, use_pretrained=False):
-        """
-        Fit the model multiple times using cross-validation and returning the
-        best fit model.
-        """
-
-
-        self.set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
-                 l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
-                 l2_sigma=0.1, n_segments=5, n_members_segment=1, lr=0.001,
-                 patience = 10, epochs=300, verbose=0, std=True)
-
 
     def predict(self, X):
         """

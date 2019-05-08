@@ -102,6 +102,7 @@ futuretime = pd.date_range(start='2019-01-01',
 #test_indeces = (timey>='2002-03-01') & (timey<='2011-02-01')
 
 test_indeces = (timey>='1982-01-01') & (timey<='1992-01-01')
+
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
