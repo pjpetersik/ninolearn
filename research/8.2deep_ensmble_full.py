@@ -102,8 +102,6 @@ futuretime = pd.date_range(start='2019-01-01',
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-model = DEM()
-
 decades = [80, 90, 100, 110]
 
 pred_mean_full = np.array([])
@@ -122,6 +120,9 @@ for decade in decades:
 
     trainX, trainy = X[train_indeces,:], y[train_indeces]
     testX, testy = X[test_indeces,:], y[test_indeces]
+
+
+    model = DEM()
 
     model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
                 l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
@@ -148,6 +149,7 @@ for decade in decades:
     decadal_rmse[i] = round(rmse(testy, pred_mean),2)
     decadal_corr[i] = np.corrcoef(testy, pred_mean)[0,1]
 
+    del model
     i+=1
 ##%% just for testing the loading function delete and load the model
 #del model
@@ -185,7 +187,8 @@ plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
 # plot explained variance
-plot_correlation(y, pred_mean_full, timey)
+# minus two month to center season around central month
+plot_correlation(y, pred_mean_full, timey - pd.tseries.offsets.MonthBegin(2))
 
 
 # Error distribution

@@ -23,8 +23,8 @@ def plot_explained_variance(y, pred, time):
     ax.set_ylim(0, 1)
     ax.bar(m, rsq)
     ax.set_xticks(m)
-    ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J',
-                        'J', 'A', 'S', 'O', 'N', 'D'])
+    ax.set_xticklabels(['DJF', 'JFM', 'FMA', 'MAM', 'MMJ', 'MJJ',
+                        'JJA', 'JAS', 'ASO', 'SON', 'OND', 'NDJ'])
     ax.set_xlabel("month")
     ax.set_ylabel(f"$r^2$")
     ax.set_title(f"$r^2 =$ {round(np.corrcoef(y,pred)[0,1]**2, 2)}")

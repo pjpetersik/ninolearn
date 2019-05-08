@@ -14,23 +14,48 @@ if not exists(postdir):
 def season_to_month(season):
     """
     translates a 3-month season string to the corresponding integer of the
-    central month
+    first month after the season (to ensure not to include any future information
+    when predictions are made later with this data)
 
     :type season: string
     :param season: Season represented by three letters such as 'DJF'
     """
-    switcher = {'DJF': 1,
-                'JFM': 2,
-                'FMA': 3,
-                'MAM': 4,
-                'AMJ': 5,
-                'MJJ': 6,
-                'JJA': 7,
-                'JAS': 8,
-                'ASO': 9,
-                'SON': 10,
-                'OND': 11,
-                'NDJ': 12,
+    switcher = {'DJF': 3,
+                'JFM': 4,
+                'FMA': 5,
+                'MAM': 6,
+                'AMJ': 7,
+                'MJJ': 8,
+                'JJA': 9,
+                'JAS': 10,
+                'ASO': 11,
+                'SON': 12,
+                'OND': 1,
+                'NDJ': 2,
+                }
+
+    return switcher[season]
+
+def season_shift_year(season):
+    """
+    when the function .season_to_month() is applied the year related to the OND and
+    NDJ needs to be shifted by 1.
+
+    :type season: string
+    :param season: Season represented by three letters such as 'DJF'
+    """
+    switcher = {'DJF': 0,
+                'JFM': 0,
+                'FMA': 0,
+                'MAM': 0,
+                'AMJ': 0,
+                'MJJ': 0,
+                'JJA': 0,
+                'JAS': 0,
+                'ASO': 0,
+                'SON': 0,
+                'OND': 1,
+                'NDJ': 1,
                 }
 
     return switcher[season]
@@ -46,7 +71,7 @@ def prep_nino_seasonal():
     period ="S"
     data = read_raw.nino_anom(index=index, period=period, detrend=False)
 
-    df = ({'year': data.YR.values,
+    df = ({'year': data.YR.values + data.SEAS.apply(season_shift_year).values,
            'month': data.SEAS.apply(season_to_month).values,
            'day': data.YR.values/data.YR.values})
     dti = pd.to_datetime(df)
@@ -125,7 +150,7 @@ def prep_iod():
     df.to_csv(join(postdir, 'iod.csv'))
 
 if __name__ == "__main__":
-#    prep_nino_seasonal()
+    prep_nino_seasonal()
 #    prep_wwv()
 #    prep_nino_month()
-    a=prep_iod()
+#    a=prep_iod()
