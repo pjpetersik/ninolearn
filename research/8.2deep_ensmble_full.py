@@ -67,7 +67,7 @@ pca2_u = pca_u['pca2']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 9
+lead_time = 3
 shift = 3 # actually 3
 
 feature_unscaled = np.stack((nino34, #nino12, nino3, nino4,
@@ -75,9 +75,9 @@ feature_unscaled = np.stack((nino34, #nino12, nino3, nino4,
                              wwv, iod,
                              pca2_u,
                              c2_ssh,
-                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
-                             C_sst, H_sst,
-                             S_air, T_air,
+#                             L_ssh, C_ssh, T_ssh, H_ssh, c2_ssh,
+#                             C_sst, H_sst,
+#                             S_air, T_air,
                              ), axis=1)
 
 scaler = StandardScaler()
@@ -99,68 +99,67 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
-
-#test_indeces = (timey>='1982-01-01') & (timey<='1992-01-01')
-train_indeces = np.invert(test_indeces)
-
-trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
-testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
-
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
 model = DEM()
 
-model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
-            l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
-            lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=1, std=True)
+decades = [80, 90, 100, 110]
 
-#model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
+pred_mean_full = np.array([])
+pred_std_full = np.array([])
 
-model.fit(trainX, trainy, testX, testy, use_pretrained=False)
+decadal_corr = np.zeros(len(decades))
+decadal_rmse = np.zeros(len(decades))
+decadal_nll = np.zeros(len(decades))
 
+i=0
+for decade in decades:
+    print_header(f'{1902+decade}-01-01 till {1911+decade}-12-01')
 
-#%%
-pred_mean, pred_std = model.predict(testX)
+    test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+    train_indeces = np.invert(test_indeces)
 
-score = model.evaluate(testy, pred_mean, pred_std)
-print_header(f"Score: {score}")
+    trainX, trainy = X[train_indeces,:], y[train_indeces]
+    testX, testy = X[test_indeces,:], y[test_indeces]
 
-if model.std:
-    ens_dir=f'ensemble_lead{lead_time}'
-else:
-    ens_dir=f'simple_ensemble_lead{lead_time}'
+    model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
+                l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
+                lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=0, std=True)
 
-model.save(location=modeldir, dir_name=ens_dir)
+    model.fit(trainX, trainy)
 
+    pred_mean, pred_std = model.predict(testX)
 
-#%% =============================================================================
-# Plots
-# =============================================================================
+    score = model.evaluate(testy, pred_mean, pred_std)
+    print_header(f"Score: {score}")
+
+    pred_mean_full = np.append(pred_mean_full, pred_mean)
+    pred_std_full = np.append(pred_std_full, pred_std)
+
+    if model.std:
+        ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
+    else:
+        ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
+
+    model.save(location=modeldir, dir_name=ens_dir)
+
+    decadal_nll[i] = score
+    decadal_rmse[i] = round(rmse(testy, pred_mean),2)
+    decadal_corr[i] = np.corrcoef(testy, pred_mean)[0,1]
+
+    i+=1
+##%% just for testing the loading function delete and load the model
+#del model
+#model = DEM()
+#model.load(location=modeldir, dir_name=ens_dir)
+#
+#pred_mean, pred_std = model.predict(testX)
+#predtrain_mean, predtrain_std = model.predict(trainX)
+#predfuture_mean, predfuture_std =  model.predict(futureX)
+
+#%% Predictions
 plt.close("all")
-
-# Scores during trianing
-plt.subplots()
-
-for h in model.history:
-    plt.plot(h.history[f'val_{model.loss_name}'], c='k')
-    plt.plot(h.history[f'{model.loss_name}'], c='r')
-
-plt.plot(np.nan, c='k', label='test')
-plt.plot(np.nan, c='r', label='train')
-plt.legend()
-
-#%% just for testing the loading function delete and load the model
-del model
-model = DEM()
-model.load(location=modeldir, dir_name=ens_dir)
-
-pred_mean, pred_std = model.predict(testX)
-predtrain_mean, predtrain_std = model.predict(trainX)
-predfuture_mean, predfuture_std =  model.predict(futureX)
-
-# Predictions
 plt.subplots(figsize=(15,3.5))
 plt.axhspan(-0.5,
             -6,
@@ -176,53 +175,37 @@ plt.xlim(timey[0],futuretime[-1])
 plt.ylim(-3,3)
 
 # test
-plot_prediction(testtimey, pred_mean, std=pred_std, facecolor='royalblue', line_color='navy')
-
-# train
-predtrain_mean[traintimey=='2002-02-01'] = np.nan
-plot_prediction(traintimey, predtrain_mean, std=predtrain_std, facecolor='lime', line_color='g')
-
-# future
-plot_prediction(futuretime, predfuture_mean, std=predfuture_std, facecolor='orange', line_color='darkorange')
+plot_prediction(timey, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
 
 # observation
 plt.plot(timey, y, "k")
-#
-#in_or_out = np.zeros((len(pred_mean)))
-#in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
-#in_frac = np.sum(in_or_out)/len(testy)
-#
-#in_or_out_train = np.zeros((len(predtrain_mean)))
-#in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
-#in_frac_train = np.sum(in_or_out_train)/len(trainy)
-#plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
 
-pred_rmse = round(rmse(testy, pred_mean),2)
+pred_rmse = round(rmse(y, pred_mean_full),2)
 plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
-
-# Seaonality of Standard deviations
-plt.subplots()
-
-xr_nino34 = xr.DataArray(nino34)
-std_data = xr_nino34.groupby('time.month').std(dim='time')
-
-pd_pred_std = pd.Series(data=pred_std, index = testtimey)
-xr_pred_std = xr.DataArray(pd_pred_std)
-std_pred = xr_pred_std.groupby('time.month').mean(dim='time')
-
-std_data.plot()
-std_pred.plot()
-
-
 # plot explained variance
-plot_correlation(testy, pred_mean, testtimey)
+plot_correlation(y, pred_mean_full, timey)
 
 
 # Error distribution
 plt.subplots()
 plt.title("Error distribution")
-error = pred_mean - testy
+error = pred_mean_full - y
 
 plt.hist(error, bins=16)
+
+#decadal scores
+decades_plot = ['80s', '90s', '00s', '10s']
+
+fig, ax = plt.subplots(1,3)
+ax[0].set_title("NLL")
+ax[0].bar(decades_plot, decadal_nll)
+
+ax[1].set_title("correlation")
+ax[1].bar(decades_plot, decadal_corr)
+
+ax[2].set_title("rmse")
+ax[2].bar(decades_plot, decadal_rmse)
+
+
