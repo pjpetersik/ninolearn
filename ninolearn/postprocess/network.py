@@ -317,7 +317,8 @@ class networkMetricsSeries(object):
                 corrcoef, threshold=self.threshold,
                 edge_density=self.edge_density)
 
-        save_date = self.reader.enddate + pd.tseries.offsets.MonthBegin(0)
+        # save date is the first day of the last month from the time window
+        save_date = self.reader.enddate - pd.tseries.offsets.MonthBegin(1)
 
         logger.debug(f'Save date: {save_date}')
 
@@ -400,11 +401,3 @@ class networkMetricsSeries(object):
             self.computeNetworkMetrics(corrcoef)
             self.reader.shift_window(month=1)
         self.save()
-
-
-if __name__ == "__main__":
-    nms = networkMetricsSeries('air_daily', 'NCEP', processed="anom",
-                               threshold=0.9, startyear=1948, endyear=2018,
-                               window_size=12, lon_min=120, lon_max=260,
-                               lat_min=-30, lat_max=30, verbose=1)
-    nms.computeTimeSeries()

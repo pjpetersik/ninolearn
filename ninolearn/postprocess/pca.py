@@ -96,8 +96,8 @@ class pca(PCA):
         """
         save the first three pca components to a csvfile
         """
-        # save data to first day of month ahead?
-        save_index = self.time.to_index()+pd.tseries.offsets.MonthBegin(1)
+        # save data to first day of month
+        save_index = self.time.to_index()
 
         pca1 = pd.Series(np.matmul(self.EOFarr, self.components_[0, :]),
                          index=save_index)
@@ -106,14 +106,14 @@ class pca(PCA):
         pca3 = pd.Series(np.matmul(self.EOFarr, self.components_[2, :]),
                          index=save_index)
 
-        df = pd.DataFrame({'pca1': pca1, 'pca2': pca2, 'pca3': pca3})
+        self.df = pd.DataFrame({'pca1': pca1, 'pca2': pca2, 'pca3': pca3})
 
         filename = generateFileName(self.variable, self.dataset,
                                     ''.join((self.processed,extension)),
                                     suffix='csv')
         filename = '-'.join(['pca', filename])
 
-        df.to_csv(join(postdir, filename))
+        self.df.to_csv(join(postdir, filename))
 
     def plot_eof(self):
         """

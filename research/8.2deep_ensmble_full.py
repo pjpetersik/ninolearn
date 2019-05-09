@@ -19,14 +19,10 @@ K.clear_session()
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-lead_time = 8
+lead_time = 0
 X, y, timey, yp = pipeline(lead_time, return_persistance=True)
 #%%
 decades = [80, 90, 100, 110]
-
-decadal_corr = np.zeros(len(decades))
-decadal_rmse = np.zeros(len(decades))
-decadal_nll = np.zeros(len(decades))
 
 
 for decade in decades:
@@ -59,6 +55,12 @@ for decade in decades:
 i=0
 pred_mean_full = np.array([])
 pred_std_full = np.array([])
+
+
+decadal_corr = np.zeros(len(decades))
+decadal_rmse = np.zeros(len(decades))
+decadal_nll = np.zeros(len(decades))
+
 
 for decade in decades:
     K.clear_session()
@@ -108,7 +110,7 @@ plt.grid()
 
 # plot explained variance
 # minus two month to center season around central month
-plot_correlation(y, pred_mean_full, timey - pd.tseries.offsets.MonthBegin(2))
+plot_correlation(y, pred_mean_full, timey - pd.tseries.offsets.MonthBegin(1))
 
 
 # Error distribution

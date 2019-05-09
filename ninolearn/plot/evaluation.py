@@ -84,20 +84,20 @@ def plot_confMat(y, pred, labels):
     fig.tight_layout()
 
 
-def plot_seasonal_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp):
+def plot_seasonal_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp, extend='min'):
     fig, ax = plt.subplots()
     m = np.arange(1,13)
 
     levels = np.linspace(vmin, vmax, nlevels+1)
     C = ax.contourf(m,lead_time, data, levels=levels,
                  vmin=vmin, vmax=vmax,
-                 cmap=cmap, extend='min')
+                 cmap=cmap, extend=extend)
 
     ax.set_xticks(m)
     ax.set_xticklabels(seas_ticks)
     ax.set_xlabel('Target season')
     ax.set_ylabel('lead time')
-    plt.colorbar(C, ticks=np.arange(0,1.1,0.1))
+    plt.colorbar(C, ticks=np.arange(vmin,vmax+0.1,0.1))
 
 
 

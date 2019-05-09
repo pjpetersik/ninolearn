@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.nino_timeseries import nino_background
 from ninolearn.utils import print_header
-from ninolearn.postprocess.pca import pca
 from ninolearn.postprocess.network import networkMetricsSeries
 
 # %% ==========================================================================

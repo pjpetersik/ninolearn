@@ -3,6 +3,25 @@ from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.nino_timeseries import nino_background
 from ninolearn.utils import scale
 from statsmodels.tsa.stattools import ccf
+from scipy.stats import spearmanr
+
+import numpy as np
+
+def spearman_lag(x,y, max_lags=80):
+    scorr = np.zeros(max_lags)
+    scorr[0] = spearmanr(x[:], y[:])[0]
+    for i in np.arange(1, max_lags):
+        scorr[i] = spearmanr(x[i:], y[:-i])[0]
+
+    return scorr
+
+def pearson_lag(x,y, max_lags=80):
+    pcorr = np.zeros(max_lags)
+    pcorr[0] = np.corrcoef(x[:], y[:])[0,1]
+    for i in np.arange(1, max_lags):
+        pcorr[i] = np.corrcoef(x[i:], y[:-i])[0,1]
+
+    return pcorr
 
 plt.close("all")
 
@@ -20,8 +39,8 @@ network = reader.read_statistic('network_metrics', variable='sshg',
 #network = reader.read_statistic('network_metrics', variable='air',
 #                           dataset='NCEP', processed="anom")
 
-pca = reader.read_statistic('pca', variable='vwnd',
-                           dataset='NCEP', processed="anom")
+pca = reader.read_statistic('pca', variable='uwnd',
+                          dataset='NCEP', processed="anom")
 
 c2 = network['fraction_clusters_size_2']
 c3 = network['fraction_clusters_size_3']
@@ -35,18 +54,27 @@ L = network['average_path_length']
 pca2 = pca['pca2']
 
 plt.subplots()
-var = scale(c2)
+var = scale(nino)
+var2 = scale(c2)
+var3 = scale(iod)
 nino = scale(nino34)
 
 var.plot(c='r')
 nino.plot(c='k')
 
 plt.subplots()
-plt.xcorr(nino, var, maxlags=80)
-plt.vlines(12,-1,1, colors="r")
-plt.vlines(6,-1,1, colors="b")
-plt.vlines(0,-1,1, colors="k")
+plt.vlines(12,-1,1, colors="grey")
+plt.vlines(6,-1,1, colors="grey")
+plt.vlines(0,-1,1, colors="grey")
+plt.xcorr(nino, var, maxlags=80, label="auto-correlation")
+plt.xcorr(nino, var2, maxlags=80, color="b", label="c2")
+plt.xcorr(nino, var3, maxlags=80, color="r", label="iod")
 plt.ylim(-1,1)
+plt.xlim(0,48)
+plt.legend()
+plt.xlabel('lag month')
+
+
 #
 #
 #%% =============================================================================

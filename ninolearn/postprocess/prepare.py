@@ -20,18 +20,18 @@ def season_to_month(season):
     :type season: string
     :param season: Season represented by three letters such as 'DJF'
     """
-    switcher = {'DJF': 3,
-                'JFM': 4,
-                'FMA': 5,
-                'MAM': 6,
-                'AMJ': 7,
-                'MJJ': 8,
-                'JJA': 9,
-                'JAS': 10,
-                'ASO': 11,
-                'SON': 12,
-                'OND': 1,
-                'NDJ': 2,
+    switcher = {'DJF': 2,
+                'JFM': 3,
+                'FMA': 4,
+                'MAM': 5,
+                'AMJ': 6,
+                'MJJ': 7,
+                'JJA': 8,
+                'JAS': 9,
+                'ASO': 10,
+                'SON': 11,
+                'OND': 12,
+                'NDJ': 1,
                 }
 
     return switcher[season]
@@ -54,7 +54,7 @@ def season_shift_year(season):
                 'JAS': 0,
                 'ASO': 0,
                 'SON': 0,
-                'OND': 1,
+                'OND': 0,
                 'NDJ': 1,
                 }
 

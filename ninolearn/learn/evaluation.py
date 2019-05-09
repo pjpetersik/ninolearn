@@ -35,8 +35,8 @@ def correlation(y, pred, time):
 
 def rmse_mon(y, pred, time):
     """
-    Returns the correlation (r) for each month in a time series
-    TODO: Standardize with climatological anomaly
+    Returns the RMSE for each month in a time series
+    TODO: Standardize with climatological anomaly!!!
     """
     RMSE = np.zeros(12)
 

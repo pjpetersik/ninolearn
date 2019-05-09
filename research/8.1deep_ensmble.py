@@ -67,10 +67,10 @@ pca2_u = pca_u['pca2']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 9
+lead_time = 6
 shift = 3
 
-feature_unscaled = np.stack((nino34, sc, wwv, pca2_u, c2_ssh),
+feature_unscaled = np.stack((nino34, sc, wwv, pca2_u),
                             axis=1)
 
 scaler = StandardScaler()
@@ -201,7 +201,7 @@ std_pred.plot()
 
 
 # plot explained variance
-plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(2))
+plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1))
 
 
 # Error distribution
