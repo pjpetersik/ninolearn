@@ -24,7 +24,6 @@ X, y, timey, yp = pipeline(lead_time, return_persistance=True)
 #%%
 decades = [80, 90, 100, 110]
 
-
 for decade in decades:
     K.clear_session()
     print_header(f'Test period: {1902+decade}-01-01 till {1911+decade}-12-01')

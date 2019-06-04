@@ -34,7 +34,7 @@ def plot_explained_variance(y, pred, time):
     ax.set_ylabel(f"$r^2$")
     ax.set_title(f"$r^2 =$ {round(np.corrcoef(y,pred)[0,1]**2, 2)}")
 
-def plot_correlation(y, pred, time):
+def plot_correlation(y, pred, time, title=None):
     """
     make a bar plot of the explained varince between y and the prediction
     """
@@ -49,7 +49,10 @@ def plot_correlation(y, pred, time):
     ax.set_xticklabels(seas_ticks)
     ax.set_xlabel("season")
     ax.set_ylabel(f"$r$")
-    ax.set_title(f"$r =$ {round(np.corrcoef(y,pred)[0,1], 2)}")
+    if title is None:
+        ax.set_title(f"$r =$ {round(np.corrcoef(y,pred)[0,1], 2)}")
+    else:
+         ax.set_title(title)
 
 def plot_confMat(y, pred, labels):
     """

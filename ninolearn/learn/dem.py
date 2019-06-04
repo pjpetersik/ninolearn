@@ -67,11 +67,60 @@ class DEM(object):
         A deep ensemble model (DEM) predicting  either mean or mean and standard deviation with one hidden
         layer having the ReLU function as activation for the hidden layer. It
         is trained using the MSE or negative-log-likelihood of a gaussian distribution, respectively.
-        :type int:
-        :param neurons: Number of neurons.
+
+        :type layers: int
+        :param layers: Number of hidden layers
+
+        :type neurons: int
+        :param neurons: Number of neurons in a hidden layers
 
         :type dropout: float
-        :param dropout: Dropout rate.
+        :param dropout: Dropout rate for the hidden layer neurons.
+
+        :type noise: float
+        :param noise: Standard deviation of the gaussian noise that is added to
+        the input
+
+        :type l1_hidden: float
+        :l1_hidden: Coefficent for the L1 penalty term for the hidden layer.
+
+        :type l2_hidden: float
+        :l2_hidden: Coefficent for the L2 penalty term for the hidden layer.
+
+        :type l1_mu: float
+        :l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.
+
+        :type l2_mu: float
+        :l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.
+
+        :type l1_sigma: float
+        :l1_sigma: Coefficent for the L1 penalty term in the
+        standard-deviation-output neuron.
+
+        :type l2_mu: float
+        :l2_mu: Coefficent for the L2 penalty term in the
+        standard-deviation-output neuron.
+
+        :param batch_size: Batch size for the training.
+
+        :param n_segments: Number of segments for the generation of members.
+
+        :param n_members_segment: number of members that are generated per segment
+
+        :param lr: the learning rate during training
+
+        :param patience: Number of epochs to wait until training is stopped if
+        score was not improved.
+
+        :param epochs: The maximum numberof epochs for the training.
+
+        :param verbose: Option to print scores during training to the screen. Here, 0
+        means silent.
+
+        :type std: boolean
+        :param std: If True then a deep ensembles with two output neurons (mean
+        and standard deviation) is used. Otherwise just one output neuron is used
+        for the regression task.
         """
         # hyperparameters
         self.layers = layers
@@ -86,10 +135,10 @@ class DEM(object):
         self.l2_sigma = l2_sigma
         self.lr = lr
         self.n_segments = n_segments
-        self.n_members_segments = n_members_segment
+        self.n_members_segment = n_members_segment
         self.batch_size = batch_size
         # derived parameters
-        self.n_members = self.n_segments * self.n_members_segments
+        self.n_members = self.n_segments * self.n_members_segment
 
         # training settings
         self.patience = patience
@@ -161,7 +210,7 @@ class DEM(object):
              warnings.warn("Validation and test data set are the same if n_segements is 1!")
 
         i = 0
-        while i<self.n_members_segments:
+        while i<self.n_members_segment:
             j = 0
             while j<self.n_segments:
                 n_ens_sel = len(self.ensemble)

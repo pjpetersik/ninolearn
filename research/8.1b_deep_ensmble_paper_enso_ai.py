@@ -67,10 +67,10 @@ pca2_u = pca_u['pca2']
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 6
+lead_time = 3
 shift = 3
 
-feature_unscaled = np.stack((nino34, sc, wwv, pca2_u),
+feature_unscaled = np.stack((nino34, sc, wwv),
                             axis=1)
 
 scaler = StandardScaler()
@@ -93,8 +93,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         freq='MS')
 
 #test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
-
-test_indeces = (timey>='1992-01-01') & (timey<='2002-01-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -145,6 +144,7 @@ plt.plot(np.nan, c='r', label='train')
 plt.legend()
 
 #%% just for testing the loading function delete and load the model
+plt.close("all")
 del model
 model = DEM()
 model.load(location=modeldir, dir_name=ens_dir)
@@ -165,7 +165,7 @@ plt.axhspan(0.5,
             facecolor='red',
             alpha=0.1,zorder=0)
 
-plt.xlim(timey[0],futuretime[-1])
+plt.xlim(timey[0],timey[-1])#futuretime[-1])
 plt.ylim(-3,3)
 
 # test
@@ -176,14 +176,16 @@ plot_prediction(testtimey, pred_mean, std=pred_std, facecolor='royalblue', line_
 plot_prediction(traintimey, predtrain_mean, std=predtrain_std, facecolor='lime', line_color='g')
 
 # future
-plot_prediction(futuretime, predfuture_mean, std=predfuture_std, facecolor='orange', line_color='darkorange')
+#plot_prediction(futuretime, predfuture_mean, std=predfuture_std, facecolor='orange', line_color='darkorange')
 
 # observation
 plt.plot(timey, y, "k")
 
 pred_rmse = round(rmse(testy, pred_mean),2)
-plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
+plt.title(f"Lead time: {lead_time} month")#", RMSE (of mean): {pred_rmse}")
 plt.grid()
+plt.xlabel('Year')
+plt.ylabel('NINO3.4 [K]')
 
 
 # Seaonality of Standard deviations
@@ -201,7 +203,7 @@ std_pred.plot()
 
 
 # plot explained variance
-plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1))
+plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1), title="")
 
 
 # Error distribution
@@ -210,6 +212,15 @@ plt.title("Error distribution")
 error = pred_mean - testy
 
 plt.hist(error, bins=16)
+
+#%%
+in_or_out = np.zeros((len(pred_mean)))
+in_or_out[(testy>pred_mean-pred_std) & (testy<pred_mean+pred_std)] = 1
+in_frac_1std = np.sum(in_or_out)/len(testy)
+
+in_or_out = np.zeros((len(pred_mean)))
+in_or_out[(testy>pred_mean-2*pred_std) & (testy<pred_mean+2*pred_std)] = 1
+in_frac_2std = np.sum(in_or_out)/len(testy)
 
 
 """

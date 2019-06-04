@@ -19,17 +19,17 @@ nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
 nms_ssh.computeTimeSeries()
 
 
-nms_air = networkMetricsSeries('air', 'NCEP', processed="anom",
-                           threshold=0.9, startyear=1980, endyear=2018,
-                           window_size=12, lon_min=120, lon_max=280,
-                           lat_min=-30, lat_max=30, verbose=1)
-nms_air.computeTimeSeries()
-
-nms_sst = networkMetricsSeries('sst', 'ERSSTv5', processed="anom",
-                           threshold=0.9, startyear=1980, endyear=2018,
-                           window_size=12, lon_min=120, lon_max=280,
-                           lat_min=-30, lat_max=30, verbose=1)
-nms_sst.computeTimeSeries()
+#nms_air = networkMetricsSeries('air', 'NCEP', processed="anom",
+#                           threshold=0.9, startyear=1980, endyear=2018,
+#                           window_size=12, lon_min=120, lon_max=280,
+#                           lat_min=-30, lat_max=30, verbose=1)
+#nms_air.computeTimeSeries()
+#
+#nms_sst = networkMetricsSeries('sst', 'ERSSTv5', processed="anom",
+#                           threshold=0.9, startyear=1980, endyear=2018,
+#                           window_size=12, lon_min=120, lon_max=280,
+#                           lat_min=-30, lat_max=30, verbose=1)
+#nms_sst.computeTimeSeries()
 
 
 
@@ -39,10 +39,10 @@ nms_sst.computeTimeSeries()
 # =============================================================================
 # =============================================================================
 plt.close("all")
-var = 'fraction_clusters_size_3'
+var = 'fraction_clusters_size_2'
 #var = 'corrected_hamming_distance'
-var = 'avelocal_transmissivity'
-var = 'average_path_length'
+var = 'global_transitivity'
+#var = 'average_path_length'
 
 readerobs = data_reader(startdate='1981-01', enddate='2018-12')
 nwm_obs = readerobs.read_statistic('network_metrics', 'sshg',
@@ -64,11 +64,14 @@ plt.xcorr(nino34, nwm_obs[var], maxlags=48)
 
 
 
+
+
+
+#%%
 """
 ARCHIVED
 
-
-#%% =============================================================================
+# =============================================================================
 # GFDL Data zos
 # =============================================================================
 nms = networkMetricsSeries('zos', 'GFDL-CM3', processed="anom",
