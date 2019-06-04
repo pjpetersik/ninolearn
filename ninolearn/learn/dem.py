@@ -137,6 +137,7 @@ class DEM(object):
         self.n_segments = n_segments
         self.n_members_segment = n_members_segment
         self.batch_size = batch_size
+
         # derived parameters
         self.n_members = self.n_segments * self.n_members_segment
 

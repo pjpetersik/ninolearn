@@ -19,7 +19,7 @@ K.clear_session()
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-lead_time = 0
+lead_time = 15
 X, y, timey, yp = pipeline(lead_time, return_persistance=True)
 #%%
 decades = [80, 90, 100, 110]

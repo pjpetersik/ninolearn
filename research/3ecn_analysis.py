@@ -12,18 +12,18 @@ from ninolearn.postprocess.network import networkMetricsSeries
 # =============================================================================
 print_header("Network Metrics")
 
-nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
-                           threshold=0.9, startyear=1980, endyear=2018,
-                           window_size=12, lon_min=120, lon_max=280,
-                           lat_min=-30, lat_max=30, verbose=1)
-nms_ssh.computeTimeSeries()
-
-
-#nms_air = networkMetricsSeries('air', 'NCEP', processed="anom",
+#nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
 #                           threshold=0.9, startyear=1980, endyear=2018,
 #                           window_size=12, lon_min=120, lon_max=280,
 #                           lat_min=-30, lat_max=30, verbose=1)
-#nms_air.computeTimeSeries()
+#nms_ssh.computeTimeSeries()
+
+
+nms_air = networkMetricsSeries('air', 'NCEP', processed="anom",
+                           edge_density=0.005, startyear=1980, endyear=2018,
+                           window_size=12, lon_min=120, lon_max=280,
+                           lat_min=-30, lat_max=30, verbose=1)
+nms_air.computeTimeSeries()
 #
 #nms_sst = networkMetricsSeries('sst', 'ERSSTv5', processed="anom",
 #                           threshold=0.9, startyear=1980, endyear=2018,
@@ -45,8 +45,8 @@ var = 'global_transitivity'
 #var = 'average_path_length'
 
 readerobs = data_reader(startdate='1981-01', enddate='2018-12')
-nwm_obs = readerobs.read_statistic('network_metrics', 'sshg',
-                                        dataset='GODAS',
+nwm_obs = readerobs.read_statistic('network_metrics', 'air',
+                                        dataset='NCEP',
                                         processed='anom')
 
 nino34 = readerobs.read_csv('nino3.4M')

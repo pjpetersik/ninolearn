@@ -13,12 +13,28 @@ from ninolearn.learn.evaluation import rmse, correlation, rmse_mon
 from ninolearn.plot.evaluation import plot_seasonal_skill
 from ninolearn.utils import print_header
 from data_pipeline import pipeline
+from ninolearn.utils import scale
+
+plt.close("all")
+# starting year of el nino
+elnino_ep = [1957, 1965, 1972, 1976, 1982,
+             1997, 2016]
+
+elnino_cp = [1953, 1958, 1963, 1968, 1969,
+             1977, 1979, 1986, 1987, 1991,
+             1994, 2002, 2004, 2006, 2009]
+
+lanina_ep = [1964, 1970, 1973, 1988, 1998,
+             2007, 2010]
+
+lanina_cp  = [1954, 1955, 1967, 1971, 1974,
+              1975, 1984, 1995, 2000, 2001, 2011]
 
 #%% =============================================================================
 #  process data
 # =============================================================================
-#decades = [80, 90, 100, 110]
-decades = [100]
+decades = [80, 90, 100, 110]
+#decades = [100]
 
 lead_time_arr = np.array([0, 3, 6, 9, 12, 15])
 
@@ -64,30 +80,34 @@ for i in range(n_pred):
         pred_std_full = np.append(pred_std_full, pred_std)
         pred_persistance_full = np.append(pred_persistance_full, pred_pers)
         ytrue = np.append(ytrue, testy)
-        timeytrue= timeytrue.append(testtimey)
+        timeytrue = timeytrue.append(testtimey)
+
+    # extract the years coresponding to a certain type
+    type_indeces = np.zeros(len(timey), dtype=bool)
+
+    for year in elnino_cp:
+        type_indeces =  ((timey>=f'{year}-07-01') & (timey<=f'{year+1}-06-01')) | type_indeces
 
     #%% ===========================================================================
     # Deep ensemble
     # =============================================================================
 
     # all seasons skills
-    all_season_corr[i] = np.corrcoef(ytrue, pred_mean_full)[0,1]
-    all_season_corr_pres[i] = np.corrcoef(ytrue, pred_persistance_full)[0,1]
+    all_season_corr[i] = np.corrcoef(ytrue[type_indeces], pred_mean_full[type_indeces])[0,1]
+    all_season_corr_pres[i] = np.corrcoef(ytrue[type_indeces], pred_persistance_full[type_indeces])[0,1]
 
-    all_season_rmse[i] = rmse(ytrue, pred_mean_full)
-    all_season_rmse_pres[i] = rmse(ytrue, pred_persistance_full)
+    ax = plt.figure().gca()
+    plt.title(f'Lead time: {lead_time} month')
+    plt.scatter(scale(ytrue[~type_indeces]), scale(pred_mean_full[~type_indeces]), c='k')
+    plt.scatter(scale(ytrue[type_indeces]), scale(pred_mean_full[type_indeces]),c='r')
 
-    all_season_nll[i] = model.evaluate(ytrue, pred_mean_full, pred_std_full)
-
-    # seasonal skills
-    seas_corr[:, i] = correlation(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    seas_corr_pers[:, i] = correlation(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-
-    seas_rmse[:, i] = rmse_mon(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    seas_rmse_pers[:, i] = rmse_mon(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-
+    plt.plot([-10,10],[-10,10], 'k')
+    plt.xlim(-3,3)
+    plt.ylim(-3,3)
+    plt.xlabel('Normalized Nino3.4')
+    plt.ylabel('Normalized mean prediction')
 #%%
-plt.close("all")
+
 
 ax = plt.figure().gca()
 plt.plot(lead_time_arr, all_season_corr, label="Deep Ensemble Mean")
@@ -101,39 +121,4 @@ plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-ax = plt.figure().gca()
-plt.plot(lead_time_arr, all_season_rmse, label="Deep Ensemble Mean")
-plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence")
-plt.ylim(0.,1.8)
-plt.xlim(0,8)
-plt.xlabel('lead time')
-plt.ylabel('RMSE')
-plt.title('RMSE')
-plt.grid()
-plt.legend()
-ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-ax = plt.figure().gca()
-plt.plot(lead_time_arr, all_season_nll, label="Deep Ensemble")
-plt.ylim(-0.5,0.5)
-plt.xlim(0.,8)
-plt.xlabel('lead time')
-plt.ylabel('NLL')
-plt.title('Negative-loglikelihood')
-plt.grid()
-plt.legend()
-ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-
-plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
-plt.vlines(4,0,9)
-plt.plot(np.arange(7,13), np.arange(0,6),'k')
-plt.plot(np.arange(1,5), np.arange(6,10),'k')
-
-plot_seasonal_skill(lead_time_arr, seas_corr_pers.T,  vmin=0, vmax=1)
-plt.vlines(4,0,9)
-plt.plot(np.arange(7,13), np.arange(0,6),'k')
-plt.plot(np.arange(1,5), np.arange(6,10),'k')
-plot_seasonal_skill(lead_time_arr, seas_corr.T-seas_corr_pers.T,  vmin=-1, vmax=1, extend='both', cmap=plt.cm.bwr)
-
-plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1, cmap=plt.cm.Reds)
-plot_seasonal_skill(lead_time_arr, seas_rmse_pers.T, vmin=0, vmax=1, cmap=plt.cm.Reds)
