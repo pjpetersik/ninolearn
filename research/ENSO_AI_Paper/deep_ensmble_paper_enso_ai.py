@@ -108,8 +108,6 @@ model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
             l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
             lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=1, std=True)
 
-#model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
-
 model.fit(trainX, trainy, testX, testy, use_pretrained=False)
 
 
@@ -144,8 +142,10 @@ plt.plot(np.nan, c='r', label='train')
 plt.legend()
 
 #%% just for testing the loading function delete and load the model
-plt.close("all")
+
 del model
+#%%
+plt.close("all")
 model = DEM()
 model.load(location=modeldir, dir_name=ens_dir)
 
@@ -154,7 +154,7 @@ predtrain_mean, predtrain_std = model.predict(trainX)
 predfuture_mean, predfuture_std =  model.predict(futureX)
 
 # Predictions
-plt.subplots(figsize=(15,3.5))
+plt.subplots(figsize=(8,2.5))
 plt.axhspan(-0.5,
             -6,
             facecolor='blue',
@@ -186,7 +186,7 @@ plt.title(f"Lead time: {lead_time} month")#", RMSE (of mean): {pred_rmse}")
 plt.grid()
 plt.xlabel('Year')
 plt.ylabel('NINO3.4 [K]')
-
+plt.tight_layout()
 
 # Seaonality of Standard deviations
 plt.subplots()
@@ -202,9 +202,8 @@ std_data.plot()
 std_pred.plot()
 
 
-# plot explained variance
-plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1), title="")
-
+# plot correlation
+plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1), title="Correlation skill")
 
 # Error distribution
 plt.subplots()
@@ -222,15 +221,3 @@ in_or_out = np.zeros((len(pred_mean)))
 in_or_out[(testy>pred_mean-2*pred_std) & (testy<pred_mean+2*pred_std)] = 1
 in_frac_2std = np.sum(in_or_out)/len(testy)
 
-
-"""
-Archived:
-#in_or_out = np.zeros((len(pred_mean)))
-#in_or_out[(testy>predicty_m1std) & (testy<predicty_p1std)] = 1
-#in_frac = np.sum(in_or_out)/len(testy)
-#
-#in_or_out_train = np.zeros((len(predtrain_mean)))
-#in_or_out_train[(trainy>predicttrainy_m1std) & (trainy<predicttrainy_p1std)] = 1
-#in_frac_train = np.sum(in_or_out_train)/len(trainy)
-#plt.title(f"train:{round(in_frac_train,2)*100}%, test:{round(in_frac*100,2)}%, RMSE (of mean): {pred_rmse}")
-"""

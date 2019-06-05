@@ -30,7 +30,7 @@ def plot_explained_variance(y, pred, time):
     ax.bar(m, rsq)
     ax.set_xticks(m)
     ax.set_xticklabels(seas_ticks)
-    ax.set_xlabel("season")
+    ax.set_xlabel("Season")
     ax.set_ylabel(f"$r^2$")
     ax.set_title(f"$r^2 =$ {round(np.corrcoef(y,pred)[0,1]**2, 2)}")
 
@@ -39,20 +39,21 @@ def plot_correlation(y, pred, time, title=None):
     make a bar plot of the explained varince between y and the prediction
     """
     m = np.arange(1, 13)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(5,2.5))
 
-    rsq = correlation(y, pred, time)
+    rsq, p = correlation(y, pred, time)
 
     ax.set_ylim(0, 1)
     ax.bar(m, rsq)
     ax.set_xticks(m)
     ax.set_xticklabels(seas_ticks)
-    ax.set_xlabel("season")
-    ax.set_ylabel(f"$r$")
+    ax.set_xlabel("Season")
+    ax.set_ylabel(f"Correlation coefficient")
     if title is None:
         ax.set_title(f"$r =$ {round(np.corrcoef(y,pred)[0,1], 2)}")
     else:
          ax.set_title(title)
+    plt.tight_layout()
 
 def plot_confMat(y, pred, labels):
     """
@@ -88,7 +89,7 @@ def plot_confMat(y, pred, labels):
 
 
 def plot_seasonal_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcmp, extend='min'):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(5,3.5))
     m = np.arange(1,13)
 
     levels = np.linspace(vmin, vmax, nlevels+1)
@@ -97,10 +98,11 @@ def plot_seasonal_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcm
                  cmap=cmap, extend=extend)
 
     ax.set_xticks(m)
-    ax.set_xticklabels(seas_ticks)
-    ax.set_xlabel('Target season')
-    ax.set_ylabel('lead time')
-    plt.colorbar(C, ticks=np.arange(vmin,vmax+0.1,0.1))
+    ax.set_xticklabels(seas_ticks, rotation='vertical')
+    ax.set_xlabel('Target Season')
+    ax.set_ylabel('Lead Time in Month')
+    plt.colorbar(C, ticks=np.arange(vmin,vmax+0.1,0.2))
+    plt.tight_layout()
 
 
 

@@ -6,6 +6,7 @@ from statsmodels.tsa.stattools import ccf
 from scipy.stats import spearmanr
 
 import numpy as np
+import pandas as pd
 
 def spearman_lag(x,y, max_lags=80):
     scorr = np.zeros(max_lags)
@@ -28,6 +29,16 @@ plt.close("all")
 reader = data_reader(startdate='1981-01', enddate='2017-12')
 iod = reader.read_csv('iod')
 wwv = reader.read_csv('wwv')
+uwnd = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
+uwnd_eq = uwnd.loc[dict(lat=slice(5,-5), lon=slice(120, 140))]
+uwnd_eq_mean = uwnd_eq.mean(dim='lat').mean(dim='lon')
+
+ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+#ssh_grad = np.sort(np.gradient(ssh.loc[dict(lat=0, lon=slice(200,280))],axis=1),axis=1)
+
+ssh_grad = np.nanmean(np.gradient(ssh.loc[dict(lat=0, lon=slice(210, 240))],axis=1),axis=1)
+ssh_grad = pd.Series(data=ssh_grad, index=ssh.time.values)
+
 
 nino34 = reader.read_csv('nino3.4S')
 nino12 = reader.read_csv('nino1+2M')
@@ -52,30 +63,28 @@ T = network['global_transitivity']
 C = network['avelocal_transmissivity']
 L = network['average_path_length']
 
-pca2 = pca['pca2']
+pca2 = -pca['pca2']
 
 plt.subplots()
-var = scale(T)
-var2 = scale(c2)
+var = scale(uwnd_eq_mean)
+var2 = scale(pca2)
 var3 = scale(iod)
 nino = scale(nino34)
 nino3norm = scale(nino3)
 nino4norm = scale(nino4)
 
 
-nino3.plot()
-nino4.plot()
-
 var.plot(c='r')
-#nino.plot(c='k')
+nino.plot(c='k')
+var2.plot(c='b')
 
 plt.subplots()
 plt.vlines(12,-1,1, colors="grey")
 plt.vlines(6,-1,1, colors="grey")
 plt.vlines(0,-1,1, colors="grey")
-plt.xcorr(nino, var, maxlags=80, label="auto-correlation")
-plt.xcorr(nino, var2, maxlags=80, color="b", label="c2")
-plt.xcorr(nino, var3, maxlags=80, color="r", label="iod")
+plt.xcorr(nino, var, maxlags=80, label="var-correlation")
+plt.xcorr(nino, var2, maxlags=80, color="b", label="pca2")
+#plt.xcorr(nino, var3, maxlags=80, color="r", label="iod")
 plt.ylim(-1,1)
 plt.xlim(0,48)
 plt.legend()

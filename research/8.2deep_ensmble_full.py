@@ -19,7 +19,7 @@ K.clear_session()
 #%% =============================================================================
 # Deep ensemble
 # =============================================================================
-lead_time = 15
+lead_time = 10
 X, y, timey, yp = pipeline(lead_time, return_persistance=True)
 #%%
 decades = [80, 90, 100, 110]
@@ -37,12 +37,14 @@ for decade in decades:
 
     model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
                 l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
-                lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=0, std=True)
+                lr=0.001, batch_size=1, epochs=500, n_segments=5,
+                n_members_segment=1, patience=30, verbose=0, std=True)
 
     model.fit(trainX, trainy)
 
     if model.std:
         ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
+
     else:
         ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
 
@@ -55,11 +57,9 @@ i=0
 pred_mean_full = np.array([])
 pred_std_full = np.array([])
 
-
 decadal_corr = np.zeros(len(decades))
 decadal_rmse = np.zeros(len(decades))
 decadal_nll = np.zeros(len(decades))
-
 
 for decade in decades:
     K.clear_session()
@@ -80,6 +80,7 @@ for decade in decades:
     decadal_rmse[i] = round(rmse(testy, pred_mean),2)
     decadal_corr[i] = np.corrcoef(testy, pred_mean)[0,1]
     i+=1
+
 
 #%% Predictions
 plt.close("all")
@@ -108,7 +109,7 @@ plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
 plt.grid()
 
 # plot explained variance
-# minus two month to center season around central month
+# minus one month to center season around central month
 plot_correlation(y, pred_mean_full, timey - pd.tseries.offsets.MonthBegin(1))
 
 

@@ -14,7 +14,7 @@ if not exists(postdir):
 def season_to_month(season):
     """
     translates a 3-month season string to the corresponding integer of the
-    first month after the season (to ensure not to include any future information
+    last month of the season (to ensure not to include any future information
     when predictions are made later with this data)
 
     :type season: string
@@ -38,7 +38,7 @@ def season_to_month(season):
 
 def season_shift_year(season):
     """
-    when the function .season_to_month() is applied the year related to the OND and
+    when the function .season_to_month() is applied the year related to
     NDJ needs to be shifted by 1.
 
     :type season: string

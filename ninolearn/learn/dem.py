@@ -123,20 +123,16 @@ class DEM(object):
         for the regression task.
         """
         # hyperparameters
-        self.layers = layers
-        self.neurons = neurons
-        self.dropout = dropout
-        self.noise = noise
-        self.l1_hidden = l1_hidden
-        self.l2_hidden = l2_hidden
-        self.l1_mu = l1_mu
-        self.l2_mu = l2_mu
-        self.l1_sigma = l1_sigma
-        self.l2_sigma = l2_sigma
-        self.lr = lr
+        self.hyperparameters = {'layers': layers, 'neurons': neurons,
+                'dropout': dropout, 'noise': noise,
+                'l1_hidden': l1_hidden, 'l2_hidden': l2_hidden,
+                'l1_mu': l1_mu, 'l2_mu': l2_mu,
+                'l1_sigma': l1_sigma, 'l2_sigma': l2_sigma,
+                'lr': lr, 'batch_size': batch_size}
+
+        # traning/validation split
         self.n_segments = n_segments
         self.n_members_segment = n_members_segment
-        self.batch_size = batch_size
 
         # derived parameters
         self.n_members = self.n_segments * self.n_members_segment
@@ -158,7 +154,7 @@ class DEM(object):
             self.loss_name = 'mean_squared_error'
 
         # initialize optimizer and early stopping
-        self.optimizer = Adam(lr=self.lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
+        self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
         self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=0,
                    mode='min', restore_best_weights=True)
 
@@ -180,15 +176,19 @@ class DEM(object):
         The method builds a new member of the ensemble and returns it.
         """
         inputs = Input(shape=(n_features,))
-        h = GaussianNoise(self.noise)(inputs)
+        h = GaussianNoise(self.hyperparameters['noise'])(inputs)
 
-        for _ in range(self.layers):
-            h = Dense(self.neurons, activation='relu', kernel_regularizer=regularizers.l1_l2(self.l1_hidden, self.l2_hidden))(h)
-            h = Dropout(self.dropout)(h)
+        for _ in range(self.hyperparameters['layers']):
+            h = Dense(self.hyperparameters['neurons'], activation='relu',
+                      kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'], self.hyperparameters['l2_hidden']))(h)
+            h = Dropout(self.hyperparameters['dropout'])(h)
 
-        mu = Dense(1, activation='linear', kernel_regularizer=regularizers.l1_l2(self.l1_mu, self.l2_mu))(h)
+        mu = Dense(1, activation='linear',
+                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'], self.hyperparameters['l2_mu']))(h)
+
         if self.std:
-            sigma = Dense(1, activation='softplus', kernel_regularizer=regularizers.l1_l2(self.l1_sigma, self.l2_sigma))(h)
+            sigma = Dense(1, activation='softplus',
+                          kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_sigma'], self.hyperparameters['l2_sigma']))(h)
             outputs = concatenate([mu, sigma])
 
         else:
@@ -247,7 +247,7 @@ class DEM(object):
                     valyens = valy
 
                 history = ensemble_member.fit(trainXens, trainyens,
-                                            epochs=self.epochs, batch_size=self.batch_size, verbose=self.verbose,
+                                            epochs=self.epochs, batch_size=self.hyperparameters['batch_size'], verbose=self.verbose,
                                             shuffle=True, callbacks=[self.es],
                                             validation_data=(valXens, valyens))
 
@@ -259,7 +259,7 @@ class DEM(object):
 
     def predict(self, X):
         """
-        Senerates the ensemble prediction of a model ensemble
+        Generates the ensemble prediction of a model ensemble
 
         :param model_ens: list of ensemble models
         :param X: the features

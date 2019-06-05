@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 
 from ninolearn.utils import scale
+from scipy.stats import pearsonr
 
 
 def explained_variance(y, pred, time):
@@ -25,13 +26,13 @@ def correlation(y, pred, time):
     Returns the correlation (r) for each month in a time series
     """
     r = np.zeros(12)
-
+    p = np.zeros(12)
     for i in range(12):
         month = (time.month == i+1)
         y_sel = scale(y[month])
         pred_sel = scale(pred[month])
-        r[i] = np.corrcoef(y_sel, pred_sel)[0, 1]
-    return r
+        r[i], p[i] = pearsonr(y_sel, pred_sel)
+    return r, p
 
 def rmse_mon(y, pred, time):
     """
@@ -45,9 +46,20 @@ def rmse_mon(y, pred, time):
 
         y_sel = y[month]
         pred_sel = pred[month]
-        RMSE[i] = rmse(y_sel, pred_sel)
+        RMSE[i] = np.sqrt(mean_squared_error(y_sel, pred_sel))/np.std(y_sel)
     return RMSE
 
+
+def rmse_monmean(y, predict, time):
+    """
+    Computes the root mean square error (RMSE)
+
+    :param y: the base line data
+    :param predict: the predicted data
+    :return: the RMSE
+    """
+    seasonal_RMSE = rmse_mon(y, predict, time)
+    return np.mean(seasonal_RMSE)
 
 def rmse(y, predict):
     """
