@@ -9,7 +9,7 @@ from keras import backend as K
 
 from ninolearn.learn.dem import DEM
 from ninolearn.pathes import modeldir
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon,
+from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon
 from ninolearn.plot.evaluation import plot_seasonal_skill
 from ninolearn.utils import print_header
 from data_pipeline import pipeline
@@ -22,7 +22,7 @@ from scipy.stats import pearsonr
 decades = [80, 90, 100, 110]
 #decades = [100]
 
-lead_time_arr = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12])
+lead_time_arr = np.array([0, 3, 6, 9, 12])
 
 n_pred = len(lead_time_arr)
 # scores for the full timeseries
@@ -144,10 +144,10 @@ plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.in
 
 #%% FOR ENSO ML Paper
 #plt.close("all")
-plot_seasonal_skill(lead_time_arr, seas_corr_pers.T,  vmin=-1, vmax=1, cmap=plt.cm.seismic, extend='neither')
-
-seas_p_pers_pos = seas_p_pers.copy()
-seas_p_pers_pos[seas_corr_pers<0] = 1
-
-plt.contour(np.arange(1,13),lead_time_arr, seas_p_pers_pos.T, levels=[0.01, 0.05, 0.1])
-plot_seasonal_skill(lead_time_arr, seas_p_pers_pos.T,  vmin=0, vmax=1., cmap=plt.cm.Blues, extend='max')
+#plot_seasonal_skill(lead_time_arr, seas_corr_pers.T,  vmin=-1, vmax=1, cmap=plt.cm.seismic, extend='neither')
+#
+#seas_p_pers_pos = seas_p_pers.copy()
+#seas_p_pers_pos[seas_corr_pers<0] = 1
+#
+#plt.contour(np.arange(1,13),lead_time_arr, seas_p_pers_pos.T, levels=[0.01, 0.05, 0.1])
+#plot_seasonal_skill(lead_time_arr, seas_p_pers_pos.T,  vmin=0, vmax=1., cmap=plt.cm.Blues, extend='max')

@@ -227,11 +227,40 @@ postprocess(sat)
 uwind = read_raw.uwind()
 postprocess(uwind)
 
+vwind = read_raw.vwind()
+postprocess(vwind)
+
 # post process values from GODAS
 ssh_godas = read_raw.ssh_godas()
 ssh_godas_regrid = to2_5x2_5(ssh_godas)
 postprocess(ssh_godas_regrid)
 
+# =============================================================================
+# Calculate some variables
+# =============================================================================
+wspd = np.sqrt(uwind**2 + vwind**2)
+wspd.attrs = uwind.attrs.copy()
+wspd.name = 'wspd'
+wspd.attrs['long_name'] = 'Monthly Mean Wind Speed at sigma level 0.995'
+wspd.attrs['var_desc'] = 'wind-speed'
+postprocess(wspd)
+
+taux = uwind * wspd
+taux.attrs = uwind.attrs.copy()
+taux.name = 'taux'
+taux.attrs['long_name'] = 'Monthly Mean Zonal Wind Stress at sigma level 0.995'
+taux.attrs['var_desc'] = 'x-wind-stress'
+taux.attrs['units'] = 'm^2/s^2'
+postprocess(taux)
+
+tauy = vwind * wspd
+tauy.attrs = uwind.attrs.copy()
+tauy.name = 'tauy'
+tauy.attrs['long_name'] = 'Monthly Mean Meridional Wind Stress at sigma level 0.995'
+tauy.attrs['var_desc'] = 'y-wind-stress'
+tauy.attrs['units'] = 'm^2/s^2'
+postprocess(tauy)
+#%%
 """
 ARCHIVED
 

@@ -26,46 +26,35 @@ K.clear_session()
 # =============================================================================
 reader = data_reader(startdate='1981-01')
 
-nino4 = reader.read_csv('nino4M')
+# NINO3.4 Index
 nino34 = reader.read_csv('nino3.4S')
-nino12 = reader.read_csv('nino1+2M')
-nino3 = reader.read_csv('nino3M')
 
+# Other indeces
 iod = reader.read_csv('iod')
 wwv = reader.read_csv('wwv')
 
-len_ts = len(nino34)
-sc = np.cos(np.arange(len_ts)/12*2*np.pi)
-yr = np.arange(len_ts) % 12
+# seasonal cycle
+sc = np.cos(np.arange(len(nino34))/12*2*np.pi)
 
+# SSH network metrics
 network_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
-
-network_sst = reader.read_statistic('network_metrics', variable='sst',
-                           dataset='ERSSTv5', processed="anom")
-
-network_sat = reader.read_statistic('network_metrics', variable='air',
-                           dataset='NCEP', processed="anom")
-
 c2_ssh = network_ssh['fraction_clusters_size_2']
-S_ssh = network_ssh['fraction_giant_component']
 H_ssh = network_ssh['corrected_hamming_distance']
-T_ssh = network_ssh['global_transitivity']
-C_ssh = network_ssh['avelocal_transmissivity']
-L_ssh = network_ssh['average_path_length']
 
-C_sst = network_sst['avelocal_transmissivity']
-H_sst = network_ssh['corrected_hamming_distance']
+#wind stress
+taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 
-S_air = network_ssh['fraction_giant_component']
-T_air = network_ssh['global_transitivity']
+taux_WP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(120, 160))]
+taux_WP_mean = taux_WP.mean(dim='lat').mean(dim='lon')
 
-pca_u = reader.read_statistic('pca', variable='uwnd', dataset='NCEP', processed='anom')
-pca2_u = pca_u['pca2']
+taux_CP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(160, 180))]
+taux_CP_mean = taux_CP.mean(dim='lat').mean(dim='lon')
 
-ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
-ssh_grad = np.nanmean(np.gradient(ssh.loc[dict(lat=0, lon=slice(200,240))],axis=1),axis=1)
-ssh_grad = pd.Series(data=ssh_grad, index=ssh.time.values)
+taux_EP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(180, 240))]
+taux_EP_mean = taux_EP.mean(dim='lat').mean(dim='lon')
+
+
 #%% =============================================================================
 #  process data
 # =============================================================================
@@ -73,8 +62,9 @@ time_lag = 12
 lead_time = 3
 shift = 3
 
-feature_unscaled = np.stack((nino34, sc, wwv, ssh_grad),
-                            axis=1)
+feature_unscaled = np.stack((nino34, sc,  iod, wwv,
+                             H_ssh, c2_ssh,
+                             taux_WP_mean, taux_CP_mean, taux_EP_mean), axis=1)
 
 scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
@@ -96,7 +86,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         freq='MS')
 
 #test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
-test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -107,8 +97,8 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 model = DEM()
 
-model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
-            l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
+model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.01,
+            l2_hidden=0., l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
             lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=1, std=True)
 
 #model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')

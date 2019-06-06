@@ -1,5 +1,5 @@
 """
-here I want to implement the code for the deep ensemble
+TODO: Write a search algorithm to find good hyperparameters
 """
 import numpy as np
 

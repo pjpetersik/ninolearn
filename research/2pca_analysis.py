@@ -44,7 +44,14 @@ pca_ssh.load_data('sshg', 'GODAS', processed="anom",
 pca_ssh.compute_pca()
 pca_ssh.save()
 
-
+#taux
+pca_taux = pca(n_components=6)
+pca_taux.load_data('taux', 'NCEP', processed="anom",
+                  startyear=1948, endyear=2018, lon_min=120, lon_max=280,
+                  lat_min=-30, lat_max=30)
+pca_taux.compute_pca()
+pca_taux.save()
+pca_taux.plot_eof()
 
 
 """

@@ -21,10 +21,19 @@ def pipeline(lead_time,  return_persistance=False):
     # network metrics
     network_ssh = reader.read_statistic('network_metrics', variable='sshg', dataset='GODAS', processed="anom")
     c2_ssh = network_ssh['fraction_clusters_size_2']
+    H_ssh = network_ssh['corrected_hamming_distance']
 
-    # pca
-    pca_u = reader.read_statistic('pca', variable='uwnd', dataset='NCEP', processed='anom')
-    pca2_u = pca_u['pca2']
+    #wind stress
+    taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+
+    taux_WP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(120, 160))]
+    taux_WP_mean = taux_WP.mean(dim='lat').mean(dim='lon')
+
+    taux_CP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(160, 180))]
+    taux_CP_mean = taux_CP.mean(dim='lat').mean(dim='lon')
+
+    taux_EP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(180, 240))]
+    taux_EP_mean = taux_EP.mean(dim='lat').mean(dim='lon')
 
     # time lag
     time_lag = 12
@@ -33,8 +42,9 @@ def pipeline(lead_time,  return_persistance=False):
     shift = 3
 
     # process features
-    #feature_unscaled = np.stack((nino34, sc, wwv), axis=1)
-    feature_unscaled = np.stack((nino34, sc, wwv, iod, pca2_u, c2_ssh), axis=1)
+    feature_unscaled = np.stack((nino34, sc, wwv, iod,
+                                 taux_WP_mean, taux_CP_mean, taux_EP_mean,
+                                 c2_ssh, H_ssh), axis=1)
 
     scalerX = StandardScaler()
     Xorg = scalerX.fit_transform(feature_unscaled)
