@@ -100,9 +100,6 @@ def plot_seasonal_skill(lead_time, data, vmin=-1, vmax=1, nlevels=20, cmap=newcm
     ax.set_xticks(m)
     ax.set_xticklabels(seas_ticks, rotation='vertical')
     ax.set_xlabel('Target Season')
-    ax.set_ylabel('Lead Time in Month')
+    ax.set_ylabel('Lead Time [Month]')
     plt.colorbar(C, ticks=np.arange(vmin,vmax+0.1,0.2))
     plt.tight_layout()
-
-
-

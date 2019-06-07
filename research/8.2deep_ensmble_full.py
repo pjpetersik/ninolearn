@@ -85,24 +85,17 @@ for lead_time in [0, 3, 6, 9, 12]:
     #%% Predictions
     plt.close("all")
     plt.subplots(figsize=(15,3.5))
-    plt.axhspan(-0.5,
-                -6,
-                facecolor='blue',
-                alpha=0.1,zorder=0)
-
-    plt.axhspan(0.5,
-                6,
-                facecolor='red',
-                alpha=0.1,zorder=0)
-
-    plt.xlim(timey[0],timey[-1])
-    plt.ylim(-3,3)
 
     # test
     plot_prediction(timey, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
-
     # observation
     plt.plot(timey, y, "k")
+
+    plt.axhspan(-0.5, -6, facecolor='blue',  alpha=0.1,zorder=0)
+    plt.axhspan(0.5, 6, facecolor='red', alpha=0.1,zorder=0)
+
+    plt.xlim(timey[0],timey[-1])
+    plt.ylim(-3,3)
 
     pred_rmse = round(rmse(y, pred_mean_full),2)
     plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")

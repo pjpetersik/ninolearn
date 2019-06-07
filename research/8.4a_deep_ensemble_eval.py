@@ -5,17 +5,21 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import pandas as pd
 
+from os.path import join
+
 from keras import backend as K
 
 from ninolearn.learn.dem import DEM
 from ninolearn.pathes import modeldir
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon
+from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, rmse
+from ninolearn.plot.prediction import plot_prediction
 from ninolearn.plot.evaluation import plot_seasonal_skill
 from ninolearn.utils import print_header
 from data_pipeline import pipeline
+from ninolearn.private import plotdir
 
 from scipy.stats import pearsonr
-
+plt.close("all")
 #%% =============================================================================
 #  process data
 # =============================================================================
@@ -98,48 +102,82 @@ for i in range(n_pred):
     seas_rmse[:, i] = rmse_mon(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
     seas_rmse_pers[:, i] = rmse_mon(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
-#%%
-plt.close("all")
+    plt.subplots(figsize=(8,1.8))
+    # test
+    plot_prediction(timey, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
+    # observation
+    plt.plot(timey, y, "k")
+    plt.xlabel('Time [Year]')
+    plt.ylabel('ONI [K]')
 
-ax = plt.figure().gca()
+    plt.axhspan(-0.5, -6, facecolor='blue',  alpha=0.1,zorder=0)
+    plt.axhspan(0.5, 6, facecolor='red', alpha=0.1,zorder=0)
+
+    plt.xlim(timey[0],timey[-1])
+    plt.ylim(-3,3)
+
+    plt.title(f"Lead time: {lead_time} month")
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
+#%%
+
+
+# all season correlation score
+ax = plt.figure(figsize=(3.5,3.)).gca()
 plt.plot(lead_time_arr, all_season_corr, label="Deep Ensemble Mean")
 plt.plot(lead_time_arr, all_season_corr_pres, label="Persistence")
 plt.ylim(-0.2,1)
 plt.xlim(0,8)
-plt.xlabel('lead time')
-plt.ylabel('r')
-plt.title('Correlation skill')
+plt.xlabel('Lead Time [Month]')
+plt.ylabel('Correlation coefficient')
+#plt.title('Correlation skill')
 plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-#
-ax = plt.figure().gca()
+plt.tight_layout()
+plt.savefig(join(plotdir, f'all_season_corr.pdf'))
+
+# all season rmse score
+ax = plt.figure(figsize=(3.5,3.)).gca()
 plt.plot(lead_time_arr, all_season_rmse, label="Deep Ensemble Mean")
 plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence")
 plt.ylim(0.,1.8)
 plt.xlim(0,8)
-plt.xlabel('lead time')
-plt.ylabel('RMSE')
-plt.title('RMSE')
+plt.xlabel('Lead Time [Month]')
+plt.ylabel('Normalized RMSE')
+#plt.title('Normalized RMSE')
 plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 
-ax = plt.figure().gca()
+# all seasons negative loglikelihood
+ax = plt.figure(figsize=(3.5,3.)).gca()
 plt.plot(lead_time_arr, all_season_nll, label="Deep Ensemble")
 plt.ylim(-0.5,0.5)
 plt.xlim(0.,8)
-plt.xlabel('lead time')
+plt.xlabel('Lead Time [Month]')
 plt.ylabel('NLL')
-plt.title('Negative-loglikelihood')
+#plt.title('Negative-loglikelihood')
 plt.grid()
 plt.legend()
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig(join(plotdir, f'all_season_nll.pdf'))
+
 
 plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
+plt.title('Correlation skill')
+plt.tight_layout()
+plt.savefig(join(plotdir, f'seasonal_corr.pdf'))
 
 plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.inferno_r, extend='max')
+plt.title('Normalized RMSE')
+plt.tight_layout()
+plt.savefig(join(plotdir, f'seasonal_rmse.pdf'))
 
 
 #%% FOR ENSO ML Paper

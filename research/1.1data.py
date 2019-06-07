@@ -57,20 +57,6 @@ HadISST1_dict = {
 downloadFileHTTP(HadISST1_dict)
 unzip_gz(HadISST1_dict)
 
-
-SST_GFDL_dict = {
-        'filename': 'tos_Omon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
-        'host': 'nomads.gfdl.noaa.gov',
-        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/ocean/Omon/r1i1p1/v20110601/tos/'
-        }
-
-for year_int in np.arange(1,500,5):
-    year_start = f"{year_int:03d}"
-    year_end = f"{year_int+4:03d}"
-
-    SST_GFDL_dict['filename'] = f'tos_Omon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
-    downloadFileFTP(SST_GFDL_dict, outdir='sst_gfdl')
-
 # =============================================================================
 # ORAP5.0 SSH
 # =============================================================================
@@ -94,30 +80,27 @@ for year_int in range(1979, 2014):
         downloadFileFTP(ORAP50_dict, outdir='ssh',
                         username=CMEMS_username, password=CMEMS_password)
 
+
+# =============================================================================
+# GODAS data
+# =============================================================================
 GODAS_dict = {'filename': 'sshg.1980.nc',
               'host': 'ftp.cdc.noaa.gov',
               'location': '/Datasets/godas/'
               }
 
 for i in range(1980,2019):
+    #ssh
     GODAS_dict['filename'] = f'sshg.{i}.nc'
     downloadFileFTP(GODAS_dict, outdir = 'ssh_godas')
 
+    #u-current
+    GODAS_dict['filename'] = f'ucur.{i}.nc'
+    downloadFileFTP(GODAS_dict, outdir = 'ucur_godas')
 
-
-SSH_GFDL_dict = {
-        'filename': 'zos_Omon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
-        'host': 'nomads.gfdl.noaa.gov',
-        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/ocean/Omon/r1i1p1/v20110601/zos/'
-        }
-
-for year_int in np.arange(1,500,5):
-    year_start = f"{year_int:03d}"
-    year_end = f"{year_int+4:03d}"
-
-    SSH_GFDL_dict['filename'] = f'zos_Omon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
-    downloadFileFTP(SSH_GFDL_dict, outdir='ssh_gfdl')
-
+    #v-current
+    GODAS_dict['filename'] = f'vcur.{i}.nc'
+    downloadFileFTP(GODAS_dict, outdir = 'vcur_godas')
 
 # =============================================================================
 # WWV
@@ -169,19 +152,6 @@ SATmon_dict = {
         }
 
 downloadFileFTP(SATmon_dict)
-
-SAT_GFDL_dict = {
-        'filename': 'tas_Amon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
-        'host': 'nomads.gfdl.noaa.gov',
-        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/atmos/Amon/r1i1p1/v20110601/tas/'
-        }
-
-for year_int in np.arange(1,500,5):
-    year_start = f"{year_int:03d}"
-    year_end = f"{year_int+4:03d}"
-
-    SAT_GFDL_dict['filename'] = f'tas_Amon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
-    downloadFileFTP(SAT_GFDL_dict, outdir='sat_gfdl')
 
 # =============================================================================
 # indian ocean dipole  (IOD) index
@@ -235,6 +205,14 @@ ssh_godas = read_raw.ssh_godas()
 ssh_godas_regrid = to2_5x2_5(ssh_godas)
 postprocess(ssh_godas_regrid)
 
+ucur_godas = read_raw.ssh_godas()
+ucur_godas_regrid = to2_5x2_5(ucur_godas)
+postprocess(ucur_godas_regrid)
+
+ucur_godas = read_raw.ssh_godas()
+vcur_godas_regrid = to2_5x2_5(ucur_godas)
+postprocess(vcur_godas_regrid)
+
 # =============================================================================
 # Calculate some variables
 # =============================================================================
@@ -263,6 +241,20 @@ postprocess(tauy)
 #%%
 """
 ARCHIVED
+
+SSH_GFDL_dict = {
+        'filename': 'zos_Omon_GFDL-CM3_piControl_r1i1p1_000101-000512.nc',
+        'host': 'nomads.gfdl.noaa.gov',
+        'location': '/CMIP5/output1/NOAA-GFDL/GFDL-CM3/piControl/mon/ocean/Omon/r1i1p1/v20110601/zos/'
+        }
+
+for year_int in np.arange(1,500,5):
+    year_start = f"{year_int:03d}"
+    year_end = f"{year_int+4:03d}"
+
+    SSH_GFDL_dict['filename'] = f'zos_Omon_GFDL-CM3_piControl_r1i1p1_0{year_start}01-0{year_end}12.nc'
+    downloadFileFTP(SSH_GFDL_dict, outdir='ssh_gfdl')
+
 
 #daily
 sat_daily = read_raw.sat(mean='daily')
