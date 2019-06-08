@@ -12,6 +12,7 @@ def pipeline(lead_time,  return_persistance=False):
 
     # indeces
     nino34 = reader.read_csv('nino3.4S')
+
     iod = reader.read_csv('iod')
     wwv = reader.read_csv('wwv')
 

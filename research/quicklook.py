@@ -62,9 +62,9 @@ nino3 = reader.read_csv('nino3M')
 
 network = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
-
-network = reader.read_statistic('network_metrics', variable='air',
-                           dataset='NCEP', processed="anom")
+#
+#network = reader.read_statistic('network_metrics', variable='air',
+#                           dataset='NCEP', processed="anom")
 
 pca = reader.read_statistic('pca', variable='taux',
                           dataset='NCEP', processed="anom")
@@ -81,7 +81,7 @@ L = network['average_path_length']
 pca2 = -pca['pca2']
 
 plt.subplots()
-var = scale(taux_WP_mean)
+var = scale(T)
 var2 = scale(taux_CP_mean)
 var3 = scale(taux_EP_mean)
 nino = scale(nino34)

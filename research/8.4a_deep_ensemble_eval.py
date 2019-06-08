@@ -11,7 +11,7 @@ from keras import backend as K
 
 from ninolearn.learn.dem import DEM
 from ninolearn.pathes import modeldir
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, rmse
+from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, rmse, seasonal_nll
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.plot.evaluation import plot_seasonal_skill
 from ninolearn.utils import print_header
@@ -20,6 +20,7 @@ from ninolearn.private import plotdir
 
 from scipy.stats import pearsonr
 plt.close("all")
+
 #%% =============================================================================
 #  process data
 # =============================================================================
@@ -49,6 +50,8 @@ seas_p_pers = np.zeros((12, n_pred))
 
 seas_rmse = np.zeros((12, n_pred))
 seas_rmse_pers = np.zeros((12, n_pred))
+
+seas_nll = np.zeros((12, n_pred))
 
 for i in range(n_pred):
     lead_time = lead_time_arr[i]
@@ -102,6 +105,11 @@ for i in range(n_pred):
     seas_rmse[:, i] = rmse_mon(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
     seas_rmse_pers[:, i] = rmse_mon(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
+    seas_nll[:, i] = seasonal_nll(ytrue, pred_mean_full, pred_std_full,
+                                  timeytrue - pd.tseries.offsets.MonthBegin(1), model.evaluate)
+
+
+
     plt.subplots(figsize=(8,1.8))
     # test
     plot_prediction(timey, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
@@ -120,6 +128,7 @@ for i in range(n_pred):
     plt.grid()
     plt.tight_layout()
     plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
+
 #%%
 
 
@@ -178,6 +187,11 @@ plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.in
 plt.title('Normalized RMSE')
 plt.tight_layout()
 plt.savefig(join(plotdir, f'seasonal_rmse.pdf'))
+
+plot_seasonal_skill(lead_time_arr, seas_nll.T, vmin=-1, vmax=1, cmap=plt.cm.inferno_r, extend='both')
+plt.title('NLL')
+plt.tight_layout()
+plt.savefig(join(plotdir, f'seasonal_nll.pdf'))
 
 
 #%% FOR ENSO ML Paper

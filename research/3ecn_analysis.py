@@ -12,24 +12,11 @@ from ninolearn.postprocess.network import networkMetricsSeries
 # =============================================================================
 print_header("Network Metrics")
 
-#nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
-#                           threshold=0.9, startyear=1980, endyear=2018,
-#                           window_size=12, lon_min=120, lon_max=280,
-#                           lat_min=-30, lat_max=30, verbose=1)
-#nms_ssh.computeTimeSeries()
-
-
-nms_air = networkMetricsSeries('air', 'NCEP', processed="anom",
-                           edge_density=0.005, startyear=1980, endyear=2018,
+nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
+                           threshold=0.9, startyear=1980, endyear=2018,
                            window_size=12, lon_min=120, lon_max=280,
                            lat_min=-30, lat_max=30, verbose=1)
-nms_air.computeTimeSeries()
-#
-#nms_sst = networkMetricsSeries('sst', 'ERSSTv5', processed="anom",
-#                           threshold=0.9, startyear=1980, endyear=2018,
-#                           window_size=12, lon_min=120, lon_max=280,
-#                           lat_min=-30, lat_max=30, verbose=1)
-#nms_sst.computeTimeSeries()
+nms_ssh.computeTimeSeries()
 
 
 
@@ -39,17 +26,23 @@ nms_air.computeTimeSeries()
 # =============================================================================
 # =============================================================================
 plt.close("all")
-var = 'fraction_clusters_size_2'
-#var = 'corrected_hamming_distance'
-var = 'global_transitivity'
-#var = 'average_path_length'
+c2 = nms_ssh['fraction_clusters_size_2']
+c3 = nms_ssh['fraction_clusters_size_3']
+c5 = nms_ssh['fraction_clusters_size_5']
+S = nms_ssh['fraction_giant_component']
+H = nms_ssh['corrected_hamming_distance']
+T = nms_ssh['global_transitivity']
+C = nms_ssh['avelocal_transmissivity']
+L = nms_ssh['average_path_length']
+
+var = T
 
 readerobs = data_reader(startdate='1981-01', enddate='2018-12')
-nwm_obs = readerobs.read_statistic('network_metrics', 'air',
-                                        dataset='NCEP',
+nwm_obs = readerobs.read_statistic('network_metrics', 'sshg',
+                                        dataset='GODAS',
                                         processed='anom')
 
-nino34 = readerobs.read_csv('nino3.4M')
+nino34 = readerobs.read_csv('nino3.4S')
 
 plt.figure(figsize=(7, 1.5))
 nwm_obs[var].plot(c='k')

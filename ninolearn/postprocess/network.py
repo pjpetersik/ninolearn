@@ -65,7 +65,8 @@ class climateNetwork(igraph.Graph):
                             OR the fixed edge_density method!")
 
         if threshold is not None:
-            adjacency[correalation_matrix > threshold] = 1.
+            #adjacency[correalation_matrix > threshold] = 1.
+            adjacency[np.abs(correalation_matrix) > threshold] = 1.
             cls.threshold = threshold
 
         elif edge_density is not None:

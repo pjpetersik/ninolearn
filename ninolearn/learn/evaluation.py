@@ -21,6 +21,17 @@ def explained_variance(y, pred, time):
         rsq[i] = round(r[i]**2, 3)
     return rsq
 
+def seasonal_nll(y, pred_mean, pred_std, time, evaluate):
+    score = np.zeros(12)
+    for i in range(12):
+        month = (time.month == i+1)
+        y_sel = y[month]
+        pred_mean_sel = pred_mean[month]
+        pred_std_sel = pred_std[month]
+        score[i] = evaluate(y_sel, pred_mean_sel, pred_std_sel)
+    return score
+
+
 def correlation(y, pred, time):
     """
     Returns the correlation (r) for each month in a time series
@@ -37,13 +48,11 @@ def correlation(y, pred, time):
 def rmse_mon(y, pred, time):
     """
     Returns the RMSE for each month in a time series
-    TODO: Standardize with climatological anomaly!!!
     """
     RMSE = np.zeros(12)
 
     for i in range(12):
         month = (time.month == i+1)
-
         y_sel = y[month]
         pred_sel = pred[month]
         RMSE[i] = np.sqrt(mean_squared_error(y_sel, pred_sel))/np.std(y_sel)
