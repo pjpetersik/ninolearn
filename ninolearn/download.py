@@ -33,7 +33,7 @@ def downloadFileFTP(info_dict, outdir='',
         ftp.cwd(location)
 
         localfile = open(join(rawdir, outdir, filename), 'wb')
-        ftp.retrbinary('RETR ' + filename, localfile.write, 1024)
+        ftp.retrbinary('RETR ' + filename, localfile.write, 204800)
         localfile.close()
         ftp.quit()
 

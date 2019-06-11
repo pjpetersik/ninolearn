@@ -34,7 +34,9 @@ plt.close("all")
 
 reader = data_reader(startdate='1981-01', enddate='2018-12')
 iod = reader.read_csv('iod')
+wwvwest = reader.read_csv('wwvwest')
 wwv = reader.read_csv('wwv')
+
 
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 
@@ -77,13 +79,13 @@ H = network['corrected_hamming_distance']
 T = network['global_transitivity']
 C = network['avelocal_transmissivity']
 L = network['average_path_length']
-
+rho = network['edge_density']
 pca2 = -pca['pca2']
 
 plt.subplots()
-var = scale(T)
-var2 = scale(taux_CP_mean)
-var3 = scale(taux_EP_mean)
+var = scale(wwv)
+var2 = scale(taux_EP_mean)
+var3 = scale(wwvwest)
 nino = scale(nino34)
 nino3norm = scale(nino3)
 nino4norm = scale(nino4)
@@ -91,9 +93,10 @@ nino4norm = scale(nino4)
 
 var.plot(c='r')
 nino.plot(c='k')
-var2.plot(c='b')
+#var2.plot(c='b')
 var3.plot(c='g')
 
+#%%
 plt.subplots()
 plt.vlines(12,-1,1, colors="grey")
 plt.vlines(6,-1,1, colors="grey")

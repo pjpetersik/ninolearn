@@ -113,14 +113,14 @@ def prep_nino_month(index="3.4", detrend=False):
 
     data.to_csv(join(postdir, filename))
 
-def prep_wwv():
+def prep_wwv(cardinal_direction=""):
     """
     Add a time axis corresponding to the first day of the central month of a
     3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
     some axis.
     """
-    print("Prepare WWV timeseries.")
-    data = read_raw.wwv_anom()
+    print(f"Prepare WWV {cardinal_direction} timeseries.")
+    data = read_raw.wwv_anom(cardinal_direction=cardinal_direction)
 
     df = ({'year': data.date.astype(str).str[:4],
            'month': data.date.astype(str).str[4:],
@@ -130,7 +130,7 @@ def prep_wwv():
     data.index = dti
     data.index.name = 'time'
     data = data.rename(index=str, columns={'Anomaly': 'anom'})
-    data.to_csv(join(postdir, 'wwv.csv'))
+    data.to_csv(join(postdir, f'wwv{cardinal_direction}.csv'))
 
 def prep_iod():
     """

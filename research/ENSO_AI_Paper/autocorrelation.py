@@ -4,6 +4,9 @@ from ninolearn.IO.read_post import data_reader
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
+from ninolearn.private import plotdir
+
+from os.path import join
 
 plt.close("all")
 reader = data_reader(startdate='1980-02')
@@ -39,3 +42,4 @@ ax.set_ylabel('Lag Month')
 plt.colorbar(C, ticks=np.arange(-1,1.1,0.2))
 plt.tight_layout()
 ax.contour(m,lag_arr, p_value.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
+plt.savefig(join(plotdir, 'autocorr.pdf'))

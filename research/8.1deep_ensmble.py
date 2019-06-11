@@ -32,6 +32,7 @@ nino34 = reader.read_csv('nino3.4S')
 # Other indeces
 iod = reader.read_csv('iod')
 wwv = reader.read_csv('wwv')
+wwv_west = reader.read_csv('wwvwest')
 
 # seasonal cycle
 sc = np.cos(np.arange(len(nino34))/12*2*np.pi)
@@ -41,6 +42,11 @@ network_ssh = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
 c2_ssh = network_ssh['fraction_clusters_size_2']
 H_ssh = network_ssh['corrected_hamming_distance']
+S = network_ssh['fraction_giant_component']
+H = network_ssh['corrected_hamming_distance']
+T_ssh = network_ssh['global_transitivity']
+C = network_ssh['avelocal_transmissivity']
+L_ssh = network_ssh['average_path_length']
 
 #wind stress
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
@@ -59,12 +65,14 @@ taux_EP_mean = taux_EP.mean(dim='lat').mean(dim='lon')
 #  process data
 # =============================================================================
 time_lag = 12
-lead_time = 3
+lead_time = 6
 shift = 3
 
-feature_unscaled = np.stack((nino34, sc,  iod, wwv,
-                             H_ssh, c2_ssh,
-                             taux_WP_mean, taux_CP_mean, taux_EP_mean), axis=1)
+feature_unscaled = np.stack((nino34, sc,  iod,
+                             wwv, wwv_west,
+                             H_ssh, c2_ssh, #L_ssh, T_ssh,
+                             taux_WP_mean, taux_CP_mean, taux_EP_mean
+                             ), axis=1)
 
 scaler = StandardScaler()
 Xorg = scaler.fit_transform(feature_unscaled)
@@ -85,8 +93,8 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-#test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
-test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
+#test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -97,9 +105,9 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 model = DEM()
 
-model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.01,
-            l2_hidden=0., l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
-            lr=0.001, batch_size=1, epochs=500, n_segments=5, n_members_segment=1, patience=30, verbose=1, std=True)
+model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.1,
+            l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0., l2_sigma=0.2,
+            lr=0.001, batch_size=1, epochs=500, n_segments=3, n_members_segment=1, patience=30, verbose=1, std=True)
 
 #model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
 

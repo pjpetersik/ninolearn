@@ -92,7 +92,7 @@ GODAS_dict = {'filename': 'sshg.1980.nc',
 for i in range(1980,2019):
     #ssh
     GODAS_dict['filename'] = f'sshg.{i}.nc'
-    downloadFileFTP(GODAS_dict, outdir = 'ssh_godas')
+    downloadFileFTP(GODAS_dict, outdir = 'sshg_godas')
 
     #u-current
     GODAS_dict['filename'] = f'ucur.{i}.nc'
@@ -110,9 +110,14 @@ WWV_dict = {
         'url': 'https://www.pmel.noaa.gov/tao/wwv/data/wwv.dat'
         }
 
-downloadFileHTTP(WWV_dict)
+WWV_West_dict = {
+        'filename': 'wwv_west.dat',
+        'url': 'https://www.pmel.noaa.gov/tao/wwv/data/wwv_west.dat'
+        }
 
-# =============================================================================
+downloadFileHTTP(WWV_dict)
+downloadFileHTTP(WWV_West_dict)
+#%% =============================================================================
 # Wind
 # =============================================================================
 uwind_dict = {
@@ -163,8 +168,6 @@ IOD_dict = {
 
 downloadFileHTTP(IOD_dict)
 
-
-
 #%% =============================================================================
 # =============================================================================
 # # Postprocess
@@ -179,8 +182,10 @@ prep_nino_month(index="3")
 prep_nino_month(index="1+2")
 prep_nino_month(index="4")
 prep_wwv()
+prep_wwv(cardinal_direction="west")
 prep_iod()
 
+#%%
 from ninolearn.IO import read_raw
 from ninolearn.postprocess.anomaly import postprocess
 from ninolearn.postprocess.regrid import to2_5x2_5
@@ -201,17 +206,18 @@ vwind = read_raw.vwind()
 postprocess(vwind)
 
 # post process values from GODAS
-ssh_godas = read_raw.ssh_godas()
+ssh_godas = read_raw.godas(variable='sshg')
 ssh_godas_regrid = to2_5x2_5(ssh_godas)
 postprocess(ssh_godas_regrid)
 
-ucur_godas = read_raw.ssh_godas()
-ucur_godas_regrid = to2_5x2_5(ucur_godas)
-postprocess(ucur_godas_regrid)
+#TODO for postprecessing of ucur select one level at a time!
+#ucur_godas = read_raw.godas(variable='ucur')
+#ucur_godas_regrid = to2_5x2_5(ucur_godas)
+#postprocess(ucur_godas_regrid)
 
-ucur_godas = read_raw.ssh_godas()
-vcur_godas_regrid = to2_5x2_5(ucur_godas)
-postprocess(vcur_godas_regrid)
+#vcur_godas = read_raw.godas(variable='vcur')
+#vcur_godas_regrid = to2_5x2_5(vcur_godas)
+#postprocess(vcur_godas_regrid)
 
 # =============================================================================
 # Calculate some variables
@@ -238,6 +244,8 @@ tauy.attrs['long_name'] = 'Monthly Mean Meridional Wind Stress at sigma level 0.
 tauy.attrs['var_desc'] = 'y-wind-stress'
 tauy.attrs['units'] = 'm^2/s^2'
 postprocess(tauy)
+
+
 #%%
 """
 ARCHIVED

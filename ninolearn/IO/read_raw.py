@@ -40,11 +40,16 @@ def nino_anom(index="3.4", period ="S", detrend=False):
         raise Exception("The desired NINO index is not available.")
 
 
-def wwv_anom():
+def wwv_anom(cardinal_direction=""):
     """
     get the warm water volume anomaly
     """
-    data = pd.read_csv(join(rawdir, "wwv.dat"),
+    if cardinal_direction != "":
+        filename = f"wwv_{cardinal_direction}.dat"
+    else:
+        filename = "wwv.dat"
+
+    data = pd.read_csv(join(rawdir, filename),
                        delim_whitespace=True, header=4)
     return data
 
@@ -142,11 +147,11 @@ def ssh():
     data_return.name = 'ssh'
     return data_return
 
-def ssh_godas():
-    data = xr.open_mfdataset(join(rawdir, 'ssh_godas', '*.nc'),
+def godas(variable="sshg"):
+    data = xr.open_mfdataset(join(rawdir, f'{variable}_godas', '*.nc'),
                              concat_dim='time')
     data = data.load()
-    data.sshg.attrs['dataset'] = 'GODAS'
+    data[variable].attrs['dataset'] = 'GODAS'
     return data.sshg
 
 def sat_gfdl():
