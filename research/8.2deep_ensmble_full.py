@@ -21,7 +21,7 @@ K.clear_session()
 # =============================================================================
 decades = [80, 90, 100, 110]
 
-for lead_time in [0, 3, 6, 9, 12]:
+for lead_time in [0, 3, 6, 9, 12, 15, 18]:
     X, y, timey, yp = pipeline(lead_time, return_persistance=True)
     print_header(f'Lead time: {lead_time} month')
     for decade in decades:
@@ -38,7 +38,7 @@ for lead_time in [0, 3, 6, 9, 12]:
         model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
                     l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
                     lr=0.001, batch_size=1, epochs=500, n_segments=5,
-                    n_members_segment=1, patience=30, verbose=0, std=True)
+                    n_members_segment=2, patience=30, verbose=0, std=True)
 
         model.fit(trainX, trainy)
 
@@ -56,6 +56,9 @@ for lead_time in [0, 3, 6, 9, 12]:
     i=0
     pred_mean_full = np.array([])
     pred_std_full = np.array([])
+    pred_time_full = pd.DatetimeIndex([])
+
+    testy_full = np.array([])
 
     decadal_corr = np.zeros(len(decades))
     decadal_rmse = np.zeros(len(decades))
@@ -70,11 +73,14 @@ for lead_time in [0, 3, 6, 9, 12]:
         model.load(location=modeldir, dir_name=ens_dir)
 
         test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
-        testX, testy = X[test_indeces,:], y[test_indeces]
+        testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
         pred_mean, pred_std = model.predict(testX)
 
         pred_mean_full = np.append(pred_mean_full, pred_mean)
         pred_std_full = np.append(pred_std_full, pred_std)
+        pred_time_full = pred_time_full.append(testtimey)
+
+        testy_full = np.append(testy_full, testy)
 
         decadal_nll[i] = model.evaluate(testy, pred_mean, pred_std)
         decadal_rmse[i] = round(rmse(testy, pred_mean),2)
@@ -87,29 +93,29 @@ for lead_time in [0, 3, 6, 9, 12]:
     plt.subplots(figsize=(15,3.5))
 
     # test
-    plot_prediction(timey, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
+    plot_prediction(pred_time_full, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
     # observation
     plt.plot(timey, y, "k")
 
     plt.axhspan(-0.5, -6, facecolor='blue',  alpha=0.1,zorder=0)
     plt.axhspan(0.5, 6, facecolor='red', alpha=0.1,zorder=0)
 
-    plt.xlim(timey[0],timey[-1])
+    plt.xlim(pred_time_full[0], pred_time_full[-1])
     plt.ylim(-3,3)
 
-    pred_rmse = round(rmse(y, pred_mean_full),2)
+    pred_rmse = round(rmse(testy_full, pred_mean_full),2)
     plt.title(f"Lead time: {lead_time} month, RMSE (of mean): {pred_rmse}")
     plt.grid()
 
     # plot explained variance
     # minus one month to center season around central month
-    plot_correlation(y, pred_mean_full, timey - pd.tseries.offsets.MonthBegin(1))
+    plot_correlation(testy_full, pred_mean_full, pred_time_full - pd.tseries.offsets.MonthBegin(1))
 
 
     # Error distribution
     plt.subplots()
     plt.title("Error distribution")
-    error = pred_mean_full - y
+    error = pred_mean_full - testy_full
 
     plt.hist(error, bins=16)
 

@@ -148,11 +148,16 @@ def ssh():
     return data_return
 
 def godas(variable="sshg"):
-    data = xr.open_mfdataset(join(rawdir, f'{variable}_godas', '*.nc'),
+    ds = xr.open_mfdataset(join(rawdir, f'{variable}_godas', '*.nc'),
                              concat_dim='time')
-    data = data.load()
+
+    if len(ds[variable].shape)==4:
+        data = ds.loc[dict(level=5)].load()
+    else:
+        data = ds.load()
+
     data[variable].attrs['dataset'] = 'GODAS'
-    return data.sshg
+    return data[variable]
 
 def sat_gfdl():
     data = xr.open_mfdataset(join(rawdir, 'sat_gfdl', '*.nc'),

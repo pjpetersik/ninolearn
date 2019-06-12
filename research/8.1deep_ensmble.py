@@ -21,6 +21,17 @@ from ninolearn.pathes import modeldir
 #%%
 K.clear_session()
 
+def basin_means(data, lat1=2.5, lat2=-2.5):
+    data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
+    data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
+    data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
+    data_EP_mean = data_EP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    return data_WP_mean, data_CP_mean, data_EP_mean
 #%% =============================================================================
 # read data
 # =============================================================================
@@ -50,28 +61,24 @@ L_ssh = network_ssh['average_path_length']
 
 #wind stress
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
 
-taux_WP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(120, 160))]
-taux_WP_mean = taux_WP.mean(dim='lat').mean(dim='lon')
-
-taux_CP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(160, 180))]
-taux_CP_mean = taux_CP.mean(dim='lat').mean(dim='lon')
-
-taux_EP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(180, 240))]
-taux_EP_mean = taux_EP.mean(dim='lat').mean(dim='lon')
+ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
+ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-7.5, lat2=7.5)
 
 
 #%% =============================================================================
 #  process data
 # =============================================================================
-time_lag = 12
+time_lag = 2
 lead_time = 6
 shift = 3
 
 feature_unscaled = np.stack((nino34, sc,  iod,
                              wwv, wwv_west,
                              H_ssh, c2_ssh, #L_ssh, T_ssh,
-                             taux_WP_mean, taux_CP_mean, taux_EP_mean
+                             ucur_WP_mean, #ucur_CP_mean, ucur_EP_mean,
+                             taux_WP_mean, #taux_CP_mean, taux_EP_mean
                              ), axis=1)
 
 scaler = StandardScaler()
@@ -105,7 +112,7 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 model = DEM()
 
-model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.1,
+model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
             l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0., l2_sigma=0.2,
             lr=0.001, batch_size=1, epochs=500, n_segments=3, n_members_segment=1, patience=30, verbose=1, std=True)
 

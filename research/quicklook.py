@@ -30,6 +30,18 @@ def residual(x, y):
     yres = y - ylin
     return yres
 
+def basin_means(data, lat1=2.5, lat2=-2.5):
+    data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
+    data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
+    data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
+    data_EP_mean = data_EP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    return data_WP_mean, data_CP_mean, data_EP_mean
+
 plt.close("all")
 
 reader = data_reader(startdate='1981-01', enddate='2018-12')
@@ -37,17 +49,14 @@ iod = reader.read_csv('iod')
 wwvwest = reader.read_csv('wwvwest')
 wwv = reader.read_csv('wwv')
 
-
+#GODAS data
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
 
-taux_WP = taux.loc[dict(lat=slice(5,-5), lon=slice(120, 160))]
-taux_WP_mean = taux_WP.mean(dim='lat').mean(dim='lon')
+ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
+ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-7.5, lat2=7.5)
+ucur_WP_mean = pd.Series(data=ucur_CP_mean, index=ucur_WP_mean.time.values)
 
-taux_CP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(160, 180))]
-taux_CP_mean = taux_CP.mean(dim='lat').mean(dim='lon')
-
-taux_EP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(180, 240))]
-taux_EP_mean = taux_EP.mean(dim='lat').mean(dim='lon')
 
 
 ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
@@ -57,6 +66,8 @@ ssh_grad = np.nanmean(np.gradient(ssh.loc[dict(lat=0, lon=slice(210, 240))],axis
 ssh_grad = pd.Series(data=ssh_grad, index=ssh.time.values)
 
 
+
+#%%
 nino34 = reader.read_csv('nino3.4S')
 nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')
@@ -83,7 +94,7 @@ rho = network['edge_density']
 pca2 = -pca['pca2']
 
 plt.subplots()
-var = scale(wwv)
+var = scale(ucur_WP_mean)
 var2 = scale(taux_EP_mean)
 var3 = scale(wwvwest)
 nino = scale(nino34)
@@ -94,7 +105,7 @@ nino4norm = scale(nino4)
 var.plot(c='r')
 nino.plot(c='k')
 #var2.plot(c='b')
-var3.plot(c='g')
+#var3.plot(c='g')
 
 #%%
 plt.subplots()

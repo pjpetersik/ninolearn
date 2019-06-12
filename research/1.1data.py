@@ -40,7 +40,6 @@ NINOindeces_dict = {
         'filename': 'nino_1_4.txt'
         }
 
-
 downloadFileHTTP(NINO34_dict)
 downloadFileHTTP(NINO34detrend_dict)
 downloadFileHTTP(NINOindeces_dict)
@@ -168,6 +167,11 @@ IOD_dict = {
 
 downloadFileHTTP(IOD_dict)
 
+# =============================================================================
+# Ocean heat content
+# =============================================================================
+#https://www.ncdc.noaa.gov/cdr/oceanic/ocean-heat-content
+
 #%% =============================================================================
 # =============================================================================
 # # Postprocess
@@ -210,14 +214,14 @@ ssh_godas = read_raw.godas(variable='sshg')
 ssh_godas_regrid = to2_5x2_5(ssh_godas)
 postprocess(ssh_godas_regrid)
 
-#TODO for postprecessing of ucur select one level at a time!
-#ucur_godas = read_raw.godas(variable='ucur')
-#ucur_godas_regrid = to2_5x2_5(ucur_godas)
-#postprocess(ucur_godas_regrid)
+#%%TODO for postprecessing of ucur select one level at a time!
+ucur_godas = read_raw.godas(variable='ucur')
+ucur_godas_regrid = to2_5x2_5(ucur_godas)
+postprocess(ucur_godas_regrid)
 
-#vcur_godas = read_raw.godas(variable='vcur')
-#vcur_godas_regrid = to2_5x2_5(vcur_godas)
-#postprocess(vcur_godas_regrid)
+vcur_godas = read_raw.godas(variable='vcur')
+vcur_godas_regrid = to2_5x2_5(vcur_godas)
+postprocess(vcur_godas_regrid)
 
 # =============================================================================
 # Calculate some variables
