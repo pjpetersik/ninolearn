@@ -134,11 +134,10 @@ for i in range(n_lead):
     seas_nll[:, i] = seasonal_nll(ytrue, pred_mean_full, pred_std_full,
                                   timeytrue - pd.tseries.offsets.MonthBegin(1), model.evaluate)
 
-
-
     plt.subplots(figsize=(8,1.8))
-    # test
+    # plot prediction
     plot_prediction(timeytrue, pred_mean_full, std=pred_std_full, facecolor='royalblue', line_color='navy')
+
     # observation
     plt.plot(timey, y, "k")
     plt.xlabel('Time [Year]')
@@ -156,53 +155,66 @@ for i in range(n_lead):
     plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
 
 #%%
-
+decade_color = ['limegreen', 'darkgoldenrod', 'red', 'royalblue']
+decade_name = ['1982-1991', '1992-2001', '2002-2011', '2012-2018']
 
 # all season correlation score
-ax = plt.figure(figsize=(3.5,3.)).gca()
-plt.plot(lead_time_arr, all_season_corr, label="Deep Ensemble Mean")
-plt.plot(lead_time_arr, all_season_corr_pres, label="Persistence")
+ax = plt.figure(figsize=(6.5,3.)).gca()
+for j in range(n_decades):
+    plt.plot(lead_time_arr, decadel_corr[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
+    plt.plot(lead_time_arr, decadel_corr_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
+plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1982-2018)", lw=2)
+plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1982-2018)", lw=2)
+
 plt.ylim(-0.2,1)
-plt.xlim(0,8)
+plt.xlim(0,18)
 plt.xlabel('Lead Time [Month]')
 plt.ylabel('Correlation coefficient')
 #plt.title('Correlation skill')
 plt.grid()
-plt.legend()
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 plt.savefig(join(plotdir, f'all_season_corr.pdf'))
 
-# all season rmse score
-ax = plt.figure(figsize=(3.5,3.)).gca()
-plt.plot(lead_time_arr, all_season_rmse, label="Deep Ensemble Mean")
-plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence")
+#%% all season rmse score
+ax = plt.figure(figsize=(6.5,3.)).gca()
+
+for j in range(n_decades):
+    plt.plot(lead_time_arr, decadel_rmse[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
+    plt.plot(lead_time_arr, decadel_rmse_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
+plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1982-2018)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1982-2018)", c='k', linestyle='--',  lw=2)
+
 plt.ylim(0.,1.8)
-plt.xlim(0,8)
+plt.xlim(0,18)
 plt.xlabel('Lead Time [Month]')
 plt.ylabel('Normalized RMSE')
 #plt.title('Normalized RMSE')
 plt.grid()
-plt.legend()
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 
-# all seasons negative loglikelihood
-ax = plt.figure(figsize=(3.5,3.)).gca()
-plt.plot(lead_time_arr, all_season_nll, label="Deep Ensemble")
-plt.ylim(-0.5,0.5)
-plt.xlim(0.,8)
+#%% all seasons negative loglikelihood
+ax = plt.figure(figsize=(6.5,3.)).gca()
+for j in range(n_decades):
+    plt.plot(lead_time_arr, decadel_nll[j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
+plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1982-2018)", c='k', lw=2)
+
+plt.ylim(-0.5,0.7)
+plt.xlim(0.,18)
 plt.xlabel('Lead Time [Month]')
 plt.ylabel('NLL')
 #plt.title('Negative-loglikelihood')
 plt.grid()
-plt.legend()
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 plt.savefig(join(plotdir, f'all_season_nll.pdf'))
 
-
+#%% contour skill plots
 plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
 plt.title('Correlation skill')
