@@ -24,36 +24,47 @@ plt.close("all")
 #%% =============================================================================
 #  process data
 # =============================================================================
-decades = [80, 90, 100, 110]
-#decades = [100]
+decades_arr = [80, 90, 100, 110]
+n_decades = len(decades_arr)
 
 lead_time_arr = np.array([0, 3, 6, 9, 12, 15, 18])
+n_lead = len(lead_time_arr)
 
-n_pred = len(lead_time_arr)
 # scores for the full timeseries
-all_season_corr = np.zeros(n_pred)
-all_season_p = np.zeros(n_pred)
-all_season_rmse = np.zeros(n_pred)
+all_season_corr = np.zeros(n_lead)
+all_season_p = np.zeros(n_lead)
+all_season_rmse = np.zeros(n_lead)
 
-all_season_corr_pres = np.zeros(n_pred)
-all_season_p_pers = np.zeros(n_pred)
-all_season_rmse_pres = np.zeros(n_pred)
+all_season_corr_pres = np.zeros(n_lead)
+all_season_p_pers = np.zeros(n_lead)
+all_season_rmse_pres = np.zeros(n_lead)
 
-all_season_nll = np.zeros(n_pred)
+all_season_nll = np.zeros(n_lead)
+
+# decadal scores
+decadel_corr = np.zeros((n_decades, n_lead))
+decadel_p = np.zeros((n_decades, n_lead))
+decadel_rmse = np.zeros((n_decades, n_lead))
+
+decadel_corr_pres = np.zeros((n_decades, n_lead))
+decadel_p_pers = np.zeros((n_decades, n_lead))
+decadel_rmse_pres = np.zeros((n_decades, n_lead))
+
+decadel_nll = np.zeros((n_decades, n_lead))
 
 # scores for seasonal values
-seas_corr = np.zeros((12, n_pred))
-seas_p = np.zeros((12, n_pred))
+seas_corr = np.zeros((12, n_lead))
+seas_p = np.zeros((12, n_lead))
 
-seas_corr_pers = np.zeros((12, n_pred))
-seas_p_pers = np.zeros((12, n_pred))
+seas_corr_pers = np.zeros((12, n_lead))
+seas_p_pers = np.zeros((12, n_lead))
 
-seas_rmse = np.zeros((12, n_pred))
-seas_rmse_pers = np.zeros((12, n_pred))
+seas_rmse = np.zeros((12, n_lead))
+seas_rmse_pers = np.zeros((12, n_lead))
 
-seas_nll = np.zeros((12, n_pred))
+seas_nll = np.zeros((12, n_lead))
 
-for i in range(n_pred):
+for i in range(n_lead):
     lead_time = lead_time_arr[i]
     print_header(f'Lead time: {lead_time} months')
 
@@ -65,8 +76,13 @@ for i in range(n_pred):
     ytrue = np.array([])
     timeytrue = pd.DatetimeIndex([])
 
-    for decade in decades:
+    for j in range(n_decades):
+        decade = decades_arr[j]
+
+        # free some memory
         K.clear_session()
+
+        # make predictions
         print(f'Predict: {1902+decade}-01-01 till {1911+decade}-12-01')
 
         ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
@@ -79,6 +95,16 @@ for i in range(n_pred):
         pred_mean, pred_std = model.predict(testX)
         pred_pers = y_persistance[test_indeces]
 
+        # calculate the decadel scores
+        decadel_corr[j, i], decadel_p[j, i] = pearsonr(testy, pred_mean)
+        decadel_corr_pres[j, i], decadel_p_pers[j, i] = pearsonr(testy, pred_pers)
+
+        decadel_rmse[j, i] = rmse_monmean(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1))
+        decadel_rmse_pres[j, i] = rmse_monmean(testy, pred_pers, testtimey - pd.tseries.offsets.MonthBegin(1))
+
+        decadel_nll[j, i] = model.evaluate(testy, pred_mean, pred_std)
+
+        # make the full time series
         pred_mean_full = np.append(pred_mean_full, pred_mean)
         pred_std_full = np.append(pred_std_full, pred_std)
         pred_persistance_full = np.append(pred_persistance_full, pred_pers)
@@ -89,7 +115,7 @@ for i in range(n_pred):
     # Deep ensemble
     # =============================================================================
 
-    # all seasons skills
+    # calculate all seasons scores
     all_season_corr[i], all_season_p[i] = pearsonr(ytrue, pred_mean_full)
     all_season_corr_pres[i], all_season_p_pers[i] = pearsonr(ytrue, pred_persistance_full)
 
