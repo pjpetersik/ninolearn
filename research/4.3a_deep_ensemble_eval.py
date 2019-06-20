@@ -186,10 +186,10 @@ for j in range(n_decades):
 plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1982-2018)", c='k', lw=2)
 plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1982-2018)", c='k', linestyle='--',  lw=2)
 
-plt.ylim(0.,1.8)
+plt.ylim(0.,2)
 plt.xlim(0,18)
 plt.xlabel('Lead Time [Month]')
-plt.ylabel('Normalized RMSE')
+plt.ylabel('SSRMSE')
 #plt.title('Normalized RMSE')
 plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -222,7 +222,7 @@ plt.tight_layout()
 plt.savefig(join(plotdir, f'seasonal_corr.pdf'))
 
 plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.inferno_r, extend='max')
-plt.title('Normalized RMSE')
+plt.title('SRMSE')
 plt.tight_layout()
 plt.savefig(join(plotdir, f'seasonal_rmse.pdf'))
 

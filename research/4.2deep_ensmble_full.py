@@ -35,12 +35,12 @@ for lead_time in [0, 3, 6, 9, 12, 15, 18]:
 
         model = DEM()
 
-        model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=0.0,
-                    l2_hidden=0.2, l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
-                    lr=0.001, batch_size=1, epochs=500, n_segments=5,
+        model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=[0.0, 0.2],
+                    l2_hidden=[0, 0.2], l1_mu=0., l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
+                    lr=[0.0001, 0.01], batch_size=100, epochs=500, n_segments=5,
                     n_members_segment=2, patience=30, verbose=0, std=True)
 
-        model.fit(trainX, trainy)
+        model.fit_RandomizedSearch(trainX, trainy)
 
         if model.std:
             ens_dir=f'ensemble_decade{decade}_lead{lead_time}'

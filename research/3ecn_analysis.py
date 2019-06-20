@@ -12,11 +12,17 @@ from ninolearn.postprocess.network import networkMetricsSeries
 # =============================================================================
 print_header("Network Metrics")
 
-nms_ssh = networkMetricsSeries('sshg', 'GODAS', processed="anom",
-                           threshold=0.9, startyear=1980, endyear=2018,
+#nms_ssh_godas = networkMetricsSeries('sshg', 'GODAS', processed="anom",
+#                           threshold=0.9, startyear=1980, endyear=2018,
+#                           window_size=12, lon_min=120, lon_max=280,
+#                           lat_min=-30, lat_max=30, verbose=1)
+#nms_ssh_godas.computeTimeSeries()
+
+nms_ssh_oras4 = networkMetricsSeries('zos', 'ORAS4', processed="anom",
+                           threshold=0.9, startyear=1959, endyear=2017,
                            window_size=12, lon_min=120, lon_max=280,
                            lat_min=-30, lat_max=30, verbose=1)
-nms_ssh.computeTimeSeries()
+nms_ssh_oras4.computeTimeSeries()
 
 
 
@@ -26,14 +32,14 @@ nms_ssh.computeTimeSeries()
 # =============================================================================
 # =============================================================================
 plt.close("all")
-c2 = nms_ssh['fraction_clusters_size_2']
-c3 = nms_ssh['fraction_clusters_size_3']
-c5 = nms_ssh['fraction_clusters_size_5']
-S = nms_ssh['fraction_giant_component']
-H = nms_ssh['corrected_hamming_distance']
-T = nms_ssh['global_transitivity']
-C = nms_ssh['avelocal_transmissivity']
-L = nms_ssh['average_path_length']
+c2 = nms_ssh_oras4['fraction_clusters_size_2']
+c3 = nms_ssh_oras4['fraction_clusters_size_3']
+c5 = nms_ssh_oras4['fraction_clusters_size_5']
+S = nms_ssh_oras4['fraction_giant_component']
+H = nms_ssh_oras4['corrected_hamming_distance']
+T = nms_ssh_oras4['global_transitivity']
+C = nms_ssh_oras4['avelocal_transmissivity']
+L = nms_ssh_oras4['average_path_length']
 
 var = T
 

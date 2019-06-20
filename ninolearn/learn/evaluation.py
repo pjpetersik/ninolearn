@@ -58,7 +58,6 @@ def rmse_mon(y, pred, time):
         RMSE[i] = np.sqrt(mean_squared_error(y_sel, pred_sel))/np.std(y_sel)
     return RMSE
 
-
 def rmse_monmean(y, predict, time):
     """
     Computes the root mean square error (RMSE)

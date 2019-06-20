@@ -130,6 +130,14 @@ class DEM(object):
                 'l1_sigma': l1_sigma, 'l2_sigma': l2_sigma,
                 'lr': lr, 'batch_size': batch_size}
 
+        # hyperparameters for randomized search
+        self.hyperparameters_search = {}
+
+        for key in self.hyperparameters.keys():
+            if type(self.hyperparameters[key]) is list:
+                if len(self.hyperparameters[key])>0:
+                    self.hyperparameters_search[key] = self.hyperparameters[key].copy()
+
         # traning/validation split
         self.n_segments = n_segments
         self.n_members_segment = n_members_segment
@@ -153,11 +161,6 @@ class DEM(object):
             self.loss = 'mse'
             self.loss_name = 'mean_squared_error'
 
-        # initialize optimizer and early stopping
-        self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=0,
-                   mode='min', restore_best_weights=True)
-
     def get_pretrained_weights(self, location=None,  dir_name='pre_ensemble'):
         """
         loads weights from a pretrained model
@@ -175,20 +178,36 @@ class DEM(object):
         """
         The method builds a new member of the ensemble and returns it.
         """
+        # initialize optimizer and early stopping
+        self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
+        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=0,
+                   mode='min', restore_best_weights=True)
+
         inputs = Input(shape=(n_features,))
         h = GaussianNoise(self.hyperparameters['noise'])(inputs)
 
         for _ in range(self.hyperparameters['layers']):
             h = Dense(self.hyperparameters['neurons'], activation='relu',
-                      kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'], self.hyperparameters['l2_hidden']))(h)
+                      kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
+                                                            self.hyperparameters['l2_hidden']),
+                      kernel_initializer='random_uniform',
+                      bias_initializer='zeros')(h)
+
             h = Dropout(self.hyperparameters['dropout'])(h)
 
         mu = Dense(1, activation='linear',
-                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'], self.hyperparameters['l2_mu']))(h)
+                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'],
+                                                         self.hyperparameters['l2_mu']),
+                   kernel_initializer='random_uniform',
+                   bias_initializer='zeros')(h)
 
         if self.std:
             sigma = Dense(1, activation='softplus',
-                          kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_sigma'], self.hyperparameters['l2_sigma']))(h)
+                          kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_sigma'],
+                                                                self.hyperparameters['l2_sigma']),
+                          kernel_initializer='random_uniform',
+                          bias_initializer='zeros')(h)
+
             outputs = concatenate([mu, sigma])
 
         else:
@@ -202,8 +221,13 @@ class DEM(object):
         """
         Fit the model to training data
         """
+         # clear memory
+        K.clear_session()
+
+        # allocate lists for the ensemble
         self.ensemble = []
         self.history = []
+        self.val_loss = []
 
         self.segment_len = trainX.shape[0]//self.n_segments
 
@@ -252,10 +276,52 @@ class DEM(object):
                                             validation_data=(valXens, valyens))
 
                 self.history.append(history)
-
+                self.val_loss.append(ensemble_member.evaluate(valXens, valyens)[1])
                 self.ensemble.append(ensemble_member)
                 j+=1
             i+=1
+        self.mean_val_loss = np.mean(self.val_loss)
+
+
+    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+
+        # check if hyperparameters where provided in lists for randomized search
+        if len(self.hyperparameters_search) == 0:
+            raise Exception("No variable indicated for hyperparameter search!")
+
+        #iterate with randomized hyperparameters
+        best_loss = np.inf
+        for i in range(n_iter):
+            print_header(f"Search iteration Nr {i}")
+
+            # random selection of hyperparameters
+            for key in self.hyperparameters_search.keys():
+                low = self.hyperparameters_search[key][0]
+                high = self.hyperparameters_search[key][1]
+
+                self.hyperparameters[key] = np.random.uniform(low, high)
+
+            self.fit(trainX, trainy, **kwargs)
+
+            # check if validation score was enhanced
+            if self.mean_val_loss<best_loss:
+                best_loss = self.mean_val_loss
+                self.best_hyperparameters = self.hyperparameters.copy()
+
+                small_print_header("New best hyperparameters")
+                print(f"Mean loss: {best_loss}")
+                print(self.best_hyperparameters)
+
+        # refit the model with optimized hyperparameter
+        # AND to have the weights of the DE for the best hyperparameters again
+        print_header("Refit the model with best hyperparamters")
+
+        self.hyperparameters = self.best_hyperparameters.copy()
+        print(self.hyperparameters)
+        self.fit(trainX, trainy, **kwargs)
+
+        print(f"best loss search: {best_loss}")
+        print(f"loss refitting : {self.mean_val_loss}")
 
     def predict(self, X):
         """

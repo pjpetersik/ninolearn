@@ -31,6 +31,9 @@ def residual(x, y):
     return yres
 
 def basin_means(data, lat1=2.5, lat2=-2.5):
+    data_basin =  data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 240))]
+    data_basin_mean = data_basin.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
     data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
     data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
@@ -40,47 +43,48 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
     data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
     data_EP_mean = data_EP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
-    return data_WP_mean, data_CP_mean, data_EP_mean
+    return data_basin_mean, data_WP_mean, data_CP_mean, data_EP_mean
 
 plt.close("all")
 
-reader = data_reader(startdate='1981-01', enddate='2018-12')
+reader = data_reader(startdate='1981-01', enddate='2017-12')
+
 iod = reader.read_csv('iod')
-wwvwest = reader.read_csv('wwvwest')
-wwv = reader.read_csv('wwv')
+#wwvwest = reader.read_csv('wwvwest')
+#wwv = reader.read_csv('wwv')
 
 #GODAS data
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
-taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
+taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
 
-ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
-ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-7.5, lat2=7.5)
-ucur_WP_mean = pd.Series(data=ucur_CP_mean, index=ucur_WP_mean.time.values)
-
+#ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
+#ucur_basin_mean, ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-2.5, lat2=5.5)
+#
+#ucur_basin_mean_roll = ucur_basin_mean.rolling(time=24, center=False).mean()
+#ucur_EP_mean = pd.Series(data=ucur_EP_mean, index=ucur_WP_mean.time.values)
 
 
 ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+#ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
 #ssh_grad = np.sort(np.gradient(ssh.loc[dict(lat=0, lon=slice(200,280))],axis=1),axis=1)
 
-ssh_grad = np.nanmean(np.gradient(ssh.loc[dict(lat=0, lon=slice(210, 240))],axis=1),axis=1)
-ssh_grad = pd.Series(data=ssh_grad, index=ssh.time.values)
+#ssh_grad = np.nanmean(np.gradient(ssh.loc[dict(lat=0, lon=slice(210, 240))],axis=1),axis=1)
+#ssh_grad = pd.Series(data=ssh_grad, index=ssh.time.values)
 
-
+kiri=ssh.loc[dict(lat=0, lon=197.5)]
 
 #%%
-nino34 = reader.read_csv('nino3.4S')
+nino34 = reader.read_csv('nino3.4M')
 nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')
 nino3 = reader.read_csv('nino3M')
 
 network = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
-#
-#network = reader.read_statistic('network_metrics', variable='air',
-#                           dataset='NCEP', processed="anom")
 
-pca = reader.read_statistic('pca', variable='taux',
-                          dataset='NCEP', processed="anom")
+
+network2 = reader.read_statistic('network_metrics', variable='zos',
+                           dataset='ORAS4', processed="anom")
 
 c2 = network['fraction_clusters_size_2']
 c3 = network['fraction_clusters_size_3']
@@ -91,12 +95,13 @@ T = network['global_transitivity']
 C = network['avelocal_transmissivity']
 L = network['average_path_length']
 rho = network['edge_density']
-pca2 = -pca['pca2']
+
+c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(ucur_WP_mean)
-var2 = scale(taux_EP_mean)
-var3 = scale(wwvwest)
+var = scale(c2_oras)
+var2 = scale(c2)
+#var3 = scale(wwvwest)
 nino = scale(nino34)
 nino3norm = scale(nino3)
 nino4norm = scale(nino4)
@@ -104,7 +109,7 @@ nino4norm = scale(nino4)
 
 var.plot(c='r')
 nino.plot(c='k')
-#var2.plot(c='b')
+var2.plot(c='b')
 #var3.plot(c='g')
 
 #%%
@@ -112,8 +117,8 @@ plt.subplots()
 plt.vlines(12,-1,1, colors="grey")
 plt.vlines(6,-1,1, colors="grey")
 plt.vlines(0,-1,1, colors="grey")
-plt.xcorr(nino, var3, maxlags=80, color="r", label="EP", usevlines=False)
-plt.xcorr(nino, var2, maxlags=80, color="b", label="CP", usevlines=False)
+#plt.xcorr(nino, var3, maxlags=80, color="r", label="EP", usevlines=False)
+#plt.xcorr(nino, var2, maxlags=80, color="b", label="CP", usevlines=False)
 plt.xcorr(nino, var, maxlags=80, label="WP", usevlines=False)
 plt.hlines(0,-1000,1000)
 plt.ylim(-1,1)

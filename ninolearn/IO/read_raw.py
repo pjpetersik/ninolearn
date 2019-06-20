@@ -159,6 +159,13 @@ def godas(variable="sshg"):
     data[variable].attrs['dataset'] = 'GODAS'
     return data[variable]
 
+def oras4():
+    ds = xr.open_mfdataset(join(rawdir, f'ssh_oras4', '*.nc'),
+                             concat_dim='time')
+    data = ds.load()
+    data.zos.attrs['dataset'] = 'ORAS4'
+    return data.zos
+
 def sat_gfdl():
     data = xr.open_mfdataset(join(rawdir, 'sat_gfdl', '*.nc'),
                              concat_dim='time')
