@@ -89,7 +89,11 @@ for i in range(n_lead):
         model = DEM()
         model.load(location=modeldir, dir_name=ens_dir)
 
-        test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+        if decade == 80:
+            test_indeces = (timey>=f'{1903+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+        else:
+            test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+
         testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
         pred_mean, pred_std = model.predict(testX)
@@ -156,7 +160,7 @@ for i in range(n_lead):
 
 #%%
 decade_color = ['limegreen', 'darkgoldenrod', 'red', 'royalblue']
-decade_name = ['1982-1991', '1992-2001', '2002-2011', '2012-2018']
+decade_name = ['1983-1991', '1992-2001', '2002-2011', '2012-2018']
 
 # all season correlation score
 ax = plt.figure(figsize=(6.5,3.)).gca()
@@ -201,7 +205,7 @@ plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 ax = plt.figure(figsize=(6.5,3.)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_nll[j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1982-2018)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1983-2018)", c='k', lw=2)
 
 plt.ylim(-0.5,0.7)
 plt.xlim(0.,18)

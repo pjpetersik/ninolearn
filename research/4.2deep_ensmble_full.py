@@ -22,7 +22,7 @@ K.clear_session()
 # =============================================================================
 decades = [80, 90, 100, 110]
 
-for lead_time in [15, 18]:#0, 3, 6, 9, 12,
+for lead_time in [0, 3, 6, 9, 12, 15, 18]:
     X, y, timey, yp = pipeline(lead_time, return_persistance=True)
     print_header(f'Lead time: {lead_time} month')
     for decade in decades:

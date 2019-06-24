@@ -66,8 +66,8 @@ y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
 # this is the size of our encoded representations
 encoding_dim = 8
 
-kernel_size = 16
-filters = 8
+kernel_size = 32
+filters = 4
 
 l1 = 0.00
 l2 = 0.00
