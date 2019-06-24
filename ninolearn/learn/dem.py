@@ -271,7 +271,8 @@ class DEM(object):
                     valyens = valy
 
                 history = ensemble_member.fit(trainXens, trainyens,
-                                            epochs=self.epochs, batch_size=self.hyperparameters['batch_size'], verbose=self.verbose,
+                                            epochs=self.epochs, batch_size=self.hyperparameters['batch_size'],
+                                            verbose=self.verbose,
                                             shuffle=True, callbacks=[self.es],
                                             validation_data=(valXens, valyens))
 
@@ -292,7 +293,7 @@ class DEM(object):
         #iterate with randomized hyperparameters
         best_loss = np.inf
         for i in range(n_iter):
-            print_header(f"Search iteration Nr {i}")
+            print_header(f"Search iteration Nr {i+1}/{n_iter}")
 
             # random selection of hyperparameters
             for key in self.hyperparameters_search.keys():

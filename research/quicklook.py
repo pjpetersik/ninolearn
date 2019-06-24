@@ -82,9 +82,10 @@ nino3 = reader.read_csv('nino3M')
 network = reader.read_statistic('network_metrics', variable='sshg',
                            dataset='GODAS', processed="anom")
 
-
 network2 = reader.read_statistic('network_metrics', variable='zos',
                            dataset='ORAS4', processed="anom")
+
+pca = reader.read_statistic('pca', variable='taux', dataset='NCEP', processed='anom')
 
 c2 = network['fraction_clusters_size_2']
 c3 = network['fraction_clusters_size_3']
