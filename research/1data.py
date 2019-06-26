@@ -148,6 +148,10 @@ downloadFileHTTP(IOD_dict)
 # =============================================================================
 #https://www.ncdc.noaa.gov/cdr/oceanic/ocean-heat-content
 
+HCA_dict={'filename': 'hca.nc',
+          'url': 'http://data.nodc.noaa.gov/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/NETCDF/heat_content/heat_content_anomaly_0-700_seasonal.nc'}
+
+downloadFileHTTP(HCA_dict)
 #%% =============================================================================
 # =============================================================================
 # # Postprocess

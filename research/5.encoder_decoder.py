@@ -25,9 +25,11 @@ K.clear_session()
 
 #read data
 reader = data_reader(startdate='1981-01', enddate='2018-12')
-#ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #sat = reader.read_netcdf('air', dataset='NCEP', processed='anom')
+uwnd = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
+
 nino34 = reader.read_csv('nino3.4S')
 
 # select
@@ -60,8 +62,8 @@ else:
 
 n_obs = len(feature)
 
-train_end = int(0.7 * n_obs)
-val_end = int(0.8 * n_obs)
+train_end = int(0.5 * n_obs)
+val_end = int(0.7 * n_obs)
 
 X_train, X_val, X_test = X[:train_end], X[train_end:val_end], X[val_end:]
 y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
@@ -72,14 +74,14 @@ y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
 # ENCODER-DECODER
 # =============================================================================
 # this is the size of our encoded representations
-encoding_dim = 8 # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
+encoding_dim = 16 # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
 hidden_dim = 32
 l1 = 0.00
 l2 = 0.00
 
 # encoder
 inputs = Input(shape=(1625,))
-h = GaussianNoise(0.5)(inputs)
+h = GaussianNoise(0.0)(inputs)
 
 
 h = Dense(hidden_dim, activation='relu',
@@ -93,8 +95,8 @@ encoder = Model(inputs, latent, name='encoder')
 
 # decoder
 latent_inputs = Input(shape=(encoding_dim,))
-#h = Dense(hidden_dim, activation='relu',
-#          kernel_regularizer=regularizers.l1_l2(l1, l2))(latent_inputs)
+h = Dense(hidden_dim, activation='relu',
+          kernel_regularizer=regularizers.l1_l2(l1, l2))(latent_inputs)
 
 decoded = Dense(1625, activation='linear',
                 kernel_regularizer=regularizers.l1_l2(l1, l2))(latent_inputs)
@@ -106,7 +108,7 @@ autoencoder = Model(inputs, decoder(encoder(inputs)))
 
 
 optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-es = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0, patience=50, verbose=0,
+es = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0, patience=100, verbose=0,
                    mode='min', restore_best_weights=True)
 
 autoencoder.compile(loss='mse', optimizer=optimizer, metrics=['mse'])
@@ -115,9 +117,9 @@ autoencoder.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=200, ba
                 shuffle=True, callbacks=[es])
 
 #%% Predictions
-pred = autoencoder.predict(Xall)
+predy = autoencoder.predict(Xall)
 
-label_unscaled_decoded = scaler_l.inverse_transform(pred)
+label_unscaled_decoded = scaler_l.inverse_transform(predy)
 
 label_decoded = xr.zeros_like(label)
 label_decoded.values = label_unscaled_decoded.reshape((Xall.shape[0], label.shape[1],label.shape[2]))
@@ -168,3 +170,18 @@ plt.subplots()
 plt.plot(nino34_pred.time[lead+val_end:], nino34.values[lead+val_end:])
 plt.plot(nino34_pred.time[lead+val_end:], nino34_pred.values[val_end:-lead])
 print(np.corrcoef(nino34.values[lead:],nino34_pred.values[:-lead]))
+
+#%%
+corrM = np.zeros(len(predy[0,:]))
+
+for i in range(len(predy[0,:])):
+    corrM[i] = np.corrcoef(predy[:,i], yall[:,i])[0,1]
+
+
+corrM=corrM.reshape((label.shape[1:]))
+fig, ax = plt.subplots(figsize=(8,2))
+
+vmin = 0.
+vmax = 1.
+C=ax.imshow(corrM, origin='lower', vmin=vmin, vmax=vmax)
+plt.colorbar(C)
