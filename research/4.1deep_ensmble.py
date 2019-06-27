@@ -39,15 +39,14 @@ def selected_variables(weigt_matrix, time_lag):
 #%% =============================================================================
 # read data
 # =============================================================================
-reader = data_reader(startdate='1981-01', enddate='2017-12')
+reader = data_reader(startdate='1960-01', enddate='2017-12')
 
 # NINO3.4 Index
 nino34 = reader.read_csv('nino3.4S')
 
 # Other indeces
 iod = reader.read_csv('iod')
-wwv = reader.read_csv('wwv')
-#wwv_west = reader.read_csv('wwvwest')
+wwv = reader.read_csv('wwv_proxy')
 
 # seasonal cycle
 sc = np.cos(np.arange(len(nino34))/12*2*np.pi)
@@ -63,16 +62,11 @@ H_ssh = network_ssh['corrected_hamming_distance']
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
 
-#ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
-#ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-5., lat2=5.)
-#
-#sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
-#
-#sst_equator = sst.loc[dict(lat=0, lon=slice(120, 160))][:,::2]
-#ucur_equator = ucur.loc[dict(lat=2.5, lon=slice(120, 240))][:,::4]
-
 ssh = reader.read_netcdf('zos', dataset='ORAS4', processed='anom')
-kiri=ssh.loc[dict(lat=0, lon=197.5)]
+
+# decadel variation of leading eof
+pca_dec = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')['pca1']
+
 
 
 #%% =============================================================================
@@ -82,8 +76,8 @@ time_lag = 12
 lead_time = 6
 shift = 3
 
-feature_unscaled = np.stack((nino34, sc, iod, wwv,
-                             taux_WP_mean, taux_CP_mean, taux_EP_mean,
+feature_unscaled = np.stack((nino34, sc, iod, wwv, pca_dec,
+                             #taux_WP_mean, taux_CP_mean, taux_EP_mean,
                              c2_ssh, H_ssh,
                              ), axis=1)
 
@@ -109,8 +103,10 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-#test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
-test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='1995-01-01') & (timey<='2006-12-01')
+#test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
+#test_indeces = (timey>='1992-01-01') & (timey<='2001-12-01')
+
 train_indeces = np.invert(test_indeces)
 
 trainX, trainy, traintimey = X[train_indeces,:], y[train_indeces], timey[train_indeces]
@@ -121,15 +117,20 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 model = DEM()
 
-model.set_parameters(layers=1, dropout=0.2, noise=0.2, l1_hidden=[0, 0.2],
-            l2_hidden=[0, 0.2], l1_mu=0.0, l2_mu=0.2, l1_sigma=0.0, l2_sigma=0.2,
+#model.set_parameters(layers=1, dropout=0.2, noise=0.4, l1_hidden=0.003,
+#            l2_hidden=0.15, l1_mu=0.007, l2_mu=0.19, l1_sigma=0., l2_sigma=0.03,
+#            lr=0.005, batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
+#            patience=30, verbose=0, std=True)
+
+model.set_parameters(layers=1, dropout=[0.1,0.5], noise=[0.1,0.5], l1_hidden=[0,0.2],
+            l2_hidden=[0.,0.2], l1_mu=[0.,0.2], l2_mu=[0.,0.2], l1_sigma=[0.,0.2], l2_sigma=[0.,0.2],
             lr=[0.0001,0.01], batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
             patience=30, verbose=0, std=True)
 
+
 #model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
 
-model.fit_RandomizedSearch(trainX, trainy, n_iter=10)
-#model.fit(trainX, trainy)
+model.fit_RandomizedSearch(trainX, trainy, n_iter=100)
 
 #%%
 pred_mean, pred_std = model.predict(testX)

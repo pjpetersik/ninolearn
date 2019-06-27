@@ -23,7 +23,5 @@ def to2_5x2_5(data):
     return regrid_data
 
 if __name__ == "__main__":
-#    ssh_godas = read_raw.ssh_godas()
-#    data = to2_5x2_5(ssh_godas)
-    sst_gfdl = read_raw.sst_gfdl()
-    data = to2_5x2_5(sst_gfdl)
+    var = read_raw.hca()
+    a = to2_5x2_5(var)

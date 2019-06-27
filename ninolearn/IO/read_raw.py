@@ -1,6 +1,7 @@
 from os.path import join
 import pandas as pd
 import xarray as xr
+from scipy.io import loadmat
 
 from ninolearn.pathes import rawdir
 
@@ -62,6 +63,13 @@ def iod():
                        index_col=0, engine='python')
     return data
 
+def K_index():
+    data = loadmat(join(rawdir, "Kindex.mat"))
+
+    kindex = data['Kindex2_mon_anom'][:,0]
+    time = pd.date_range(start='1955-01-01', end='2011-12-01', freq='MS')
+    ds = pd.Series(data=kindex, index=time)
+    return ds
 
 def sst_ERSSTv5():
     """
@@ -197,3 +205,17 @@ def sst_gfdl():
     # this change needs to be done to prevent OutOfBoundsError
     data['time'] = pd.date_range(start='1700-01-01', end='2199-12-01',freq='MS')
     return data.tos
+
+def hca_mon():
+    """
+    heat content anomaly, seasonal variable to the first day of the middle season
+    and upsample the data
+    """
+    data = xr.open_dataset(join(rawdir, "hca.nc"), decode_times=False)
+    data['time'] = pd.date_range(start='1955-02-01', end='2019-02-01', freq='3MS')
+    data.h18_hc.attrs['dataset'] = 'NODC'
+
+    data_raw = data.h18_hc[:,0,:,:]
+    data_upsampled = data_raw.resample(time='MS').interpolate('linear')
+    data_upsampled.name = 'hca'
+    return data_upsampled

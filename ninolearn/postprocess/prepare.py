@@ -4,7 +4,9 @@ from os import mkdir
 import numpy as np
 
 from ninolearn.IO import read_raw
-from ninolearn.pathes import postdir
+from ninolearn.pathes import postdir, rawdir
+
+from ninolearn.IO.read_post import data_reader
 
 if not exists(postdir):
     print("make a data directory at %s" % postdir)
@@ -132,6 +134,32 @@ def prep_wwv(cardinal_direction=""):
     data = data.rename(index=str, columns={'Anomaly': 'anom'})
     data.to_csv(join(postdir, f'wwv{cardinal_direction}.csv'))
 
+def prep_K_index():
+    """
+    function that edits the Kirimati index from Bunge and Clarke (2014)
+    """
+    data = read_raw.K_index()
+    data.index.name = 'time'
+    data.name = 'kindex'
+    data.to_csv(join(postdir, f'kindex.csv'), header=True)
+    print(data)
+
+def prep_wwv_proxy():
+    """
+    Make a wwv proxy index that uses the K-index from Bunge and Clarke (2014)
+    for the time period between 1955 and 1979
+    """
+
+    reader_wwv = data_reader(startdate='1980-01', enddate='2018-12')
+    wwv = reader_wwv.read_csv('wwv')
+
+    reader_kindex = data_reader(startdate='1955-01', enddate='1979-12')
+    kindex = reader_kindex.read_csv('kindex') *10e12
+
+    wwv_proxy = kindex.append(wwv)
+    wwv_proxy.to_csv(join(postdir, f'wwv_proxy.csv'), header=True)
+
+
 def prep_iod():
     """
     Prepare the IOD index dataframe
@@ -149,8 +177,6 @@ def prep_iod():
 
     df.to_csv(join(postdir, 'iod.csv'))
 
+
 if __name__ == "__main__":
-    prep_nino_seasonal()
-#    prep_wwv()
-#    prep_nino_month()
-#    a=prep_iod()
+    prep_hca()

@@ -22,13 +22,12 @@ lanina_ep = np.array([1964, 1970, 1973, 1988, 1998,
 lanina_cp  = np.array([1954, 1955, 1967, 1971, 1974,
               1975, 1984, 1995, 2000, 2001, 2011])
 
-
-reader = data_reader(startdate='1981-01', enddate='2017-12')
+reader = data_reader(startdate='1960-01', enddate='2017-12')
 
 nino34 = reader.read_csv('nino3.4S')
 
 #GODAS data
-var = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+var = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
 #var = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #var = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
 #var = reader.read_netcdf('zos', dataset='ORAS4', processed='anom')
@@ -47,12 +46,14 @@ ep_p1 = np.array([year in elnino_ep + 1 for year in nino34.index.year])
 
 winter_cp = (winter & cp) | (winter_p1 & cp_p1)
 winter_ep = (winter & ep) | (winter_p1 & ep_p1)
+
+winter_nino = winter_cp | winter_ep
 summer_cp = (summer & cp)
 summer_ep = (summer & ep)
 spring_cp = (spring & cp)
 spring_ep = (spring & ep)
 
-index_cp = (winter_cp)
+index_cp = (winter_nino)
 index_ep = (winter_ep)
 
 var_mean_cp = var[index_cp,:,:].mean(dim='time', skipna=True)
@@ -77,8 +78,6 @@ cmap = plt.cm.bwr
 vmax = np.max(np.abs(var_mean_ep))
 cs = m.contour(x, y, var_mean_cp, cmap=cmap, vmin=-vmax, vmax=vmax)
 m.colorbar(cs)
-
-
 
 
 fig = plt.figure()

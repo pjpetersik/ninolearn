@@ -45,6 +45,8 @@ class data_reader(object):
         """
         data = pd.read_csv(join(postdir, f"{variable}.csv"),
                            index_col=0, parse_dates=True)
+
+
         self._check_dates(data, f"{variable}")
 
         return data[processed].loc[self.startdate:self.enddate]
@@ -65,7 +67,7 @@ class data_reader(object):
 
         self._check_dates(data, f'{filename[:-3]}')
 
-        regrided = ['GODAS', 'ERSSTv5', 'ORAS4']
+        regrided = ['GODAS', 'ERSSTv5', 'ORAS4', 'NODC']
 
         if dataset not in regrided  and dataset!='ORAP5' and  dataset != 'GFDL-CM3':
             return data.loc[self.startdate:self.enddate,

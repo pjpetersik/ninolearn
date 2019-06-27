@@ -47,11 +47,11 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1981-01', enddate='2017-12')
+reader = data_reader(startdate='1961-01', enddate='2011-12')
 
 iod = reader.read_csv('iod')
 #wwvwest = reader.read_csv('wwvwest')
-#wwv = reader.read_csv('wwv')
+wwv = reader.read_csv('wwv_proxy')
 
 #GODAS data
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
@@ -85,7 +85,9 @@ network = reader.read_statistic('network_metrics', variable='sshg',
 network2 = reader.read_statistic('network_metrics', variable='zos',
                            dataset='ORAS4', processed="anom")
 
-pca = reader.read_statistic('pca', variable='taux', dataset='NCEP', processed='anom')
+pca_dechca = reader.read_statistic('pca', variable='dec_hca', dataset='NODC', processed='anom')
+pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
+
 
 c2 = network['fraction_clusters_size_2']
 c3 = network['fraction_clusters_size_3']
@@ -100,8 +102,8 @@ rho = network['edge_density']
 c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(c2_oras)
-var2 = scale(c2)
+var = scale(c2)
+var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)
 nino3norm = scale(nino3)
@@ -126,7 +128,6 @@ plt.ylim(-1,1)
 plt.xlim(0,48)
 plt.legend()
 plt.xlabel('lag month')
-
 
 """
 Archieved

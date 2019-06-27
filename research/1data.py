@@ -4,7 +4,7 @@ from ninolearn.download import downloadFileFTP, downloadFileHTTP, unzip_gz
 from ninolearn.private import CMEMS_password, CMEMS_username
 from ninolearn.utils import print_header
 
-# =============================================================================
+#%% =============================================================================
 # =============================================================================
 # # Download
 # =============================================================================
@@ -158,7 +158,7 @@ downloadFileHTTP(HCA_dict)
 # =============================================================================
 # =============================================================================
 print_header("Postprocess Data")
-from ninolearn.postprocess.prepare import prep_nino_seasonal, prep_nino_month, prep_wwv, prep_iod
+from ninolearn.postprocess.prepare import prep_nino_seasonal, prep_nino_month, prep_wwv, prep_iod, prep_K_index, prep_wwv_proxy
 
 prep_nino_seasonal()
 prep_nino_month(index="3.4")
@@ -168,12 +168,15 @@ prep_nino_month(index="4")
 prep_wwv()
 prep_wwv(cardinal_direction="west")
 prep_iod()
+prep_K_index()
+prep_wwv_proxy()
+
 
 #%%
 from ninolearn.IO import read_raw
-from ninolearn.postprocess.anomaly import postprocess
+from ninolearn.postprocess.anomaly import postprocess, saveAnomaly
 from ninolearn.postprocess.regrid import to2_5x2_5
-# postprocess sst data from ERSSTv5
+#%% postprocess sst data from ERSSTv5
 
 sst_ERSSTv5 = read_raw.sst_ERSSTv5()
 sst_ERSSTv5_regrid = to2_5x2_5(sst_ERSSTv5)
@@ -207,6 +210,14 @@ postprocess(ucur_godas_regrid)
 vcur_godas = read_raw.godas(variable='vcur')
 vcur_godas_regrid = to2_5x2_5(vcur_godas)
 postprocess(vcur_godas_regrid)
+
+#%%
+hca_ndoc = read_raw.hca_mon()
+hca_ndoc_regrid = to2_5x2_5(hca_ndoc)
+saveAnomaly(hca_ndoc_regrid, False, compute=False)
+
+
+#%%
 
 # =============================================================================
 # Calculate some variables

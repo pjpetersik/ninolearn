@@ -148,8 +148,7 @@ def toPostDir(data):
         print(f"save {data.name} in post directory")
         data.to_netcdf(path)
 
-
-def saveAnomaly(data, new):
+def saveAnomaly(data, new, compute=True):
     """
     save deviation to postdir
     """
@@ -161,7 +160,14 @@ def saveAnomaly(data, new):
         print(f"{data.name} anomaly already computed")
     else:
         print(f"Compute {data.name} anomaly")
-        anom = computeAnomaly(data)
+
+        if compute:
+            print(f"Compute and save {data.name} anomaly")
+
+            anom = computeAnomaly(data)
+        else:
+            print(f"Save {data.name} anomaly")
+            anom = data
 
         anom.name = ''.join([data.name, 'Anom'])
 

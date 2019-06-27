@@ -70,6 +70,12 @@ class pca(PCA):
 
         data = self.reader.read_netcdf(variable, dataset, processed)
 
+        self.set_eof_array(data)
+
+    def set_eof_array(self, data):
+        """
+        genrates the array that will be analyzed with the EOF.
+        """
         self.time = data['time']
         self.lon = data['lon']
         self.lat = data['lat']
@@ -86,13 +92,14 @@ class pca(PCA):
         self.EOFarr[np.isnan(self.EOFarr)] = 0
         self.EOFarr = detrend(self.EOFarr, axis=0)
 
+
     def compute_pca(self):
         """
         Simple wrapper around the PCA.fit() method.
         """
         self.fit(self.EOFarr)
 
-    def save(self, extension=''):
+    def save(self, extension='', filename=None):
         """
         save the first three pca components to a csvfile
         """
@@ -108,9 +115,14 @@ class pca(PCA):
 
         self.df = pd.DataFrame({'pca1': pca1, 'pca2': pca2, 'pca3': pca3})
 
-        filename = generateFileName(self.variable, self.dataset,
-                                    ''.join((self.processed,extension)),
+        if filename is None:
+            filename = generateFileName(self.variable, self.dataset,
+                                    ''.join((self.processed, extension)),
                                     suffix='csv')
+
+        else:
+            filename = '.'.join((filename,'csv'))
+
         filename = '-'.join(['pca', filename])
 
         self.df.to_csv(join(postdir, filename))
@@ -122,8 +134,17 @@ class pca(PCA):
         lon2, lat2 = np.meshgrid(self.lon, self.lat)
 
         try:
-            nino34 = self.reader.read_csv('nino3.4M')
+            nino34 = self.reader.read_csv('nino3.4S')
         except IndexError:
+            """
+            allow error when  data is out of range for ONI index
+            """
+            pass
+        except AttributeError:
+            """
+            allow when now reader was initialized (data was not loaded but directly)
+            provided with the .set_eof_array() method
+            """
             pass
 
         fig = plt.figure(figsize=(15, 7))
