@@ -41,7 +41,7 @@ def computeMeanClimatology(data):
         print(f"- Data has {period} period")
 
         if reference_period:
-            meanclim = data.loc['1948-01-01':'2018-12-31']. \
+            meanclim = data.loc['1981-01-01':'2010-12-31']. \
                 groupby(f'time.{period}').mean(dim="time")
         else:
             print("Use the entire time series for the Mean Climatology")
@@ -67,7 +67,7 @@ def computeStdClimatology(data):
         period = _get_period(data)
         print(f"- Data has {period} period")
         if reference_period:
-            stdclim = data.loc['1948-01-01':'2018-12-31']. \
+            stdclim = data.loc['1981-01-01':'2010-12-31']. \
                 groupby(f'time.{period}').std(dim="time")
         else:
             print("Use the entire time series for the Std Climatology")
@@ -214,7 +214,9 @@ def postprocess(data, new=False, ref_period = True):
     toPostDir(data)
     # TODO: Read from postdir?
 
+    #TODO better
     global reference_period
     reference_period = ref_period
+
     saveAnomaly(data, new)
     saveNormAnomaly(data, new)

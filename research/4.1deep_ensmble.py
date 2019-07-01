@@ -76,8 +76,9 @@ time_lag = 12
 lead_time = 6
 shift = 3
 
+# TODO warm pool edge, how to better include temperature
 feature_unscaled = np.stack((nino34, sc, iod, wwv, pca_dec,
-                             #taux_WP_mean, taux_CP_mean, taux_EP_mean,
+                             taux_WP_mean, #taux_CP_mean, taux_EP_mean,
                              c2_ssh, H_ssh,
                              ), axis=1)
 

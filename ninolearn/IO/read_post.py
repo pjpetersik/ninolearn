@@ -67,7 +67,7 @@ class data_reader(object):
 
         self._check_dates(data, f'{filename[:-3]}')
 
-        regrided = ['GODAS', 'ERSSTv5', 'ORAS4', 'NODC']
+        regrided = ['GODAS', 'ERSSTv5', 'ORAS4', 'NODC', 'NCAR']
 
         if dataset not in regrided  and dataset!='ORAP5' and  dataset != 'GFDL-CM3':
             return data.loc[self.startdate:self.enddate,

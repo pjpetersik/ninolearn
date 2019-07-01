@@ -152,6 +152,17 @@ HCA_dict={'filename': 'hca.nc',
           'url': 'http://data.nodc.noaa.gov/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/NETCDF/heat_content/heat_content_anomaly_0-700_seasonal.nc'}
 
 downloadFileHTTP(HCA_dict)
+
+#%% =============================================================================
+# OLR
+# =============================================================================
+OLRmon_dict = {
+        'filename': 'olr.mon.mean.nc',
+        'host': 'ftp.cdc.noaa.gov',
+        'location': '/Datasets/interp_OLR/'
+        }
+
+downloadFileFTP(OLRmon_dict)
 #%% =============================================================================
 # =============================================================================
 # # Postprocess
@@ -216,6 +227,10 @@ hca_ndoc = read_raw.hca_mon()
 hca_ndoc_regrid = to2_5x2_5(hca_ndoc)
 saveAnomaly(hca_ndoc_regrid, False, compute=False)
 
+#%%
+olr_ncar = read_raw.olr()
+olr_ncar_regrid = to2_5x2_5(olr_ncar)
+postprocess(olr_ncar_regrid)
 
 #%%
 

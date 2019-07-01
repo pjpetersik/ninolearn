@@ -37,7 +37,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
     data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
     data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
-    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
+    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 210))]
     data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
     data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
@@ -47,16 +47,17 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1961-01', enddate='2011-12')
+reader = data_reader(startdate='1981-01', enddate='2018-12')
 
 iod = reader.read_csv('iod')
 #wwvwest = reader.read_csv('wwvwest')
 wwv = reader.read_csv('wwv_proxy')
-
+wwv_total = reader.read_csv('wwv', processed='Volume')
 #GODAS data
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
-taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
+taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=20, lat2=2.5)
 
+#taux_CP_mean = taux_CP_mean.rolling(time=3).mean()
 #ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
 #ucur_basin_mean, ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-2.5, lat2=5.5)
 #
@@ -64,14 +65,14 @@ taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux)
 #ucur_EP_mean = pd.Series(data=ucur_EP_mean, index=ucur_WP_mean.time.values)
 
 
-ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+#ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
 #ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
 #ssh_grad = np.sort(np.gradient(ssh.loc[dict(lat=0, lon=slice(200,280))],axis=1),axis=1)
 
 #ssh_grad = np.nanmean(np.gradient(ssh.loc[dict(lat=0, lon=slice(210, 240))],axis=1),axis=1)
 #ssh_grad = pd.Series(data=ssh_grad, index=ssh.time.values)
 
-kiri=ssh.loc[dict(lat=0, lon=197.5)]
+#kiri=ssh.loc[dict(lat=0, lon=197.5)]
 
 #%%
 nino34 = reader.read_csv('nino3.4M')
@@ -79,8 +80,8 @@ nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')
 nino3 = reader.read_csv('nino3M')
 
-network = reader.read_statistic('network_metrics', variable='sshg',
-                           dataset='GODAS', processed="anom")
+#network = reader.read_statistic('network_metrics', variable='sshg',
+#                           dataset='GODAS', processed="anom")
 
 network2 = reader.read_statistic('network_metrics', variable='zos',
                            dataset='ORAS4', processed="anom")
@@ -89,21 +90,21 @@ pca_dechca = reader.read_statistic('pca', variable='dec_hca', dataset='NODC', pr
 pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
 
 
-c2 = network['fraction_clusters_size_2']
-c3 = network['fraction_clusters_size_3']
-c5 = network['fraction_clusters_size_5']
-S = network['fraction_giant_component']
-H = network['corrected_hamming_distance']
-T = network['global_transitivity']
-C = network['avelocal_transmissivity']
-L = network['average_path_length']
-rho = network['edge_density']
+#c2 = network['fraction_clusters_size_2']
+#c3 = network['fraction_clusters_size_3']
+#c5 = network['fraction_clusters_size_5']
+#S = network['fraction_giant_component']
+#H = network['corrected_hamming_distance']
+#T = network['global_transitivity']
+#C = network['avelocal_transmissivity']
+#L = network['average_path_length']
+#rho = network['edge_density']
 
 c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(c2)
-var2 = scale(wwv)
+var = scale(taux_CP_mean)
+#var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)
 nino3norm = scale(nino3)
@@ -112,7 +113,7 @@ nino4norm = scale(nino4)
 
 var.plot(c='r')
 nino.plot(c='k')
-var2.plot(c='b')
+#var2.plot(c='b')
 #var3.plot(c='g')
 
 #%%

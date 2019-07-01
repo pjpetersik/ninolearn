@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def nino_background(nino_data, nino_treshold=0.8):
+def nino_background(nino_data, nino_treshold=0.5):
     """
     Generates a plotbackground based on values of the Nino3.4 Index
     """

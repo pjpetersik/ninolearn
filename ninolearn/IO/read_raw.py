@@ -140,6 +140,15 @@ def sat(mean='monthly'):
         return data_return
 
 
+def olr():
+    """
+    get v-wind from NCEP/NCAR reanalysis
+    """
+    data = xr.open_dataset(join(rawdir, "olr.mon.mean.nc"))
+    data.olr.attrs['dataset'] = 'NCAR'
+    return data.olr
+
+
 def ssh():
     """
     Get sea surface height. And change some attirbutes and coordinate names

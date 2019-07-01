@@ -61,7 +61,7 @@ pca_taux.plot_eof()
 # TODO: The naming of the saved files is not perfect. better would be a automatic
 # filename generation that aligns with the  naming convention
 
-reader = data_reader(startdate='1955-02', enddate='2018-12')
+reader = data_reader(startdate='1955-02', enddate='2018-12', lon_min=120, lon_max=300)
 hca = reader.read_netcdf('hca', dataset='NODC', processed='anom')
 
 hca_decadel = hca.rolling(time=60, center=False).mean()
@@ -77,7 +77,7 @@ pca_hca_decadel.save(extension='.csv', filename='dec_hca_NODC_anom')
 
 
 
-reader = data_reader(startdate='1955-02', enddate='2018-12')
+reader = data_reader(startdate='1955-02', enddate='2018-12',lon_min=120, lon_max=300)
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 
 sst_decadel = sst.rolling(time=60, center=False).mean()
@@ -90,6 +90,32 @@ pca_sst_decadel.set_eof_array(sst_decadel)
 pca_sst_decadel.compute_pca()
 pca_sst_decadel.plot_eof()
 pca_sst_decadel.save(extension='.csv', filename='dec_sst_ERSSTv5_anom')
+
+
+#%%olr
+pca_olr = pca(n_components=6)
+pca_olr.load_data('olr', 'NCAR', processed="anom",
+                  startyear=1975, endyear=2018, lon_min=120, lon_max=280,
+                  lat_min=-30, lat_max=30)
+pca_olr.compute_pca()
+pca_olr.save()
+pca_olr.plot_eof()
+
+#%%OLR long
+reader = data_reader(startdate='1975-01', enddate='2018-12',lon_min=120, lon_max=300)
+
+olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
+
+olr_decadel = olr.rolling(time=60, center=False).mean()
+olr_decadel.attrs = olr.attrs.copy()
+olr_decadel.name = f'dec_{olr.name}'
+
+pca_olr_decadel = pca(n_components=6)
+
+pca_olr_decadel.set_eof_array(olr_decadel)
+pca_olr_decadel.compute_pca()
+pca_olr_decadel.plot_eof()
+pca_olr_decadel.save(extension='.csv', filename='dec_sst_ERSSTv5_anom')
 
 
 

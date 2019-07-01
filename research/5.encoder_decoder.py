@@ -24,12 +24,13 @@ from IPython.display import HTML
 K.clear_session()
 
 #read data
-reader = data_reader(startdate='1981-01', enddate='2018-12')
-ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+reader = data_reader(startdate='1951-01', enddate='2018-12')#, lat_max=60,lon_min=30)
+#ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+#ssh = reader.read_netcdf('zos', dataset='ORAS4', processed='anom')
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #sat = reader.read_netcdf('air', dataset='NCEP', processed='anom')
-uwnd = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
-
+#uwnd = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
+#taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 nino34 = reader.read_csv('nino3.4S')
 
 # select
@@ -51,7 +52,7 @@ yorg = scaler_l.fit_transform(label_unscaled)
 Xall = np.nan_to_num(Xorg)
 yall = np.nan_to_num(yorg)
 
-lead = 6
+lead = 3
 
 if lead == 0:
     y = yall
@@ -62,8 +63,8 @@ else:
 
 n_obs = len(feature)
 
-train_end = int(0.5 * n_obs)
-val_end = int(0.7 * n_obs)
+train_end = int(0.65 * n_obs)
+val_end = int(0.85 * n_obs)
 
 X_train, X_val, X_test = X[:train_end], X[train_end:val_end], X[val_end:]
 y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
@@ -75,13 +76,13 @@ y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
 # =============================================================================
 # this is the size of our encoded representations
 encoding_dim = 16 # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
-hidden_dim = 32
-l1 = 0.00
-l2 = 0.00
+hidden_dim = 128
+l1 = 0.0
+l2 = 0.0001
 
 # encoder
-inputs = Input(shape=(1625,))
-h = GaussianNoise(0.0)(inputs)
+inputs = Input(shape=(X.shape[1],))
+h = GaussianNoise(0.2)(inputs)
 
 
 h = Dense(hidden_dim, activation='relu',
@@ -95,10 +96,10 @@ encoder = Model(inputs, latent, name='encoder')
 
 # decoder
 latent_inputs = Input(shape=(encoding_dim,))
-h = Dense(hidden_dim, activation='relu',
-          kernel_regularizer=regularizers.l1_l2(l1, l2))(latent_inputs)
+#h = Dense(hidden_dim, activation='relu',
+#          kernel_regularizer=regularizers.l1_l2(l1, l2))(latent_inputs)
 
-decoded = Dense(1625, activation='linear',
+decoded = Dense(X.shape[1], activation='linear',
                 kernel_regularizer=regularizers.l1_l2(l1, l2))(latent_inputs)
 
 decoder = Model(latent_inputs, decoded, name='decoder')
@@ -108,12 +109,12 @@ autoencoder = Model(inputs, decoder(encoder(inputs)))
 
 
 optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-es = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0, patience=100, verbose=0,
+es = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0, patience=50, verbose=0,
                    mode='min', restore_best_weights=True)
 
 autoencoder.compile(loss='mse', optimizer=optimizer, metrics=['mse'])
 
-autoencoder.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=200, batch_size=100,
+autoencoder.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=500, batch_size=50,
                 shuffle=True, callbacks=[es])
 
 #%% Predictions
@@ -130,46 +131,63 @@ print(f"Score: {autoencoder.evaluate(X_test, y_test)[1]}")
 #%%
 plt.close("all")
 
-#frame = 442-lead
-frame = 410-lead
-fig, ax = plt.subplots(3, 1)
 
-vmin = -1.3
-vmax = 1.3
-ax[0].imshow(label[frame], origin='lower', vmin=vmin, vmax=vmax)
-ax[1].imshow(label[frame+lead], origin='lower', vmin=vmin, vmax=vmax)
-ax[2].imshow(label_decoded[frame], origin='lower', vmin=vmin, vmax=vmax)
-
-#%%
-
-fig, ax = plt.subplots(2, 1)
-
-true = label[val_end+lead]
-pred = label_decoded[val_end]
-
-true_im = ax[0].imshow(true, origin='lower', vmin=-1.3, vmax=1.3)
-pred_im = ax[1].imshow(pred, origin='lower', vmin=-1.3, vmax=1.3)
-
-def update(data):
-    true_im.set_data(data[0])
-    pred_im.set_data(data[1])
-
-def data_gen():
-    k=0
-    kmax = len(y_test)
-    while k<kmax:
-        yield label[val_end+lead+k], label_decoded[val_end+k]
-        k+=1
-ani = animation.FuncAnimation(fig, update, data_gen, interval=200)
-
-#%%
-
+# NINO3.4 Predicted vs. Observation
 nino34_pred = label_decoded.loc[dict(lat=slice(-5, 5), lon=slice(210, 240))].mean(dim="lat").mean(dim='lon')
 
 plt.subplots()
 plt.plot(nino34_pred.time[lead+val_end:], nino34.values[lead+val_end:])
 plt.plot(nino34_pred.time[lead+val_end:], nino34_pred.values[val_end:-lead])
-print(np.corrcoef(nino34.values[lead:],nino34_pred.values[:-lead]))
+print(np.corrcoef(nino34.values[lead:], nino34_pred.values[:-lead]))
+
+
+
+# A static plot
+#frame = 442-lead
+frame = 410-lead
+fig1, ax1 = plt.subplots(3, 1)
+
+vmin = -1.3
+vmax = 1.3
+ax1[0].imshow(label[frame], origin='lower', vmin=vmin, vmax=vmax)
+ax1[1].imshow(label[frame+lead], origin='lower', vmin=vmin, vmax=vmax)
+ax1[2].imshow(label_decoded[frame], origin='lower', vmin=vmin, vmax=vmax)
+
+
+fig, ax = plt.subplots(3, 1, figsize=(6,7), squeeze=False)
+true = label[val_end+lead]
+pred = label_decoded[val_end]
+
+true_im = ax[0,0].imshow(true, origin='lower', vmin=-1.3, vmax=1.3)
+pred_im = ax[1,0].imshow(pred, origin='lower', vmin=-1.3, vmax=1.3)
+title = ax[0,0].set_title('')
+
+
+ax[2,0].plot(nino34_pred.time[lead+val_end:], nino34.values[lead+val_end:])
+ax[2,0].plot(nino34_pred.time[lead+val_end:], nino34_pred.values[val_end:-lead])
+ax[2,0].set_ylim(-3,3)
+ax[2,0].set_xlim(nino34_pred.time[lead+val_end].values, nino34_pred.time[-1].values)
+
+vline = ax[2,0].plot([nino34_pred.time[lead+val_end].values,nino34_pred.time[lead+val_end].values], [-10,10], color='k')
+
+
+def update(data):
+    true_im.set_data(data[0])
+    pred_im.set_data(data[1])
+    title_str = np.datetime_as_string(data[0].time.values)[:10]
+    title.set_text(title_str)
+
+    vline[0].set_data([data[2], data[2]],[-10,10])
+
+def data_gen():
+    k=0
+    kmax = len(y_test)
+    while k<kmax:
+        yield label[val_end+lead+k], label_decoded[val_end+k], nino34_pred.time[lead+val_end+k].values
+        k+=1
+
+ani = animation.FuncAnimation(fig, update, data_gen, interval=300)
+
 
 #%%
 corrM = np.zeros(len(predy[0,:]))

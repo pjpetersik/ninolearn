@@ -140,9 +140,8 @@ def prep_K_index():
     """
     data = read_raw.K_index()
     data.index.name = 'time'
-    data.name = 'kindex'
+    data.name = 'anom'
     data.to_csv(join(postdir, f'kindex.csv'), header=True)
-    print(data)
 
 def prep_wwv_proxy():
     """
@@ -154,7 +153,7 @@ def prep_wwv_proxy():
     wwv = reader_wwv.read_csv('wwv')
 
     reader_kindex = data_reader(startdate='1955-01', enddate='1979-12')
-    kindex = reader_kindex.read_csv('kindex') *10e12
+    kindex = reader_kindex.read_csv('kindex') * 10e12
 
     wwv_proxy = kindex.append(wwv)
     wwv_proxy.to_csv(join(postdir, f'wwv_proxy.csv'), header=True)
