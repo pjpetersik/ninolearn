@@ -1,6 +1,7 @@
 from ninolearn.postprocess.pca import pca
 from ninolearn.IO.read_post import data_reader
 import matplotlib.pyplot as plt
+import numpy as np
 plt.close("all")
 #%% =============================================================================
 # =============================================================================
@@ -19,13 +20,14 @@ pca_sat.load_data('air', 'NCEP', processed="anom",
 pca_sat.compute_pca()
 pca_sat.save()
 
-#sat
+#uwnd
 pca_uwnd = pca(n_components=6)
 pca_uwnd.load_data('uwnd', 'NCEP', processed="anom",
                   startyear=1948, endyear=2018, lon_min=120, lon_max=280,
                   lat_min=-30, lat_max=30)
 pca_uwnd.compute_pca()
 pca_uwnd.save()
+pca_uwnd.plot_eof()
 
 # sst
 pca_sst = pca(n_components=6)
@@ -34,9 +36,10 @@ pca_sst.load_data('sst', 'ERSSTv5', processed="anom",
                   lat_min=-30, lat_max=30)
 pca_sst.compute_pca()
 pca_sst.save()
+pca_sst.plot_eof()
 
 
-# ssh
+#%% ssh
 pca_ssh = pca(n_components=6)
 pca_ssh.load_data('sshg', 'GODAS', processed="anom",
                   startyear=1980, endyear=2018, lon_min=120, lon_max=280,
@@ -116,8 +119,6 @@ pca_olr_decadel.set_eof_array(olr_decadel)
 pca_olr_decadel.compute_pca()
 pca_olr_decadel.plot_eof()
 pca_olr_decadel.save(extension='.csv', filename='dec_sst_ERSSTv5_anom')
-
-
 
 
 """

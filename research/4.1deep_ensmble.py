@@ -48,6 +48,9 @@ nino34 = reader.read_csv('nino3.4S')
 iod = reader.read_csv('iod')
 wwv = reader.read_csv('wwv_proxy')
 
+#warm pool edge
+wp_edge =  reader.read_csv('wp_edge', processed='')
+
 # seasonal cycle
 sc = np.cos(np.arange(len(nino34))/12*2*np.pi)
 
@@ -104,7 +107,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='1995-01-01') & (timey<='2006-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2011-12-01')
 #test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
 #test_indeces = (timey>='1992-01-01') & (timey<='2001-12-01')
 

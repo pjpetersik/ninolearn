@@ -12,7 +12,8 @@ import numpy as np
 import pandas as pd
 
 from os.path import join
-elnino_ep = np.array([1957, 1965, 1972, 1976, 1982, 1997, #2015
+
+elnino_ep = np.array([1957, 1965, 1972, 1976, 1997, 1982,#  #2015
                       ])
 
 elnino_cp = np.array([1953, 1958, 1963, 1968, 1969,
@@ -32,7 +33,7 @@ nino34 = reader.read_csv('nino3.4S')
 
 spring = np.array([month in [3, 4, 5] for month in nino34.index.month])
 summer = np.array([month in [6, 7, 8] for month in nino34.index.month])
-autumn = np.array([month in [9, 10 , 11] for month in nino34.index.month])
+autumn = np.array([month in [12] for month in nino34.index.month])
 
 winter = np.array([month in [12] for month in nino34.index.month])
 winter_p1 = np.array([month in [1, 2] for month in nino34.index.month])
@@ -45,6 +46,11 @@ cp_p1 = np.array([year in elnino_cp + 1 for year in nino34.index.year])
 ep_m1 = np.array([year in elnino_ep - 1 for year in nino34.index.year])
 ep = np.array([year in elnino_ep for year in nino34.index.year])
 ep_p1 = np.array([year in elnino_ep + 1 for year in nino34.index.year])
+
+
+autumn_m1_cp = autumn & cp_m1
+autumn_m1_ep = autumn & ep_m1
+autumn_m1_nino = autumn_m1_cp | autumn_m1_ep
 
 
 winter_m1_cp = (winter & cp_m1) | (winter_p1 & cp)
@@ -122,10 +128,6 @@ fig, axs = plt.subplots(2, 2, figsize=(12,4))
 
 
 
-
-
-
-
 # SST and taux
 m = Basemap(projection='merc',llcrnrlat=-30,urcrnrlat=30,\
             llcrnrlon=100,urcrnrlon=300,lat_ts=5,resolution='c',ax=axs[0,0])
@@ -137,7 +139,7 @@ m.drawmeridians(np.arange(0., 360., 30.), color='grey')
 m.drawmapboundary(fill_color='white')
 m.drawcoastlines()
 
-ls = linestyles=np.where(levels_ssh > 0, "-", "--")
+ls = np.where(levels_ssh > 0, "-", "--")
 ls[levels_ssh==0] = ':'
 cs = m.contour(x, y, ssh_mean_cp, colors='black', levels=levels_ssh, linestyles=ls)
 
@@ -167,7 +169,7 @@ m.drawmeridians(np.arange(0., 360., 30.), labels=[0,0,0,1], color='grey')
 m.drawmapboundary(fill_color='white')
 m.drawcoastlines()
 
-ls = linestyles=np.where(levels_tau > 0, "-", "--")
+ls = np.where(levels_tau > 0, "-", "--")
 ls[levels_tau==0] = ':'
 cs = m.contour(x, y, taux_mean_cp, colors='black', levels=levels_tau, linestyles=ls)
 
@@ -201,7 +203,7 @@ m.drawmeridians(np.arange(0., 360., 30.),color='grey')
 m.drawmapboundary(fill_color='white')
 m.drawcoastlines()
 
-ls = linestyles=np.where(levels_ssh > 0, "-", "--")
+ls = np.where(levels_ssh > 0, "-", "--")
 ls[levels_ssh==0] = ':'
 cs = m.contour(x, y, ssh_mean_ep, colors='black', levels=levels_ssh, linestyles=ls)
 
@@ -231,7 +233,7 @@ m.drawmeridians(np.arange(0., 360., 30.),labels=[0,0,0,1],color='grey')
 m.drawmapboundary(fill_color='white')
 m.drawcoastlines()
 
-ls = linestyles=np.where(levels_tau > 0, "-", "--")
+ls =np.where(levels_tau > 0, "-", "--")
 ls[levels_tau==0] = ':'
 cs = m.contour(x, y, taux_mean_ep, colors='black', levels=levels_tau, linestyles=ls)
 

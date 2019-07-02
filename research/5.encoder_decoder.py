@@ -32,7 +32,7 @@ sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #uwnd = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
 #taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 nino34 = reader.read_csv('nino3.4S')
-
+#%%
 # select
 feature = sst
 label = sst
@@ -40,7 +40,6 @@ label = sst
 # preprocess data
 feature_unscaled = feature.values.reshape(feature.shape[0],-1)
 label_unscaled = label.values.reshape(label.shape[0],-1)
-
 
 
 scaler_f = StandardScaler()
@@ -52,7 +51,7 @@ yorg = scaler_l.fit_transform(label_unscaled)
 Xall = np.nan_to_num(Xorg)
 yall = np.nan_to_num(yorg)
 
-lead = 3
+lead = 9
 
 if lead == 0:
     y = yall
@@ -128,6 +127,8 @@ label_decoded.values = label_unscaled_decoded.reshape((Xall.shape[0], label.shap
 latent_variables = encoder.predict(Xall)
 
 print(f"Score: {autoencoder.evaluate(X_test, y_test)[1]}")
+
+
 #%%
 plt.close("all")
 

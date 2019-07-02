@@ -37,7 +37,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
     data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
     data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
-    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 210))]
+    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
     data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
     data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
@@ -47,16 +47,21 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1981-01', enddate='2018-12')
+reader = data_reader(startdate='1980-01', enddate='2018-12')
 
 iod = reader.read_csv('iod')
 #wwvwest = reader.read_csv('wwvwest')
 wwv = reader.read_csv('wwv_proxy')
-wwv_total = reader.read_csv('wwv', processed='Volume')
-#GODAS data
-taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
-taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=20, lat2=2.5)
+wp_edge = reader.read_csv('wp_edge', processed='total')
 
+#wwv_total = reader.read_csv('wwv', processed='Volume')
+#GODAS data
+
+taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=2.5, lat2=-2.5)
+
+sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
+olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
 #taux_CP_mean = taux_CP_mean.rolling(time=3).mean()
 #ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
 #ucur_basin_mean, ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-2.5, lat2=5.5)
@@ -83,11 +88,11 @@ nino3 = reader.read_csv('nino3M')
 #network = reader.read_statistic('network_metrics', variable='sshg',
 #                           dataset='GODAS', processed="anom")
 
-network2 = reader.read_statistic('network_metrics', variable='zos',
-                           dataset='ORAS4', processed="anom")
+#network2 = reader.read_statistic('network_metrics', variable='zos',
+#                           dataset='ORAS4', processed="anom")
 
-pca_dechca = reader.read_statistic('pca', variable='dec_hca', dataset='NODC', processed='anom')
-pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
+#pca_dechca = reader.read_statistic('pca', variable='dec_hca', dataset='NODC', processed='anom')
+#pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
 
 
 #c2 = network['fraction_clusters_size_2']
@@ -100,10 +105,10 @@ pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5',
 #L = network['average_path_length']
 #rho = network['edge_density']
 
-c2_oras = network2['fraction_clusters_size_2']
+#c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(taux_CP_mean)
+var = scale(wp_edge)
 #var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)
@@ -130,6 +135,19 @@ plt.xlim(0,48)
 plt.legend()
 plt.xlabel('lag month')
 
+#%% =============================================================================
+# Warm pool edge
+# =============================================================================
+sst_total = reader.read_netcdf('sst', dataset='ERSSTv5', processed='')
+
+
+sst_eq = sst_total.loc[dict(lat=0)]
+warm_pool_edge = np.zeros(sst_eq.shape[0])
+for i in range(sst_eq.shape[0]):
+    warm_pool_edge[i] =  np.argwhere(sst_eq[i].values>28).max() * 2.5 * 111.321
+
+
+#%%
 """
 Archieved
 

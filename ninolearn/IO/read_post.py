@@ -65,26 +65,29 @@ class data_reader(object):
 
         data = xr.open_dataarray(join(postdir, filename), chunks=chunks)
 
-        self._check_dates(data, f'{filename[:-3]}')
-
         regrided = ['GODAS', 'ERSSTv5', 'ORAS4', 'NODC', 'NCAR']
 
-        if dataset not in regrided  and dataset!='ORAP5' and  dataset != 'GFDL-CM3':
-            return data.loc[self.startdate:self.enddate,
-                            self.lat_max:self.lat_min,
-                            self.lon_min:self.lon_max]
+        if processed=='meanclim':
+            return data
 
-        elif dataset in regrided or dataset == 'GFDL-CM3':
-            return data.loc[self.startdate:self.enddate,
-                            self.lat_min:self.lat_max,
-                            self.lon_min:self.lon_max]
-        elif dataset=='ORAP5':
-            return data.loc[self.startdate: self.enddate, :, :].where(
-                   (data.nav_lat > self.lat_min) &
-                   (data.nav_lat < self.lat_max) &
-                   (data.nav_lon > self.lon_min) &
-                   (data.nav_lon < self.lon_max),
-                   drop=True)
+        else:
+            self._check_dates(data, f'{filename[:-3]}')
+            if dataset not in regrided  and dataset!='ORAP5' and  dataset != 'GFDL-CM3':
+                return data.loc[self.startdate:self.enddate,
+                                self.lat_max:self.lat_min,
+                                self.lon_min:self.lon_max]
+
+            elif dataset in regrided or dataset == 'GFDL-CM3':
+                return data.loc[self.startdate:self.enddate,
+                                self.lat_min:self.lat_max,
+                                self.lon_min:self.lon_max]
+            elif dataset=='ORAP5':
+                return data.loc[self.startdate: self.enddate, :, :].where(
+                       (data.nav_lat > self.lat_min) &
+                       (data.nav_lat < self.lat_max) &
+                       (data.nav_lon > self.lon_min) &
+                       (data.nav_lon < self.lon_max),
+                       drop=True)
 
     def read_statistic(self, statistic, variable, dataset='', processed=''):
 
