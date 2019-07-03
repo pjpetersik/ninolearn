@@ -59,7 +59,7 @@ class MissingArgumentError(ValueError):
     pass
 
 class DEM(object):
-    def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1,
+    def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1, noise_out=0.0,
                  l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
                  l2_sigma=0.1, batch_size=10, n_segments=5, n_members_segment=1,
                  lr=0.001, patience = 10, epochs=300, verbose=0, std=True):
@@ -124,7 +124,7 @@ class DEM(object):
         """
         # hyperparameters
         self.hyperparameters = {'layers': layers, 'neurons': neurons,
-                'dropout': dropout, 'noise': noise,
+                'dropout': dropout, 'noise': noise, 'noise_out':noise,
                 'l1_hidden': l1_hidden, 'l2_hidden': l2_hidden,
                 'l1_mu': l1_mu, 'l2_mu': l2_mu,
                 'l1_sigma': l1_sigma, 'l2_sigma': l2_sigma,
@@ -195,11 +195,16 @@ class DEM(object):
 
             h = Dropout(self.hyperparameters['dropout'])(h)
 
+
+
         mu = Dense(1, activation='linear',
                    kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'],
                                                          self.hyperparameters['l2_mu']),
                    kernel_initializer='random_uniform',
                    bias_initializer='zeros')(h)
+
+        mu = GaussianNoise(self.hyperparameters['noise_out'])(mu)
+
 
         if self.std:
             sigma = Dense(1, activation='softplus',
@@ -207,6 +212,7 @@ class DEM(object):
                                                                 self.hyperparameters['l2_sigma']),
                           kernel_initializer='random_uniform',
                           bias_initializer='zeros')(h)
+            sigma = GaussianNoise(self.hyperparameters['noise_out'])(sigma)
 
             outputs = concatenate([mu, sigma])
 

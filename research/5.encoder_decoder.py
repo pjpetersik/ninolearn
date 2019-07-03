@@ -30,7 +30,7 @@ reader = data_reader(startdate='1951-01', enddate='2018-12')#, lat_max=60,lon_mi
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #sat = reader.read_netcdf('air', dataset='NCEP', processed='anom')
 #uwnd = reader.read_netcdf('uwnd', dataset='NCEP', processed='anom')
-#taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 nino34 = reader.read_csv('nino3.4S')
 #%%
 # select
@@ -76,7 +76,7 @@ y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
 # this is the size of our encoded representations
 encoding_dim = 16 # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
 hidden_dim = 128
-l1 = 0.0
+l1 = 0.0001
 l2 = 0.0001
 
 # encoder
@@ -108,8 +108,8 @@ autoencoder = Model(inputs, decoder(encoder(inputs)))
 
 
 optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-es = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0, patience=50, verbose=0,
-                   mode='min', restore_best_weights=True)
+es = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0, patience=40, verbose=0,
+                   mode='min', restore_best_weights=False)
 
 autoencoder.compile(loss='mse', optimizer=optimizer, metrics=['mse'])
 

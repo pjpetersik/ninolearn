@@ -47,7 +47,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1980-01', enddate='2018-12')
+reader = data_reader(startdate='1965-01', enddate='2017-12', lon_min=30)
 
 iod = reader.read_csv('iod')
 #wwvwest = reader.read_csv('wwvwest')
@@ -58,10 +58,12 @@ wp_edge = reader.read_csv('wp_edge', processed='total')
 #GODAS data
 
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
-taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=2.5, lat2=-2.5)
+taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=7.5, lat2=-7.5)
 
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
-olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
+#olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
+#olr_basin_mean, olr_WP_mean, olr_CP_mean, olr_EP_mean = basin_means(olr, lat1=-2.5, lat2=7.5)
+
 #taux_CP_mean = taux_CP_mean.rolling(time=3).mean()
 #ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
 #ucur_basin_mean, ucur_WP_mean, ucur_CP_mean, ucur_EP_mean = basin_means(ucur, lat1=-2.5, lat2=5.5)
@@ -108,7 +110,7 @@ nino3 = reader.read_csv('nino3M')
 #c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(wp_edge)
+var = scale(iod)
 #var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)
