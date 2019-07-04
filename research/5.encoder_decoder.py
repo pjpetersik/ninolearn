@@ -19,8 +19,10 @@ K.clear_session()
 # Data
 # =============================================================================
 #read data
-reader = data_reader(startdate='1951-01', enddate='2018-12')
+reader = data_reader(startdate='1971-01', enddate='2017-12')
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
+ssh = reader.read_netcdf('zos', dataset='ORAS4', processed='anom')
+taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 nino34 = reader.read_csv('nino3.4S')
 #
 # select
@@ -41,19 +43,22 @@ yorg = scaler_l.fit_transform(label_unscaled)
 Xall = np.nan_to_num(Xorg)
 yall = np.nan_to_num(yorg)
 
-lead = 6
+prelead = 1
+lead = 12
+step_size = 4
+steps = lead//step_size
 
 if lead == 0:
     y = yall
     X = Xall
 else:
-    y = yall[lead:]
-    X = Xall[:-lead]
+    y = yall[step_size:]
+    X = Xall[:-step_size]
 
 n_obs = len(feature)
 
 train_end = int(0.65 * n_obs)
-val_end = int(0.85 * n_obs)
+val_end = int(0.75 * n_obs)
 
 X_train, X_val, X_test = X[:train_end], X[train_end:val_end], X[val_end:]
 y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
@@ -64,22 +69,26 @@ y_train, y_val, y_test = y[:train_end], y[train_end:val_end], y[val_end:]
 # =============================================================================
 
 model = EncoderDecoder()
-model.set_parameters()
 
-model.fit(X_train, y_train, valX=X_val, valy=y_val)
+architrecure = [256, 16]
 
+model.set_parameters(neurons=architrecure, lr=0.0001)
+model.fit(X_train, y_train, valX=X_val, valy=y_val, compile_model=True)
+
+#%%
 predy = model.predict(Xall)
 
+# if integration is applied
+for _ in range(steps-1):
+    predy = model.predict(predy*1.2)
 
-label_unscaled_decoded = scaler_l.inverse_transform(predy)
 
 label_decoded = xr.zeros_like(label)
-label_decoded.values = label_unscaled_decoded.reshape((Xall.shape[0], label.shape[1],label.shape[2]))
+label_decoded.values = scaler_l.inverse_transform(predy).reshape((Xall.shape[0], label.shape[1],label.shape[2]))
 
 latent_variables = model.encoder.predict(Xall)
 
 print(f"Score: {model.encoder_decoder.evaluate(X_test, y_test)[1]}")
-
 
 # =============================================================================
 # Plot
@@ -88,7 +97,7 @@ plt.close("all")
 
 
 # NINO3.4 Predicted vs. Observation
-nino34_pred = label_decoded.loc[dict(lat=slice(-5, 5), lon=slice(210, 240))].mean(dim="lat").mean(dim='lon')
+nino34_pred = label_decoded.loc[dict(lat=slice(-5, 5), lon=slice(190, 240))].mean(dim="lat").mean(dim='lon')
 
 plt.subplots()
 plt.plot(nino34_pred.time[lead+val_end:], nino34.values[lead+val_end:])
@@ -102,8 +111,8 @@ print(np.corrcoef(nino34.values[lead:], nino34_pred.values[:-lead]))
 frame = 410-lead
 fig1, ax1 = plt.subplots(3, 1)
 
-vmin = -1.3
-vmax = 1.3
+vmin = -3
+vmax = 3
 ax1[0].imshow(label[frame], origin='lower', vmin=vmin, vmax=vmax)
 ax1[1].imshow(label[frame+lead], origin='lower', vmin=vmin, vmax=vmax)
 ax1[2].imshow(label_decoded[frame], origin='lower', vmin=vmin, vmax=vmax)
@@ -113,8 +122,8 @@ fig, ax = plt.subplots(3, 1, figsize=(6,7), squeeze=False)
 true = label[val_end+lead]
 pred = label_decoded[val_end]
 
-true_im = ax[0,0].imshow(true, origin='lower', vmin=-1.3, vmax=1.3)
-pred_im = ax[1,0].imshow(pred, origin='lower', vmin=-1.3, vmax=1.3)
+true_im = ax[0,0].imshow(true, origin='lower', vmin=vmin, vmax=vmax, cmap=plt.cm.bwr)
+pred_im = ax[1,0].imshow(pred, origin='lower', vmin=vmin, vmax=vmax, cmap=plt.cm.bwr)
 title = ax[0,0].set_title('')
 
 
@@ -144,7 +153,7 @@ def data_gen():
 ani = animation.FuncAnimation(fig, update, data_gen, interval=300)
 
 
-#%%
+
 corrM = np.zeros(len(predy[0,:]))
 
 for i in range(len(predy[0,:])):

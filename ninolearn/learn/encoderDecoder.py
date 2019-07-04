@@ -2,9 +2,9 @@ import numpy as np
 
 
 import keras.backend as K
-from keras.models import Model, save_model, load_model
-from keras.layers import Dense, Input, concatenate
-from keras.layers import Dropout, GaussianNoise
+from keras.models import Model
+from keras.layers import Dense, Input
+from keras.layers import GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
@@ -13,6 +13,7 @@ class EncoderDecoder(object):
     def set_parameters(self, neurons=[128, 16], dropout=0.2, noise=0.2, noise_out=0.0,
                  l1_hidden=0.0001, l2_hidden=0.0001, l1_out=0.0001, l2_out=0.0001, batch_size=50,
                  lr=0.0001, patience = 40, epochs=500, verbose=1):
+
         """
         Set the parameters of the Encoder-Decoder neural network
         """
@@ -87,12 +88,13 @@ class EncoderDecoder(object):
         return encoder_decoder
 
 
-    def fit(self, trainX, trainy, valX=None, valy=None):
+    def fit(self, trainX, trainy, compile_model=True,valX=None, valy=None):
         # clear memory
         K.clear_session
 
-        self.encoder_decoder = self.build_model(trainX.shape[1])
-        self.encoder_decoder.compile(loss='mse', optimizer=self.optimizer, metrics=['mse'])
+        if compile_model:
+            self.encoder_decoder = self.build_model(trainX.shape[1])
+            self.encoder_decoder.compile(loss='mse', optimizer=self.optimizer, metrics=['mse'])
 
 
         self.history = self.encoder_decoder.fit(trainX, trainy,
