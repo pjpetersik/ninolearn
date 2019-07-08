@@ -10,7 +10,7 @@ from ninolearn.IO.read_post import data_reader
 from ninolearn.utils import scale
 from ninolearn.private import plotdir
 
-
+from composites_CP_EP import winter_nino
 plt.close("all")
 # =============================================================================
 # Data
@@ -22,43 +22,52 @@ pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5',
 
 
 olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
-olr = olr.rolling(time=60, center=False).mean()
+#olr = olr.rolling(time=60, center=False).mean()
 olr = olr.sortby('lat', ascending=False)
 
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 taux = taux.sortby('lat', ascending=False)
 
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
+#sst = sst.rolling(time=60, center=False).mean()
 sst = sst.sortby('lat', ascending=False)
+
 # =============================================================================
 # Model
 # =============================================================================
+X = np.stack((pca_dechca['pca1'].loc['1985-01':],),axis=1)
 
-X = np.stack((-pca_decsst['pca1'].loc['1985-01':],),axis=1)
+# mask the land if NaN
 y = olr.loc['1985-01':]
+y_m = np.ma.masked_invalid(y)
+flat_y = y_m.reshape(y_m.shape[0],-1)
+flat_y_comp = np.ma.compress_rowcols(flat_y, axis=1)
 
 reg = linear_model.LinearRegression(fit_intercept=True)
-flat_y = y.values.reshape(y.shape[0],-1)
-
-reg.fit(X, flat_y)
+reg.fit(X, flat_y_comp)
 
 pred = reg.predict(X)
-score = r2_score(flat_y, pred, multioutput='raw_values')
 
-score2 = np.zeros_like(score)
-p = np.zeros_like(score)
+score_m = np.ma.masked_array(np.zeros_like(flat_y[1]), flat_y.mask[1])
+p_m = np.ma.masked_array(np.zeros_like(flat_y[1]), flat_y.mask[1])
+#%%
+indeces = np.argwhere(score_m.mask==False)[:,0]
 
-for i in range(score2.shape[0]):
-    score2[i], p[i] = pearsonr(pred[:,i], flat_y[:,i])
+for i in range(pred.shape[1]):
+    j = indeces[i]
+    score_m[j], p_m[j] = pearsonr(pred[:,i], flat_y_comp[:,i])
 
-
+score, p = score_m.filled(np.nan), p_m.filled(np.nan)
+#%%
 score_map = score.reshape((y.shape[1],y.shape[2]))
-score2_map = score2.reshape((y.shape[1],y.shape[2]))
 p_map = p.reshape((y.shape[1], y.shape[2]))
 
-coef = reg.coef_[:,0].reshape((y.shape[1],y.shape[2])) * X[:,0].std()
+coef_m = np.ma.masked_array(np.zeros_like(flat_y[1]), flat_y.mask[1])
+coef_m[indeces] = reg.coef_[:,0] * X[:,0].std()
 
-# =============================================================================
+coef = coef_m.filled(np.nan)
+coef_map = coef.reshape((y.shape[1],y.shape[2]))
+#%% =============================================================================
 # Plot
 # =============================================================================
 plt.close("all")
@@ -89,8 +98,8 @@ m.drawmeridians(np.arange(0., 360., 30.),  labels=[0,0,0,1], color='grey')
 m.drawmapboundary(fill_color='white')
 m.drawcoastlines()
 
-cs_olr = m.contour(x, y, coef, vmin=-vmax, vmax=vmax, levels=levels, cmap=plt.cm.seismic)
-cs_r2 =  m.contourf(x, y, score2_map**2, vmin=0.0,vmax=1, levels = levels_r2, cmap=plt.cm.Greens, extend='max')
+cs_olr = m.contour(x, y, coef_map, vmin=-vmax, vmax=vmax, levels=levels, cmap=plt.cm.seismic)
+cs_r2 =  m.contourf(x, y, score_map**2, vmin=0.0,vmax=1, levels = levels_r2, cmap=plt.cm.Greens, extend='max')
 cs_p = m.contourf(x, y, p_map, levels=[0, 0.001], hatches = ['//'], alpha=0)
 
 # Color bar

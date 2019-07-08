@@ -261,8 +261,11 @@ tauy.attrs['units'] = 'm^2/s^2'
 postprocess(tauy)
 
 
-
-
+# =============================================================================
+# Postprocessing based on already postprocessd data
+# =============================================================================
+from ninolearn.postprocess.prepare import calc_warm_pool_edge
+calc_warm_pool_edge()
 
 #%%
 """

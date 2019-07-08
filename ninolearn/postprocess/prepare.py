@@ -180,21 +180,29 @@ def calc_warm_pool_edge():
     """
     calculate the warm pool edge
     """
-    reader = data_reader(startdate='1948-01', enddate='2018-12')
+    reader = data_reader(startdate='1948-01', enddate='2018-12',lon_min=120, lon_max=290)
     sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='')
 
     sst_eq = sst.loc[dict(lat=0)]
     warm_pool_edge = np.zeros(sst_eq.shape[0])
+    indeces = np.zeros(sst_eq.shape[0])
 
     # TODO  not very efficent
     for i in range(sst_eq.shape[0]):
-        warm_pool_edge[i] = np.argwhere(sst_eq[i].values>28.).max() * 2.5 * 111.321
+        index = np.argwhere(sst_eq[i].values>28.).max()
+        indeces[i] = index
+
+        slope = sst_eq[i, index] - sst_eq[i, index-1]
+
+        intercept28C = (sst_eq[i, index] - 28.) * slope + index
+
+        warm_pool_edge[i] = intercept28C * 2.5 * 111.321
 
     df = pd.DataFrame(data=warm_pool_edge,index=sst.time.values, columns=['total'])
     df.index.name = 'time'
 
     df.to_csv(join(postdir, 'wp_edge.csv'))
-    return warm_pool_edge
+    return warm_pool_edge, indeces
 
 if __name__ == "__main__":
-    calc_warm_pool_edge()
+    a,b=calc_warm_pool_edge()

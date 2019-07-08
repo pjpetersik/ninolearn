@@ -4,6 +4,7 @@ from ninolearn.plot.nino_timeseries import nino_background
 from ninolearn.utils import scale
 from statsmodels.tsa.stattools import ccf
 from scipy.stats import spearmanr
+from sklearn import linear_model
 
 import numpy as np
 import pandas as pd
@@ -35,7 +36,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
     data_basin_mean = data_basin.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
     data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
-    data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+    data_WP_mean = data_WP.mean(dim='lat', skipna=True).max(dim='lon', skipna=True)
 
     data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
     data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
@@ -47,7 +48,11 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1965-01', enddate='2017-12', lon_min=30)
+reader = data_reader(startdate='1965-01', enddate='2018-12', lon_min=30)
+nino34 = reader.read_csv('nino3.4M')
+nino12 = reader.read_csv('nino1+2M')
+nino4 = reader.read_csv('nino4M')
+nino3 = reader.read_csv('nino3M')
 
 iod = reader.read_csv('iod')
 #wwvwest = reader.read_csv('wwvwest')
@@ -58,7 +63,18 @@ wp_edge = reader.read_csv('wp_edge', processed='total')
 #GODAS data
 
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+
 taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=7.5, lat2=-7.5)
+
+
+X = nino4.values.reshape(-1, 1)
+y = taux_WP_mean.values
+reg = linear_model.LinearRegression(fit_intercept=True)
+
+reg.fit(X , y)
+#%%
+taux_sst = reg.predict(X)
+taux_WP_mean.values = taux_WP_mean.values - taux_sst
 
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
@@ -82,10 +98,7 @@ sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #kiri=ssh.loc[dict(lat=0, lon=197.5)]
 
 #%%
-nino34 = reader.read_csv('nino3.4M')
-nino12 = reader.read_csv('nino1+2M')
-nino4 = reader.read_csv('nino4M')
-nino3 = reader.read_csv('nino3M')
+
 
 #network = reader.read_statistic('network_metrics', variable='sshg',
 #                           dataset='GODAS', processed="anom")
@@ -110,8 +123,8 @@ nino3 = reader.read_csv('nino3M')
 #c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(iod)
-#var2 = scale(wwv)
+var = scale(taux_WP_mean)
+var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)
 nino3norm = scale(nino3)
@@ -120,7 +133,7 @@ nino4norm = scale(nino4)
 
 var.plot(c='r')
 nino.plot(c='k')
-#var2.plot(c='b')
+var2.plot(c='b')
 #var3.plot(c='g')
 
 #%%
@@ -136,18 +149,6 @@ plt.ylim(-1,1)
 plt.xlim(0,48)
 plt.legend()
 plt.xlabel('lag month')
-
-#%% =============================================================================
-# Warm pool edge
-# =============================================================================
-sst_total = reader.read_netcdf('sst', dataset='ERSSTv5', processed='')
-
-
-sst_eq = sst_total.loc[dict(lat=0)]
-warm_pool_edge = np.zeros(sst_eq.shape[0])
-for i in range(sst_eq.shape[0]):
-    warm_pool_edge[i] =  np.argwhere(sst_eq[i].values>28).max() * 2.5 * 111.321
-
 
 #%%
 """

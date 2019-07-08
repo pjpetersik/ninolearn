@@ -13,7 +13,7 @@ import pandas as pd
 
 from os.path import join
 
-elnino_ep = np.array([1957, 1965, 1972, 1976, 1997, 1982,#  #2015
+elnino_ep = np.array([1957, 1965, 1972, 1976, 1982,# 1997#  #2015
                       ])
 
 elnino_cp = np.array([1953, 1958, 1963, 1968, 1969,
@@ -31,7 +31,7 @@ reader = data_reader(startdate='1981-01', enddate='2018-12', lon_min=30, lon_max
 
 nino34 = reader.read_csv('nino3.4S')
 
-spring = np.array([month in [3, 4, 5] for month in nino34.index.month])
+spring = np.array([month in [1,2, 3, ] for month in nino34.index.month])
 summer = np.array([month in [6, 7, 8] for month in nino34.index.month])
 autumn = np.array([month in [12] for month in nino34.index.month])
 
@@ -73,14 +73,14 @@ winter_cp = (winter & cp) | (winter_p1 & cp_p1)
 winter_ep = (winter & ep) | (winter_p1 & ep_p1)
 winter_nino = winter_cp | winter_ep
 
-index_cp = (winter_cp)
-index_ep = (winter_ep)
+index_cp = (spring_cp)
+index_ep = (spring_ep)
 
 
 # =============================================================================
 # Read data
 # =============================================================================
-taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+taux = reader.read_netcdf('tauy', dataset='NCEP', processed='anom')
 taux = taux.sortby('lat', ascending=False)
 tauy = reader.read_netcdf('tauy', dataset='NCEP', processed='anom')
 tauy = taux.sortby('lat', ascending=False)
