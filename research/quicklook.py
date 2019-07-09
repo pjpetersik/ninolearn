@@ -48,7 +48,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1965-01', enddate='2018-12', lon_min=30)
+reader = data_reader(startdate='1961-01', enddate='2017-12', lon_min=30)
 nino34 = reader.read_csv('nino3.4M')
 nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')
@@ -103,18 +103,18 @@ sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #network = reader.read_statistic('network_metrics', variable='sshg',
 #                           dataset='GODAS', processed="anom")
 
-#network2 = reader.read_statistic('network_metrics', variable='zos',
-#                           dataset='ORAS4', processed="anom")
+network = reader.read_statistic('network_metrics', variable='zos',
+                           dataset='ORAS4', processed="anom")
 
 #pca_dechca = reader.read_statistic('pca', variable='dec_hca', dataset='NODC', processed='anom')
 #pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
 
 
-#c2 = network['fraction_clusters_size_2']
+c2 = network['fraction_clusters_size_2']
 #c3 = network['fraction_clusters_size_3']
 #c5 = network['fraction_clusters_size_5']
 #S = network['fraction_giant_component']
-#H = network['corrected_hamming_distance']
+H = network['corrected_hamming_distance']
 #T = network['global_transitivity']
 #C = network['avelocal_transmissivity']
 #L = network['average_path_length']
@@ -123,7 +123,7 @@ sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 #c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(taux_WP_mean)
+var = scale(H)
 var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)

@@ -1,0 +1,221 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import matplotlib.pyplot as plt
+import xarray as xr
+import matplotlib.animation as animation
+from matplotlib.ticker import MaxNLocator
+
+import pandas as pd
+
+import keras.backend as K
+
+from sklearn.preprocessing import StandardScaler
+
+from scipy.stats import pearsonr
+
+from ninolearn.IO.read_post import data_reader
+from ninolearn.learn.encoderDecoder import EncoderDecoder
+from ninolearn.pathes import ed_model_dir
+from ninolearn.utils import print_header
+from ninolearn.learn.evaluation import correlation
+from ninolearn.plot.evaluation import plot_seasonal_skill
+
+plt.close("all")
+
+#%%free memory from old sessions
+K.clear_session()
+decades_arr = [60, 70, 80, 90, 100, 110]
+n_decades = len(decades_arr)
+
+lead_time_arr = np.array([0, 3, 6, 9, 12, 15, 18])
+n_lead = len(lead_time_arr)
+
+# scores for the full timeseries
+all_season_corr = np.zeros(n_lead)
+all_season_p = np.zeros(n_lead)
+all_season_rmse = np.zeros(n_lead)
+
+all_season_corr_pres = np.zeros(n_lead)
+all_season_p_pers = np.zeros(n_lead)
+all_season_rmse_pres = np.zeros(n_lead)
+
+# decadal scores
+decadel_corr = np.zeros((n_decades, n_lead))
+decadel_p = np.zeros((n_decades, n_lead))
+decadel_rmse = np.zeros((n_decades, n_lead))
+
+decadel_corr_pres = np.zeros((n_decades, n_lead))
+decadel_p_pers = np.zeros((n_decades, n_lead))
+decadel_rmse_pres = np.zeros((n_decades, n_lead))
+
+decadel_nll = np.zeros((n_decades, n_lead))
+
+# scores for seasonal values
+seas_corr = np.zeros((12, n_lead))
+seas_p = np.zeros((12, n_lead))
+
+seas_corr_pers = np.zeros((12, n_lead))
+seas_p_pers = np.zeros((12, n_lead))
+
+seas_rmse = np.zeros((12, n_lead))
+seas_rmse_pers = np.zeros((12, n_lead))
+
+seas_nll = np.zeros((12, n_lead))
+
+# =============================================================================
+# Data
+# =============================================================================
+reader = data_reader(startdate='1959-11', enddate='2017-12')
+sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom').rolling(time=3).mean()[2:]
+nino34 = reader.read_csv('nino3.4S')[2:]
+
+# select
+feature = sst.copy(deep=True)
+label = sst.copy(deep=True)
+
+# preprocess data
+feature_unscaled = feature.values.reshape(feature.shape[0],-1)
+label_unscaled = label.values.reshape(label.shape[0],-1)
+
+scaler_f = StandardScaler()
+Xorg = scaler_f.fit_transform(feature_unscaled)
+
+scaler_l = StandardScaler()
+yorg = scaler_l.fit_transform(label_unscaled)
+
+Xall = np.nan_to_num(Xorg)
+yall = np.nan_to_num(yorg)
+
+# shift
+shift = 3
+for i in range(n_lead):
+    lead = lead_time_arr[i]
+    print_header(f'Lead time: {lead} months')
+
+    y = yall[lead+shift:]
+    X = Xall[:-lead-shift]
+
+    timey = nino34.index[lead+shift:]
+
+    y_nino = nino34[lead+shift:]
+
+    pred_full_oni = np.array([])
+    true_oni = np.array([])
+    timeytrue = pd.DatetimeIndex([])
+
+    pred_da_full = xr.zeros_like(label[lead+shift:,:,:])
+
+    for j in range(n_decades):
+        decade = decades_arr[j]
+
+        print_header(f'Predict: {1902+decade}-01-01 till {1911+decade}-12-01')
+
+        # get test data
+        test_indeces = test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+        testX, testy, testtimey = X[test_indeces,:], y[test_indeces,:], timey[test_indeces]
+        testnino  = y_nino[test_indeces]
+
+        # load model corresponding to the test data
+        model = EncoderDecoder()
+        dir_name = f'ed_ensemble_decade{decade}_lead{lead}'
+        model.load(location=ed_model_dir, dir_name=dir_name)
+
+        # make prediction
+        pred, _ = model.predict(testX)
+
+        # reshape data into an xarray data array (da)
+        pred_da = xr.zeros_like(label[lead+shift:,:,:][test_indeces])
+        pred_da.values = scaler_l.inverse_transform(pred).reshape((testX.shape[0], label.shape[1], label.shape[2]))
+
+        # fill full forecast array
+        timeytrue = timeytrue.append(testtimey)
+        pred_da_full.values[test_indeces] = pred_da.values
+
+        # calculate the ONI
+        pred_oni = pred_da.loc[dict(lat=slice(-5, 5), lon=slice(190, 240))].mean(dim="lat").mean(dim='lon')
+
+        # calculate the decadel scores of the ONI
+        decadel_corr[j, i], decadel_p[j, i] = pearsonr(testnino, pred_oni)
+
+        # make the full time series
+        pred_full_oni = np.append(pred_full_oni, pred_oni)
+        true_oni = np.append(true_oni, testnino)
+
+    # correlation map
+    pred_da_full_reshaped = pred_da_full.values.reshape(pred_da_full.shape[0],-1)
+    label_reshaped = label[lead+shift:,:,:].values.reshape(pred_da_full.shape[0],-1)
+    corr_map = np.zeros(label_reshaped.shape[1])
+
+    for j in range(len(corr_map)):
+        corr_map[j] = np.corrcoef(pred_da_full_reshaped[:,j], label_reshaped[:,j])[0,1]
+    corr_map = corr_map.reshape((label.shape[1:]))
+
+    # calculate all seasons scores ONI
+    all_season_corr[i], all_season_p[i] = pearsonr(true_oni, pred_full_oni)
+
+     # seasonal skills
+    seas_corr[:, i], seas_p[:, i] = correlation(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+
+
+    # Plot correlation map
+    fig, ax = plt.subplots(figsize=(8,2))
+    plt.title(f"Lead time: {lead} month")
+    C=ax.imshow(corr_map, origin='lower', vmin=0, vmax=1)
+    plt.colorbar(C)
+
+    # Plot ONI Forecasts
+    plt.subplots(figsize=(8,1.8))
+
+    plt.plot(timeytrue, pred_full_oni, c='navy')
+    plt.plot(timey, y_nino, "k")
+
+    plt.xlabel('Time [Year]')
+    plt.ylabel('ONI [K]')
+
+    plt.axhspan(-0.5, -6, facecolor='blue',  alpha=0.1,zorder=0)
+    plt.axhspan(0.5, 6, facecolor='red', alpha=0.1,zorder=0)
+
+    plt.xlim(timeytrue[0], timeytrue[-1])
+    plt.ylim(-3,3)
+
+    plt.title(f"Lead time: {lead} month")
+    plt.grid()
+    plt.tight_layout()
+    #plt.savefig(join(plotdir, f'ed_pred_lead{lead}.pdf'))
+
+
+#%% =============================================================================
+# Plot
+# =============================================================================
+
+decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalblue']
+decade_name = ['1962-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
+
+# all season correlation score ONI
+ax = plt.figure(figsize=(6.5,3.)).gca()
+for j in range(n_decades):
+    plt.plot(lead_time_arr, decadel_corr[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
+    plt.plot(lead_time_arr, decadel_corr_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
+plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1982-2017)", lw=2)
+plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1982-2017)", lw=2)
+
+plt.ylim(-0.2,1)
+plt.xlim(0,18)
+plt.xlabel('Lead Time [Month]')
+plt.ylabel('Correlation coefficient')
+#plt.title('Correlation skill')
+plt.grid()
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+#plt.savefig(join(plotdir, f'ed_all_season_corr.pdf'))
+
+
+
+#%% contour skill plots ONI
+plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
+plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
+plt.title('Correlation skill')
+plt.tight_layout()
+#plt.savefig(join(plotdir, f'ed_seasonal_corr.pdf'))

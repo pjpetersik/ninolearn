@@ -24,10 +24,10 @@ plt.close("all")
 #%% =============================================================================
 #  process data
 # =============================================================================
-decades_arr = [80, 90, 100, 110]
+decades_arr = [60, 70, 80, 90, 100, 110]
 n_decades = len(decades_arr)
 
-lead_time_arr = np.array([0, 3, 6, 9, 12, 15, 18])
+lead_time_arr = np.array([0, 3, 6, 9, 12, 15])
 n_lead = len(lead_time_arr)
 
 # scores for the full timeseries
@@ -89,10 +89,7 @@ for i in range(n_lead):
         model = DEM()
         model.load(location=modeldir, dir_name=ens_dir)
 
-        if decade == 80:
-            test_indeces = (timey>=f'{1903+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
-        else:
-            test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+        test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
 
         testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
@@ -159,19 +156,19 @@ for i in range(n_lead):
     plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
 
 #%%
-decade_color = ['limegreen', 'darkgoldenrod', 'red', 'royalblue']
-decade_name = ['1983-1991', '1992-2001', '2002-2011', '2012-2018']
+decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalblue']
+decade_name = ['1962-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
 
 # all season correlation score
 ax = plt.figure(figsize=(6.5,3.)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_corr[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
     plt.plot(lead_time_arr, decadel_corr_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1982-2018)", lw=2)
-plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1982-2018)", lw=2)
+plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1982-2017)", lw=2)
+plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1982-2017)", lw=2)
 
 plt.ylim(-0.2,1)
-plt.xlim(0,18)
+plt.xlim(0, lead_time_arr[-1])
 plt.xlabel('Lead Time [Month]')
 plt.ylabel('Correlation coefficient')
 #plt.title('Correlation skill')
@@ -187,11 +184,11 @@ ax = plt.figure(figsize=(6.5,3.)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_rmse[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
     plt.plot(lead_time_arr, decadel_rmse_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1982-2018)", c='k', lw=2)
-plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1982-2018)", c='k', linestyle='--',  lw=2)
+plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1982-2017)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1982-2017)", c='k', linestyle='--',  lw=2)
 
 plt.ylim(0.,2)
-plt.xlim(0,18)
+plt.xlim(0, lead_time_arr[-1])
 plt.xlabel('Lead Time [Month]')
 plt.ylabel('SSRMSE')
 #plt.title('Normalized RMSE')
@@ -208,7 +205,7 @@ for j in range(n_decades):
 plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1983-2018)", c='k', lw=2)
 
 plt.ylim(-0.5,0.7)
-plt.xlim(0.,18)
+plt.xlim(0.,lead_time_arr[-1])
 plt.xlabel('Lead Time [Month]')
 plt.ylabel('NLL')
 #plt.title('Negative-loglikelihood')

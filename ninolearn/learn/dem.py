@@ -18,6 +18,7 @@ from shutil import rmtree
 from ninolearn.learn.losses import nll_gaussian
 from ninolearn.learn.evaluation import rmse
 from ninolearn.utils import print_header, small_print_header
+from ninolearn.exceptions import MissingArgumentError
 
 import warnings
 def _mixture(pred):
@@ -55,8 +56,6 @@ def nll(mean_y, mean_pred, std_pred):
     loss =  np.mean(summed, axis=-1)
     return loss
 
-class MissingArgumentError(ValueError):
-    pass
 
 class DEM(object):
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1, noise_out=0.0,
@@ -227,7 +226,7 @@ class DEM(object):
         """
         Fit the model to training data
         """
-         # clear memory
+        # clear memory
         K.clear_session()
 
         # allocate lists for the ensemble
@@ -365,7 +364,7 @@ class DEM(object):
         """
         Negative - log -likelihood for the prediction of a gaussian probability
         """
-        if  std_pred is None:
+        if std_pred is None:
             return rmse(ytrue, mean_pred)
 
         else:

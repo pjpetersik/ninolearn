@@ -13,7 +13,7 @@ import pandas as pd
 
 from os.path import join
 
-elnino_ep = np.array([1957, 1965, 1972, 1976, 1982,# 1997#  #2015
+elnino_ep = np.array([1957, 1965, 1972, 1976, 1982, 1997#  #2015
                       ])
 
 elnino_cp = np.array([1953, 1958, 1963, 1968, 1969,
@@ -27,7 +27,7 @@ lanina_ep = np.array([1964, 1970, 1973, 1988, 1998,
 lanina_cp  = np.array([1954, 1955, 1967, 1971, 1974,
               1975, 1984, 1995, 2000, 2001, 2011])
 
-reader = data_reader(startdate='1981-01', enddate='2018-12', lon_min=30, lon_max=300)
+reader = data_reader(startdate='1974-06', enddate='2017-12', lon_min=30, lon_max=300)
 
 nino34 = reader.read_csv('nino3.4S')
 
@@ -52,7 +52,6 @@ autumn_m1_cp = autumn & cp_m1
 autumn_m1_ep = autumn & ep_m1
 autumn_m1_nino = autumn_m1_cp | autumn_m1_ep
 
-
 winter_m1_cp = (winter & cp_m1) | (winter_p1 & cp)
 winter_m1_ep = (winter & ep_m1) | (winter_p1 & ep)
 winter_m1_nino = winter_m1_cp | winter_m1_ep
@@ -73,21 +72,21 @@ winter_cp = (winter & cp) | (winter_p1 & cp_p1)
 winter_ep = (winter & ep) | (winter_p1 & ep_p1)
 winter_nino = winter_cp | winter_ep
 
-index_cp = (spring_cp)
-index_ep = (spring_ep)
+index_cp = (winter_cp)
+index_ep = (winter_ep)
 
 
 # =============================================================================
 # Read data
 # =============================================================================
-taux = reader.read_netcdf('tauy', dataset='NCEP', processed='anom')
+taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 taux = taux.sortby('lat', ascending=False)
 tauy = reader.read_netcdf('tauy', dataset='NCEP', processed='anom')
 tauy = taux.sortby('lat', ascending=False)
 
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 sst = sst.sortby('lat', ascending=False)
-ssh = reader.read_netcdf('sshg', dataset='GODAS', processed='anom')
+ssh = reader.read_netcdf('zos', dataset='ORAS4', processed='anom')
 ssh = ssh.sortby('lat', ascending=False)
 olr =  - reader.read_netcdf('olr', dataset='NCAR', processed='anom')
 olr = olr.sortby('lat', ascending=False)
@@ -241,11 +240,11 @@ cs_olr = m.contourf(x, y, olr_mean_ep, cmap=plt.cm.BrBG, levels=levels_olr, exte
 
 divider = make_axes_locatable(axs[1,1])
 cax = divider.append_axes("right", size="8%", pad=0.1)
-plt.colorbar(cs_olr, cax=cax, label=r' OLRA [W/m$^2$]')
+plt.colorbar(cs_olr, cax=cax, label=r'- OLRA [W/m$^2$]')
 
 axs[1,1].text(9.2e5, 5.3e6, 'd', weight='bold', size=18,
         bbox={'facecolor': 'white', 'alpha': 0.9, 'pad': 7})
 
 plt.tight_layout()
 
-#plt.savefig(join(plotdir, 'composite.pdf'))
+plt.savefig(join(plotdir, 'composite.pdf'))
