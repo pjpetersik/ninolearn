@@ -10,11 +10,13 @@ from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.learn.evaluation import rmse
 from ninolearn.learn.dem import DEM
-from ninolearn.utils import print_header
+from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir
 
 from data_pipeline import pipeline
 
+import os
+import time
 plt.close("all")
 K.clear_session()
 #%% =============================================================================
@@ -22,12 +24,22 @@ K.clear_session()
 # =============================================================================
 decades = [60, 70, 80, 90, 100, 110]
 
-for lead_time in [0, 3, 6, 9, 12, 15]:
+for lead_time in [15, 12, 9, 6, 3, 0]:
     X, y, timey, yp = pipeline(lead_time, return_persistance=True)
     print_header(f'Lead time: {lead_time} month')
     for decade in decades:
         K.clear_session()
-        print_header(f'Test period: {1902+decade}-01-01 till {1911+decade}-12-01')
+        small_print_header(f'Test period: {1902+decade}-01-01 till {1911+decade}-12-01')
+
+        ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
+        out_dir = os.path.join(modeldir, ens_dir)
+
+        modified_time = time.gmtime(os.path.getmtime(out_dir))
+        local_time = time.localtime()
+
+        if modified_time.tm_mon==local_time.tm_mon and modified_time.tm_mday>=local_time.tm_mday-1:
+            print("Trained today!")
+            continue
 
         test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
         train_indeces = np.invert(test_indeces)
@@ -41,12 +53,7 @@ for lead_time in [0, 3, 6, 9, 12, 15]:
                     lr=[0.0001,0.01], batch_size=100, epochs=500, n_segments=5,
                     n_members_segment=1, patience=30, verbose=0, std=True)
 
-        model.fit_RandomizedSearch(trainX, trainy, n_iter=50)
-
-        if model.std:
-            ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
-        else:
-            ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
+        model.fit_RandomizedSearch(trainX, trainy, n_iter=100)
 
         model.save(location=modeldir, dir_name=ens_dir)
 

@@ -14,22 +14,21 @@ from os import mkdir, listdir, getcwd
 from shutil import rmtree
 
 from ninolearn.exceptions import MissingArgumentError
-from ninolearn.utils import small_print_header
+from ninolearn.utils import small_print_header, print_header
 
 import warnings
 
 class EncoderDecoder(object):
-    def set_parameters(self, neurons=[128, 16], dropout=0.2, noise=0.2, noise_out=0.0,
+    def set_parameters(self, neurons=(128, 16), dropout=0.2, noise=0.2, noise_out=0.2,
                  l1_hidden=0.0001, l2_hidden=0.0001, l1_out=0.0001, l2_out=0.0001, batch_size=50,
                  lr=0.0001, n_segments=5, n_members_segment=1, patience = 40, epochs=500, verbose=0):
-
         """
         Set the parameters of the Encoder-Decoder neural network
         """
 
         # hyperparameters
         self.hyperparameters = {'neurons': neurons,
-                'dropout': dropout, 'noise': noise, 'noise_out':noise,
+                'dropout': dropout, 'noise': noise, 'noise_out': noise_out,
                 'l1_hidden': l1_hidden, 'l2_hidden': l2_hidden,
                 'l1_out': l1_out, 'l2_out': l2_out,
                 'lr': lr, 'batch_size': batch_size}
@@ -81,7 +80,7 @@ class EncoderDecoder(object):
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']))(h)
 
-        self.encoder = Model(inputs=inputs, outputs=latent, name='encoder')
+        encoder = Model(inputs=inputs, outputs=latent, name='encoder')
 
         # the decoder part
         latent_inputs = Input(shape=(self.hyperparameters['neurons'][self.bottelneck_layer],))
@@ -96,12 +95,12 @@ class EncoderDecoder(object):
                         kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
                                                               self.hyperparameters['l2_out']))(h)
 
-        self.decoder = Model(inputs=latent_inputs, outputs=decoded, name='decoder')
+        decoder = Model(inputs=latent_inputs, outputs=decoded, name='decoder')
 
         # endocder-decoder model
-        encoder_decoder = Model(inputs, self.decoder(self.encoder(inputs)), name='encoder_decoder')
+        encoder_decoder = Model(inputs, decoder(encoder(inputs)), name='encoder_decoder')
 
-        return encoder_decoder
+        return encoder_decoder, encoder, decoder
 
 
     def fit(self, trainX, trainy,valX=None, valy=None):
@@ -126,7 +125,7 @@ class EncoderDecoder(object):
                 small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
 
                 # build model
-                member = self.build_model(trainX.shape[1])
+                member, member_encoder, member_decoder = self.build_model(trainX.shape[1])
 
                 # compite model
                 member.compile(loss='mse', optimizer=self.optimizer, metrics=['mse'])
@@ -143,7 +142,6 @@ class EncoderDecoder(object):
                     trainyens = np.delete(trainy, np.s_[start_ind:end_ind], axis=0)
                     valXens = trainX[start_ind:end_ind]
                     valyens = trainy[start_ind:end_ind]
-                    print
 
                 # validate on test data set
                 elif self.n_segments==1:
@@ -168,6 +166,56 @@ class EncoderDecoder(object):
             i+=1
         self.mean_val_loss = np.mean(self.val_loss)
         print(f"Mean loss: {self.mean_val_loss}")
+
+    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+
+        # check if hyperparameters where provided in lists for randomized search
+        if len(self.hyperparameters_search) == 0:
+            raise Exception("No variable indicated for hyperparameter search!")
+
+        #iterate with randomized hyperparameters
+        best_loss = np.inf
+        for i in range(n_iter):
+            print_header(f"Search iteration Nr {i+1}/{n_iter}")
+
+            # random selection of hyperparameters
+            for key in self.hyperparameters_search.keys():
+                low = self.hyperparameters_search[key][0]
+                high = self.hyperparameters_search[key][1]
+
+                if type(low) is float and type(high) is float:
+                    self.hyperparameters[key] = np.random.uniform(low, high)
+
+                if type(low) is int and type(high) is int:
+                    self.hyperparameters[key] = np.random.randint(low, high+1)
+
+                if type(low) is tuple and type(high) is tuple:
+                    hyp_list = []
+                    for i in range(len(low)):
+                        hyp_list.append(np.random.randint(low[i], high[i]+1))
+                    self.hyperparameters[key] = tuple(hyp_list)
+
+            self.fit(trainX, trainy, **kwargs)
+
+            # check if validation score was enhanced
+            if self.mean_val_loss<best_loss:
+                best_loss = self.mean_val_loss
+                self.best_hyperparameters = self.hyperparameters.copy()
+
+                small_print_header("New best hyperparameters")
+                print(f"Mean loss: {best_loss}")
+                print(self.best_hyperparameters)
+
+        # refit the model with optimized hyperparameter
+        # AND to have the weights of the DE for the best hyperparameters again
+        print_header("Refit the model with best hyperparamters")
+
+        self.hyperparameters = self.best_hyperparameters.copy()
+        print(self.hyperparameters)
+        self.fit(trainX, trainy, **kwargs)
+
+        print(f"best loss search: {best_loss}")
+        print(f"loss refitting : {self.mean_val_loss}")
 
     def predict(self, X):
         """

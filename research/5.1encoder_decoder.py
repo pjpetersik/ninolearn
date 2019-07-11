@@ -44,7 +44,7 @@ yall = np.nan_to_num(yorg)
 
 # shift
 shift = 3
-for lead in [0, 3, 6, 9, 12, 15, 18]:
+for lead in [0, 3, 6, 9, 12, 15]:
     print_header(f'Lead time: {lead} month')
 
     y = yall[lead+shift:]
@@ -67,11 +67,11 @@ for lead in [0, 3, 6, 9, 12, 15, 18]:
 
         model = EncoderDecoder()
 
-        architrecure = [256, 16]
+        model.set_parameters(neurons=(128, 16), dropout=0.2, noise=0.2, noise_out=0.2,
+                 l1_hidden=0.0001, l2_hidden=0.0001, l1_out=0.0001, l2_out=0.0001, batch_size=100,
+                 lr=0.01, n_segments=5, n_members_segment=1, patience = 40, epochs=500, verbose=0)
 
-        model.set_parameters(neurons=architrecure, lr=0.001)
         model.fit(trainX, trainy)
-
         dir_name = f'ed_ensemble_decade{decade}_lead{lead}'
         model.save(location=ed_model_dir, dir_name=dir_name)
 

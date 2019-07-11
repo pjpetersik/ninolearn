@@ -82,12 +82,14 @@ class pca(PCA):
 
         EOFarr = np.array(data[:, :, :])
 
-        self.len_time = len(self.time)
-        self.len_lat = len(self.lat)
-        self.len_lon = len(self.lon)
+        self.n_time = len(self.time)
+        self.n_lat = len(self.lat)
+        self.n_lon = len(self.lon)
+        self.nan_index = np.isnan(EOFarr[-1,:,:])
 
-        self.EOFarr = EOFarr.reshape((self.len_time,
-                                      self.len_lat * self.len_lon))
+        self.EOFarr = EOFarr.reshape((self.n_time,
+                                      self.n_lat * self.n_lon))
+
 
         self.EOFarr[np.isnan(self.EOFarr)] = 0
         self.EOFarr = detrend(self.EOFarr, axis=0)
@@ -163,8 +165,8 @@ class pca(PCA):
             norm = cm.colors.Normalize(vmax=-1, vmin=1.)
             cmap = cm.bwr
             cs = m.pcolormesh(x, y, scaleMax(
-                              self.components_[i, :].reshape(self.len_lat,
-                                                             self.len_lon)),
+                              self.components_[i, :].reshape(self.n_lat,
+                                                             self.n_lon)),
                               cmap=cmap, norm=norm)
             m.colorbar(cs)
 
@@ -176,6 +178,15 @@ class pca(PCA):
             except:
                 pass
             plt.plot(self.time, projection)
+
+    def component_map_(self, eof=1):
+        comp_map = self.components_[eof-1, :].copy().reshape(self.n_lat, self.n_lon)
+        comp_map[self.nan_index] = np.nan
+        return comp_map
+
+    def pc_projection(self, eof=1):
+        projection = np.matmul(self.EOFarr, self.components_[eof-1, :])
+        return projection
 
 
 #if __name__ == "__main__":

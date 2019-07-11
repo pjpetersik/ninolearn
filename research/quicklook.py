@@ -38,7 +38,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
     data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
     data_WP_mean = data_WP.mean(dim='lat', skipna=True).max(dim='lon', skipna=True)
 
-    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
+    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 210))]
     data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
 
     data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
@@ -48,7 +48,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 
 plt.close("all")
 
-reader = data_reader(startdate='1961-01', enddate='2017-12', lon_min=30)
+reader = data_reader(startdate='1980-01', enddate='2017-12', lon_min=30)
 nino34 = reader.read_csv('nino3.4M')
 nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')
@@ -77,8 +77,9 @@ taux_sst = reg.predict(X)
 taux_WP_mean.values = taux_WP_mean.values - taux_sst
 
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
-#olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
-#olr_basin_mean, olr_WP_mean, olr_CP_mean, olr_EP_mean = basin_means(olr, lat1=-2.5, lat2=7.5)
+olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')
+olr_basin_mean, olr_WP_mean, olr_CP_mean, olr_EP_mean = basin_means(olr, lat1=-2.5, lat2=7.5)
+
 
 #taux_CP_mean = taux_CP_mean.rolling(time=3).mean()
 #ucur = reader.read_netcdf('ucur', dataset='GODAS', processed='anom')
@@ -123,7 +124,7 @@ H = network['corrected_hamming_distance']
 #c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(H)
+var = scale(olr_CP_mean)
 var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)
