@@ -202,7 +202,7 @@ plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 ax = plt.figure(figsize=(6.5,3.)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_nll[j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1983-2018)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1983-2017)", c='k', lw=2)
 
 plt.ylim(-0.5,0.7)
 plt.xlim(0.,lead_time_arr[-1])
