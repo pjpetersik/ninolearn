@@ -11,7 +11,7 @@ from keras import backend as K
 
 from ninolearn.learn.dem import DEM
 from ninolearn.pathes import modeldir
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, rmse, seasonal_nll
+from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, seasonal_nll
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.plot.evaluation import plot_seasonal_skill
 from ninolearn.utils import print_header
@@ -153,7 +153,14 @@ for i in range(n_lead):
     plt.title(f"Lead time: {lead_time} month")
     plt.grid()
     plt.tight_layout()
-    plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
+    #plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
+    plt.savefig(join(plotdir, f'pred_lead{lead_time}.jpg'), dpi=360)
+
+    #plot std only
+    plt.subplots(figsize=(8,1.8))
+    plot_prediction(timeytrue, pred_std_full)
+
+
 
 #%%
 decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalblue']
@@ -176,7 +183,8 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'all_season_corr.pdf'))
+#plt.savefig(join(plotdir, f'all_season_corr.pdf'))
+plt.savefig(join(plotdir, f'all_season_corr.jpg'), dpi=360)
 
 #%% all season rmse score
 ax = plt.figure(figsize=(6.5,3.)).gca()
@@ -196,7 +204,7 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
+#plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 
 #%% all seasons negative loglikelihood
 ax = plt.figure(figsize=(6.5,3.)).gca()
@@ -213,24 +221,25 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'all_season_nll.pdf'))
+#plt.savefig(join(plotdir, f'all_season_nll.pdf'))
 
 #%% contour skill plots
 plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
 plt.title('Correlation skill')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'seasonal_corr.pdf'))
+#plt.savefig(join(plotdir, f'seasonal_corr.pdf'))
+plt.savefig(join(plotdir, f'seasonal_corr.jpg'), dpi=360)
 
 plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.inferno_r, extend='max')
 plt.title('SRMSE')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'seasonal_rmse.pdf'))
+#plt.savefig(join(plotdir, f'seasonal_rmse.pdf'))
 
 plot_seasonal_skill(lead_time_arr, seas_nll.T, vmin=-1, vmax=1, cmap=plt.cm.inferno_r, extend='both')
 plt.title('NLL')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'seasonal_nll.pdf'))
+#plt.savefig(join(plotdir, f'seasonal_nll.pdf'))
 
 
 #%% FOR ENSO ML Paper

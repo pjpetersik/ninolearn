@@ -248,3 +248,4 @@ axs[1,1].text(9.2e5, 5.3e6, 'd', weight='bold', size=18,
 plt.tight_layout()
 
 plt.savefig(join(plotdir, 'composite.pdf'))
+plt.savefig(join(plotdir, 'composite.jpg'), dpi=360)

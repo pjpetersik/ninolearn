@@ -108,8 +108,8 @@ network = reader.read_statistic('network_metrics', variable='zos',
                            dataset='ORAS4', processed="anom")
 
 #pca_dechca = reader.read_statistic('pca', variable='dec_hca', dataset='NODC', processed='anom')
-#pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
-
+pca_decsst = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')
+pca_decsst = pca_decsst['pca1']
 
 c2 = network['fraction_clusters_size_2']
 #c3 = network['fraction_clusters_size_3']
@@ -124,7 +124,7 @@ H = network['corrected_hamming_distance']
 #c2_oras = network2['fraction_clusters_size_2']
 
 plt.subplots()
-var = scale(olr_CP_mean)
+var = scale(pca_decsst)
 var2 = scale(wwv)
 #var3 = scale(wwvwest)
 nino = scale(nino34)

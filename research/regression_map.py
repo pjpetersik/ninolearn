@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 from ninolearn.IO.read_post import data_reader
+from os.path import join
+from ninolearn.private import plotdir
 # =============================================================================
 # Read
 # =============================================================================
@@ -27,7 +29,7 @@ olr = olr.sortby('lat', ascending=False)
 SSTA_gradient = np.nanmean(np.gradient(sst.loc[dict(lat=0, lon=slice(120, 280))], axis=0), axis=1)
 OLR_mean = olr.loc[dict(lat=slice(5, -5), lon=slice(150, 210))].mean(dim='lon').mean(dim='lat')
 
-X = np.stack((nino, OLR_mean, iod), axis=1)
+X = np.stack((nino, OLR_mean), axis=1)
 reg = linear_model.LinearRegression(fit_intercept=False)
 
 taux_flat = taux.values.reshape(taux.shape[0],-1)
@@ -50,7 +52,7 @@ p_map = p.reshape((taux.shape[1],taux.shape[2]))
 
 coef_sst = reg.coef_[:,0].reshape((taux.shape[1],taux.shape[2])) * X[:,0].std()
 coef_olr = reg.coef_[:,1].reshape((taux.shape[1],taux.shape[2])) * X[:,1].std()
-coef_iod = reg.coef_[:,2].reshape((taux.shape[1],taux.shape[2])) * X[:,2].std()
+#coef_iod = reg.coef_[:,2].reshape((taux.shape[1],taux.shape[2])) * X[:,2].std()
 # =============================================================================
 # Plot
 # =============================================================================
@@ -64,16 +66,16 @@ levels_r2 = np.linspace(0, 0.8, 21, endpoint = True)
 
 # Generate the base plot
 lon2, lat2 = np.meshgrid(taux.lon, taux.lat)
-fig, axs = plt.subplots(3, 1, figsize=(9,5))
+fig, axs = plt.subplots(2, 1, figsize=(9,5))
 m = []
-for i in range(3):
+for i in range(2):
     m.append(Basemap(projection='merc',llcrnrlat=-30,urcrnrlat=30,\
             llcrnrlon=100,urcrnrlon=300,lat_ts=5,resolution='c', ax=axs[i]))
 
     x, y = m[i](lon2, lat2)
 
     m[i].drawparallels(np.arange(-90., 120., 15.), labels=[1,0,0,0], color='grey')
-    if i == 2:
+    if i == 1:
         m[i].drawmeridians(np.arange(0., 360., 30.),  labels=[0,0,0,1], color='grey')
     else:
         m[i].drawmeridians(np.arange(0., 360., 30.),  color='grey')
@@ -89,7 +91,7 @@ for i in range(3):
 # Overlay the base plot with
 cs_sst = m[0].contour(x, y, coef_sst, vmin=-vmax, vmax=vmax, levels=levels, cmap=plt.cm.seismic)
 cs_olr = m[1].contour(x, y, coef_olr, vmin=-vmax, vmax=vmax, levels=levels, cmap=plt.cm.seismic)
-cs_iod = m[2].contour(x, y, coef_iod, vmin=-vmax, vmax=vmax, levels=levels, cmap=plt.cm.seismic)
+#cs_iod = m[2].contour(x, y, coef_iod, vmin=-vmax, vmax=vmax, levels=levels, cmap=plt.cm.seismic)
 
 
 
@@ -105,4 +107,4 @@ fig.colorbar(cs_sst, cax= cbar_ax1, label=r'$\tau_x$[m$^2$s$^{-2}$]')
 fig.colorbar(cs_r2, cax = cbar_ax2, label=r'$r^2$')
 
 
-
+plt.savefig(join(plotdir, 'regression_taux.jpg'), dpi=360)

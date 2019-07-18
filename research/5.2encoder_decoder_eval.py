@@ -179,7 +179,8 @@ for i in range(n_lead):
     plt.title(f"Lead time: {lead} month")
     C=ax.imshow(corr_map, origin='lower', vmin=0, vmax=1)
     plt.colorbar(C)
-    plt.savefig(join(plotdir, f'ed_corr_map_lead{lead}.pdf'))
+    #plt.savefig(join(plotdir, f'ed_corr_map_lead{lead}.pdf'))
+
 
     # Plot ONI Forecasts
     plt.subplots(figsize=(8,1.8))
@@ -199,7 +200,7 @@ for i in range(n_lead):
     plt.title(f"Lead time: {lead} month")
     plt.grid()
     plt.tight_layout()
-    plt.savefig(join(plotdir, f'ed_pred_lead{lead}.pdf'))
+    #plt.savefig(join(plotdir, f'ed_pred_lead{lead}.pdf'))
 
 
 #%% =============================================================================
@@ -226,7 +227,7 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_all_season_corr.pdf'))
+#plt.savefig(join(plotdir, f'ed_all_season_corr.pdf'))
 
 #%% all season rmse score
 ax = plt.figure(figsize=(6.5,3.)).gca()
@@ -246,7 +247,7 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_all_season_rmse.pdf'))
+#plt.savefig(join(plotdir, f'ed_all_season_rmse.pdf'))
 
 
 #%% contour skill plots ONI
@@ -254,9 +255,9 @@ plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
 plt.title('Correlation skill')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_seasonal_corr.pdf'))
+#plt.savefig(join(plotdir, f'ed_seasonal_corr.pdf'))
 
 plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.inferno_r, extend='max')
 plt.title('SRMSE')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_seasonal_rmse.pdf'))
+#plt.savefig(join(plotdir, f'ed_seasonal_rmse.pdf'))

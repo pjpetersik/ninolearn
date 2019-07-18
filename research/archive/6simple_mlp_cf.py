@@ -15,7 +15,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation import plot_confMat
-from ninolearn.learn.mlp import nino_to_category, include_time_lag
+from ninolearn.utils import nino_to_category, include_time_lag
 
 K.clear_session()
 

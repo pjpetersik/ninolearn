@@ -31,14 +31,15 @@ for lead_time in [15, 12, 9, 6, 3, 0]:
         K.clear_session()
         small_print_header(f'Test period: {1902+decade}-01-01 till {1911+decade}-12-01')
 
+        # jump loop iteration if already trained
         ens_dir=f'ensemble_decade{decade}_lead{lead_time}'
         out_dir = os.path.join(modeldir, ens_dir)
 
         modified_time = time.gmtime(os.path.getmtime(out_dir))
-        local_time = time.localtime()
+        compare_time = time.strptime("15-7-2019 13:00 UTC", "%d-%m-%Y %H:%M %Z")
 
-        if modified_time.tm_mon==local_time.tm_mon and modified_time.tm_mday>=local_time.tm_mday-1:
-            print("Trained today!")
+        if modified_time>compare_time:
+            print("Trained already!")
             continue
 
         test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')

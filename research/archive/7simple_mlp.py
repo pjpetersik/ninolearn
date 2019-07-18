@@ -19,7 +19,7 @@ from sklearn.preprocessing import StandardScaler
 from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_explained_variance
 from ninolearn.learn.evaluation import rmse
-from ninolearn.learn.mlp import include_time_lag
+from ninolearn.utils import include_time_lag
 
 K.clear_session()
 

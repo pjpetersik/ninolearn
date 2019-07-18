@@ -76,6 +76,7 @@ axs[0].text(9.2e5, 5.3e6, 'a', weight='bold', size=18,
 
 
 plt.savefig(join(plotdir, 'dec_sst_eof.pdf'))
+plt.savefig(join(plotdir, 'dec_sst_eof.jpg'), dpi = 360)
 #%%
 # =============================================================================
 # Data
@@ -187,10 +188,11 @@ fig.subplots_adjust(right=0.75)
 cbar_ax1 = fig.add_axes([0.75, 0.1, 0.04, 0.8])
 cbar_ax2 = fig.add_axes([0.87, 0.1, 0.04, 0.8])
 
-fig.colorbar(cs_olr, cax= cbar_ax1, label=r'OLR [W$\,$m$^{-2}$]  /  $\tau_x$ [m$^2\,$s$^{-2}$]')
+fig.colorbar(cs_olr, cax= cbar_ax1, label=r'OLR [W$\,$m$^{-2}$]  /  $\hat\tau_x$ [m$^2\,$s$^{-2}$]')
 fig.colorbar(cs_r2, cax = cbar_ax2, label=r'$r^2$')
 
 
 
 
 plt.savefig(join(plotdir, 'dec_olr_regression.pdf'))
+plt.savefig(join(plotdir, 'dec_olr_regression.jpg'), dpi = 360)

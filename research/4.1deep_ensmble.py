@@ -13,9 +13,8 @@ from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.learn.evaluation import rmse
-from ninolearn.learn.mlp import include_time_lag
 from ninolearn.learn.dem import DEM
-from ninolearn.utils import print_header
+from ninolearn.utils import print_header, include_time_lag
 from ninolearn.pathes import modeldir
 
 #%%
@@ -39,7 +38,7 @@ def selected_variables(weigt_matrix, time_lag):
 #%% =============================================================================
 # read data
 # =============================================================================
-reader = data_reader(startdate='1960-01', enddate='2017-12')
+reader = data_reader(startdate='1980-01', enddate='2017-12')
 
 # NINO3.4 Index
 nino34 = reader.read_csv('nino3.4S')

@@ -45,8 +45,8 @@ class recharge_oscillator(object):
 
 class limited_recharge_oscillator(object):
     def __init__(self, r=0.25, alpha=0.125, b_0=2.5,
-                 gamma=0.75, c=1.,  mu = 0.6,
-                 delta_s=0.3, d=1.):
+                 gamma=0.65, c=1.,  mu = 0.4,
+                 delta_s=0.1, d=1.):
         """
         Initialize the recharge oscillator in its non-dimensional form
         """
@@ -70,10 +70,12 @@ class limited_recharge_oscillator(object):
         return hw + tauc/2
 
     def tau_c(self,Te, Tc):
-        return self.b * Tc #+ np.random.uniform(-0.1, 0.1)
+        return self.b * Tc + 1.5 * Tc
 
     def tau_e(self,Te, Tc):
-        return self.b * (Te - Tc)
+        return self.b * (Te - Tc) + 0.3 * Te #- 0.5 * Tc
+
+
 
     def dhw_dt(self, hw, Te, Tc):
         return -self.r * hw - self.alpha * (self.tau_c(Te, Tc) + self.tau_e(Te, Tc))/2
@@ -84,15 +86,13 @@ class limited_recharge_oscillator(object):
 
         he = self.h_e(hw, tauc, taue)
 
-        return  - self.c * Te + self.gamma * he #+ 0.1*tauc - 0.01* (hw + self.b * Te)**3
+        return  - self.c * Te + self.gamma * he  - 0.1* (hw + self.b * Te)**3
 
     def dTc_dt(self, hw, Te, Tc, t):
         tauc = self.tau_c(Te, Tc)
-        taue = self.tau_e(Te, Tc)
-        he = self.h_e(hw, tauc, taue)
         hc = self.h_c(hw, tauc)
 
-        return  - self.d * Tc + self.delta_s * tauc + self.gamma * hc  #- 0.5*np.cos(np.pi*2 * t)#+ 5*np.random.uniform(-1, 1)#- 0.01*Tc**3
+        return  - self.d * Tc + self.delta_s * tauc + self.gamma * hc - 0.1*Tc**3
 
 
 

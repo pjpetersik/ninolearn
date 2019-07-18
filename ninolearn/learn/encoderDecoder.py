@@ -3,7 +3,7 @@ import numpy as np
 
 import keras.backend as K
 from keras.models import Model, save_model, load_model
-from keras.layers import Dense, Input
+from keras.layers import Dense, Input, GaussianDropout
 from keras.layers import GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
@@ -19,11 +19,76 @@ from ninolearn.utils import small_print_header, print_header
 import warnings
 
 class EncoderDecoder(object):
-    def set_parameters(self, neurons=(128, 16), dropout=0.2, noise=0.2, noise_out=0.2,
-                 l1_hidden=0.0001, l2_hidden=0.0001, l1_out=0.0001, l2_out=0.0001, batch_size=50,
-                 lr=0.0001, n_segments=5, n_members_segment=1, patience = 40, epochs=500, verbose=0):
+    """
+    The Encoder-Decoder is an neural network that has the same architecture as
+    an Autoencoder. Hence, labal and feature vector have the same dimension.
+    In the ninolearn package the model is called Encoder-Decoder because it is
+    used for prediction purposes and therefore label and feature vector might
+    be soparated by some time lag or even are not the same variable.
+    """
+    def set_parameters(self, neurons=(128, 16), dropout=0.2, noise=0.2,
+                       noise_out=0.2, l1_hidden=0.0001, l2_hidden=0.0001,
+                       l1_out=0.0001, l2_out=0.0001, batch_size=50,
+                       lr=0.0001, n_segments=5, n_members_segment=1,
+                       patience = 40, epochs=500, verbose=0):
         """
-        Set the parameters of the Encoder-Decoder neural network
+        Set the parameters of the Encoder-Decoder neural network.
+
+        Note, if the parameters are given in a list, ninolearn assumes that
+        a the method .fit_RandomizedSearch() is used.
+
+        :type neurons: tuple (list of two tuples for .fit_RandomizedSearch())
+        :param neurons: The architecture of the Encoder-Decoder. The layer
+        with the lowest number of neurons is assumed to be the bottleneck layer
+        for which the activation function is linear. Furthermore, the output
+        layer has a linear activation as well. All other layers have the ReLU
+        as activation
+
+        :type dropout: float
+        :param dropout: Standard deviation of the Gaussian dropout. Dropout
+        layers are installed behind each hidden layer in the Encoder and the
+        Decoder.
+
+        :type noise: float
+        :param noise: Standard deviation of Gaussian noise for the input layer.
+
+        :type noise: float
+        :param noise: Standard deviation of Gaussian noise for the output
+        layer.
+
+        :type l1_hidden,  l2_hidden: float
+        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty
+        term for the hidden layer weights.
+
+        :type l1_out,  l2_out: float
+        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty
+        term for the output layer weights.
+
+        :type batch_size: int
+        :param batch_size: Batch size  during training of a member of the
+        Encoder-Decoder.
+
+        :type lr: float
+        :param lr: The learning rate.
+
+        :type n_segments: int
+        :param n_segments: The number of segments that are used for the cross-
+        validation scheme and the training of the Ensemble members.
+
+        :type n_members_segment:  int
+        :param n_members_segment: The number of members that are trained for
+        one segment.
+
+        :type patience: int
+        :param patience: The number of epochs to wait until Early-Stopping
+        stops the training.
+
+        :type epochs: int
+        :param epochs: The maximum number of epochs.
+
+        :type verbose: int
+        :param verbose: Print some progress to screen. Either 0 (silent), 1 or
+        2.
         """
 
         # hyperparameters
@@ -57,10 +122,17 @@ class EncoderDecoder(object):
         self.n_members = self.n_segments * self.n_members_segment
 
 
-    def build_model(self, n_features):
+    def build_model(self, n_features, n_labels):
         """
         The method builds a new member of the ensemble and returns it.
+
+        :type n_features: int
+        :param n_features: The number of features.
+
+        :type n_labels: int
+        :param n_labels: The number of labels.
         """
+
         # initialize optimizer and early stopping
         self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
         self.es = EarlyStopping(monitor=f'val_mean_squared_error', min_delta=0.0, patience=self.patience, verbose=1,
@@ -75,6 +147,7 @@ class EncoderDecoder(object):
             h = Dense(self.hyperparameters['neurons'][i], activation='relu',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']))(h)
+            h = GaussianDropout(self.hyperparameters['dropout'])(h)
 
         latent = Dense(self.hyperparameters['neurons'][self.bottelneck_layer], activation='linear',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
@@ -90,8 +163,9 @@ class EncoderDecoder(object):
             h = Dense(self.hyperparameters['neurons'][i], activation='relu',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']))(h)
+            h = GaussianDropout(self.hyperparameters['dropout'])(h)
 
-        decoded = Dense(n_features, activation='linear',
+        decoded = Dense(n_labels, activation='linear',
                         kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
                                                               self.hyperparameters['l2_out']))(h)
 
@@ -103,11 +177,32 @@ class EncoderDecoder(object):
         return encoder_decoder, encoder, decoder
 
 
-    def fit(self, trainX, trainy,valX=None, valy=None):
-        # clear memory
-        K.clear_session
+    def fit(self, trainX, trainy, valX=None, valy=None):
+        """
+        Fit the model. If n_segments is 1, then a validation data set needs to
+        be supplied.
 
-         # allocate lists for the ensemble
+        :type trainX: np.ndarray
+        :param trainX: The training feature set. 2-D array with dimensions
+        (timesteps, features)
+
+        :type trainy: np.ndarray
+        :param trainy: The training label set. 2-D array with dimensions
+        (timesteps, labels)
+
+        :type valX: np.ndarray
+        :param valX: The validation feature set. 2-D array with dimensions
+        (timesteps, features).
+
+        :type valy:  np.ndarray
+        :param valy: The validation label set. 2-D array with dimensions
+        (timesteps, labels).
+        """
+
+        # clear memory
+        K.clear_session()
+
+        # allocate lists for the ensemble
         self.ensemble = []
         self.history = []
         self.val_loss = []
@@ -125,7 +220,7 @@ class EncoderDecoder(object):
                 small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
 
                 # build model
-                member, member_encoder, member_decoder = self.build_model(trainX.shape[1])
+                member, member_encoder, member_decoder = self.build_model(trainX.shape[1], trainy.shape[1])
 
                 # compite model
                 member.compile(loss='mse', optimizer=self.optimizer, metrics=['mse'])
@@ -168,6 +263,21 @@ class EncoderDecoder(object):
         print(f"Mean loss: {self.mean_val_loss}")
 
     def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+        """
+        Hyperparameter optimazation using random search.
+
+
+        :type trainX: np.ndarray
+        :param trainX: The training feature set. 2-D array with dimensions
+        (timesteps, features)
+
+        :type trainy: np.ndarray
+        :param trainy: The training label set. 2-D array with dimensions
+        (timesteps, labels)
+
+        :param **kwargs: Keyword arguments are passed to the .fit() method.
+        """
+
 
         # check if hyperparameters where provided in lists for randomized search
         if len(self.hyperparameters_search) == 0:
@@ -219,7 +329,10 @@ class EncoderDecoder(object):
 
     def predict(self, X):
         """
-        Ensemble prediction
+        Ensemble prediction.
+
+        :type X: np.ndarray
+        :param X: Feature set for which the prediction should be made.
         """
         pred_ens = np.zeros((X.shape[0], X.shape[1], self.n_members))
         for i in range(self.n_members):
@@ -229,7 +342,15 @@ class EncoderDecoder(object):
 
     def save(self, location='', dir_name='ed_ensemble'):
         """
-        Save the ensemble
+        Save the ensemble.
+
+        :type location: str
+        :param location: Base directory where to for all Encoder-Decoder
+        ensembles
+
+        :type dir_name: str
+        :param dir_name: The specific directory name in the base directory
+        were to save the ensemble.
         """
         path = join(location, dir_name)
         if not exists(path):
@@ -245,7 +366,15 @@ class EncoderDecoder(object):
 
     def load(self, location=None,  dir_name='ensemble'):
         """
-        Load the ensemble
+        Save the ensemble.
+
+        :type location: str
+        :param location: Base directory where for all Encoder-Decoder
+        ensembles.
+
+        :type dir_name: str
+        :param dir_name: The specific directory name in the base directory
+        were to find the ensemble.
         """
         if location is None:
             location = getcwd()

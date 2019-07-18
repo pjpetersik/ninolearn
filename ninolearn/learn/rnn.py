@@ -2,8 +2,6 @@
 This code was inspired by the instructions found on
 https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural
 -networks-python-keras/
-
-TODO: make the NRMSE the loss
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,17 +13,14 @@ import keras.backend as K
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from keras.layers import Dropout, GaussianNoise
-from keras.optimizers import Adam, RMSprop
+from keras.layers import Dropout
+from keras.optimizers import RMSprop
 from keras.callbacks import EarlyStopping
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-from scipy import interpolate
 
-from ninolearn.IO.read_post import (data_reader, csv_vars)
-
-from .augment import window_warping
+from ninolearn.IO.read_post import data_reader, csv_vars
 
 class Data(object):
     def __init__(self, label_name=None, data_pool_dict=None,
@@ -86,27 +81,6 @@ class Data(object):
         self.__trainX, self.__testX = self._create_feature_set(self.features)
         self.trainXorg, self.testXorg = self.__trainX.copy(), self.__testX.copy()
 
-        if False:
-            for _ in range(20):
-                first = True
-                for key in self.feature_keys:
-                    self.features_df[key] = self._read_wrapper(key)
-                    feature_values = self.features_df[key].values
-                    feature_warped = window_warping(feature_values)
-
-                    if first:
-                        features = self._prepare_feature(key, feature_warped)
-                        first = False
-                    else:
-                        new_feature = self._prepare_feature(key, feature_warped)
-
-                        features = np.concatenate((features, new_feature),
-                                                       axis=2)
-                warped_trainX, warped_testX = self._create_feature_set(features)
-
-                self.__trainX = np.concatenate((self.__trainX, warped_trainX), axis = 0)
-                self.__testX = np.concatenate((self.__testX, warped_testX), axis = 0)
-
 
     def load_label(self, key):
         """
@@ -124,16 +98,6 @@ class Data(object):
 
         self.__trainY, self.__testY = self._create_label_set(self.label)
         self.trainYorg, self.testYorg = self.__trainY.copy(), self.__testY.copy()
-
-        if False:
-            for _ in range(20):
-                label_warped = window_warping(label_values)
-                label = self._prepare_label(label_warped)
-                warped_trainY, warped_testY = self._create_label_set(label)
-
-                self.__trainY = np.concatenate((self.__trainY, warped_trainY), axis = 0)
-                self.__testY = np.concatenate((self.__testY, warped_testY), axis = 0)
-
 
     def _read_wrapper(self, key):
         """
