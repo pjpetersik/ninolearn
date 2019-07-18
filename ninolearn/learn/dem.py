@@ -21,43 +21,46 @@ from ninolearn.utils import print_header, small_print_header
 from ninolearn.exceptions import MissingArgumentError
 
 import warnings
-def _mixture(pred):
-    """
-    returns the ensemble mixture results
-    """
-    mix_mean = pred[:,0,:].mean(axis=1)
-    mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
-    mix_std = np.sqrt(mix_var)
-    return mix_mean, mix_std
-
-def predict_ens(model_ens, X):
-    """
-    generates the ensemble prediction of a model ensemble
-
-    :param model_ens: list of ensemble models
-    :param X: the features
-    """
-    pred_ens = np.zeros((X.shape[0], 2, len(model_ens)))
-    for i in range(len(model_ens)):
-        pred_ens[:,:,i] = model_ens[i].predict(X)
-    return _mixture(pred_ens)
-
-def nll(mean_y, mean_pred, std_pred):
-    """
-    Negative - log -likelihood for the prediction of a gaussian probability
-    """
-    mean = mean_pred
-    sigma = std_pred + 1e-6 # adding 1-e6 for numerical stability reasons
-
-    first  =  0.5 * np.log(np.square(sigma))
-    second =  np.square(mean - mean_y) / (2  * np.square(sigma))
-    summed = first + second
-
-    loss =  np.mean(summed, axis=-1)
-    return loss
+#def _mixture(pred):
+#    """
+#    returns the ensemble mixture results
+#    """
+#    mix_mean = pred[:,0,:].mean(axis=1)
+#    mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
+#    mix_std = np.sqrt(mix_var)
+#    return mix_mean, mix_std
+#
+#def predict_ens(model_ens, X):
+#    """
+#    generates the ensemble prediction of a model ensemble
+#
+#    :param model_ens: list of ensemble models
+#    :param X: the features
+#    """
+#    pred_ens = np.zeros((X.shape[0], 2, len(model_ens)))
+#    for i in range(len(model_ens)):
+#        pred_ens[:,:,i] = model_ens[i].predict(X)
+#    return _mixture(pred_ens)
+#
+#def nll(mean_y, mean_pred, std_pred):
+#    """
+#    Negative - log -likelihood for the prediction of a gaussian probability
+#    """
+#    mean = mean_pred
+#    sigma = std_pred + 1e-6 # adding 1-e6 for numerical stability reasons
+#
+#    first  =  0.5 * np.log(np.square(sigma))
+#    second =  np.square(mean - mean_y) / (2  * np.square(sigma))
+#    summed = first + second
+#
+#    loss =  np.mean(summed, axis=-1)
+#    return loss
 
 
 class DEM(object):
+    """
+    A class to generate a Deep Ensemble.
+    """
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1, noise_out=0.0,
                  l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
                  l2_sigma=0.1, batch_size=10, n_segments=5, n_members_segment=1,
@@ -97,8 +100,7 @@ class DEM(object):
         standard-deviation-output neuron.
 
         :type l2_mu: float
-        :l2_mu: Coefficent for the L2 penalty term in the
-        standard-deviation-output neuron.
+        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation-output neuron.
 
         :param batch_size: Batch size for the training.
 

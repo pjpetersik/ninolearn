@@ -5,10 +5,14 @@ from scipy.io import loadmat
 
 from ninolearn.pathes import rawdir
 
+"""
+This module collects a bunch methods to read the raw data files.
+"""
+
 
 def nino34_anom():
     """
-    get the Nino3.4 Index anomaly
+    Get the Nino3.4 Index anomaly.
     """
     data = pd.read_csv(join(rawdir, "nino34.txt"), delim_whitespace=True)
     return data
@@ -34,7 +38,6 @@ def nino_anom(index="3.4", period ="S", detrend=False):
             elif not detrend:
                 data = pd.read_csv(join(rawdir, "nino_1_4.txt"),
                                            delim_whitespace=True)
-
         return data
 
     except UnboundLocalError:
