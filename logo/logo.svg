@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="New document 1">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="472.75541"
+     inkscape:cy="829.27304"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1600"
+     inkscape:window-height="855"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#ff0000;stroke:#000000;stroke-width:2.77083348999999979px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 525.77101,93.104747 c 0,0 -125.14982,9.647763 -178.125,15.833323 -52.97518,6.18555 -117.74845,2.07233 -138.54168,23.75 -20.79322,21.67767 7.14984,16.39328 17.8125,33.64584 10.66267,17.25257 69.27084,25.72916 87.08336,25.72916 17.8125,0 80.75315,-6.5249 122.70833,-3.95833 41.95519,2.56657 77.45646,18.46777 98.95833,33.64584 21.50186,15.17808 19.79167,39.58333 19.79167,39.58333"
+       id="path2996"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="czzzzzzc" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3020"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TG Pagella Math;-inkscape-font-specification:TG Pagella Math"
+       transform="matrix(1.5314749,0,0,1.5314749,-49.81317,48.452281)"><flowRegion
+         id="flowRegion3022"><rect
+           id="rect3024"
+           width="312.85715"
+           height="40"
+           x="202.85715"
+           y="43.790752"
+           style="font-size:11px" /></flowRegion><flowPara
+         id="flowPara3026"
+         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Serif;-inkscape-font-specification:DejaVu Serif">NinoLearn</flowPara></flowRoot>  </g>
+</svg>
