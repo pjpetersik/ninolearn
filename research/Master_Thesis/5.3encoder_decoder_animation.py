@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 import xarray as xr
 import matplotlib.animation as animation
 from matplotlib.ticker import MaxNLocator
-from mpl_toolkits.basemap import Basemap
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 import pandas as pd
 
 import keras.backend as K
@@ -16,14 +15,12 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import pearsonr
 
 from ninolearn.IO.read_post import data_reader
-from ninolearn.learn.encoderDecoder import EncoderDecoder
+from ninolearn.learn.models.encoderDecoder import EncoderDecoder
 from ninolearn.pathes import ed_model_dir
 from ninolearn.utils import print_header
 from ninolearn.learn.evaluation import correlation
 from ninolearn.plot.evaluation import plot_seasonal_skill
-from ninolearn.private import plotdir
 
-from os.path import join
 plt.close("all")
 
 #%%free memory from old sessions
@@ -33,6 +30,43 @@ n_decades = len(decades_arr)
 # =============================================================================
 # Animation
 # =============================================================================
+
+def animation_ed(true, pred, nino,  nino_pred, time):
+    fig, ax = plt.subplots(3, 1, figsize=(6,7), squeeze=False)
+
+    vmin = -3
+    vmax = 3
+
+    true_im = ax[0,0].imshow(true[0], origin='lower', vmin=vmin, vmax=vmax, cmap=plt.cm.bwr)
+    pred_im = ax[1,0].imshow(pred[0], origin='lower', vmin=vmin, vmax=vmax, cmap=plt.cm.bwr)
+    title = ax[0,0].set_title('')
+
+    ax[2,0].plot(time, nino)
+    ax[2,0].plot(time, nino_pred)
+    ax[2,0].set_ylim(-3,3)
+    ax[2,0].set_xlim(time[0], time[-1])
+
+    vline = ax[2,0].plot([time[0], time[0]], [-10,10], color='k')
+
+
+    def update(data):
+        true_im.set_data(data[0])
+        pred_im.set_data(data[1])
+        title_str = np.datetime_as_string(data[0].time.values)[:10]
+        title.set_text(title_str)
+
+        vline[0].set_data([data[2], data[2]],[-10,10])
+
+    def data_gen():
+        k=0
+        kmax = len(label)
+        while k<kmax:
+
+            yield true.loc[time[k]], pred.loc[time[k]], time[k]
+            k+=1
+
+    ani = animation.FuncAnimation(fig, update, data_gen, interval=100)
+    return ani
 
 #%% =============================================================================
 # Data
@@ -59,7 +93,7 @@ Xall = np.nan_to_num(Xorg)
 yall = np.nan_to_num(yorg)
 
 shift = 3
-lead = 6
+lead = 9
 print_header(f'Lead time: {lead} months')
 
 y = yall[lead+shift:]
@@ -109,55 +143,5 @@ for j in range(n_decades):
     true_oni = np.append(true_oni, testnino)
 
 
-
-#%% =============================================================================
-# #Plots
-# =============================================================================
-levels_sst = np.arange(-3, 3.25, 0.25)
-lon2, lat2 = np.meshgrid(pred_da_full.lon, pred_da_full.lat)
-
-
-
-plt.close("all")
-
-fig, axs = plt.subplots(2, 1, figsize=(6,4))
-
-
-date = '1999-01-01'
-
-m = []
-
-for i in [0,1]:
-    m.append(Basemap(projection='merc',llcrnrlat=-30,urcrnrlat=30,\
-                llcrnrlon=120,urcrnrlon=280,lat_ts=5,resolution='c',ax=axs[i]))
-
-    x, y = m[i](lon2, lat2)
-
-    m[i].drawparallels(np.arange(-90., 120., 15.), labels=[1,0,0,0], color='grey')
-    m[i].drawmeridians(np.arange(0., 360., 30.), color='grey')
-    m[i].drawmapboundary(fill_color='white')
-    m[i].drawcoastlines()
-
-
-
-axs[0].set_title('ND(1998)J(1999)', size=14)
-cs_sst = m[0].contourf(x, y, pred_da_full.loc[date], cmap=plt.cm.seismic,levels=levels_sst, extend='both')
-axs[0].text(9.2e5, 5.3e6, 'Forecast', weight='bold', size=12,
-        bbox={'facecolor': 'white', 'alpha': 0.9, 'pad': 7})
-
-
-cs_sst = m[1].contourf(x, y, label.loc[date], cmap=plt.cm.seismic,levels=levels_sst, extend='both')
-axs[1].text(9.2e5, 5.3e6, 'Observation', weight='bold', size=12,
-        bbox={'facecolor': 'white', 'alpha': 0.9, 'pad': 7})
-
-
-
-
-# Color bar
-fig.subplots_adjust(right=0.7)
-cax= fig.add_axes([0.75, 0.15, 0.02, 0.7])
-
-
-fig.colorbar(cs_sst, cax=cax,label="T [K]")
-
-plt.savefig(join(plotdir, f'ed_forecast_lead{lead}_{date[:-3]}.pdf'))
+#%%
+ani = animation_ed(label[lead+shift:], pred_da_full, true_oni, pred_full_oni, timeytrue)

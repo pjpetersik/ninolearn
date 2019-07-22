@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 import keras.backend as K
 
-from ninolearn.learn.dem import DEM
+from ninolearn.learn.models.dem import DEM
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir
 

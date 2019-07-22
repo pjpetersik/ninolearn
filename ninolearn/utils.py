@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.stats import spearmanr, pearsonr
 
 def print_header(string):
     print()
@@ -109,5 +109,69 @@ def nino_to_category(nino, categories=None, threshold=None):
         nino_cat[nino>threshold] = 2
         nino_cat[nino<-threshold] = 0
     return nino_cat
+
+
+def basin_means(data, lat1=2.5, lat2=-2.5):
+    """
+    Computes the mean in different basins of the equatorial Pacific
+
+    :param data: The data for which the Basins means shall be computed with
+    dimension (time, lat, lon).
+
+    :param lat1, lat2: The latidual bounds
+
+    :returns: The mean in the west Pacific (120E- 160E), the central Pacifc (160E-180E),
+    east Pacifc  (180E- 240W).
+    """
+    data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
+    data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
+    data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
+    data_EP_mean = data_EP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
+
+    return data_WP_mean, data_CP_mean, data_EP_mean
+
+def spearman_lag(x, y, max_lags=80):
+    """
+    Computes the Spearman lag correlation coefficents using  of x and y until a maximum number of lag time
+    steps.
+
+    :param x: The variable that leads.
+
+    :param y: The variable that lags.
+
+    :param max_lags: The maximum number of time steps the for which the
+    lag correlation is computed.
+
+    :returns: A timeseries with the lag correlations.
+    """
+    r = np.zeros(max_lags)
+    r[0] = spearmanr(x[:], y[:])[0]
+    for i in np.arange(1, max_lags):
+        r[i] = spearmanr(x[i:], y[:-i])[0]
+    return r
+
+def pearson_lag(x, y, max_lags=28):
+    """
+    Computes the Pearson lag correlation coefficents using  of x and y until a maximum number of lag time
+    steps.
+
+    :param x: The variable that leads.
+
+    :param y: The variable that lags.
+
+    :param max_lags: The maximum number of time steps the for which the
+    lag correlation is computed.
+
+    :returns: A timeseries with the lag correlations and the corresponding p-value.
+    """
+    r, p = np.zeros(max_lags+1), np.zeros(max_lags+1)
+    r[0], p[0] = pearsonr(x[:], y[:])
+    for i in np.arange(1, max_lags+1):
+         r[i], p[i] =  pearsonr(x[i:], y[:-i])
+    return r, p
 
 

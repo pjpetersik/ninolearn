@@ -74,7 +74,7 @@ class pca(PCA):
 
     def set_eof_array(self, data):
         """
-        genrates the array that will be analyzed with the EOF.
+        Genrates the array that will be analyzed with the EOF.
         """
         self.time = data['time']
         self.lon = data['lon']
@@ -103,7 +103,7 @@ class pca(PCA):
 
     def save(self, extension='', filename=None):
         """
-        save the first three pca components to a csvfile
+        Saves the first three pca components to a csv-file.
         """
         # save data to first day of month
         save_index = self.time.to_index()
@@ -180,18 +180,20 @@ class pca(PCA):
             plt.plot(self.time, projection)
 
     def component_map_(self, eof=1):
+        """
+        Returns the components as a map.
+
+        :param eof: The leading eof (default:1).
+        """
         comp_map = self.components_[eof-1, :].copy().reshape(self.n_lat, self.n_lon)
         comp_map[self.nan_index] = np.nan
         return comp_map
 
     def pc_projection(self, eof=1):
+        """
+        Returns the amplitude timeseries of the specified eof.
+
+        :param eof: The nth leading eof (default:1).
+        """
         projection = np.matmul(self.EOFarr, self.components_[eof-1, :])
         return projection
-
-
-#if __name__ == "__main__":
-#    pca_obj = pca(n_components=6)
-#    pca_obj.load_data('air', 'NCEP', 'anom', startyear=1950, endyear=2018)
-#    pca_obj.compute_pca()
-#    pca_obj.save()
-#    pca_obj.plot_eof()

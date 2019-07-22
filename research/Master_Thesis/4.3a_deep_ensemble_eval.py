@@ -9,7 +9,7 @@ from os.path import join
 
 from keras import backend as K
 
-from ninolearn.learn.dem import DEM
+from ninolearn.learn.models.dem import DEM
 from ninolearn.pathes import modeldir
 from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, seasonal_nll
 from ninolearn.plot.prediction import plot_prediction

@@ -4,7 +4,7 @@ from os import mkdir
 import numpy as np
 
 from ninolearn.IO import read_raw
-from ninolearn.pathes import postdir, rawdir
+from ninolearn.pathes import postdir
 
 from ninolearn.IO.read_post import data_reader
 
@@ -203,6 +203,3 @@ def calc_warm_pool_edge():
 
     df.to_csv(join(postdir, 'wp_edge.csv'))
     return warm_pool_edge, indeces
-
-if __name__ == "__main__":
-    a,b=calc_warm_pool_edge()

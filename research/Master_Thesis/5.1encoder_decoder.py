@@ -10,7 +10,7 @@ import keras.backend as K
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.IO.read_post import data_reader
-from ninolearn.learn.encoderDecoder import EncoderDecoder
+from ninolearn.learn.models.encoderDecoder import EncoderDecoder
 from ninolearn.pathes import ed_model_dir
 from ninolearn.utils import print_header
 

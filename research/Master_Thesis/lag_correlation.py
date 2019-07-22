@@ -1,47 +1,13 @@
 import matplotlib.pyplot as plt
 from ninolearn.IO.read_post import data_reader
+from ninolearn.utils import basin_means
 
-from scipy.stats import spearmanr, pearsonr
+from ninolearn.utils import pearson_lag
 from ninolearn.private import plotdir
 
 import numpy as np
 from os.path import join
 
-def spearman_lag(x,y, max_lags=80):
-    scorr = np.zeros(max_lags)
-    scorr[0] = spearmanr(x[:], y[:])[0]
-    for i in np.arange(1, max_lags):
-        scorr[i] = spearmanr(x[i:], y[:-i])[0]
-
-    return scorr
-
-def pearson_lag(x,y, max_lags=28):
-    r, p = np.zeros(max_lags+1), np.zeros(max_lags+1)
-    r[0], p[0] = pearsonr(x[:], y[:])
-    for i in np.arange(1, max_lags+1):
-         r[i], p[i] =  pearsonr(x[i:], y[:-i])
-    return r, p
-
-def residual(x, y):
-    p = np.polyfit(x, y, deg=1)
-    ylin = p[0] + p[1] * x
-    yres = y - ylin
-    return yres
-
-def basin_means(data, lat1=2.5, lat2=-2.5):
-    data_basin =  data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 240))]
-    data_basin_mean = data_basin.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
-
-    data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
-    data_WP_mean = data_WP.mean(dim='lat', skipna=True).max(dim='lon', skipna=True)
-
-    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 210))]
-    data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
-
-    data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
-    data_EP_mean = data_EP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
-
-    return data_basin_mean, data_WP_mean, data_CP_mean, data_EP_mean
 
 plt.close("all")
 
@@ -49,7 +15,7 @@ reader = data_reader(startdate='1962-01', enddate='2017-12', lon_min=30)
 nino34 = reader.read_csv('nino3.4S')
 wwv = reader.read_csv('wwv_proxy')
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
-taux_basin_mean, taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=7.5, lat2=-7.5)
+taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=7.5, lat2=-7.5)
 iod = reader.read_csv('iod')
 
 network = reader.read_statistic('network_metrics', variable='zos',

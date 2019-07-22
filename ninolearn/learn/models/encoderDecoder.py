@@ -13,8 +13,11 @@ from os.path import join, exists
 from os import mkdir, listdir, getcwd
 from shutil import rmtree
 
+
+from ninolearn.learn.evaluation import rmse
 from ninolearn.exceptions import MissingArgumentError
 from ninolearn.utils import small_print_header, print_header
+
 
 import warnings
 
@@ -338,6 +341,19 @@ class EncoderDecoder(object):
         for i in range(self.n_members):
             pred_ens[:,:,i] = self.ensemble[i].predict(X)
         return np.mean(pred_ens, axis=2), pred_ens
+
+    def evaluate(self, X, ytrue):
+        """
+        Evaluate the model based on the RMSE
+
+        :type X: np.ndarray
+        :param X: The feature array.
+
+        :type ytrue: np.ndarray
+        :param ytrue: The true label array.
+        """
+        ypred, dummy = self.predict(X)
+        return rmse(ytrue, ypred)
 
 
     def save(self, location='', dir_name='ed_ensemble'):

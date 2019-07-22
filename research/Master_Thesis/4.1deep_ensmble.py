@@ -13,28 +13,12 @@ from ninolearn.IO.read_post import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.learn.evaluation import rmse
-from ninolearn.learn.dem import DEM
-from ninolearn.utils import print_header, include_time_lag
+from ninolearn.learn.models.dem import DEM
+from ninolearn.utils import print_header, include_time_lag, basin_means
 from ninolearn.pathes import modeldir
 
-#%%
 K.clear_session()
 
-def basin_means(data, lat1=2.5, lat2=-2.5):
-    data_WP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(120, 160))]
-    data_WP_mean = data_WP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
-
-    data_CP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(160, 180))]
-    data_CP_mean = data_CP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
-
-    data_EP = data.loc[dict(lat=slice(lat1, lat2), lon=slice(180, 240))]
-    data_EP_mean = data_EP.mean(dim='lat', skipna=True).mean(dim='lon', skipna=True)
-
-    return data_WP_mean, data_CP_mean, data_EP_mean
-
-def selected_variables(weigt_matrix, time_lag):
-
-    pass
 #%% =============================================================================
 # read data
 # =============================================================================
