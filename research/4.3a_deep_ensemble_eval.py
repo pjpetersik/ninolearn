@@ -24,7 +24,15 @@ plt.close("all")
 #%% =============================================================================
 #  process data
 # =============================================================================
-decades_arr = [60, 70, 80, 90, 100, 110]
+period = "_laninalike"
+
+if period=="":
+    decades_arr = [60, 70, 80, 90, 100, 110]
+elif period=="_elninolike":
+    decades_arr = [80, 90]
+elif period=="_laninalike":
+    decades_arr = [60, 70, 100, 110]
+
 n_decades = len(decades_arr)
 
 lead_time_arr = np.array([0, 3, 6, 9, 12, 15])
@@ -153,8 +161,10 @@ for i in range(n_lead):
     plt.title(f"Lead time: {lead_time} month")
     plt.grid()
     plt.tight_layout()
-    #plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
-    plt.savefig(join(plotdir, f'pred_lead{lead_time}.jpg'), dpi=360)
+
+    if period=="":
+        plt.savefig(join(plotdir, f'pred_lead{lead_time}.pdf'))
+        plt.savefig(join(plotdir, f'pred_lead{lead_time}.jpg'), dpi=360)
 
     #plot std only
     plt.subplots(figsize=(8,1.8))
@@ -183,8 +193,10 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-#plt.savefig(join(plotdir, f'all_season_corr.pdf'))
-plt.savefig(join(plotdir, f'all_season_corr.jpg'), dpi=360)
+
+if period=="":
+    plt.savefig(join(plotdir, f'all_season_corr.pdf'))
+    plt.savefig(join(plotdir, f'all_season_corr.jpg'), dpi=360)
 
 #%% all season rmse score
 ax = plt.figure(figsize=(6.5,3.)).gca()
@@ -204,7 +216,9 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-#plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
+
+if period=="":
+    plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 
 #%% all seasons negative loglikelihood
 ax = plt.figure(figsize=(6.5,3.)).gca()
@@ -221,25 +235,28 @@ plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-#plt.savefig(join(plotdir, f'all_season_nll.pdf'))
+if period=="":
+    plt.savefig(join(plotdir, f'all_season_nll.pdf'))
 
 #%% contour skill plots
 plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
 plt.title('Correlation skill')
 plt.tight_layout()
-#plt.savefig(join(plotdir, f'seasonal_corr.pdf'))
-plt.savefig(join(plotdir, f'seasonal_corr.jpg'), dpi=360)
+
+plt.savefig(join(plotdir, f'seasonal_corr{period}.pdf'))
+plt.savefig(join(plotdir, f'seasonal_corr{period}.jpg'), dpi=360)
 
 plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.inferno_r, extend='max')
 plt.title('SRMSE')
 plt.tight_layout()
-#plt.savefig(join(plotdir, f'seasonal_rmse.pdf'))
+#
+plt.savefig(join(plotdir, f'seasonal_rmse{period}.pdf'))
 
 plot_seasonal_skill(lead_time_arr, seas_nll.T, vmin=-1, vmax=1, cmap=plt.cm.inferno_r, extend='both')
 plt.title('NLL')
 plt.tight_layout()
-#plt.savefig(join(plotdir, f'seasonal_nll.pdf'))
+plt.savefig(join(plotdir, f'seasonal_nll{period}.pdf'))
 
 
 #%% FOR ENSO ML Paper

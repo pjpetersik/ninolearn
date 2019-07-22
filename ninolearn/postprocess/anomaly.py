@@ -200,7 +200,6 @@ def saveNormAnomaly(data, new):
             Divided by the Monthly standard deviation'
 
         normanom.attrs = _delete_some_attributes(normanom.attrs)
-
         normanom.to_netcdf(path)
 
 

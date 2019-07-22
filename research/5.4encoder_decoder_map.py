@@ -123,7 +123,7 @@ plt.close("all")
 fig, axs = plt.subplots(2, 1, figsize=(6,4))
 
 
-date = '2011-01-01'
+date = '1999-01-01'
 
 m = []
 
@@ -140,7 +140,7 @@ for i in [0,1]:
 
 
 
-axs[0].set_title('ND(2010)J(2011)', size=14)
+axs[0].set_title('ND(1998)J(1999)', size=14)
 cs_sst = m[0].contourf(x, y, pred_da_full.loc[date], cmap=plt.cm.seismic,levels=levels_sst, extend='both')
 axs[0].text(9.2e5, 5.3e6, 'Forecast', weight='bold', size=12,
         bbox={'facecolor': 'white', 'alpha': 0.9, 'pad': 7})

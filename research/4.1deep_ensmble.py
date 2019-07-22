@@ -38,7 +38,7 @@ def selected_variables(weigt_matrix, time_lag):
 #%% =============================================================================
 # read data
 # =============================================================================
-reader = data_reader(startdate='1980-01', enddate='2017-12')
+reader = data_reader(startdate='1960-01', enddate='2017-12')
 
 # NINO3.4 Index
 nino34 = reader.read_csv('nino3.4S')
@@ -76,9 +76,10 @@ lead_time = 6
 shift = 3
 
 # TODO warm pool edge, how to better include temperature
-feature_unscaled = np.stack((nino34, iod, wwv, #pca_dec, sc,
+feature_unscaled = np.stack((nino34, iod, wwv,  sc,#pca_dec, sc,
                              taux_WP_mean, #taux_CP_mean, taux_EP_mean,
-                             H_ssh, #c2_ssh,
+                             H_ssh, c2_ssh,
+                             pca_dec
                              ), axis=1)
 
 #feature_unscaled = np.concatenate((feature_unscaled, sst_equator),
@@ -103,7 +104,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2018-12-01')
+test_indeces = (timey>='2002-01-01') & (timey<='2017-12-01')
 #test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
 #test_indeces = (timey>='1992-01-01') & (timey<='2001-12-01')
 
@@ -122,8 +123,8 @@ model = DEM()
 #            lr=0.005, batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
 #            patience=30, verbose=0, std=True)
 
-model.set_parameters(layers=1, dropout=[0.1,0.5], noise=[0.1,0.5], noise_out=[0.1, 0.5], l1_hidden=[0,0.2],
-            l2_hidden=[0.,0.2], l1_mu=[0.,0.2], l2_mu=[0.,0.2], l1_sigma=[0.,0.2], l2_sigma=[0.,0.2],
+model.set_parameters(layers=1, dropout=[0.1,0.5], noise=[0.1,0.5], noise_out=[0.1, 0.5], l1_hidden=[0, 0.2],
+            l2_hidden=[0.,0.2], l1_mu=[0., 0.2], l2_mu=[0.,0.2], l1_sigma=[0.,0.2], l2_sigma=[0.,0.2],
             lr=[0.0001,0.01], batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
             patience=30, verbose=0, std=True)
 

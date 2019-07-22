@@ -12,15 +12,19 @@ Documentation for the Code
    :maxdepth: 4
    :caption: Contents:
 
-ninolearn Learn
+NinoLearn Learn
 ===================
 .. autoclass:: ninolearn.learn.DEM
     :members:
 .. autoclass:: ninolearn.learn.EncoderDecoder
     :members:
 
-ninolearn IO
-===================
+NinoLearn Postprocess
+=======================
+
+
+NinoLearn Input/Output
+=======================
 .. automodule:: ninolearn.IO.read_raw
    :members:
 

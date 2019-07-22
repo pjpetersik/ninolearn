@@ -80,7 +80,7 @@ pca_hca_decadel.save(extension='.csv', filename='dec_hca_NODC_anom')
 
 
 
-reader = data_reader(startdate='1955-02', enddate='2018-12',lon_min=120, lon_max=300)
+reader = data_reader(startdate='1955-01', enddate='2018-12',lon_min=120, lon_max=300)
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 
 sst_decadel = sst.rolling(time=60, center=False).mean()

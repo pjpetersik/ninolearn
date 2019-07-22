@@ -18,10 +18,7 @@ plt.close("all")
 
 
 
-
-
-
-reader = data_reader(startdate='1955-02', enddate='2018-12',lon_min=100, lon_max=300)
+reader = data_reader(startdate='1955-01', enddate='2018-12',lon_min=100, lon_max=300)
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 sst_decadel = sst.rolling(time=60, center=False).mean()
 sst_decadel.attrs = sst.attrs.copy()
@@ -32,14 +29,14 @@ pca_sst.set_eof_array(sst_decadel)
 pca_sst.compute_pca()
 
 PC = - pca_sst.pc_projection(eof=1) / 10
-ds_PC = pd.Series(PC, index=pd.date_range(start='1955-02-01', end='2018-12-01', freq='MS'))
+ds_PC = pd.Series(PC, index=pd.date_range(start='1955-01-01', end='2018-12-01', freq='MS'))
 
 
 
 exp_var =  np.round(pca_sst.explained_variance_ratio_[0] * 100, decimals=1)
 fig, axs = plt.subplots(2, 1, figsize=(7,5))
 
-axs[1].plot(pd.date_range(start='1955-02-01', end='2018-12-01', freq='MS'), PC)
+axs[1].plot(pd.date_range(start='1955-01-01', end='2018-12-01', freq='MS'), PC)
 axs[1].set_xlim('1960-01', '2018-12')
 axs[1].set_ylim(-2, 1.5)
 axs[1].hlines(0,'1960-01', '2018-12', linestyle='--')
