@@ -1,3 +1,9 @@
+"""
+This module contains a bunch of mehtods to compute seasonal anomalies.
+
+Currently the reference period is 1981-2010.
+"""
+
 from os.path import join, exists
 import xarray as xr
 import pandas as pd
@@ -137,7 +143,7 @@ def _delete_some_attributes(attrs):
 
 def toPostDir(data):
     """
-    save the basic data to the postdir
+    Save the basic data to the postdir.
     """
     filename = generateFileName(data.name, dataset=data.dataset, suffix='nc')
     path = join(postdir, filename)
@@ -205,17 +211,15 @@ def saveNormAnomaly(data, new):
 
 def postprocess(data, new=False, ref_period = True):
     """
-    combine all the postprocessing functions in one data routine
+    Combine all the postprocessing functions in one data routine.
+
     :param data: xarray data array
     :param new: compute the statistics again (default = False)
     """
     small_print_header(f"Process {data.name} from {data.dataset}")
     toPostDir(data)
-    # TODO: Read from postdir?
-
-    #TODO better
+    #TODO: Do this better!
     global reference_period
     reference_period = ref_period
 
     saveAnomaly(data, new)
-    saveNormAnomaly(data, new)

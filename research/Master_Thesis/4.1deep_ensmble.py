@@ -25,8 +25,8 @@ K.clear_session()
 reader = data_reader(startdate='1960-01', enddate='2017-12')
 
 # NINO3.4 Index
-nino34 = reader.read_csv('nino3.4S')
-
+nino34 = reader.read_csv('oni')
+#%%
 # Other indeces
 iod = reader.read_csv('iod')
 wwv = reader.read_csv('wwv_proxy')

@@ -7,8 +7,6 @@ plt.close("all")
 # =============================================================================
 # Decadel PCAs
 # =============================================================================
-# TODO: The naming of the saved files is not perfect. better would be a automatic
-# filename generation that aligns with the  naming convention
 
 reader = data_reader(startdate='1955-02', enddate='2018-12', lon_min=120, lon_max=300)
 hca = reader.read_netcdf('hca', dataset='NODC', processed='anom')
@@ -24,8 +22,6 @@ pca_hca_decadel.compute_pca()
 pca_hca_decadel.plot_eof()
 pca_hca_decadel.save(extension='.csv', filename='dec_hca_NODC_anom')
 
-
-
 reader = data_reader(startdate='1955-01', enddate='2018-12',lon_min=120, lon_max=300)
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
 
@@ -39,5 +35,3 @@ pca_sst_decadel.set_eof_array(sst_decadel)
 pca_sst_decadel.compute_pca()
 pca_sst_decadel.plot_eof()
 pca_sst_decadel.save(extension='.csv', filename='dec_sst_ERSSTv5_anom')
-
-

@@ -49,6 +49,7 @@ def basin_means(data, lat1=2.5, lat2=-2.5):
 plt.close("all")
 
 reader = data_reader(startdate='1980-01', enddate='2017-12', lon_min=30)
+oni = reader.read_csv('oni')
 nino34 = reader.read_csv('nino3.4M')
 nino12 = reader.read_csv('nino1+2M')
 nino4 = reader.read_csv('nino4M')

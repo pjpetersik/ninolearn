@@ -29,23 +29,23 @@ lanina_cp  = np.array([1954, 1955, 1967, 1971, 1974,
 
 reader = data_reader(startdate='1974-06', enddate='2017-12', lon_min=30, lon_max=300)
 
-nino34 = reader.read_csv('nino3.4S')
+oni = reader.read_csv('oni')
 
-spring = np.array([month in [1,2, 3, ] for month in nino34.index.month])
-summer = np.array([month in [6, 7, 8] for month in nino34.index.month])
-autumn = np.array([month in [12] for month in nino34.index.month])
+spring = np.array([month in [1,2, 3, ] for month in oni.index.month])
+summer = np.array([month in [6, 7, 8] for month in oni.index.month])
+autumn = np.array([month in [12] for month in oni.index.month])
 
-winter = np.array([month in [12] for month in nino34.index.month])
-winter_p1 = np.array([month in [1, 2] for month in nino34.index.month])
+winter = np.array([month in [12] for month in oni.index.month])
+winter_p1 = np.array([month in [1, 2] for month in oni.index.month])
 
 
-cp_m1 = np.array([year in elnino_cp - 1 for year in nino34.index.year])
-cp = np.array([year in elnino_cp for year in nino34.index.year])
-cp_p1 = np.array([year in elnino_cp + 1 for year in nino34.index.year])
+cp_m1 = np.array([year in elnino_cp - 1 for year in oni.index.year])
+cp = np.array([year in elnino_cp for year in oni.index.year])
+cp_p1 = np.array([year in elnino_cp + 1 for year in oni.index.year])
 
-ep_m1 = np.array([year in elnino_ep - 1 for year in nino34.index.year])
-ep = np.array([year in elnino_ep for year in nino34.index.year])
-ep_p1 = np.array([year in elnino_ep + 1 for year in nino34.index.year])
+ep_m1 = np.array([year in elnino_ep - 1 for year in oni.index.year])
+ep = np.array([year in elnino_ep for year in oni.index.year])
+ep_p1 = np.array([year in elnino_ep + 1 for year in oni.index.year])
 
 
 autumn_m1_cp = autumn & cp_m1

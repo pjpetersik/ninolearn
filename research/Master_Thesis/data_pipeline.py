@@ -23,13 +23,13 @@ def pipeline(lead_time,  return_persistance=False):
     reader = data_reader(startdate='1960-01', enddate='2017-12')
 
     # indeces
-    nino34 = reader.read_csv('nino3.4S')
+    oni = reader.read_csv('oni')
 
     iod = reader.read_csv('iod')
     wwv = reader.read_csv('wwv_proxy')
 
     # seasonal cycle
-    sc = np.cos(np.arange(len(nino34))/12*2*np.pi)
+    sc = np.cos(np.arange(len(oni))/12*2*np.pi)
 
     # network metrics
     network_ssh = reader.read_statistic('network_metrics', variable='zos', dataset='ORAS4', processed="anom")
@@ -53,7 +53,7 @@ def pipeline(lead_time,  return_persistance=False):
     shift = 3
 
     # process features
-    feature_unscaled = np.stack((nino34, sc, wwv, iod,
+    feature_unscaled = np.stack((oni, sc, wwv, iod,
                                  taux_WP_mean,
                                  c2_ssh, H_ssh,
                                  pca_dec), axis=1)
@@ -70,11 +70,11 @@ def pipeline(lead_time,  return_persistance=False):
     X = include_time_lag(X, max_lag=time_lag)
 
     # arange label
-    yorg = nino34.values
+    yorg = oni.values
     y = yorg[lead_time + time_lag + shift:]
 
     # get the time axis of the label
-    timey = nino34.index[lead_time + time_lag + shift:]
+    timey = oni.index[lead_time + time_lag + shift:]
 
     if return_persistance:
         y_persistance = yorg[time_lag: - lead_time - shift]

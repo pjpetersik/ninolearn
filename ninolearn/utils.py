@@ -1,3 +1,8 @@
+"""
+In this module, functions are collected which have not found a proper "home"-module
+yet.
+"""
+
 import numpy as np
 from scipy.stats import spearmanr, pearsonr
 

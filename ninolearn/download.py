@@ -1,4 +1,6 @@
-from __future__ import print_function
+"""
+This module contains methods to download files from ftp-servers or via http.
+"""
 
 from ftplib import FTP
 from requests import get
@@ -12,6 +14,14 @@ from ninolearn.pathes import rawdir
 if not exists(rawdir):
     print("make a data directory at %s" % rawdir)
     mkdir(rawdir)
+
+
+def download(info_dict, **kwargs):
+    if info_dict['downloadType']=='ftp':
+        downloadFileFTP(info_dict, **kwargs)
+
+    elif info_dict['downloadType']=='http':
+        downloadFileHTTP(info_dict, **kwargs)
 
 
 def downloadFileFTP(info_dict, outdir='',

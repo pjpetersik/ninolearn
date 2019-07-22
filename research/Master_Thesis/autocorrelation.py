@@ -12,7 +12,7 @@ plt.close("all")
 reader = data_reader(startdate='1980-02')
 
 
-nino34 = reader.read_csv('nino3.4S')
+oni = reader.read_csv('oni')
 max_lag = 16
 
 auto_corr = np.zeros((12, max_lag))
@@ -23,12 +23,12 @@ seas_ticks = ['DJF', 'JFM', 'FMA', 'MAM', 'AMJ', 'MJJ',
 for i in range(12):
     for j in range(max_lag):
         try:
-            auto_corr[(i+j)%12,j],p_value[(i+j)%12,j] = pearsonr(nino34[i::12], nino34[i+j::12])
+            auto_corr[(i+j)%12,j],p_value[(i+j)%12,j] = pearsonr(oni[i::12], oni[i+j::12])
         except:
             try:
-                auto_corr[(i+j)%12,j],p_value[(i+j)%12,j]  = pearsonr(nino34[i::12][:-1], nino34[i+j::12])
+                auto_corr[(i+j)%12,j],p_value[(i+j)%12,j]  = pearsonr(oni[i::12][:-1], oni[i+j::12])
             except:
-                auto_corr[(i+j)%12,j],p_value[(i+j)%12,j]  = pearsonr(nino34[i::12][:-2], nino34[i+j::12])
+                auto_corr[(i+j)%12,j],p_value[(i+j)%12,j]  = pearsonr(oni[i::12][:-2], oni[i+j::12])
 
 levels = np.linspace(0, 1, 20+1)
 fig, ax = plt.subplots(figsize=(5,3.5))

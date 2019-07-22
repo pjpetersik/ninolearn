@@ -24,7 +24,7 @@ def nino_anom(index="3.4", period ="S", detrend=False):
     try:
         if period == "S":
             if index == "3.4" and not detrend:
-                data = pd.read_csv(join(rawdir, "nino34.txt"),
+                data = pd.read_csv(join(rawdir, "oni.txt"),
                                    delim_whitespace=True)
             else:
                 msg = "Only not detrended Nino3.4 index is available for seasonal records"

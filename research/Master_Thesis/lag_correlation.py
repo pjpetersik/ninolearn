@@ -12,7 +12,7 @@ from os.path import join
 plt.close("all")
 
 reader = data_reader(startdate='1962-01', enddate='2017-12', lon_min=30)
-nino34 = reader.read_csv('nino3.4S')
+oni = reader.read_csv('oni')
 wwv = reader.read_csv('wwv_proxy')
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
 taux_WP_mean, taux_CP_mean, taux_EP_mean = basin_means(taux, lat1=7.5, lat2=-7.5)
@@ -27,12 +27,12 @@ H = network['corrected_hamming_distance']
 max_lag = 19
 lead_time_arr = np.arange(-3, max_lag-2)
 
-r_oni, p_oni = pearson_lag(nino34, nino34, max_lags=max_lag)
-r_tau, p_tau = pearson_lag(nino34, taux_WP_mean, max_lags=max_lag)
-r_wwv, p_wwv = pearson_lag(nino34, wwv, max_lags=max_lag)
-r_iod, p_iod = pearson_lag(nino34, iod, max_lags=max_lag)
-r_c2, p_c2 = pearson_lag(nino34, c2, max_lags=max_lag)
-r_H, p_H = pearson_lag(nino34, H, max_lags=max_lag)
+r_oni, p_oni = pearson_lag(oni, oni, max_lags=max_lag)
+r_tau, p_tau = pearson_lag(oni, taux_WP_mean, max_lags=max_lag)
+r_wwv, p_wwv = pearson_lag(oni, wwv, max_lags=max_lag)
+r_iod, p_iod = pearson_lag(oni, iod, max_lags=max_lag)
+r_c2, p_c2 = pearson_lag(oni, c2, max_lags=max_lag)
+r_H, p_H = pearson_lag(oni, H, max_lags=max_lag)
 
 
 fig, axs = plt.subplots(1, 2, figsize=(8,3))

@@ -1,3 +1,8 @@
+"""
+This module is a collection of methods that are needed to convert the raw
+data to a same format.
+"""
+
 import pandas as pd
 from os.path import join, exists
 from os import mkdir
@@ -62,13 +67,13 @@ def season_shift_year(season):
 
     return switcher[season]
 
-def prep_nino_seasonal():
+def prep_oni():
     """
     Add a time axis corresponding to the first day of the central month of a
     3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
     some axis.
     """
-    print("Prepare Nino3.4 timeseries.")
+    print("Prepare ONI timeseries.")
     index="3.4"
     period ="S"
     data = read_raw.nino_anom(index=index, period=period, detrend=False)
@@ -81,7 +86,7 @@ def prep_nino_seasonal():
     data.index = dti
     data.index.name = 'time'
     data = data.rename(index=str, columns={'ANOM': 'anom'})
-    data.to_csv(join(postdir, f'nino{index}{period}.csv'))
+    data.to_csv(join(postdir, f'oni.csv'))
 
 def prep_nino_month(index="3.4", detrend=False):
     """

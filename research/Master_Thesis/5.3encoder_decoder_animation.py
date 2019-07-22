@@ -73,7 +73,7 @@ def animation_ed(true, pred, nino,  nino_pred, time):
 # =============================================================================
 reader = data_reader(startdate='1959-11', enddate='2017-12')
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom').rolling(time=3).mean()[2:]
-nino34 = reader.read_csv('nino3.4S')[2:]
+oni = reader.read_csv('oni')[2:]
 
 # select
 feature = sst.copy(deep=True)
@@ -99,9 +99,9 @@ print_header(f'Lead time: {lead} months')
 y = yall[lead+shift:]
 X = Xall[:-lead-shift]
 
-timey = nino34.index[lead+shift:]
+timey = oni.index[lead+shift:]
 
-y_nino = nino34[lead+shift:]
+y_nino = oni[lead+shift:]
 
 pred_full_oni = np.array([])
 true_oni = np.array([])

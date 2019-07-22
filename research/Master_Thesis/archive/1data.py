@@ -1,17 +1,21 @@
 import numpy as np
 
-from ninolearn.download import downloadFileFTP, downloadFileHTTP, unzip_gz
+from ninolearn.download import downloadFileFTP, downloadFileHTTP, download
 from ninolearn.private import CMEMS_password, CMEMS_username
 from ninolearn.utils import print_header
-
-#%% =============================================================================
+from ninolearn.sources import SST_ERSSTv5
+# =============================================================================
 # =============================================================================
 # # Download
 # =============================================================================
 # =============================================================================
 print_header("Download Data")
 
-# =============================================================================
+
+download(SST_ERSSTv5)
+
+
+#%% =============================================================================
 # ERSSTv5
 # =============================================================================
 ERSSTv5_dict = {

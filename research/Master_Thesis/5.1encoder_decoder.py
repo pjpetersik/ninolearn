@@ -28,7 +28,7 @@ reader = data_reader(startdate='1959-11', enddate='2017-12')
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom').rolling(time=3).mean()[2:]
 taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom').rolling(time=3).mean()[2:]
 
-nino34 = reader.read_csv('nino3.4S')[2:]
+oni = reader.read_csv('oni')[2:]
 #%%
 # select
 feature = sst.copy(deep=True)
@@ -59,7 +59,7 @@ for lead in [3, 6, 9, 12, 15, 0]:
 
     y = yall[lead+shift:]
     X = Xall[:-lead-shift]
-    timey = nino34.index[lead+shift:]
+    timey = oni.index[lead+shift:]
 
     for decade in [60, 70, 80, 90, 100, 110]:
         print_header(f'Test period: {1902+decade}-01-01 till {1911+decade}-12-01')

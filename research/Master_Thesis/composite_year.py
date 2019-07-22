@@ -30,14 +30,14 @@ lanina_cp  = np.array([1954, 1955, 1967, 1971, 1974,
 year = 2008
 reader = data_reader(startdate=f'{year}-01', enddate=f'{year}-12', lon_min=30, lon_max=300)
 
-nino34 = reader.read_csv('nino3.4S')
+oni = reader.read_csv('oni')
 
-spring = np.array([month in [3, 4, 5] for month in nino34.index.month])
-summer = np.array([month in [6, 7, 8] for month in nino34.index.month])
-autumn = np.array([month in [9, 10, 11] for month in nino34.index.month])
+spring = np.array([month in [3, 4, 5] for month in oni.index.month])
+summer = np.array([month in [6, 7, 8] for month in oni.index.month])
+autumn = np.array([month in [9, 10, 11] for month in oni.index.month])
 
-winter = np.array([month in [11, 12] for month in nino34.index.month])
-winter_p1 = np.array([month in [1, 2] for month in nino34.index.month])
+winter = np.array([month in [11, 12] for month in oni.index.month])
+winter_p1 = np.array([month in [1, 2] for month in oni.index.month])
 
 index = winter
 

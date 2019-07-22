@@ -18,12 +18,15 @@ logger = logging.getLogger(__name__)
 class climateNetwork(igraph.Graph):
     """
     Child object of the igraph.Graph class for the construction of a complex
-    climate network
+    climate network.
     """
     @classmethod
     def from_adjacency(cls, adjacency):
         """
-        generate an igraph network form a adjacency matrix
+        Generate an igraph network form a adjacency matrix.
+
+        :type adjacency: np.ndarray
+        :param adjacency: The NxN adjacency array.
         """
         np.fill_diagonal(adjacency, 0)
         cls.adjacency_array = adjacency
@@ -247,7 +250,7 @@ class networkMetricsSeries(object):
     def initalizeSeries(self):
         """
         initializes the pandas Series and array that saves the adjacency of the
-        network from the previous time step
+        network from the previous time step.
         """
         self.threshold_value = pd.Series()
         self.global_transitivity = pd.Series()
@@ -310,7 +313,7 @@ class networkMetricsSeries(object):
         computes network metrics from a correlation matrix in combination with
         the already given threshold
 
-        :param corrcoef: the correlation matrix
+        :param corrcoef: The correlation matrix.
         """
         logger.debug("Start computeNetworkMetrics()")
 
@@ -396,6 +399,13 @@ class networkMetricsSeries(object):
         self.data.to_csv(join(postdir, filename))
 
     def computeTimeSeries(self):
+        """
+        Compute the evolving complex network timeseries, the corresping
+        metrics and save the results to a csv-file in the data directory
+
+        NOTE: Specify the data directory as 'datadir' in the ninolear.private
+        module which you may not push the public repository.
+        """
         while self.reader.enddate <= self.enddate:
             logger.info(f'{self.reader.startdate} till {self.reader.enddate}')
             corrcoef = self.computeCorrelationMatrix()

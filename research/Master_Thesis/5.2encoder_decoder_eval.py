@@ -67,7 +67,7 @@ seas_rmse_pers = np.zeros((12, n_lead))
 # =============================================================================
 reader = data_reader(startdate='1959-11', enddate='2017-12')
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom').rolling(time=3).mean()[2:]
-nino34 = reader.read_csv('nino3.4S')[2:]
+oni = reader.read_csv('oni')[2:]
 
 # select
 feature = sst.copy(deep=True)
@@ -95,9 +95,9 @@ for i in range(n_lead):
     y = yall[lead+shift:]
     X = Xall[:-lead-shift]
 
-    timey = nino34.index[lead+shift:]
-    y_oni = nino34[lead+shift:]
-    y_oni_persistance = nino34[:-lead-shift]
+    timey = oni.index[lead+shift:]
+    y_oni = oni[lead+shift:]
+    y_oni_persistance = oni[:-lead-shift]
     y_oni_persistance.index = y_oni.index
 
     pred_full_oni = np.array([])

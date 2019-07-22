@@ -3,7 +3,7 @@ import numpy as np
 
 def plot_prediction(time, mean, std=None, std_level=1, facecolor='royalblue', line_color="navy"):
     """
-    make a plot of the prediction and if std=True plot the coressponding standard
+    Make a plot of the prediction and if std=True plot the coressponding standard
     deviation.
     """
     if std is not None:
