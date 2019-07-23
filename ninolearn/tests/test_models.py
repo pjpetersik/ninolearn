@@ -10,10 +10,11 @@ import pytest
 def test_DEM_Methods():
     check_core_methods(DEM)
 
-def test_DEM():
+def test_DEM_set_paramters():
     """
-    This test checks if the model that one intends to build with the DEM() class
-    is the one that is actually used later.
+    This test checks if the model that one intends to build with the method
+    .set_paramters() of an DEM instance is the one that is actually produced
+    in the backend by Keras.
     """
     model = DEM()
 
@@ -81,6 +82,9 @@ def test_DEM():
     noise_in_config = member.get_layer(name=f'noise_sigma').get_config()
     assert noise_in_config['stddev'] == noise_sigma
 
+
+def test_DEM_fit():
+    pass
 # =============================================================================
 # Encoder Decoder model
 # =============================================================================

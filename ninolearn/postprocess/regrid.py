@@ -10,8 +10,9 @@ def to2_5x2_5(data):
     """
     Regrids data the 2.5x2.5 from the NCEP reanalysis data set.
 
-    :param data: An xarray dataArray or DataSet with with dimensions named
+    :param data: An xarray dataArray or DataSet with with dimensions named\
     'lat' and 'lon'.
+
     """
     ds_out = xr.Dataset({'lat': (['lat'], np.arange(-90, 90.01, 2.5)),
                      'lon': (['lon'], np.arange(0, 359.99, 2.5)),

@@ -43,16 +43,16 @@ class climateNetwork(igraph.Graph):
         """
         generate an igraph network from a correlation matrix
 
-        :param correalation_matrix: the NxN correlation matrix that should be
-        used to generate the network
+        :param correalation_matrix: The NxN correlation matrix that should be\
+        used to generate the network.
 
-        :param threshold:  If NOT none but float between 0 and 1, a network
-        with a fixed global threshold is generated.
-        Note, EITHER the threshold OR the edge density method can be used!
+        :param threshold:  If NOT none but float between 0 and 1, a network\
+        with a fixed global threshold is generated.\n
+        NOTE: EITHER the threshold OR the edge density method can be used!
 
-        :param edge_density: If NOT none but float between 0 and 1, a network
-        with a fixed edge density where the strongest links are part of network
-        is generated. Note, EITHER the threshold OR the edge density method can
+        :param edge_density: If NOT none but float between 0 and 1, a network\
+        with a fixed edge density where the strongest links are part of network\
+        is generated. Note, EITHER the threshold OR the edge density method can\
         be used!
         """
 
@@ -167,44 +167,46 @@ class climateNetwork(igraph.Graph):
 
 
 class networkMetricsSeries(object):
+    """
+    Class for the computation of network metrics time series
+
+    :type variable: str
+    :param variable: The variable for which the network time series should\
+    be computed.\
+
+    :type dataset: str
+    :param dataset: The dataset that should be used to build the network.\
+
+    :type processed: str
+    :param processed: Either '','anom' or 'normanom'.\
+
+    :type threshold: float
+    :param threshold: the threshold for a the correlation coeficent between\
+    two grid point to be considered as connected.
+
+    :param startyear: The first year for which the network analysis should\
+    be done.
+
+    :param endyear: The last year for which the network analysis should be\
+    done.
+
+    :param window_size: The size of the window for which the network\
+    metrics are computed.
+
+    :param lon_min,lon_max: The minimum and the maximum values of the\
+    longitude grid for which the metrics shell be computed \
+    (from 0 to 360 degrees east).
+
+    :param lat_min,lat_max: The minimum and the maximum values of the\
+    latitude grid for which the metrics shell be computed\
+    (from -180 to 180 degrees east).
+    """
     def __init__(self, variable, dataset, processed='anom',
                  threshold=None, edge_density=None,
                  startyear=1948, endyear=2018, window_size=12,
                  lon_min=120, lon_max=260, lat_min=-30, lat_max=30,
                  verbose=0):
-        """
-        Class for the computation of network metrics time series
 
-        :type variable: str
-        :param variable: the variable for which the network time series should
-        be computed
-
-        :type dataset: str
-        :param dataset: the dataset that should be used to build the network
-
-        :type processed: str
-        :param processed: either '','anom' or 'normanom'
-
-        :type threshold: float
-        :param threshold: the threshold for a the correlation coeficent between
-        two grid point to be considered as connected
-
-        :param startyear: the first year for which the network analysis should
-        be done
-
-        :param endyear: the last year for which the network analysis should be
-        done
-
-        :param window_size: the size of the window for which the network
-        metrics are computed
-
-        :param lon_min,lon_max: the min and the max values of the longitude
-        grid for which the metrics
-        shell be computed (from 0 to 360 degrees east)
-
-        :param lat_min,lat_max:the min and the max values of the latitude grid
-        for which the metrics shell be computed (from -180 to 180 degrees east)
-        """
         self.variable = variable
         self.dataset = dataset
         self.processed = processed

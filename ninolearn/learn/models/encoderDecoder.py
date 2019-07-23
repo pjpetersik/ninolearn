@@ -41,56 +41,56 @@ class EncoderDecoder(object):
         a the method .fit_RandomizedSearch() is used.
 
         :type neurons: tuple (list of two tuples for .fit_RandomizedSearch())
-        :param neurons: The architecture of the Encoder-Decoder. The layer
-        with the lowest number of neurons is assumed to be the bottleneck layer
-        for which the activation function is linear. Furthermore, the output
-        layer has a linear activation as well. All other layers have the ReLU
-        as activation
+        :param neurons: The architecture of the Encoder-Decoder. The layer\
+        with the lowest number of neurons is assumed to be the bottleneck layer\
+        for which the activation function is linear. Furthermore, the output\
+        layer has a linear activation as well. All other layers have the ReLU\
+        as activation.
 
         :type dropout: float
-        :param dropout: Standard deviation of the Gaussian dropout. Dropout
-        layers are installed behind each hidden layer in the Encoder and the
+        :param dropout: Standard deviation of the Gaussian dropout. Dropout\
+        layers are installed behind each hidden layer in the Encoder and the\
         Decoder.
 
         :type noise: float
         :param noise: Standard deviation of Gaussian noise for the input layer.
 
         :type noise: float
-        :param noise: Standard deviation of Gaussian noise for the output
+        :param noise: Standard deviation of Gaussian noise for the output\
         layer.
 
         :type l1_hidden,  l2_hidden: float
-        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty
+        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty\
         term for the hidden layer weights.
 
         :type l1_out,  l2_out: float
-        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty
+        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty\
         term for the output layer weights.
 
         :type batch_size: int
-        :param batch_size: Batch size  during training of a member of the
+        :param batch_size: Batch size  during training of a member of the\
         Encoder-Decoder.
 
         :type lr: float
         :param lr: The learning rate.
 
         :type n_segments: int
-        :param n_segments: The number of segments that are used for the cross-
+        :param n_segments: The number of segments that are used for the cross-\
         validation scheme and the training of the Ensemble members.
 
         :type n_members_segment:  int
-        :param n_members_segment: The number of members that are trained for
+        :param n_members_segment: The number of members that are trained for\
         one segment.
 
         :type patience: int
-        :param patience: The number of epochs to wait until Early-Stopping
+        :param patience: The number of epochs to wait until Early-Stopping\
         stops the training.
 
         :type epochs: int
         :param epochs: The maximum number of epochs.
 
         :type verbose: int
-        :param verbose: Print some progress to screen. Either 0 (silent), 1 or
+        :param verbose: Print some progress to screen. Either 0 (silent), 1 or\
         2.
         """
 
@@ -186,19 +186,19 @@ class EncoderDecoder(object):
         be supplied.
 
         :type trainX: np.ndarray
-        :param trainX: The training feature set. 2-D array with dimensions
+        :param trainX: The training feature set. 2-D array with dimensions\
         (timesteps, features)
 
         :type trainy: np.ndarray
-        :param trainy: The training label set. 2-D array with dimensions
+        :param trainy: The training label set. 2-D array with dimensions\
         (timesteps, labels)
 
         :type valX: np.ndarray
-        :param valX: The validation feature set. 2-D array with dimensions
+        :param valX: The validation feature set. 2-D array with dimensions\
         (timesteps, features).
 
         :type valy:  np.ndarray
-        :param valy: The validation label set. 2-D array with dimensions
+        :param valy: The validation label set. 2-D array with dimensions\
         (timesteps, labels).
         """
 
@@ -271,17 +271,15 @@ class EncoderDecoder(object):
 
 
         :type trainX: np.ndarray
-        :param trainX: The training feature set. 2-D array with dimensions
-        (timesteps, features)
+        :param trainX: The training feature set. 2-D array with dimensions\
+        (timesteps, features).
 
         :type trainy: np.ndarray
-        :param trainy: The training label set. 2-D array with dimensions
-        (timesteps, labels)
+        :param trainy: The training label set. 2-D array with dimensions\
+        (timesteps, labels).
 
-        :param **kwargs: Keyword arguments are passed to the .fit() method.
+        :param kwargs: Keyword arguments are passed to the .fit() method.
         """
-
-
         # check if hyperparameters where provided in lists for randomized search
         if len(self.hyperparameters_search) == 0:
             raise Exception("No variable indicated for hyperparameter search!")
@@ -361,11 +359,11 @@ class EncoderDecoder(object):
         Save the ensemble.
 
         :type location: str
-        :param location: Base directory where to for all Encoder-Decoder
+        :param location: Base directory where to for all Encoder-Decoder\
         ensembles
 
         :type dir_name: str
-        :param dir_name: The specific directory name in the base directory
+        :param dir_name: The specific directory name in the base directory\
         were to save the ensemble.
         """
         path = join(location, dir_name)
@@ -385,11 +383,11 @@ class EncoderDecoder(object):
         Save the ensemble.
 
         :type location: str
-        :param location: Base directory where for all Encoder-Decoder
+        :param location: Base directory where for all Encoder-Decoder\
         ensembles.
 
         :type dir_name: str
-        :param dir_name: The specific directory name in the base directory
+        :param dir_name: The specific directory name in the base directory\
         were to find the ensemble.
         """
         if location is None:

@@ -1,6 +1,3 @@
-"""
-TODO: Write a search algorithm to find good hyperparameters
-"""
 import numpy as np
 
 import keras.backend as K
@@ -24,7 +21,10 @@ import warnings
 
 class DEM(object):
     """
-    A class to generate a Deep Ensemble.
+    A deep ensemble model (DEM) predicting  either mean or mean and standard
+    deviation with one hidden layer having the ReLU function as activation for
+    the hidden layer. It is trained using the MSE or negative-log-likelihood of
+    a gaussian distribution, respectively.
     """
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
                        noise_mu=0.1, noise_sigma=0.1, l1_hidden=0.1, l2_hidden=0.1,
@@ -32,21 +32,19 @@ class DEM(object):
                        batch_size=10, n_segments=5, n_members_segment=1,
                        lr=0.001, patience = 10, epochs=300, verbose=0, std=True):
         """
-        A deep ensemble model (DEM) predicting  either mean or mean and standard deviation with one hidden
-        layer having the ReLU function as activation for the hidden layer. It
-        is trained using the MSE or negative-log-likelihood of a gaussian distribution, respectively.
+        Set the hyperparameters and the settings for the training of the DEM.
 
         :type layers: int
-        :param layers: Number of hidden layers
+        :param layers: Number of hidden layers.
 
         :type neurons: int
-        :param neurons: Number of neurons in a hidden layers
+        :param neurons: Number of neurons in a hidden layers.
 
         :type dropout: float
         :param dropout: Dropout rate for the hidden layer neurons.
 
         :type noise: float
-        :param noise: Standard deviation of the gaussian noise that is added to
+        :param noise: Standard deviation of the gaussian noise that is added to\
         the input
 
         :type l1_hidden: float
@@ -62,32 +60,35 @@ class DEM(object):
         :l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.
 
         :type l1_sigma: float
-        :l1_sigma: Coefficent for the L1 penalty term in the
+        :l1_sigma: Coefficent for the L1 penalty term in the\
         standard-deviation-output neuron.
 
         :type l2_mu: float
-        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation-output neuron.
+        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation \
+        output neuron.
 
         :param batch_size: Batch size for the training.
 
         :param n_segments: Number of segments for the generation of members.
 
-        :param n_members_segment: number of members that are generated per segment
+        :param n_members_segment: number of members that are generated per\
+        segment.
 
         :param lr: the learning rate during training
 
-        :param patience: Number of epochs to wait until training is stopped if
+        :param patience: Number of epochs to wait until training is stopped if\
         score was not improved.
 
         :param epochs: The maximum numberof epochs for the training.
 
-        :param verbose: Option to print scores during training to the screen. Here, 0
-        means silent.
+        :param verbose: Option to print scores during training to the screen. \
+        Here, 0 means silent.
 
         :type std: boolean
-        :param std: If True then a deep ensembles with two output neurons (mean
-        and standard deviation) is used. Otherwise just one output neuron is used
-        for the regression task.
+        :param std: If True then a deep ensembles with two output neurons\
+        (mean and standard deviation) is used. Otherwise just one output \
+        neuron is used for the regression task.
+
         """
         # hyperparameters
         self.hyperparameters = {'layers': layers, 'neurons': neurons,
@@ -131,7 +132,7 @@ class DEM(object):
 
     def get_pretrained_weights(self, location=None,  dir_name='pre_ensemble'):
         """
-        loads weights from a pretrained model
+        Loads weights from a pretrained model
         """
         if location is None:
             location = getcwd()
@@ -310,7 +311,8 @@ class DEM(object):
         Generates the ensemble prediction of a model ensemble
 
         :param model_ens: list of ensemble models
-        :param X: the features
+        :param X: The features
+
         """
         if self.std:
             pred_ens = np.zeros((X.shape[0], 2, self.n_members))

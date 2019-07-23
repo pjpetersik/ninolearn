@@ -3,28 +3,70 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ninolearn's documentation!
+Welcome to NinoLearn's documentation!
 =====================================
 
 Documentation for the Code
-**************************
+##########################
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
+Ninolearn is a research framework for statistical ENSO prediction.
+
+NinoLearn Download
+##################
+.. automodule:: ninolearn.download
+    :members: download, downloadFTP, downloadHTTP, sources
+
+
+
 NinoLearn Learn
-===================
-.. autoclass:: ninolearn.learn.DEM
+###############
+Models
+******
+
+Deep Ensemble Model (DEM)
+-------------------------
+.. automodule:: ninolearn.learn.models.dem
     :members:
-.. autoclass:: ninolearn.learn.EncoderDecoder
+
+Encoder-Decoder (ED)
+--------------------
+.. automodule:: ninolearn.learn.models.encoderDecoder
     :members:
 
 NinoLearn Postprocess
-=======================
+#####################
 
+Data preparation
+****************
+.. automodule:: ninolearn.postprocess.prepare
+    :members:
+.. automodule:: ninolearn.postprocess.anomaly
+    :members:
+.. automodule:: ninolearn.postprocess.regrid
+    :members:
+
+Evolving complex networks
+*************************
+.. automodule:: ninolearn.postprocess.network
+    :members:
+
+Principal Component Analysis
+****************************
+.. autoclass:: ninolearn.postprocess.pca.pca
+    :members:
 
 NinoLearn Input/Output
-=======================
+######################
+Reading the raw data
+********************
 .. automodule:: ninolearn.IO.read_raw
+   :members:
+
+Reading the postprocessed data
+******************************
+.. autoclass:: ninolearn.IO.read_post.data_reader
    :members:
 

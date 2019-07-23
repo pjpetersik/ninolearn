@@ -16,43 +16,42 @@ from ninolearn.plot.nino_timeseries import nino_background
 
 class pca(PCA):
     """
-    This class extends the PCA class of the sklearn.decomposition.pca module.
-    It facilitates the loading of the data from the postprocessed directory,
-    wraps the fit function of the PCA class, has a saving routine for the
-    computed pca component and can plot the EOF to get more insight into the
+
+    This class extends the PCA class of the sklearn.decomposition.pca module.\
+    It facilitates the loading of the data from the postprocessed directory,\
+    wraps the fit function of the PCA class, has a saving routine for the\
+    computed pca component and can plot the EOF to get more insight into the\
     results.
     """
-    def load_data(self, variable, dataset, processed='anom',
-                  startyear=1949, endyear=2018, lon_min=120, lon_max=280,
-                  lat_min=-30, lat_max=30):
+    def load_data(self, variable, dataset, processed='anom', startyear=1949,
+                  endyear=2018, lon_min=120, lon_max=280, lat_min=-30,
+                  lat_max=30):
         """
-        Load data for PCA analysis from the desired postprocessed data set
+        Load data for PCA analysis from the desired postprocessed data set.
 
         :type variable: str
-        :param variable: the variable for which the network time series should
-        be computed
+        :param variable: The variable for which the PCA will be done.
 
         :type dataset: str
-        :param dataset: the dataset that should be used to build the network
+        :param dataset: The data set that should be used for the PCA.
 
         :type processed: str
-        :param processed: either '','anom' or 'normanom'
+        :param processed: Either '','anom' or 'normanom'.
 
-        :param startyear: the first year for which the network analysis should
-        be done
+        :param startyear: The start year for the time series for which the PCA\
+        is done.
 
-        :param endyear: the last year for which the network analysis should be
-        done
+        :param endyear: The last year for the time series for which the PCA\
+        is done.
 
-        :param lon_min,lon_max: the min and the max values of the longitude
-        grid for which the metrics shell be computed (from 0 to 360 degrees
+        :param lon_min,lon_max: The minimum and the maximum values of the\
+        longitude grid for which the metrics shell be computed \
+        (from 0 to 360 degrees east)
+
+        :param lat_min,lat_max: The min and the max values of the latitude\
+        grid for which the metrics shell be computed (from -180 to 180 degrees\
         east)
 
-        :param lat_min,lat_max:the min and the max values of the latitude grid
-        for which the metrics shell be computed (from -180 to 180 degrees east)
-
-        :type plot: bool
-        :param: make some plots to view the EOFs
         """
 
         self.variable = variable
@@ -144,7 +143,7 @@ class pca(PCA):
             pass
         except AttributeError:
             """
-            allow when now reader was initialized (data was not loaded but directly)
+            Allow when now reader was initialized (data was not loaded but directly)
             provided with the .set_eof_array() method
             """
             pass
