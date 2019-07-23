@@ -1,6 +1,6 @@
 """
-In this module, functions are collected which have not found a proper "home"-module
-yet.
+In this module, methods are collected which have not found a proper module yet
+to which they belong. Help them find there home!
 """
 
 import numpy as np

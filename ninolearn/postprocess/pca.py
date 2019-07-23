@@ -16,7 +16,7 @@ from ninolearn.plot.nino_timeseries import nino_background
 
 class pca(PCA):
     """
-    This class extends the PCA class of the sklearn.decomposition.pca modlue.
+    This class extends the PCA class of the sklearn.decomposition.pca module.
     It facilitates the loading of the data from the postprocessed directory,
     wraps the fit function of the PCA class, has a saving routine for the
     computed pca component and can plot the EOF to get more insight into the
@@ -139,7 +139,7 @@ class pca(PCA):
             nino34 = self.reader.read_csv('nino3.4S')
         except IndexError:
             """
-            allow error when  data is out of range for ONI index
+            Allow error when  data is out of range for ONI index.
             """
             pass
         except AttributeError:

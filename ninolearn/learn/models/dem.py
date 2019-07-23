@@ -26,10 +26,11 @@ class DEM(object):
     """
     A class to generate a Deep Ensemble.
     """
-    def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise=0.1, noise_out=0.0,
-                 l1_hidden=0.1, l2_hidden=0.1, l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1,
-                 l2_sigma=0.1, batch_size=10, n_segments=5, n_members_segment=1,
-                 lr=0.001, patience = 10, epochs=300, verbose=0, std=True):
+    def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
+                       noise_mu=0.1, noise_sigma=0.1, l1_hidden=0.1, l2_hidden=0.1,
+                       l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1, l2_sigma=0.1,
+                       batch_size=10, n_segments=5, n_members_segment=1,
+                       lr=0.001, patience = 10, epochs=300, verbose=0, std=True):
         """
         A deep ensemble model (DEM) predicting  either mean or mean and standard deviation with one hidden
         layer having the ReLU function as activation for the hidden layer. It
@@ -90,7 +91,8 @@ class DEM(object):
         """
         # hyperparameters
         self.hyperparameters = {'layers': layers, 'neurons': neurons,
-                'dropout': dropout, 'noise': noise, 'noise_out':noise,
+                'dropout': dropout, 'noise_in': noise_in, 'noise_mu': noise_mu,
+                'noise_sigma': noise_sigma,
                 'l1_hidden': l1_hidden, 'l2_hidden': l2_hidden,
                 'l1_mu': l1_mu, 'l2_mu': l2_mu,
                 'l1_sigma': l1_sigma, 'l2_sigma': l2_sigma,
@@ -150,16 +152,19 @@ class DEM(object):
                    mode='min', restore_best_weights=True)
 
         inputs = Input(shape=(n_features,))
-        h = GaussianNoise(self.hyperparameters['noise'])(inputs)
+        h = GaussianNoise(self.hyperparameters['noise_in'],
+                          name='noise_input')(inputs)
 
-        for _ in range(self.hyperparameters['layers']):
+        for i in range(self.hyperparameters['layers']):
             h = Dense(self.hyperparameters['neurons'], activation='relu',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']),
                       kernel_initializer='random_uniform',
-                      bias_initializer='zeros')(h)
+                      bias_initializer='zeros',
+                      name=f'hidden_{i}')(h)
 
-            h = Dropout(self.hyperparameters['dropout'])(h)
+            h = Dropout(self.hyperparameters['dropout'],
+                        name=f'hidden_dropout_{i}')(h)
 
 
 
@@ -167,9 +172,11 @@ class DEM(object):
                    kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'],
                                                          self.hyperparameters['l2_mu']),
                    kernel_initializer='random_uniform',
-                   bias_initializer='zeros')(h)
+                   bias_initializer='zeros',
+                   name='mu_output')(h)
 
-        mu = GaussianNoise(self.hyperparameters['noise_out'])(mu)
+        mu = GaussianNoise(self.hyperparameters['noise_mu'],
+                           name='noise_mu')(mu)
 
 
         if self.std:
@@ -177,8 +184,10 @@ class DEM(object):
                           kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_sigma'],
                                                                 self.hyperparameters['l2_sigma']),
                           kernel_initializer='random_uniform',
-                          bias_initializer='zeros')(h)
-            sigma = GaussianNoise(self.hyperparameters['noise_out'])(sigma)
+                          bias_initializer='zeros',
+                          name='sigma_output')(h)
+            sigma = GaussianNoise(self.hyperparameters['noise_sigma'],
+                                  name='noise_sigma')(sigma)
 
             outputs = concatenate([mu, sigma])
 
