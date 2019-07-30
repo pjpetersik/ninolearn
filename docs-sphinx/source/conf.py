@@ -191,4 +191,6 @@ epub_exclude_files = ['search.html']
 
 # -- Logo --
 html_logo = 'logo.png'
+html_favicon = 'logo.png'
+
 
