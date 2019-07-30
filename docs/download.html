@@ -1,0 +1,235 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NinoLearn Download &#8212; NinoLearn 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="NinoLearn Input/Output" href="io.html" />
+    <link rel="prev" title="Welcome to NinoLearn’s documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="io.html" title="NinoLearn Input/Output"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to NinoLearn’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to NinoLearn’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="io.html"
+                        title="next chapter">NinoLearn Input/Output</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ninolearn.download">
+<span id="ninolearn-download"></span><h1>NinoLearn Download<a class="headerlink" href="#module-ninolearn.download" title="Permalink to this headline">¶</a></h1>
+<p>This module contains methods to download files from ftp-servers or via http.
+The method download()</p>
+<dl class="function">
+<dt id="ninolearn.download.download">
+<code class="descclassname">ninolearn.download.</code><code class="descname">download</code><span class="sig-paren">(</span><em>info_dict</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/download.html#download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.download.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download data specified in the dictionary <em>info_dict</em>. The value of the
+keyword <em>‘downloadType’ is important to tell the method if the download
+is done from an ftp-server (value *’ftp’</em>) or via http (value <em>‘http’</em>).</p>
+<p>The information dictionary  <em>‘info_dict’</em> contains the essential
+informations over the source of the data. See
+:class:’ninolearn.download.sources’ for a detailed description how the
+information dictionary should be orgainized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>info_dict</strong> (<em>dict</em>) – The information dictionary for the source of the data.    See :class:’ninolearn.download.sources’ for more details on the organization    of the dictionary.</li>
+<li><strong>kwargs</strong> – Keyword arguments that are passed to :method:’ninolearn.download.downloadFTP’ or    :method:’ninolearn.download.downloadHTTP’.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.download.downloadFTP">
+<code class="descclassname">ninolearn.download.</code><code class="descname">downloadFTP</code><span class="sig-paren">(</span><em>info_dict</em>, <em>outdir=''</em>, <em>username='anonymous'</em>, <em>password='anonymous_pass'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/download.html#downloadFTP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.download.downloadFTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download a file from a FTP server. Note, just some ftp-servers
+require an login account. Make sure you do <strong>NOT commit</strong> code in which your
+login details are visible to a public repository. Hence, put the information
+in a module that that you do not commit (put its name into the .gitignore)
+file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>info_dict</strong> – The information dictionary for the source of the data.    See :class:’ninolearn.download.sources’ for more details on the organization    of the dictionary.</li>
+<li><strong>outdir</strong> (<em>str</em>) – The output directory for your variable. If outdir=’‘, then    no separate directory is made and all data is put into the raw data    directory (see ninolearn.pathes).</li>
+<li><strong>username</strong> (<em>str</em>) – Username for ftp-server login (not always required).</li>
+<li><strong>password</strong> (<em>str</em>) – Password for ftp-server login (not always required).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.download.downloadHTTP">
+<code class="descclassname">ninolearn.download.</code><code class="descname">downloadHTTP</code><span class="sig-paren">(</span><em>info_dict</em>, <em>outdir=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/download.html#downloadHTTP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.download.downloadHTTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download a file via a HTTP.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>info_dict</strong> (<em>dict</em>) – The information dictionary for the source of the data.    See :class:’ninolearn.download.sources’ for more details on the organization    of the dictionary.</li>
+<li><strong>outdir</strong> (<em>str</em>) – The output directory for your variable. If outdir=’‘, then    no separate directory is made and all data is put into the raw data     directory (see ninolearn.pathes).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="ninolearn.download.sources">
+<em class="property">class </em><code class="descclassname">ninolearn.download.</code><code class="descname">sources</code><a class="reference internal" href="_modules/ninolearn/download.html#sources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.download.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of relevant data sources. If you add a new data source yourself
+follow the dictionary template:</p>
+<p>For FTP download, you need to specify the host (keyword ‘host’) the directory
+on the ftp-server (keyword ‘location’) as well as the filename (keyword ‘filename’)
+that is going to be the name of the file AS WELL AS for the downloaded file.</p>
+<p><strong>NAME_FTP</strong> = {</p>
+<blockquote>
+<div><p>‘downloadType’:’ftp’,</p>
+<p>‘filename’: ‘filename_on_the_server_AND_local’,</p>
+<p>‘host’: ‘ftp.hostname.com’,</p>
+<p>‘location’: ‘/directory/on/the/server’</p>
+<p>}</p>
+</div></blockquote>
+<p>For HTTP download, you need to specific the FULL path to the file (keyword ‘url’)
+as well as the name that is used for the downloaded file (keyword ‘filename’)</p>
+<p><strong>NAME_HTTP</strong> = {</p>
+<blockquote>
+<div><p>‘downloadType’:’http’,</p>
+<p>‘url’: ‘<a class="reference external" href="https://www.full_url_to_the_file.com/data.txt">https://www.full_url_to_the_file.com/data.txt</a>,</p>
+<p>‘filename’: ‘local_file_name.txt’</p>
+<blockquote>
+<div>}</div></blockquote>
+</div></blockquote>
+<p><strong>Source dictionaries:</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Source ONI:</th><td class="field-body">The Oceanic Nino Index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Source NINOindeces:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">The monthly Nino1+2, Nino3, Nino4 and Nino3.4 indeces.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Source WWV,WWV_West:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The Warm water volume (WWV) and the WWV in the    western basin.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Source IOD:</th><td class="field-body">The  Dipole Mode Index (DMI) of the Indian Ocean Dipole  (IOD).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Source SST_ERSSTv5:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The SST field from the ERSSTv5 field.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Source ORAS4:</th><td class="field-body">The ORAS4 data set. Define the argument for the keyword    <em>‘filename’</em> yourself. There are various variables available form the     ORAS4 data set. Moreover, they are just available in multiple files (not     in a single big file).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Source GODAS:</th><td class="field-body">The GODAS data set. Define the argument for the keyword    <em>‘filename’</em> yourself. Data is just available in multiple files (not     in a single big file).</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Source UWIND_NCEP,VWIND_NCEP,SAT_monthly_NCEP:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">The <em>monthly</em> u-wind, vwind    and surface air temperature (SAT) from the NCEP reanalysis.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Source SAT_daily_NCEP:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The <em>daily</em> surface air temperature (SAT) from     the NCEP reanalysis.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Source HCA:</th><td class="field-body">The heat content anomaly. (Data source: NOAA)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Source OLR_NOAA:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">The outgoing longwave radiation (OLR).    (Data source: NOAA)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="io.html" title="NinoLearn Input/Output"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to NinoLearn’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Paul Petersik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

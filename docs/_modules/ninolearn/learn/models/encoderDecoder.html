@@ -1,0 +1,494 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ninolearn.learn.models.encoderDecoder &#8212; NinoLearn 0.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">NinoLearn 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ninolearn.learn.models.encoderDecoder</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">save_model</span><span class="p">,</span> <span class="n">load_model</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">GaussianDropout</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">GaussianNoise</span>
+<span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="k">import</span> <span class="n">Adam</span>
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">EarlyStopping</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">regularizers</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">listdir</span><span class="p">,</span> <span class="n">getcwd</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
+
+
+<span class="kn">from</span> <span class="nn">ninolearn.learn.evaluation</span> <span class="k">import</span> <span class="n">rmse</span>
+<span class="kn">from</span> <span class="nn">ninolearn.exceptions</span> <span class="k">import</span> <span class="n">MissingArgumentError</span>
+<span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">small_print_header</span><span class="p">,</span> <span class="n">print_header</span>
+
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<div class="viewcode-block" id="EncoderDecoder"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder">[docs]</a><span class="k">class</span> <span class="nc">EncoderDecoder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Encoder-Decoder is an neural network that has the same architecture as</span>
+<span class="sd">    an Autoencoder. Hence, labal and feature vector have the same dimension.</span>
+<span class="sd">    In the ninolearn package the model is called Encoder-Decoder because it is</span>
+<span class="sd">    used for prediction purposes and therefore label and feature vector might</span>
+<span class="sd">    be soparated by some time lag or even are not the same variable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="EncoderDecoder.set_parameters"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurons</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                       <span class="n">noise_out</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">l1_hidden</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">l2_hidden</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+                       <span class="n">l1_out</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">l2_out</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                       <span class="n">lr</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_members_segment</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                       <span class="n">patience</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the parameters of the Encoder-Decoder neural network.</span>
+
+<span class="sd">        Note, if the parameters are given in a list, ninolearn assumes that</span>
+<span class="sd">        a the method .fit_RandomizedSearch() is used.</span>
+
+<span class="sd">        :type neurons: tuple (list of two tuples for .fit_RandomizedSearch())</span>
+<span class="sd">        :param neurons: The architecture of the Encoder-Decoder. The layer\</span>
+<span class="sd">        with the lowest number of neurons is assumed to be the bottleneck layer\</span>
+<span class="sd">        for which the activation function is linear. Furthermore, the output\</span>
+<span class="sd">        layer has a linear activation as well. All other layers have the ReLU\</span>
+<span class="sd">        as activation.</span>
+
+<span class="sd">        :type dropout: float</span>
+<span class="sd">        :param dropout: Standard deviation of the Gaussian dropout. Dropout\</span>
+<span class="sd">        layers are installed behind each hidden layer in the Encoder and the\</span>
+<span class="sd">        Decoder.</span>
+
+<span class="sd">        :type noise: float</span>
+<span class="sd">        :param noise: Standard deviation of Gaussian noise for the input layer.</span>
+
+<span class="sd">        :type noise: float</span>
+<span class="sd">        :param noise: Standard deviation of Gaussian noise for the output\</span>
+<span class="sd">        layer.</span>
+
+<span class="sd">        :type l1_hidden,  l2_hidden: float</span>
+<span class="sd">        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty\</span>
+<span class="sd">        term for the hidden layer weights.</span>
+
+<span class="sd">        :type l1_out,  l2_out: float</span>
+<span class="sd">        :param l1_hidden, l2_hidden: Coefficent for the L1 and the L2 penalty\</span>
+<span class="sd">        term for the output layer weights.</span>
+
+<span class="sd">        :type batch_size: int</span>
+<span class="sd">        :param batch_size: Batch size  during training of a member of the\</span>
+<span class="sd">        Encoder-Decoder.</span>
+
+<span class="sd">        :type lr: float</span>
+<span class="sd">        :param lr: The learning rate.</span>
+
+<span class="sd">        :type n_segments: int</span>
+<span class="sd">        :param n_segments: The number of segments that are used for the cross-\</span>
+<span class="sd">        validation scheme and the training of the Ensemble members.</span>
+
+<span class="sd">        :type n_members_segment:  int</span>
+<span class="sd">        :param n_members_segment: The number of members that are trained for\</span>
+<span class="sd">        one segment.</span>
+
+<span class="sd">        :type patience: int</span>
+<span class="sd">        :param patience: The number of epochs to wait until Early-Stopping\</span>
+<span class="sd">        stops the training.</span>
+
+<span class="sd">        :type epochs: int</span>
+<span class="sd">        :param epochs: The maximum number of epochs.</span>
+
+<span class="sd">        :type verbose: int</span>
+<span class="sd">        :param verbose: Print some progress to screen. Either 0 (silent), 1 or\</span>
+<span class="sd">        2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># hyperparameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;neurons&#39;</span><span class="p">:</span> <span class="n">neurons</span><span class="p">,</span>
+                <span class="s1">&#39;dropout&#39;</span><span class="p">:</span> <span class="n">dropout</span><span class="p">,</span> <span class="s1">&#39;noise&#39;</span><span class="p">:</span> <span class="n">noise</span><span class="p">,</span> <span class="s1">&#39;noise_out&#39;</span><span class="p">:</span> <span class="n">noise_out</span><span class="p">,</span>
+                <span class="s1">&#39;l1_hidden&#39;</span><span class="p">:</span> <span class="n">l1_hidden</span><span class="p">,</span> <span class="s1">&#39;l2_hidden&#39;</span><span class="p">:</span> <span class="n">l2_hidden</span><span class="p">,</span>
+                <span class="s1">&#39;l1_out&#39;</span><span class="p">:</span> <span class="n">l1_out</span><span class="p">,</span> <span class="s1">&#39;l2_out&#39;</span><span class="p">:</span> <span class="n">l2_out</span><span class="p">,</span>
+                <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="n">lr</span><span class="p">,</span> <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_hidden_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottelneck_layer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span>
+
+        <span class="c1"># hyperparameters for randomized search</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters_search</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters_search</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># training settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="c1"># traning/validation split</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span> <span class="o">=</span> <span class="n">n_segments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_members_segment</span> <span class="o">=</span> <span class="n">n_members_segment</span>
+
+        <span class="c1"># derived parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_members</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_members_segment</span></div>
+
+
+<div class="viewcode-block" id="EncoderDecoder.build_model"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.build_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The method builds a new member of the ensemble and returns it.</span>
+
+<span class="sd">        :type n_features: int</span>
+<span class="sd">        :param n_features: The number of features.</span>
+
+<span class="sd">        :type n_labels: int</span>
+<span class="sd">        :param n_labels: The number of labels.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize optimizer and early stopping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">],</span> <span class="n">beta_1</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">beta_2</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">amsgrad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">es</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="n">f</span><span class="s1">&#39;val_mean_squared_error&#39;</span><span class="p">,</span> <span class="n">min_delta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">patience</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                   <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">restore_best_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_features</span><span class="p">,))</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">GaussianNoise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;noise&#39;</span><span class="p">])(</span><span class="n">inputs</span><span class="p">)</span>
+
+        <span class="c1"># the encoder part</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bottelneck_layer</span><span class="p">):</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_hidden&#39;</span><span class="p">],</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l2_hidden&#39;</span><span class="p">]))(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">GaussianDropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">])(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">latent</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">bottelneck_layer</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_hidden&#39;</span><span class="p">],</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l2_hidden&#39;</span><span class="p">]))(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">encoder</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">latent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;encoder&#39;</span><span class="p">)</span>
+
+        <span class="c1"># the decoder part</span>
+        <span class="n">latent_inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">bottelneck_layer</span><span class="p">],))</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">GaussianNoise</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)(</span><span class="n">latent_inputs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bottelneck_layer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_hidden_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_hidden&#39;</span><span class="p">],</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l2_hidden&#39;</span><span class="p">]))(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">GaussianDropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">])(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">decoded</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">n_labels</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                        <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_out&#39;</span><span class="p">],</span>
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l2_out&#39;</span><span class="p">]))(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">decoder</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">latent_inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">decoded</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;decoder&#39;</span><span class="p">)</span>
+
+        <span class="c1"># endocder-decoder model</span>
+        <span class="n">encoder_decoder</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">decoder</span><span class="p">(</span><span class="n">encoder</span><span class="p">(</span><span class="n">inputs</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;encoder_decoder&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">encoder_decoder</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">decoder</span></div>
+
+
+<div class="viewcode-block" id="EncoderDecoder.fit"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="n">valX</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the model. If n_segments is 1, then a validation data set needs to</span>
+<span class="sd">        be supplied.</span>
+
+<span class="sd">        :type trainX: np.ndarray</span>
+<span class="sd">        :param trainX: The training feature set. 2-D array with dimensions\</span>
+<span class="sd">        (timesteps, features)</span>
+
+<span class="sd">        :type trainy: np.ndarray</span>
+<span class="sd">        :param trainy: The training label set. 2-D array with dimensions\</span>
+<span class="sd">        (timesteps, labels)</span>
+
+<span class="sd">        :type valX: np.ndarray</span>
+<span class="sd">        :param valX: The validation feature set. 2-D array with dimensions\</span>
+<span class="sd">        (timesteps, features).</span>
+
+<span class="sd">        :type valy:  np.ndarray</span>
+<span class="sd">        :param valy: The validation label set. 2-D array with dimensions\</span>
+<span class="sd">        (timesteps, labels).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># clear memory</span>
+        <span class="n">K</span><span class="o">.</span><span class="n">clear_session</span><span class="p">()</span>
+
+        <span class="c1"># allocate lists for the ensemble</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">segment_len</span> <span class="o">=</span> <span class="n">trainX</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">valX</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Validation and test data set are the same if n_segements is 1!&quot;</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">n_members_segment</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="n">j</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span><span class="p">:</span>
+                <span class="n">n_ens_sel</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">)</span>
+                <span class="n">small_print_header</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Train member Nr {n_ens_sel+1}/</span><span class="si">{self.n_members}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># build model</span>
+                <span class="n">member</span><span class="p">,</span> <span class="n">member_encoder</span><span class="p">,</span> <span class="n">member_decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_model</span><span class="p">(</span><span class="n">trainX</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">trainy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="c1"># compite model</span>
+                <span class="n">member</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mse&#39;</span><span class="p">])</span>
+
+                <span class="c1"># validate on the spare segment</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">valX</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Validation data set will be one of the segments. The provided validation data set is not used!&quot;</span><span class="p">)</span>
+
+                    <span class="n">start_ind</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">segment_len</span>
+                    <span class="n">end_ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span>  <span class="bp">self</span><span class="o">.</span><span class="n">segment_len</span>
+
+                    <span class="n">trainXens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">end_ind</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">trainyens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">trainy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">end_ind</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">valXens</span> <span class="o">=</span> <span class="n">trainX</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">end_ind</span><span class="p">]</span>
+                    <span class="n">valyens</span> <span class="o">=</span> <span class="n">trainy</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">end_ind</span><span class="p">]</span>
+
+                <span class="c1"># validate on test data set</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">valX</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">MissingArgumentError</span><span class="p">(</span><span class="s2">&quot;When segments length is 1, a validation data set must be provided.&quot;</span><span class="p">)</span>
+                    <span class="n">trainXens</span> <span class="o">=</span> <span class="n">trainX</span>
+                    <span class="n">trainyens</span> <span class="o">=</span> <span class="n">trainy</span>
+                    <span class="n">valXens</span> <span class="o">=</span> <span class="n">valX</span>
+                    <span class="n">valyens</span> <span class="o">=</span> <span class="n">valy</span>
+
+                <span class="n">history</span> <span class="o">=</span> <span class="n">member</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">trainXens</span><span class="p">,</span> <span class="n">trainyens</span><span class="p">,</span>
+                                            <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
+                                            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                                            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="p">],</span>
+                                            <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">valXens</span><span class="p">,</span> <span class="n">valyens</span><span class="p">))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">valXens</span><span class="p">,</span> <span class="n">valyens</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Loss: </span><span class="si">{self.val_loss[-1]}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
+                <span class="n">j</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_val_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Mean loss: </span><span class="si">{self.mean_val_loss}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EncoderDecoder.fit_RandomizedSearch"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit_RandomizedSearch">[docs]</a>    <span class="k">def</span> <span class="nf">fit_RandomizedSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span>  <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hyperparameter optimazation using random search.</span>
+
+
+<span class="sd">        :type trainX: np.ndarray</span>
+<span class="sd">        :param trainX: The training feature set. 2-D array with dimensions\</span>
+<span class="sd">        (timesteps, features).</span>
+
+<span class="sd">        :type trainy: np.ndarray</span>
+<span class="sd">        :param trainy: The training label set. 2-D array with dimensions\</span>
+<span class="sd">        (timesteps, labels).</span>
+
+<span class="sd">        :param kwargs: Keyword arguments are passed to the .fit() method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if hyperparameters where provided in lists for randomized search</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters_search</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No variable indicated for hyperparameter search!&quot;</span><span class="p">)</span>
+
+        <span class="c1">#iterate with randomized hyperparameters</span>
+        <span class="n">best_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iter</span><span class="p">):</span>
+            <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Search iteration Nr {i+1}/</span><span class="si">{n_iter}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># random selection of hyperparameters</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters_search</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters_search</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters_search</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">high</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">high</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">high</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+                    <span class="n">hyp_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)):</span>
+                        <span class="n">hyp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">high</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">hyp_list</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="c1"># check if validation score was enhanced</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_val_loss</span><span class="o">&lt;</span><span class="n">best_loss</span><span class="p">:</span>
+                <span class="n">best_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_val_loss</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">best_hyperparameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                <span class="n">small_print_header</span><span class="p">(</span><span class="s2">&quot;New best hyperparameters&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Mean loss: </span><span class="si">{best_loss}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_hyperparameters</span><span class="p">)</span>
+
+        <span class="c1"># refit the model with optimized hyperparameter</span>
+        <span class="c1"># AND to have the weights of the DE for the best hyperparameters again</span>
+        <span class="n">print_header</span><span class="p">(</span><span class="s2">&quot;Refit the model with best hyperparamters&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_hyperparameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;best loss search: </span><span class="si">{best_loss}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;loss refitting : </span><span class="si">{self.mean_val_loss}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EncoderDecoder.predict"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensemble prediction.</span>
+
+<span class="sd">        :type X: np.ndarray</span>
+<span class="sd">        :param X: Feature set for which the prediction should be made.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pred_ens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_members</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_members</span><span class="p">):</span>
+            <span class="n">pred_ens</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pred_ens</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">pred_ens</span></div>
+
+<div class="viewcode-block" id="EncoderDecoder.evaluate"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ytrue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the model based on the RMSE</span>
+
+<span class="sd">        :type X: np.ndarray</span>
+<span class="sd">        :param X: The feature array.</span>
+
+<span class="sd">        :type ytrue: np.ndarray</span>
+<span class="sd">        :param ytrue: The true label array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ypred</span><span class="p">,</span> <span class="n">dummy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rmse</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span> <span class="n">ypred</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EncoderDecoder.save"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;ed_ensemble&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the ensemble.</span>
+
+<span class="sd">        :type location: str</span>
+<span class="sd">        :param location: Base directory where to for all Encoder-Decoder\</span>
+<span class="sd">        ensembles</span>
+
+<span class="sd">        :type dir_name: str</span>
+<span class="sd">        :param dir_name: The specific directory name in the base directory\</span>
+<span class="sd">        were to save the ensemble.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_members</span><span class="p">):</span>
+            <span class="n">path_h5</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;member</span><span class="si">{i}</span><span class="s2">.h5&quot;</span><span class="p">)</span>
+            <span class="n">save_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">path_h5</span><span class="p">,</span> <span class="n">include_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EncoderDecoder.load"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;ensemble&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the ensemble.</span>
+
+<span class="sd">        :type location: str</span>
+<span class="sd">        :param location: Base directory where for all Encoder-Decoder\</span>
+<span class="sd">        ensembles.</span>
+
+<span class="sd">        :type dir_name: str</span>
+<span class="sd">        :param dir_name: The specific directory name in the base directory\</span>
+<span class="sd">        were to find the ensemble.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_members</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load_model</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+
+        <span class="n">output_neurons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_output_shape_at</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">output_neurons</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">NinoLearn 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Paul Petersik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

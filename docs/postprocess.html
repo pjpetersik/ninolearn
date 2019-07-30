@@ -1,0 +1,506 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NinoLearn Postprocess &#8212; NinoLearn 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="NinoLearn Learn" href="learn.html" />
+    <link rel="prev" title="NinoLearn Input/Output" href="io.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="learn.html" title="NinoLearn Learn"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="io.html" title="NinoLearn Input/Output"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="io.html"
+                        title="previous chapter">NinoLearn Input/Output</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="learn.html"
+                        title="next chapter">NinoLearn Learn</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ninolearn-postprocess">
+<h1>NinoLearn Postprocess<a class="headerlink" href="#ninolearn-postprocess" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ninolearn.postprocess.prepare">
+<span id="data-preparation"></span><h2>Data preparation<a class="headerlink" href="#module-ninolearn.postprocess.prepare" title="Permalink to this headline">¶</a></h2>
+<p>This module is a collection of methods that are needed to convert the raw
+data to a same format.</p>
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.calc_warm_pool_edge">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">calc_warm_pool_edge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#calc_warm_pool_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.calc_warm_pool_edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the warm pool edge</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.prep_K_index">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">prep_K_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#prep_K_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.prep_K_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>function that edits the Kirimati index from Bunge and Clarke (2014)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.prep_iod">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">prep_iod</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#prep_iod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.prep_iod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the IOD index dataframe</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.prep_nino_month">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">prep_nino_month</code><span class="sig-paren">(</span><em>index='3.4'</em>, <em>detrend=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#prep_nino_month"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.prep_nino_month" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a time axis corresponding to the first day of the central month.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.prep_oni">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">prep_oni</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#prep_oni"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.prep_oni" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a time axis corresponding to the first day of the central month of a
+3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
+some axis.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.prep_wwv">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">prep_wwv</code><span class="sig-paren">(</span><em>cardinal_direction=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#prep_wwv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.prep_wwv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a time axis corresponding to the first day of the central month of a
+3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
+some axis.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.prep_wwv_proxy">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">prep_wwv_proxy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#prep_wwv_proxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.prep_wwv_proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a wwv proxy index that uses the K-index from Bunge and Clarke (2014)
+for the time period between 1955 and 1979</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.season_shift_year">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">season_shift_year</code><span class="sig-paren">(</span><em>season</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#season_shift_year"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.season_shift_year" title="Permalink to this definition">¶</a></dt>
+<dd><p>when the function .season_to_month() is applied the year related to
+NDJ needs to be shifted by 1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>season</strong> (<em>string</em>) – Season represented by three letters such as ‘DJF’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.prepare.season_to_month">
+<code class="descclassname">ninolearn.postprocess.prepare.</code><code class="descname">season_to_month</code><span class="sig-paren">(</span><em>season</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/prepare.html#season_to_month"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.prepare.season_to_month" title="Permalink to this definition">¶</a></dt>
+<dd><p>translates a 3-month season string to the corresponding integer of the
+last month of the season (to ensure not to include any future information
+when predictions are made later with this data)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>season</strong> (<em>string</em>) – Season represented by three letters such as ‘DJF’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-ninolearn.postprocess.anomaly"></span><p>This module contains a bunch of mehtods to compute seasonal anomalies.</p>
+<p>Currently the reference period is 1981-2010.</p>
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.computeAnomaly">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">computeAnomaly</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#computeAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.computeAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the seasonality</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.computeMeanClimatology">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">computeMeanClimatology</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#computeMeanClimatology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.computeMeanClimatology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monthly means</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.computeNormAnomaly">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">computeNormAnomaly</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#computeNormAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.computeNormAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the seasonality</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.computeStdClimatology">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">computeStdClimatology</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#computeStdClimatology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.computeStdClimatology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monthly stds</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.postprocess">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">postprocess</code><span class="sig-paren">(</span><em>data</em>, <em>new=False</em>, <em>ref_period=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.postprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine all the postprocessing functions in one data routine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> – xarray data array</li>
+<li><strong>new</strong> – compute the statistics again (default = False)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.saveAnomaly">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">saveAnomaly</code><span class="sig-paren">(</span><em>data</em>, <em>new</em>, <em>compute=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#saveAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.saveAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>save deviation to postdir</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.saveNormAnomaly">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">saveNormAnomaly</code><span class="sig-paren">(</span><em>data</em>, <em>new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#saveNormAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.saveNormAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>save deviation to postdir</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.postprocess.anomaly.toPostDir">
+<code class="descclassname">ninolearn.postprocess.anomaly.</code><code class="descname">toPostDir</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/anomaly.html#toPostDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.anomaly.toPostDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the basic data to the postdir.</p>
+</dd></dl>
+
+<span class="target" id="module-ninolearn.postprocess.regrid"></span><dl class="function">
+<dt id="ninolearn.postprocess.regrid.to2_5x2_5">
+<code class="descclassname">ninolearn.postprocess.regrid.</code><code class="descname">to2_5x2_5</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/regrid.html#to2_5x2_5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.regrid.to2_5x2_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regrids data the 2.5x2.5 from the NCEP reanalysis data set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – An xarray dataArray or DataSet with with dimensions named    ‘lat’ and ‘lon’.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ninolearn.postprocess.network">
+<span id="evolving-complex-networks"></span><h2>Evolving complex networks<a class="headerlink" href="#module-ninolearn.postprocess.network" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ninolearn.postprocess.network.climateNetwork">
+<em class="property">class </em><code class="descclassname">ninolearn.postprocess.network.</code><code class="descname">climateNetwork</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Child object of the igraph.Graph class for the construction of a complex
+climate network.</p>
+<dl class="method">
+<dt id="ninolearn.postprocess.network.climateNetwork.cluster_fraction">
+<code class="descname">cluster_fraction</code><span class="sig-paren">(</span><em>size=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork.cluster_fraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork.cluster_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fraction of the nodes that are part of a cluster of the
+given size (default: size=2).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int</em>) – Size of the cluster. Default:2.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.network.climateNetwork.corrected_hamming_distance">
+<code class="descname">corrected_hamming_distance</code><span class="sig-paren">(</span><em>other_adjacency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork.corrected_hamming_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork.corrected_hamming_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Hamming distance of the climate Network to the provided
+other Network (by supplying the adjacency of the other Network).
+Computation is done as described in Radebach et al. (2013).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other_adjacency</strong> – The adjacency of the other climate Network.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ninolearn.postprocess.network.climateNetwork.from_adjacency">
+<em class="property">classmethod </em><code class="descname">from_adjacency</code><span class="sig-paren">(</span><em>adjacency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork.from_adjacency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork.from_adjacency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an igraph network form a adjacency matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>adjacency</strong> (<em>np.ndarray</em>) – The NxN adjacency array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ninolearn.postprocess.network.climateNetwork.from_correalation_matrix">
+<em class="property">classmethod </em><code class="descname">from_correalation_matrix</code><span class="sig-paren">(</span><em>correalation_matrix</em>, <em>threshold=None</em>, <em>edge_density=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork.from_correalation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork.from_correalation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate an igraph network from a correlation matrix</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>correalation_matrix</strong> – The NxN correlation matrix that should be        used to generate the network.</li>
+<li><strong>threshold</strong> – If NOT none but float between 0 and 1, a network        with a fixed global threshold is generated.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>NOTE: EITHER the threshold OR the edge density method can be used!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>edge_density</strong> – If NOT none but float between 0 and 1, a network        with a fixed edge density where the strongest links are part of network        is generated. Note, EITHER the threshold OR the edge density method can        be used!</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.network.climateNetwork.giant_fraction">
+<code class="descname">giant_fraction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork.giant_fraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork.giant_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fraction of the nodes that are part of the giant component.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.network.climateNetwork.hamming_distance">
+<code class="descname">hamming_distance</code><span class="sig-paren">(</span><em>other_adjacency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#climateNetwork.hamming_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.climateNetwork.hamming_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Hamming distance of the climate Network to the provided
+other Network (by supplying the adjacency of the other Network).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other_adjacency</strong> – The adjacency of the other climate Network.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ninolearn.postprocess.network.networkMetricsSeries">
+<em class="property">class </em><code class="descclassname">ninolearn.postprocess.network.</code><code class="descname">networkMetricsSeries</code><span class="sig-paren">(</span><em>variable</em>, <em>dataset</em>, <em>processed='anom'</em>, <em>threshold=None</em>, <em>edge_density=None</em>, <em>startyear=1948</em>, <em>endyear=2018</em>, <em>window_size=12</em>, <em>lon_min=120</em>, <em>lon_max=260</em>, <em>lat_min=-30</em>, <em>lat_max=30</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#networkMetricsSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.networkMetricsSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for the computation of network metrics time series</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>variable</strong> (<em>str</em>) – The variable for which the network time series should    be computed.</li>
+<li><strong>dataset</strong> (<em>str</em>) – The dataset that should be used to build the network.</li>
+<li><strong>processed</strong> (<em>str</em>) – Either ‘’,’anom’ or ‘normanom’.</li>
+<li><strong>threshold</strong> (<em>float</em>) – the threshold for a the correlation coeficent between    two grid point to be considered as connected.</li>
+<li><strong>startyear</strong> – The first year for which the network analysis should    be done.</li>
+<li><strong>endyear</strong> – The last year for which the network analysis should be    done.</li>
+<li><strong>window_size</strong> – The size of the window for which the network    metrics are computed.</li>
+<li><strong>lon_min</strong><strong>,</strong><strong>lon_max</strong> – The minimum and the maximum values of the    longitude grid for which the metrics shell be computed     (from 0 to 360 degrees east).</li>
+<li><strong>lat_min</strong><strong>,</strong><strong>lat_max</strong> – The minimum and the maximum values of the    latitude grid for which the metrics shell be computed    (from -180 to 180 degrees east).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ninolearn.postprocess.network.networkMetricsSeries.computeNetworkMetrics">
+<code class="descname">computeNetworkMetrics</code><span class="sig-paren">(</span><em>corrcoef</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#networkMetricsSeries.computeNetworkMetrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.networkMetricsSeries.computeNetworkMetrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>computes network metrics from a correlation matrix in combination with
+the already given threshold</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>corrcoef</strong> – The correlation matrix.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.network.networkMetricsSeries.computeTimeSeries">
+<code class="descname">computeTimeSeries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#networkMetricsSeries.computeTimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.networkMetricsSeries.computeTimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the evolving complex network timeseries, the corresping
+metrics and save the results to a csv-file in the data directory</p>
+<p>NOTE: Specify the data directory as ‘datadir’ in the ninolear.private
+module which you may not push the public repository.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.network.networkMetricsSeries.initalizeSeries">
+<code class="descname">initalizeSeries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/network.html#networkMetricsSeries.initalizeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.network.networkMetricsSeries.initalizeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>initializes the pandas Series and array that saves the adjacency of the
+network from the previous time step.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="principal-component-analysis">
+<h2>Principal Component Analysis<a class="headerlink" href="#principal-component-analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ninolearn.postprocess.pca.pca">
+<em class="property">class </em><code class="descclassname">ninolearn.postprocess.pca.</code><code class="descname">pca</code><span class="sig-paren">(</span><em>n_components=None</em>, <em>copy=True</em>, <em>whiten=False</em>, <em>svd_solver='auto'</em>, <em>tol=0.0</em>, <em>iterated_power='auto'</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class extends the PCA class of the sklearn.decomposition.pca module.    It facilitates the loading of the data from the postprocessed directory,    wraps the fit function of the PCA class, has a saving routine for the    computed pca component and can plot the EOF to get more insight into the    results.</p>
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.component_map_">
+<code class="descname">component_map_</code><span class="sig-paren">(</span><em>eof=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.component_map_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.component_map_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the components as a map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eof</strong> – The leading eof (default:1).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.compute_pca">
+<code class="descname">compute_pca</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.compute_pca"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.compute_pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple wrapper around the PCA.fit() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>variable</em>, <em>dataset</em>, <em>processed='anom'</em>, <em>startyear=1949</em>, <em>endyear=2018</em>, <em>lon_min=120</em>, <em>lon_max=280</em>, <em>lat_min=-30</em>, <em>lat_max=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data for PCA analysis from the desired postprocessed data set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>variable</strong> (<em>str</em>) – The variable for which the PCA will be done.</li>
+<li><strong>dataset</strong> (<em>str</em>) – The data set that should be used for the PCA.</li>
+<li><strong>processed</strong> (<em>str</em>) – Either ‘’,’anom’ or ‘normanom’.</li>
+<li><strong>startyear</strong> – The start year for the time series for which the PCA        is done.</li>
+<li><strong>endyear</strong> – The last year for the time series for which the PCA        is done.</li>
+<li><strong>lon_min</strong><strong>,</strong><strong>lon_max</strong> – The minimum and the maximum values of the        longitude grid for which the metrics shell be computed         (from 0 to 360 degrees east)</li>
+<li><strong>lat_min</strong><strong>,</strong><strong>lat_max</strong> – The min and the max values of the latitude        grid for which the metrics shell be computed (from -180 to 180 degrees        east)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.pc_projection">
+<code class="descname">pc_projection</code><span class="sig-paren">(</span><em>eof=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.pc_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.pc_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the amplitude timeseries of the specified eof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eof</strong> – The nth leading eof (default:1).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.plot_eof">
+<code class="descname">plot_eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.plot_eof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.plot_eof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a plot for the first leading EOFs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>extension=''</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the first three pca components to a csv-file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.postprocess.pca.pca.set_eof_array">
+<code class="descname">set_eof_array</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/postprocess/pca.html#pca.set_eof_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.postprocess.pca.pca.set_eof_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genrates the array that will be analyzed with the EOF.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="learn.html" title="NinoLearn Learn"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="io.html" title="NinoLearn Input/Output"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Paul Petersik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

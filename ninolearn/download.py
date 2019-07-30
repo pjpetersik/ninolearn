@@ -57,7 +57,7 @@ def downloadFTP(info_dict, outdir='',
 
     :type outdir: str
     :param outdir: The output directory for your variable. If outdir='', then\
-    no separate directory is made and all data is put into the raw data \
+    no separate directory is made and all data is put into the raw data\
     directory (see ninolearn.pathes).
 
     :type username: str
@@ -200,7 +200,7 @@ class sources(object):
     *'filename'* yourself. Data is just available in multiple files (not \
     in a single big file).
 
-    :Source UWIND_NCEP,VWIND_NCEP,SAT_monthly_NCEP: The *monthly* u-wind, vwind
+    :Source UWIND_NCEP,VWIND_NCEP,SAT_monthly_NCEP: The *monthly* u-wind, vwind\
     and surface air temperature (SAT) from the NCEP reanalysis.
 
     :Source SAT_daily_NCEP: The *daily* surface air temperature (SAT) from \

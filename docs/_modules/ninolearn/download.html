@@ -1,0 +1,399 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ninolearn.download &#8212; NinoLearn 0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">NinoLearn 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ninolearn.download</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains methods to download files from ftp-servers or via http.</span>
+<span class="sd">The method download()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ftplib</span> <span class="k">import</span> <span class="n">FTP</span>
+<span class="kn">from</span> <span class="nn">requests</span> <span class="k">import</span> <span class="n">get</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span><span class="p">,</span> <span class="n">mkdir</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">rawdir</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">rawdir</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;make a data directory at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">rawdir</span><span class="p">)</span>
+    <span class="n">mkdir</span><span class="p">(</span><span class="n">rawdir</span><span class="p">)</span>
+
+<div class="viewcode-block" id="download"><a class="viewcode-back" href="../../download.html#ninolearn.download.download">[docs]</a><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download data specified in the dictionary *info_dict*. The value of the</span>
+<span class="sd">    keyword *&#39;downloadType&#39; is important to tell the method if the download</span>
+<span class="sd">    is done from an ftp-server (value *&#39;ftp&#39;*) or via http (value *&#39;http&#39;*).</span>
+
+<span class="sd">    The information dictionary  *&#39;info_dict&#39;* contains the essential</span>
+<span class="sd">    informations over the source of the data. See</span>
+<span class="sd">    :class:&#39;ninolearn.download.sources&#39; for a detailed description how the</span>
+<span class="sd">    information dictionary should be orgainized.</span>
+
+<span class="sd">    :type info_dict: dict</span>
+<span class="sd">    :param info_dict: The information dictionary for the source of the data.\</span>
+<span class="sd">    See :class:&#39;ninolearn.download.sources&#39; for more details on the organization\</span>
+<span class="sd">    of the dictionary.</span>
+
+<span class="sd">    :param kwargs: Keyword arguments that are passed to :method:&#39;ninolearn.download.downloadFTP&#39; or\</span>
+<span class="sd">    :method:&#39;ninolearn.download.downloadHTTP&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;downloadType&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;ftp&#39;</span><span class="p">:</span>
+        <span class="n">downloadFTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;downloadType&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;http&#39;</span><span class="p">:</span>
+        <span class="n">downloadHTTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="downloadFTP"><a class="viewcode-back" href="../../download.html#ninolearn.download.downloadFTP">[docs]</a><span class="k">def</span> <span class="nf">downloadFTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;anonymous&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;anonymous_pass&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download a file from a FTP server. Note, just some ftp-servers</span>
+<span class="sd">    require an login account. Make sure you do **NOT commit** code in which your</span>
+<span class="sd">    login details are visible to a public repository. Hence, put the information</span>
+<span class="sd">    in a module that that you do not commit (put its name into the .gitignore)</span>
+<span class="sd">    file.</span>
+
+<span class="sd">    :param info_dict: The information dictionary for the source of the data.\</span>
+<span class="sd">    See :class:&#39;ninolearn.download.sources&#39; for more details on the organization\</span>
+<span class="sd">    of the dictionary.</span>
+
+<span class="sd">    :type outdir: str</span>
+<span class="sd">    :param outdir: The output directory for your variable. If outdir=&#39;&#39;, then\</span>
+<span class="sd">    no separate directory is made and all data is put into the raw data\</span>
+<span class="sd">    directory (see ninolearn.pathes).</span>
+
+<span class="sd">    :type username: str</span>
+<span class="sd">    :param username: Username for ftp-server login (not always required).</span>
+
+<span class="sd">    :type password: str</span>
+<span class="sd">    :param password: Password for ftp-server login (not always required).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">]</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span>
+
+    <span class="c1"># make the output directory for the file</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;make a data directory at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">))</span>
+        <span class="n">mkdir</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">))</span>
+
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Download </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">ftp</span> <span class="o">=</span> <span class="n">FTP</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="n">ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+
+        <span class="n">localfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+        <span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s1">&#39;RETR &#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="n">localfile</span><span class="o">.</span><span class="n">write</span><span class="p">,</span> <span class="mi">204800</span><span class="p">)</span>
+        <span class="n">localfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">ftp</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already downloaded&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="downloadHTTP"><a class="viewcode-back" href="../../download.html#ninolearn.download.downloadHTTP">[docs]</a><span class="k">def</span> <span class="nf">downloadHTTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download a file via a HTTP.</span>
+
+<span class="sd">    :type info_dict: dict</span>
+<span class="sd">    :param info_dict: The information dictionary for the source of the data.\</span>
+<span class="sd">    See :class:&#39;ninolearn.download.sources&#39; for more details on the organization\</span>
+<span class="sd">    of the dictionary.</span>
+
+<span class="sd">    :type outdir: str</span>
+<span class="sd">    :param outdir: The output directory for your variable. If outdir=&#39;&#39;, then\</span>
+<span class="sd">    no separate directory is made and all data is put into the raw data \</span>
+<span class="sd">    directory (see ninolearn.pathes).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># open in binary mode</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Download </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="c1"># get request</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+            <span class="c1"># write to file</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already downloaded&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">unzip_gz</span><span class="p">(</span><span class="n">info_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unzip .gz format file. Some downloaded files come in in zipped format.</span>
+<span class="sd">    With this method you can unzip them directly after the download and remove</span>
+<span class="sd">    the .gz file immediately.</span>
+
+<span class="sd">    :type info_dict: dict</span>
+<span class="sd">    :param info_dict: The information dictionary for the source of the data.\</span>
+<span class="sd">    See :class:&#39;ninolearn.download.sources&#39; for more details on the organization\</span>
+<span class="sd">    of the dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filename_old</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+    <span class="n">filename_new</span> <span class="o">=</span> <span class="n">filename_old</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># unpack file</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">filename_new</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unzip </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename_old</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">filename_old</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">filename_new</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already unzipped&quot;</span> <span class="o">%</span> <span class="n">filename_old</span><span class="p">)</span>
+
+    <span class="c1"># remove .gz file</span>
+    <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">filename_new</span><span class="p">))</span> \
+       <span class="ow">and</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">filename_old</span><span class="p">)):</span>
+        <span class="n">remove</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">filename_old</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Remove </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">filename_old</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="sources"><a class="viewcode-back" href="../../download.html#ninolearn.download.sources">[docs]</a><span class="k">class</span> <span class="nc">sources</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collection of relevant data sources. If you add a new data source yourself</span>
+<span class="sd">    follow the dictionary template:</span>
+
+<span class="sd">    For FTP download, you need to specify the host (keyword &#39;host&#39;) the directory</span>
+<span class="sd">    on the ftp-server (keyword &#39;location&#39;) as well as the filename (keyword &#39;filename&#39;)</span>
+<span class="sd">    that is going to be the name of the file AS WELL AS for the downloaded file.</span>
+
+<span class="sd">    **NAME_FTP** = {\n</span>
+<span class="sd">        &#39;downloadType&#39;:&#39;ftp&#39;,\n</span>
+<span class="sd">        &#39;filename&#39;: &#39;filename_on_the_server_AND_local&#39;,\n</span>
+<span class="sd">        &#39;host&#39;: &#39;ftp.hostname.com&#39;,\n</span>
+<span class="sd">        &#39;location&#39;: &#39;/directory/on/the/server&#39;\n</span>
+<span class="sd">        }</span>
+
+
+<span class="sd">    For HTTP download, you need to specific the FULL path to the file (keyword &#39;url&#39;)</span>
+<span class="sd">    as well as the name that is used for the downloaded file (keyword &#39;filename&#39;)</span>
+
+<span class="sd">    **NAME_HTTP** = {\n</span>
+<span class="sd">           &#39;downloadType&#39;:&#39;http&#39;,\n</span>
+<span class="sd">           &#39;url&#39;: &#39;https://www.full_url_to_the_file.com/data.txt,\n</span>
+<span class="sd">           &#39;filename&#39;: &#39;local_file_name.txt&#39;\n</span>
+<span class="sd">            }</span>
+
+<span class="sd">    **Source dictionaries:**\n</span>
+
+<span class="sd">    :Source ONI: The Oceanic Nino Index.</span>
+
+<span class="sd">    :Source NINOindeces: The monthly Nino1+2, Nino3, Nino4 and Nino3.4 indeces.</span>
+
+<span class="sd">    :Source WWV,WWV_West: The Warm water volume (WWV) and the WWV in the\</span>
+<span class="sd">    western basin.</span>
+
+<span class="sd">    :Source IOD: The  Dipole Mode Index (DMI) of the Indian Ocean Dipole  (IOD).</span>
+
+<span class="sd">    :Source SST_ERSSTv5: The SST field from the ERSSTv5 field.</span>
+
+<span class="sd">    :Source ORAS4: The ORAS4 data set. Define the argument for the keyword\</span>
+<span class="sd">    *&#39;filename&#39;* yourself. There are various variables available form the \</span>
+<span class="sd">    ORAS4 data set. Moreover, they are just available in multiple files (not \</span>
+<span class="sd">    in a single big file).</span>
+
+<span class="sd">    :Source GODAS: The GODAS data set. Define the argument for the keyword\</span>
+<span class="sd">    *&#39;filename&#39;* yourself. Data is just available in multiple files (not \</span>
+<span class="sd">    in a single big file).</span>
+
+<span class="sd">    :Source UWIND_NCEP,VWIND_NCEP,SAT_monthly_NCEP: The *monthly* u-wind, vwind\</span>
+<span class="sd">    and surface air temperature (SAT) from the NCEP reanalysis.</span>
+
+<span class="sd">    :Source SAT_daily_NCEP: The *daily* surface air temperature (SAT) from \</span>
+<span class="sd">    the NCEP reanalysis.</span>
+
+<span class="sd">    :Source HCA: The heat content anomaly. (Data source: NOAA)</span>
+
+<span class="sd">    :Source OLR_NOAA: The outgoing longwave radiation (OLR).\</span>
+<span class="sd">    (Data source: NOAA)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SST_ERSSTv5</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;sst.mnmean.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/noaa.ersst.v5/&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">ONI</span> <span class="o">=</span> <span class="p">{</span>
+           <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;oni.txt&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">NINO34detrend</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/detrend.nino34.ascii.txt&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;nino34detrend.txt&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">NINOindeces</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.81-10.ascii&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;nino_1_4.txt&#39;</span>
+            <span class="p">}</span>
+
+
+    <span class="n">ORAS4</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;zos_oras4_1m_1958_grid_1x1.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp-icdc.cen.uni-hamburg.de&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/EASYInit/ORA-S4/monthly_1x1/&#39;</span>
+                  <span class="p">}</span>
+
+    <span class="n">GODAS</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;sshg.1980.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/godas/&#39;</span>
+                  <span class="p">}</span>
+
+    <span class="n">WWV</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;wwv.dat&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.pmel.noaa.gov/tao/wwv/data/wwv.dat&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">WWV_West</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;wwv_west.dat&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.pmel.noaa.gov/tao/wwv/data/wwv_west.dat&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">UWIND_NCEP</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;uwnd.mon.mean.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/ncep.reanalysis.derived/surface/&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">VWIND_NCEP</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;vwnd.mon.mean.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/ncep.reanalysis.derived/surface/&#39;</span>
+            <span class="p">}</span>
+
+
+    <span class="n">SAT_daily_NCEP</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;air.sig995.2019.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/ncep.reanalysis.dailyavgs/surface/&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">SAT_monthly_NCEP</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;air.mon.mean.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/ncep.reanalysis.derived/surface/&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">IOD</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.esrl.noaa.gov/psd/gcos_wgsp/Timeseries/Data/dmi.long.data&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;iod.txt&#39;</span>
+            <span class="p">}</span>
+
+
+    <span class="c1">#https://www.ncdc.noaa.gov/cdr/oceanic/ocean-heat-content</span>
+    <span class="n">HCA</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;hca.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://data.nodc.noaa.gov/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/NETCDF/heat_content/heat_content_anomaly_0-700_seasonal.nc&#39;</span>
+            <span class="p">}</span>
+
+    <span class="n">OLR_NOAA</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;ftp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;olr.mon.mean.nc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="s1">&#39;ftp.cdc.noaa.gov&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="s1">&#39;/Datasets/interp_OLR/&#39;</span>
+            <span class="p">}</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">NinoLearn 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Paul Petersik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>
