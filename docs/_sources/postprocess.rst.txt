@@ -1,5 +1,5 @@
-NinoLearn Postprocess
-#####################
+Postprocess
+###########
 
 Data preparation
 ****************
@@ -17,5 +17,5 @@ Evolving complex networks
 
 Principal Component Analysis
 ****************************
-.. autoclass:: ninolearn.postprocess.pca.pca
+.. automodule:: ninolearn.postprocess.pca
     :members:

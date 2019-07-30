@@ -24,12 +24,12 @@ def download(info_dict, **kwargs):
 
     The information dictionary  *'info_dict'* contains the essential
     informations over the source of the data. See
-    :class:'ninolearn.download.sources' for a detailed description how the
+    :class:`ninolearn.download.sources` for a detailed description how the
     information dictionary should be orgainized.
 
     :type info_dict: dict
     :param info_dict: The information dictionary for the source of the data.\
-    See :class:'ninolearn.download.sources' for more details on the organization\
+    See :class:`ninolearn.download.sources` for more details on the organization\
     of the dictionary.
 
     :param kwargs: Keyword arguments that are passed to :method:'ninolearn.download.downloadFTP' or\
@@ -97,11 +97,11 @@ def downloadHTTP(info_dict, outdir=''):
 
     :type info_dict: dict
     :param info_dict: The information dictionary for the source of the data.\
-    See :class:'ninolearn.download.sources' for more details on the organization\
+    See :class:`ninolearn.download.sources` for more details on the organization\
     of the dictionary.
 
     :type outdir: str
-    :param outdir: The output directory for your variable. If outdir='', then\
+    :param outdir: The output directory for your variable. If *outdir=''*, then\
     no separate directory is made and all data is put into the raw data \
     directory (see ninolearn.pathes).
     """
@@ -129,7 +129,7 @@ def unzip_gz(info_dict):
 
     :type info_dict: dict
     :param info_dict: The information dictionary for the source of the data.\
-    See :class:'ninolearn.download.sources' for more details on the organization\
+    See :class:`ninolearn.download.sources` for more details on the organization\
     of the dictionary.
     """
     filename_old = info_dict['filename']

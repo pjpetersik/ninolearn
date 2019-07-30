@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>NinoLearn Download &#8212; NinoLearn 0.1 documentation</title>
+    <title>Download &#8212; NinoLearn 0.1 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="NinoLearn Input/Output" href="io.html" />
-    <link rel="prev" title="Welcome to NinoLearn’s documentation!" href="index.html" /> 
+    <link rel="next" title="Input/Output" href="io.html" />
+    <link rel="prev" title="NinoLearn - A research framemork for statistical ENSO prediction" href="index.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -29,10 +29,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="io.html" title="NinoLearn Input/Output"
+          <a href="io.html" title="Input/Output"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to NinoLearn’s documentation!"
+          <a href="index.html" title="NinoLearn - A research framemork for statistical ENSO prediction"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
       </ul>
@@ -44,10 +44,10 @@
             </a></p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to NinoLearn’s documentation!</a></p>
+                        title="previous chapter">NinoLearn - A research framemork for statistical ENSO prediction</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="io.html"
-                        title="next chapter">NinoLearn Input/Output</a></p>
+                        title="next chapter">Input/Output</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <div class="searchformwrapper">
@@ -69,7 +69,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-ninolearn.download">
-<span id="ninolearn-download"></span><h1>NinoLearn Download<a class="headerlink" href="#module-ninolearn.download" title="Permalink to this headline">¶</a></h1>
+<span id="download"></span><h1>Download<a class="headerlink" href="#module-ninolearn.download" title="Permalink to this headline">¶</a></h1>
 <p>This module contains methods to download files from ftp-servers or via http.
 The method download()</p>
 <dl class="function">
@@ -80,14 +80,14 @@ keyword <em>‘downloadType’ is important to tell the method if the download
 is done from an ftp-server (value *’ftp’</em>) or via http (value <em>‘http’</em>).</p>
 <p>The information dictionary  <em>‘info_dict’</em> contains the essential
 informations over the source of the data. See
-:class:’ninolearn.download.sources’ for a detailed description how the
+<a class="reference internal" href="#ninolearn.download.sources" title="ninolearn.download.sources"><code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.download.sources</span></code></a> for a detailed description how the
 information dictionary should be orgainized.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>info_dict</strong> (<em>dict</em>) – The information dictionary for the source of the data.    See :class:’ninolearn.download.sources’ for more details on the organization    of the dictionary.</li>
+<li><strong>info_dict</strong> (<em>dict</em>) – The information dictionary for the source of the data.    See <a class="reference internal" href="#ninolearn.download.sources" title="ninolearn.download.sources"><code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.download.sources</span></code></a> for more details on the organization    of the dictionary.</li>
 <li><strong>kwargs</strong> – Keyword arguments that are passed to :method:’ninolearn.download.downloadFTP’ or    :method:’ninolearn.download.downloadHTTP’.</li>
 </ul>
 </td>
@@ -129,8 +129,8 @@ file.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>info_dict</strong> (<em>dict</em>) – The information dictionary for the source of the data.    See :class:’ninolearn.download.sources’ for more details on the organization    of the dictionary.</li>
-<li><strong>outdir</strong> (<em>str</em>) – The output directory for your variable. If outdir=’‘, then    no separate directory is made and all data is put into the raw data     directory (see ninolearn.pathes).</li>
+<li><strong>info_dict</strong> (<em>dict</em>) – The information dictionary for the source of the data.    See <a class="reference internal" href="#ninolearn.download.sources" title="ninolearn.download.sources"><code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.download.sources</span></code></a> for more details on the organization    of the dictionary.</li>
+<li><strong>outdir</strong> (<em>str</em>) – The output directory for your variable. If <em>outdir=’‘</em>, then    no separate directory is made and all data is put into the raw data     directory (see ninolearn.pathes).</li>
 </ul>
 </td>
 </tr>
@@ -219,10 +219,10 @@ as well as the name that is used for the downloaded file (keyword ‘filename’
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="io.html" title="NinoLearn Input/Output"
+          <a href="io.html" title="Input/Output"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to NinoLearn’s documentation!"
+          <a href="index.html" title="NinoLearn - A research framemork for statistical ENSO prediction"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
       </ul>

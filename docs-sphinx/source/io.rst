@@ -1,5 +1,5 @@
-NinoLearn Input/Output
-######################
+Input/Output
+############
 Reading the raw data
 ********************
 .. automodule:: ninolearn.IO.read_raw
