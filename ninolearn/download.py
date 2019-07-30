@@ -174,7 +174,7 @@ class sources(object):
 
     **NAME_HTTP** = {\n
            'downloadType':'http',\n
-           'url': 'https://www.full_url_to_the_file.com/data.txt,\n
+           'url': 'https://www.full_url_to_the_file.com/data.txt',\n
            'filename': 'local_file_name.txt'\n
             }
 
