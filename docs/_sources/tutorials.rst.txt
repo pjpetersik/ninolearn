@@ -2,7 +2,7 @@
 Tutorials
 #########
 
-Tutorials how to use NinoLearn are available in the directory :code:`tutorials`
+Tutorials how to use NinoLearn are available in the directory :code:`docs-sphinx/source/jupyter_notebook_tutorials`
 in GitHub repository of `NinoLearn <https://github.com/pjpetersik/ninolearn>`_.
 
 
@@ -10,3 +10,5 @@ in GitHub repository of `NinoLearn <https://github.com/pjpetersik/ninolearn>`_.
    :maxdepth: 1
 
    jupyter_notebook_tutorials/download_and_read_raw_data
+   jupyter_notebook_tutorials/prepare_data
+   jupyter_notebook_tutorials/postprocess_data

@@ -296,7 +296,7 @@
    "source": [
     "As you can see, the data sets do not have a common time axis, are available for different time periods and on different grids. \n",
     "\n",
-    "To bring the different data sets onto a common/standardized shape, check out the tutorial on preparing the data and postprocessing it."
+    "To bring the different data sets onto a common/standardized shape, check out the tutorials on [preparing the data](prepare_data.ipynb) and [postprocessing](postprocess_data.ipynb) it."
    ]
   }
  ],

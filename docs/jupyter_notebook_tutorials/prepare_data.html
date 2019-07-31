@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Download and read raw data &#8212; NinoLearn 0.1 documentation</title>
+    <title>Data preparation and read postprocessed data &#8212; NinoLearn 0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -15,8 +15,8 @@
     <link rel="shortcut icon" href="../_static/logo.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Data preparation and read postprocessed data" href="prepare_data.html" />
-    <link rel="prev" title="Tutorials" href="../tutorials.html" /> 
+    <link rel="next" title="&lt;no title&gt;" href="postprocess_data.html" />
+    <link rel="prev" title="Download and read raw data" href="download_and_read_raw_data.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -28,10 +28,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="prepare_data.html" title="Data preparation and read postprocessed data"
+          <a href="postprocess_data.html" title="&lt;no title&gt;"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../tutorials.html" title="Tutorials"
+          <a href="download_and_read_raw_data.html" title="Download and read raw data"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NinoLearn 0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../tutorials.html" accesskey="U">Tutorials</a> &#187;</li> 
@@ -43,11 +43,11 @@
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../tutorials.html"
-                        title="previous chapter">Tutorials</a></p>
+  <p class="topless"><a href="download_and_read_raw_data.html"
+                        title="previous chapter">Download and read raw data</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="prepare_data.html"
-                        title="next chapter">Data preparation and read postprocessed data</a></p>
+  <p class="topless"><a href="postprocess_data.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -64,8 +64,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../package.html">NinoLearn package</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Download and read raw data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="prepare_data.html">Data preparation and read postprocessed data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download_and_read_raw_data.html">Download and read raw data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data preparation and read postprocessed data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../forecasts.html">Some forecasts</a></li>
@@ -279,109 +279,23 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="Download-and-read-raw-data">
-<h1>Download and read raw data<a class="headerlink" href="#Download-and-read-raw-data" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="Download">
-<h2>Download<a class="headerlink" href="#Download" title="Permalink to this headline">¶</a></h2>
-<p>Before you download data, make sure that you specific the pass to the raw data directory (<code class="docutils literal notranslate"><span class="pre">rawdir</span></code>) in <code class="docutils literal notranslate"><span class="pre">ninolearn.pathes</span></code>.</p>
-<p>In this tutorial, we download the monthly Oceaninc Nino Index, sea surface temparatures from the ERSSTv5 data set and sea surface heights from the ORAS4 data set.</p>
-<div class="nbinput nblast docutils container">
+<div class="section" id="Data-preparation-and-read-postprocessed-data">
+<h1>Data preparation and read postprocessed data<a class="headerlink" href="#Data-preparation-and-read-postprocessed-data" title="Permalink to this headline">¶</a></h1>
+<p>Do you remember from the <a class="reference internal" href="download_and_read_raw_data.html"><span class="doc">Download and read raw data</span></a> tutorial, that the ONI had a wired time axis? As a little reminder:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># import the necessary methods and classes</span>
-<span class="kn">from</span> <span class="nn">ninolearn.download</span> <span class="k">import</span> <span class="n">download</span><span class="p">,</span> <span class="n">sources</span>
-</pre></div>
-</div>
-</div>
-<p>NOTE: If the data was already downloaded, it won’t be downloaded again.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">SST_ERSSTv5</span><span class="p">)</span>
-<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">ONI</span><span class="p">)</span>
-<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">SAT_monthly_NCEP</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-sst.mnmean.nc already downloaded
-oni.txt already downloaded
-air.mon.mean.nc already downloaded
-</pre></div></div>
-</div>
-<p>The sources all are dictionaries have specific keywords specify their download:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">SST_ERSSTv5</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;downloadType&#39;: &#39;ftp&#39;, &#39;filename&#39;: &#39;sst.mnmean.nc&#39;, &#39;host&#39;: &#39;ftp.cdc.noaa.gov&#39;, &#39;location&#39;: &#39;/Datasets/noaa.ersst.v5/&#39;}
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">ONI</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;downloadType&#39;: &#39;http&#39;, &#39;url&#39;: &#39;https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt&#39;, &#39;filename&#39;: &#39;oni.txt&#39;}
-</pre></div></div>
-</div>
-<p>You can see that that the two sources above have entries different downloadTypes. The SST is downloaded from an ftp-server, whereas the ONI is downloaded via http.</p>
-</div>
-<div class="section" id="Read-raw-data">
-<h2>Read raw data<a class="headerlink" href="#Read-raw-data" title="Permalink to this headline">¶</a></h2>
-<p>Routines are available in the <code class="docutils literal notranslate"><span class="pre">ninolearn.IO.read_raw</span></code> module with which it is directly possible to read the raw data as it is.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_raw</span> <span class="k">import</span> <span class="n">oni</span><span class="p">,</span> <span class="n">sst_ERSSTv5</span><span class="p">,</span> <span class="n">sat</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_raw</span> <span class="k">import</span> <span class="n">oni</span>
 
 <span class="n">ONI</span> <span class="o">=</span> <span class="n">oni</span><span class="p">()</span>
-<span class="n">SST</span> <span class="o">=</span> <span class="n">sst_ERSSTv5</span><span class="p">()</span>
-<span class="n">SAT</span> <span class="o">=</span> <span class="n">sat</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="s1">&#39;monthly&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>Let’s have a look how the raw data looks like!</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">ONI</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">ONI</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -449,12 +363,15 @@ air.mon.mean.nc already downloaded
 </table>
 </div></div>
 </div>
+<p>This time axis is difficult to work with. For this NinoLearn contains a postprocessing method that fixes this for you.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">SST</span><span class="p">)</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.prepare</span> <span class="k">import</span> <span class="n">prep_oni</span>
+
+<span class="n">prep_oni</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -463,60 +380,44 @@ air.mon.mean.nc already downloaded
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;xarray.DataArray &#39;sst&#39; (time: 1982, lat: 89, lon: 180)&gt;
-[31751640 values with dtype=float32]
-Coordinates:
-  * lat      (lat) float32 88.0 86.0 84.0 82.0 80.0 ... -82.0 -84.0 -86.0 -88.0
-  * lon      (lon) float32 0.0 2.0 4.0 6.0 8.0 ... 350.0 352.0 354.0 356.0 358.0
-  * time     (time) datetime64[ns] 1854-01-01 1854-02-01 ... 2019-02-01
-Attributes:
-    long_name:     Monthly Means of Sea Surface Temperature
-    units:         degC
-    var_desc:      Sea Surface Temperature
-    level_desc:    Surface
-    statistic:     Mean
-    dataset:       ERSSTv5
-    parent_stat:   Individual Values
-    actual_range:  [-1.8     42.32636]
-    valid_range:   [-1.8 45. ]
+Prepare ONI timeseries.
 </pre></div></div>
 </div>
+<p>All methods from the <code class="docutils literal notranslate"><span class="pre">postprocess</span></code> sub-package save the data directly to the data directory <code class="docutils literal notranslate"><span class="pre">postdir</span></code> that you need to specify in <code class="docutils literal notranslate"><span class="pre">ninolean.pathes</span></code>.</p>
+<p>Now, lets read this data using the data reader for postprocessed data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">SAT</span><span class="p">)</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+
+<span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">()</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1950-02&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+
+<span class="c1"># read from a output csv and choose the anomaly  (processed=&#39;anom&#39;) data</span>
+<span class="n">oni_anom_postprocessed</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;anom&#39;</span><span class="p">)</span>
+<span class="n">oni_anom_postprocessed</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray &#39;air&#39; (time: 854, lat: 73, lon: 144)&gt;
-[8977248 values with dtype=float32]
-Coordinates:
-  * lat      (lat) float32 90.0 87.5 85.0 82.5 80.0 ... -82.5 -85.0 -87.5 -90.0
-  * lon      (lon) float32 0.0 2.5 5.0 7.5 10.0 ... 350.0 352.5 355.0 357.5
-  * time     (time) datetime64[ns] 1948-01-01 1948-02-01 ... 2019-02-01
-Attributes:
-    long_name:     Monthly Mean Air Temperature at sigma level 0.995
-    valid_range:   [-2000.  2000.]
-    units:         degC
-    precision:     1
-    var_desc:      Air Temperature
-    level_desc:    Surface
-    statistic:     Mean
-    parent_stat:   Individual Obs
-    dataset:       NCEP
-    actual_range:  [-73.78001  42.14595]
-</pre></div></div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>time
+1950-02-01   -1.53
+1950-03-01   -1.34
+1950-04-01   -1.16
+1950-05-01   -1.18
+1950-06-01   -1.07
+Name: anom, dtype: float64
+</pre></div>
 </div>
-<p>As you can see, the data sets do not have a common time axis, are available for different time periods and on different grids.</p>
-<p>To bring the different data sets onto a common/standardized shape, check out the tutorials on <a class="reference internal" href="prepare_data.html"><span class="doc">preparing the data</span></a> and <a class="reference internal" href="postprocess_data.html"><span class="doc">postprocessing</span></a> it.</p>
 </div>
+<p>Now, the data comes in a clean format. Note that the dates to which seasonal value are assigend are the first day of the last month of the three-month season (e.g. JFM 1950 becomes 1950-03-01). This is because throughout NinoLearn only monthly data is used and all monthly data is assigned to the first date of the month. Seasonal data is assigned to the last month of a season to ensure that prediction schemes do NOT accidently include data from future periods.</p>
+<p>Further preparation methods are available in the <code class="docutils literal notranslate"><span class="pre">ninolearn.postprocess.prepare</span></code> modlue for other raw data sets.</p>
 </div>
 
 
@@ -535,10 +436,10 @@ Attributes:
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="prepare_data.html" title="Data preparation and read postprocessed data"
+          <a href="postprocess_data.html" title="&lt;no title&gt;"
              >next</a> |</li>
         <li class="right" >
-          <a href="../tutorials.html" title="Tutorials"
+          <a href="download_and_read_raw_data.html" title="Download and read raw data"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NinoLearn 0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../tutorials.html" >Tutorials</a> &#187;</li> 
