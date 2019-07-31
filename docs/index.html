@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="_static/logo.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="install.html" /> 
+    <link rel="next" title="Introduction" href="intro.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -27,7 +27,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="install.html" title="Installation"
+          <a href="intro.html" title="Introduction"
              accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">NinoLearn 0.1 documentation</a> &#187;</li> 
       </ul>
@@ -38,8 +38,8 @@
               <img class="logo" src="_static/logo.png" alt="Logo"/>
             </a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="install.html"
-                        title="next chapter">Installation</a></p>
+  <p class="topless"><a href="intro.html"
+                        title="next chapter">Introduction</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -52,6 +52,7 @@
 <script type="text/javascript">$('#searchbox').show(0);</script>
 <h3><a href="#">Table of Contents</a></h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="package.html">NinoLearn package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -72,195 +73,23 @@
 that is initiated to <strong>facilitate</strong> collaboration, <strong>speed up</strong> the start up of
 research and make realized research <strong>more transparent, comparable and reproducable</strong>.</p>
 <p>The current framework was developed in 2019 during the Master Thesis of
-Paul Petersik. It lays the groundwork for a further development and the integration
+Paul Petersik and is available on GitHub
+(see <a class="reference external" href="https://github.com/pjpetersik/ninolearn">here</a>). It lays the groundwork
+for a further development and the integration
 of other postprocessing routines and statistical models.</p>
-<div class="section" id="the-el-nino-southern-oscillation">
-<h2>The El Niño Southern Oscillation<a class="headerlink" href="#the-el-nino-southern-oscillation" title="Permalink to this headline">¶</a></h2>
-<p>The El Niño Southern Oscillation (ENSO) is a coupelled ocean atmosphere phenomenon
-which is present in the equatorial Pacific and affects the weather around the
-world. In its positive phase, temperatures throught the equatorial Pacific are
-relatively warm (El Niño phase). The other way around, temperatures are realtively
-low in the negative phase (La Niña).</p>
-</div>
-<div class="section" id="enso-forecasts">
-<h2>ENSO forecasts<a class="headerlink" href="#enso-forecasts" title="Permalink to this headline">¶</a></h2>
-<p>The predictive horizon for ENSO forecasts is by far longer than
-for weather forecasts, because of the strong autocorrelation of the ENSO for
-time periods up to about 6-9 month. Hence, there is a great interest in
-researchto make skillful seasonal forecasts for the ENSO. Whereas, dynamical
-models integratephysical equations that determine the evolution of the system
-in time, statistical models <em>learn</em> from past observations how the future state
-of the system will likely evolve. You can find current forecasts from dynamical
-and statisticalmodels on the website of the Internation Research Insitute for
-Climate and Society (see <a class="reference external" href="https://iri.columbia.edu/our-expertise/climate/forecasts/enso/current/">here</a>).</p>
-</div>
-<div class="section" id="existing-statistical-models">
-<h2>Existing statistical models<a class="headerlink" href="#existing-statistical-models" title="Permalink to this headline">¶</a></h2>
-<p>Multiple research statistical models for the ENSO predictions have been
-developed in the past. For instance a working group around
-<a class="reference external" href="https://www.eoas.ubc.ca/people/williamhsieh">William Hsieh</a> at the
-University of British Columbia (UBC) in Canada investigated the application of artifical
-neural networks (ANN) for the ENSO forecasts. One of the first papers of
-the UBC group was published by
-<a class="reference external" href="https://link.springer.com/article/10.1007/s003820050156">Tangang et al. (1997)</a>.
-More recently, researchers the Utrecht University (UU) in the Netherlands used
-ANNs to forecast the ENSO. An early attempt was made by
-<a class="reference external" href="https://www.geosci-model-dev-discuss.net/gmd-2015-273/">Feng et al. (2016)</a>
-to use machine learning (ML) methods for the ENSO forecasts. In this unpublished
-research they aimed to build a python package for ENSO forecasts that is available
-on Github (see <a class="reference external" href="https://github.com/Ambrosys/climatelearn">here</a>). Based on
-this initial attempt, <a class="reference external" href="https://www.earth-syst-dynam.net/9/969/2018/">Nooteboom et al. (2018)</a>
-developed a hybrid model which is a combination out of an Autoregressive
-integrated moving average (ARIMA) and an ANN model.</p>
-</div>
-<div class="section" id="the-aim-of-this-package">
-<h2>The aim of this package<a class="headerlink" href="#the-aim-of-this-package" title="Permalink to this headline">¶</a></h2>
-<p>The <strong>issue of already existing statisitcal models</strong> is that it can be
-difficult and time consuming to build up on them because:</p>
-<p>· the code is  not easily accessible</p>
-<p>· the code is not easily transferable to other research (particular coding
-style, different programming language, etc.)</p>
-<p>· the research uses differing conventions, i.e. defintion for lead time</p>
-<p>· accessing the used data sources and postprocessing the data is time
-consuming</p>
-<p>The research framework Ninolearn aims to tackle these shortcomings. The framework
-initiated to <strong>facilitate</strong> collaboration, <strong>speed up</strong> the start up of research
-and make realized research <strong>more transparent, comparable and reproducable</strong>.</p>
-</div>
-<div class="section" id="how-does-ninolearn-work">
-<h2>How does NinoLearn work?<a class="headerlink" href="#how-does-ninolearn-work" title="Permalink to this headline">¶</a></h2>
-<p>NinoLearn aims to automatize and clearly separate the steps that are involved
-within the development process for a statisical model:</p>
-<ol class="arabic simple">
-<li><p>Download data</p></li>
-<li><p>Read data</p></li>
-<li><p>Clean data, harmonize data from different sources</p></li>
-<li><p>Postprocess data</p></li>
-<li><p>Build a statistical model</p></li>
-<li><p>Training the model (following the best practice of a 3-split of the data set into a train, validation and test data set)</p></li>
-<li><p>Evaluate the model (using standardized tests)</p></li>
-</ol>
-<p>Point 6 and 7 are not included in a standardized way in the current version of
-NinoLearn.</p>
-<div class="section" id="download">
-<h3>Download<a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h3>
-<p>At the start of the development of a statistical model,
-one needs to download data from potentially multiple sources.
-The module <a class="reference internal" href="download.html#module-ninolearn.download" title="ninolearn.download"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.download</span></code></a> provides routines that make the download
-process for various data sources (e.g. NCEP reanalysis, ORAS4 data set, Warm
-Water volume index, Oceanic Niño Index, etc.)
-possible within a few lines.</p>
-<p>In example for the download of the sea surface temparture (SST)
-data from the ERSSTv5 data set as well as the ONI:</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ninolearn.download</span> <span class="kn">import</span> <span class="n">download</span><span class="p">,</span> <span class="n">sources</span>
-<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">SST_ERSSTv5</span><span class="p">)</span>
-<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">ONI</span><span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
-<p>The downloaded data is directly saved into the raw data (<em>rawdir</em>) direcotory
-that is specified in <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.pathes</span></code>.</p>
-</div>
-<div class="section" id="data-preparation">
-<h3>Data preparation<a class="headerlink" href="#data-preparation" title="Permalink to this headline">¶</a></h3>
-<p>Furthermore, the module <a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.prepare" title="ninolearn.postprocess.prepare"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.prepare</span></code></a> provides the user
-with methods to prepare the data such that all postprocessed data sets follow
-the same conventions regarding i.e. the time axis format.</p>
-<p>By simply executing</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.prepare</span> <span class="kn">import</span> <span class="n">prep_oni</span>
-<span class="n">prep_oni</span><span class="p">()</span>
-</pre></div>
-</td></tr></table></div>
-<p>The downloaded raw data file for the ONI is assigned with a practicable time axis
-which is used for all postprocessed data. Moreover, the prepared data is directly
-saved into the postprocessed data direcotory (<em>postdir</em>) that is specified in
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.pathes</span></code>.</p>
-</div>
-<div class="section" id="postprocessing">
-<h3>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
-<p>Some more postprocessing methods and classes are available in modules in the
-sub-package <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess</span></code>.</p>
-<p>Computing anomalies (<a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.anomaly" title="ninolearn.postprocess.anomaly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.anomaly</span></code></a>) and regriding data to
-a common grid (currently a 2.5°x2.5° grid, <a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.regrid" title="ninolearn.postprocess.regrid"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.regrid</span></code></a>)
-is as easy as in the following code snippet for the SST data set from the
-ERSSTv5:</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ninolearn.IO</span> <span class="kn">import</span> <span class="n">read_raw</span>
-<span class="kn">from</span> <span class="nn">ninolearn.postprocess.anomaly</span> <span class="kn">import</span> <span class="n">postprocess</span>
-<span class="kn">from</span> <span class="nn">ninolearn.postprocess.regrid</span> <span class="kn">import</span> <span class="n">to2_5x2_5</span>
-
-<span class="n">sst_ERSSTv5</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">sst_ERSSTv5</span><span class="p">()</span>
-<span class="n">sst_ERSSTv5_regrided</span> <span class="o">=</span> <span class="n">to2_5x2_5</span><span class="p">(</span><span class="n">sst_ERSSTv5</span><span class="p">)</span>
-<span class="n">postprocess</span><span class="p">(</span><span class="n">sst_ERSSTv5_regrided</span><span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
-<p>The method <a class="reference internal" href="postprocess.html#ninolearn.postprocess.anomaly.postprocess" title="ninolearn.postprocess.anomaly.postprocess"><code class="xref py py-func docutils literal notranslate"><span class="pre">ninolearn.postprocess.anomaly.postprocess()</span></code></a> saves the initial
-raw data file to the postprocessed data directory and renames it following a
-naming convention that makes it easy to access later. Furthermore, seasonal
-anomalies based on the reference period 1981-2010 are computed and the anomlies
-are as well saved to the postprocessed data directory following the naming
-convention.</p>
-<p>In addition, more advanced postprocessing methids such as principal
-component analysis (<a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.pca" title="ninolearn.postprocess.pca"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.pca</span></code></a>) and (evolving) complex networks
-(<a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.network" title="ninolearn.postprocess.network"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.network</span></code></a>) are provided to facilitate the use of
-these methods with the data set of interest.</p>
-</div>
-<div class="section" id="read-data">
-<h3>Read data<a class="headerlink" href="#read-data" title="Permalink to this headline">¶</a></h3>
-<p>In addition, reading methods in <a class="reference internal" href="io.html#module-ninolearn.IO.read_raw" title="ninolearn.IO.read_raw"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.IO.read_raw</span></code></a> are available that
-make it easy to read the raw data (not postprocessed) without the need to specify
-all the details about the raw data set e.g. type of method to use to read the
-raw data or number of header lines. For instance one can read the raw file
-for the ONI as follows:</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ninolearn.IO</span> <span class="kn">import</span> <span class="n">read_raw</span>
-<span class="n">oni_raw</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">oni</span><span class="p">()</span>
-</pre></div>
-</td></tr></table></div>
-<p>For the postprocessed data, a the <a class="reference internal" href="io.html#ninolearn.IO.read_post.data_reader" title="ninolearn.IO.read_post.data_reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.IO.read_post.data_reader</span></code></a>
-makes it easy to access the postprocessed data in a dynamic way, i.e. selecting
-specific time windows and areas from the desired data set. For the ONI and the
-SST anomaly (SSTA) form the ERSSTv5 this looks as follows:</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="kn">import</span> <span class="n">data_reader</span>
-
-<span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1980-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">,</span>
-                     <span class="n">lon_min</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">lon_max</span><span class="o">=</span><span class="mi">280</span><span class="p">,</span>
-                     <span class="n">lat_min</span><span class="o">=-</span><span class="mi">30</span><span class="p">,</span> <span class="n">lat_max</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-
-<span class="n">oni</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
-<span class="n">sst</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_netcdf</span><span class="p">(</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;anom&#39;</span><span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
-<p>The ONI and the SSTA are now read for the same time period (January 1980 till
-December 2017) and the SSTA for the specified regions (boundaries in degrees East).</p>
-</div>
-<div class="section" id="statistical-machine-learning-models">
-<h3>Statistical/Machine Learning models<a class="headerlink" href="#statistical-machine-learning-models" title="Permalink to this headline">¶</a></h3>
-<p>Finally, some models that were developed during the Master Thesis of
-Petersik (2019) are available in <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models</span></code>. In particular
-a Deep Ensemble (<a class="reference internal" href="learn.html#module-ninolearn.learn.models.dem" title="ninolearn.learn.models.dem"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.dem</span></code></a>) and an Encoder-Decoder
-(<a class="reference internal" href="learn.html#module-ninolearn.learn.models.encoderDecoder" title="ninolearn.learn.models.encoderDecoder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.encoderDecoder</span></code></a>) model is available. Furthermore,
-some evaluation methods for seasonal evaluation of the model are available</p>
-</div>
-</div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#the-el-nino-southern-oscillation">The El Niño Southern Oscillation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#enso-forecasts">ENSO forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#existing-statistical-models">Existing statistical models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#the-aim-of-this-package">The aim of this package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#how-does-ninolearn-work">How does NinoLearn work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#cited-literature">Cited literature</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="package.html">NinoLearn package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
@@ -269,22 +98,13 @@ some evaluation methods for seasonal evaluation of the model are available</p>
 <li class="toctree-l2"><a class="reference internal" href="learn.html">Learn</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jupyter_notebook_tutorials/download_and_read_raw_data.html">Download and read raw data</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="forecasts.html">Some forecasts</a></li>
 </ul>
 </div>
-</div>
-<div class="section" id="cited-literature">
-<h2>Cited literature<a class="headerlink" href="#cited-literature" title="Permalink to this headline">¶</a></h2>
-<p>Tangang, F. T., Hsieh, W. W., &amp; Tang, B. (1997). Forecasting the equatorial
-Pacific sea surface temperatures by neural network models.
-Climate Dynamics, 13(2), 135-147.</p>
-<p>Feng, Q. Y., Vasile, R., Segond, M., Gozolchiani, A., Wang, Y., Abel, M., … &amp;
-Dijkstra, H. A. (2016). ClimateLearn: A machine-learning approach for climate
-prediction using network measures. Geoscientific Model Development.</p>
-<p>Nooteboom, P. D., Feng, Q. Y., López, C., Hernández-García, E., &amp; Dijkstra,
-H. A. (2018). Using network theory and machine learning to predict El Niño,
-Earth Syst. Dynam., 9, 969–983.</p>
 </div>
 </div>
 
@@ -304,7 +124,7 @@ Earth Syst. Dynam., 9, 969–983.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="install.html" title="Installation"
+          <a href="intro.html" title="Introduction"
              >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">NinoLearn 0.1 documentation</a> &#187;</li> 
       </ul>

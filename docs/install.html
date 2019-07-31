@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="NinoLearn package" href="package.html" />
-    <link rel="prev" title="NinoLearn - A research framemork for statistical ENSO prediction" href="index.html" /> 
+    <link rel="prev" title="Introduction" href="intro.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -31,7 +31,7 @@
           <a href="package.html" title="NinoLearn package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="NinoLearn - A research framemork for statistical ENSO prediction"
+          <a href="intro.html" title="Introduction"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
       </ul>
@@ -42,8 +42,8 @@
               <img class="logo" src="_static/logo.png" alt="Logo"/>
             </a></p>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">NinoLearn - A research framemork for statistical ENSO prediction</a></p>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Introduction</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="package.html"
                         title="next chapter">NinoLearn package</a></p>
@@ -59,6 +59,7 @@
 <script type="text/javascript">$('#searchbox').show(0);</script>
 <h3><a href="index.html">Table of Contents</a></h3>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="package.html">NinoLearn package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -99,20 +100,35 @@ For this run the  following command in your terminal:</p>
 </pre></div>
 </div>
 <p>If you are on another system you might try:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create --name ninolearn -c conda-forge python=3.6 tensorflow keras matplotlib basemap pandas xarray dask scikit-learn netcdf4 xesmf esmpy python-igraph spyder</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create --name ninolearn -c conda-forge python=3.6 tensorflow keras matplotlib basemap pandas xarray dask scikit-learn netcdf4 xesmf esmpy python-igraph nbsphinx jupyter spyder</span>
 </pre></div>
 </div>
+<p>The particular package is used for the following purpose:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">tenserflow</span></code> and <code class="code docutils literal notranslate"><span class="pre">keras</span></code> for neural networks</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">matplotlib</span></code> and <code class="code docutils literal notranslate"><span class="pre">basemap</span></code> for plotting</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">pandas</span></code> and <code class="code docutils literal notranslate"><span class="pre">xarray</span></code> for data handeling</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">dask</span></code> for reading large data files</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">scikit-learn</span></code> for machine  learning</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">netcfd4</span></code> to open files with the NetCDF4 format</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">xesmf</span></code> and <code class="code docutils literal notranslate"><span class="pre">esmpy</span></code> for regridding data</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">python-igraph</span></code> for fast computation of complex network metrics</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">nbsphinx</span></code> to include jupyter notebooks in the documentation</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">jupyter</span></code> to work in jupyter notebooks (e.g. in the tutorials)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">spyder</span></code> as integrated development environment (optional)</p></li>
+</ul>
 <p>The environment activated by running</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">source $HOME/miniconda2/bin/activate ninolearn</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">source $HOME/YOURCONDA/bin/activate ninolearn</span>
 </pre></div>
 </div>
-<p>and deactivated by running:</p>
+<p>Here, <code class="code docutils literal notranslate"><span class="pre">YOURCONDA</span></code> is a placeholder for your conda base directory. The
+environment can be deactivated by running:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda deactivate</span>
 </pre></div>
 </div>
 <p>You might consider to put the following <code class="code docutils literal notranslate"><span class="pre">alias</span></code> into your <code class="code docutils literal notranslate"><span class="pre">.bashrc</span></code>
 file to shorten the activation process:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">alias</span> <span class="nv">ninolearn_env</span><span class="o">=</span><span class="s2">&quot;source </span><span class="nv">$HOME</span><span class="s2">/miniconda2/bin/activate ninolearn&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">alias</span> <span class="nv">ninolearn_env</span><span class="o">=</span><span class="s2">&quot;source </span><span class="nv">$HOME</span><span class="s2">/YOURCONDA/bin/activate ninolearn&quot;</span>
 </pre></div>
 </div>
 <p>Open a new terminal or source the <code class="code docutils literal notranslate"><span class="pre">.bashrc</span></code> file (as above). From now on
@@ -143,7 +159,7 @@ issue on the GitHub repository of
           <a href="package.html" title="NinoLearn package"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="NinoLearn - A research framemork for statistical ENSO prediction"
+          <a href="intro.html" title="Introduction"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">NinoLearn 0.1 documentation</a> &#187;</li> 
       </ul>

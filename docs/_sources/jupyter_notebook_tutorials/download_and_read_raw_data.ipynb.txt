@@ -1,0 +1,324 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Download and read raw data\n",
+    "## Download"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Before you download data, make sure that you specific the pass to the raw data directory (`rawdir`) in `ninolearn.pathes`. \n",
+    "\n",
+    "In this tutorial, we download the monthly Oceaninc Nino Index, sea surface temparatures from the ERSSTv5 data set and\n",
+    "sea surface heights from the ORAS4 data set."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# import the necessary methods and classes\n",
+    "from ninolearn.download import download, sources"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "NOTE: If the data was already downloaded, it won't be downloaded again."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "sst.mnmean.nc already downloaded\n",
+      "oni.txt already downloaded\n",
+      "air.mon.mean.nc already downloaded\n"
+     ]
+    }
+   ],
+   "source": [
+    "download(sources.SST_ERSSTv5)\n",
+    "download(sources.ONI)\n",
+    "download(sources.SAT_monthly_NCEP)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The sources all are dictionaries have specific keywords specify their download:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'downloadType': 'ftp', 'filename': 'sst.mnmean.nc', 'host': 'ftp.cdc.noaa.gov', 'location': '/Datasets/noaa.ersst.v5/'}\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(sources.SST_ERSSTv5)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'downloadType': 'http', 'url': 'https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt', 'filename': 'oni.txt'}\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(sources.ONI)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can see that that the two sources above have  entries different downloadTypes. The SST is downloaded from an ftp-server, whereas the ONI is downloaded via http."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Read raw data\n",
+    "\n",
+    "Routines are available in the `ninolearn.IO.read_raw` module with which it is directly possible to read the raw data as it is."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from ninolearn.IO.read_raw import oni, sst_ERSSTv5, sat\n",
+    "\n",
+    "ONI = oni()\n",
+    "SST = sst_ERSSTv5()\n",
+    "SAT = sat(mean='monthly')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let's have a look how the raw data looks like!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>SEAS</th>\n",
+       "      <th>YR</th>\n",
+       "      <th>TOTAL</th>\n",
+       "      <th>ANOM</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>DJF</td>\n",
+       "      <td>1950</td>\n",
+       "      <td>24.72</td>\n",
+       "      <td>-1.53</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>JFM</td>\n",
+       "      <td>1950</td>\n",
+       "      <td>25.17</td>\n",
+       "      <td>-1.34</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>FMA</td>\n",
+       "      <td>1950</td>\n",
+       "      <td>25.75</td>\n",
+       "      <td>-1.16</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>MAM</td>\n",
+       "      <td>1950</td>\n",
+       "      <td>26.12</td>\n",
+       "      <td>-1.18</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>AMJ</td>\n",
+       "      <td>1950</td>\n",
+       "      <td>26.32</td>\n",
+       "      <td>-1.07</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  SEAS    YR  TOTAL  ANOM\n",
+       "0  DJF  1950  24.72 -1.53\n",
+       "1  JFM  1950  25.17 -1.34\n",
+       "2  FMA  1950  25.75 -1.16\n",
+       "3  MAM  1950  26.12 -1.18\n",
+       "4  AMJ  1950  26.32 -1.07"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "ONI.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<xarray.DataArray 'sst' (time: 1982, lat: 89, lon: 180)>\n",
+      "[31751640 values with dtype=float32]\n",
+      "Coordinates:\n",
+      "  * lat      (lat) float32 88.0 86.0 84.0 82.0 80.0 ... -82.0 -84.0 -86.0 -88.0\n",
+      "  * lon      (lon) float32 0.0 2.0 4.0 6.0 8.0 ... 350.0 352.0 354.0 356.0 358.0\n",
+      "  * time     (time) datetime64[ns] 1854-01-01 1854-02-01 ... 2019-02-01\n",
+      "Attributes:\n",
+      "    long_name:     Monthly Means of Sea Surface Temperature\n",
+      "    units:         degC\n",
+      "    var_desc:      Sea Surface Temperature\n",
+      "    level_desc:    Surface\n",
+      "    statistic:     Mean\n",
+      "    dataset:       ERSSTv5\n",
+      "    parent_stat:   Individual Values\n",
+      "    actual_range:  [-1.8     42.32636]\n",
+      "    valid_range:   [-1.8 45. ]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(SST)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<xarray.DataArray 'air' (time: 854, lat: 73, lon: 144)>\n",
+      "[8977248 values with dtype=float32]\n",
+      "Coordinates:\n",
+      "  * lat      (lat) float32 90.0 87.5 85.0 82.5 80.0 ... -82.5 -85.0 -87.5 -90.0\n",
+      "  * lon      (lon) float32 0.0 2.5 5.0 7.5 10.0 ... 350.0 352.5 355.0 357.5\n",
+      "  * time     (time) datetime64[ns] 1948-01-01 1948-02-01 ... 2019-02-01\n",
+      "Attributes:\n",
+      "    long_name:     Monthly Mean Air Temperature at sigma level 0.995\n",
+      "    valid_range:   [-2000.  2000.]\n",
+      "    units:         degC\n",
+      "    precision:     1\n",
+      "    var_desc:      Air Temperature\n",
+      "    level_desc:    Surface\n",
+      "    statistic:     Mean\n",
+      "    parent_stat:   Individual Obs\n",
+      "    dataset:       NCEP\n",
+      "    actual_range:  [-73.78001  42.14595]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(SAT)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you can see, the data sets do not have a common time axis, are available for different time periods and on different grids. \n",
+    "\n",
+    "To bring the different data sets onto a common/standardized shape, check out the tutorial on preparing the data and postprocessing it."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
