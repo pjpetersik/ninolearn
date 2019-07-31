@@ -40,9 +40,6 @@ If you are on another system you might try:
 
     conda create --name ninolearn -c conda-forge python=3.6 tensorflow keras matplotlib basemap pandas xarray dask scikit-learn netcdf4 xesmf esmpy python-igraph spyder
 
-
-
-
 The environment activated by running
 
 .. code-block:: console
