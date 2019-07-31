@@ -1,17 +1,9 @@
 import matplotlib.pyplot as plt
 from ninolearn.IO.read_post import data_reader
-from ninolearn.plot.nino_timeseries import nino_background
-from ninolearn.utils import scale
-from ninolearn.private import plotdir
 
-from statsmodels.tsa.stattools import ccf
-from scipy.stats import spearmanr
 from mpl_toolkits.basemap import Basemap
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
-import pandas as pd
-
-from os.path import join
 
 elnino_ep = np.array([1957, 1965, 1972, 1976, 1982, 1997#  #2015
                       ])

@@ -78,7 +78,6 @@ plt.savefig(join(plotdir, 'dec_sst_eof.jpg'), dpi = 360)
 # =============================================================================
 # Data
 # =============================================================================
-plt.close("all")
 reader = data_reader(startdate='1974-06', enddate='2018-12',lon_min=100, lon_max=300)
 
 olr = reader.read_netcdf('olr', dataset='NCAR', processed='anom')

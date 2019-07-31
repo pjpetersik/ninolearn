@@ -74,9 +74,7 @@ def prep_oni():
     some axis.
     """
     print("Prepare ONI timeseries.")
-    index="3.4"
-    period ="S"
-    data = read_raw.nino_anom(index=index, period=period, detrend=False)
+    data = read_raw.oni()
 
     df = ({'year': data.YR.values + data.SEAS.apply(season_shift_year).values,
            'month': data.SEAS.apply(season_to_month).values,

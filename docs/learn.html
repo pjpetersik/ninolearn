@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Learn &#8212; NinoLearn 0.1 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -51,17 +49,29 @@
   <p class="topless"><a href="tutorials.html"
                         title="next chapter">Tutorials</a></p>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+<h3><a href="index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">NinoLearn package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input/Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess.html">Postprocess</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Learn</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forecasts.html">Some forecasts</a></li>
+</ul>
+
         </div>
       </div>
 
@@ -78,115 +88,107 @@
 <span id="deep-ensemble-model-dem"></span><h3>Deep Ensemble Model (DEM)<a class="headerlink" href="#module-ninolearn.learn.models.dem" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ninolearn.learn.models.dem.DEM">
-<em class="property">class </em><code class="descclassname">ninolearn.learn.models.dem.</code><code class="descname">DEM</code><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.learn.models.dem.</code><code class="sig-name descname">DEM</code><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM" title="Permalink to this definition">¶</a></dt>
 <dd><p>A deep ensemble model (DEM) predicting  either mean or mean and standard
 deviation with one hidden layer having the ReLU function as activation for
 the hidden layer. It is trained using the MSE or negative-log-likelihood of
 a gaussian distribution, respectively.</p>
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.build_model">
-<code class="descname">build_model</code><span class="sig-paren">(</span><em>n_features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.build_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.build_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param">n_features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.build_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.build_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method builds a new member of the ensemble and returns it.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.evaluate">
-<code class="descname">evaluate</code><span class="sig-paren">(</span><em>ytrue</em>, <em>mean_pred</em>, <em>std_pred=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.evaluate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">evaluate</code><span class="sig-paren">(</span><em class="sig-param">ytrue</em>, <em class="sig-param">mean_pred</em>, <em class="sig-param">std_pred=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Negative - log -likelihood for the prediction of a gaussian probability</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>trainX</em>, <em>trainy</em>, <em>valX=None</em>, <em>valy=None</em>, <em>use_pretrained=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">trainX</em>, <em class="sig-param">trainy</em>, <em class="sig-param">valX=None</em>, <em class="sig-param">valy=None</em>, <em class="sig-param">use_pretrained=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit the model to training data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.get_pretrained_weights">
-<code class="descname">get_pretrained_weights</code><span class="sig-paren">(</span><em>location=None</em>, <em>dir_name='pre_ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.get_pretrained_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.get_pretrained_weights" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_pretrained_weights</code><span class="sig-paren">(</span><em class="sig-param">location=None</em>, <em class="sig-param">dir_name='pre_ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.get_pretrained_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.get_pretrained_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads weights from a pretrained model</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.load">
-<code class="descname">load</code><span class="sig-paren">(</span><em>location=None</em>, <em>dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.load" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">location=None</em>, <em class="sig-param">dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the ensemble</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates the ensemble prediction of a model ensemble</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model_ens</strong> – list of ensemble models</li>
-<li><strong>X</strong> – The features</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_ens</strong> – list of ensemble models</p></li>
+<li><p><strong>X</strong> – The features</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>location=''</em>, <em>dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.save" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">location=''</em>, <em class="sig-param">dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the ensemble</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.save_weights">
-<code class="descname">save_weights</code><span class="sig-paren">(</span><em>location=''</em>, <em>dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.save_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.save_weights" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_weights</code><span class="sig-paren">(</span><em class="sig-param">location=''</em>, <em class="sig-param">dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.save_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.save_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves the weights</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.set_parameters">
-<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>layers=1</em>, <em>neurons=16</em>, <em>dropout=0.2</em>, <em>noise_in=0.1</em>, <em>noise_mu=0.1</em>, <em>noise_sigma=0.1</em>, <em>l1_hidden=0.1</em>, <em>l2_hidden=0.1</em>, <em>l1_mu=0.0</em>, <em>l2_mu=0.1</em>, <em>l1_sigma=0.1</em>, <em>l2_sigma=0.1</em>, <em>batch_size=10</em>, <em>n_segments=5</em>, <em>n_members_segment=1</em>, <em>lr=0.001</em>, <em>patience=10</em>, <em>epochs=300</em>, <em>verbose=0</em>, <em>std=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.set_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_parameters</code><span class="sig-paren">(</span><em class="sig-param">layers=1</em>, <em class="sig-param">neurons=16</em>, <em class="sig-param">dropout=0.2</em>, <em class="sig-param">noise_in=0.1</em>, <em class="sig-param">noise_mu=0.1</em>, <em class="sig-param">noise_sigma=0.1</em>, <em class="sig-param">l1_hidden=0.1</em>, <em class="sig-param">l2_hidden=0.1</em>, <em class="sig-param">l1_mu=0.0</em>, <em class="sig-param">l2_mu=0.1</em>, <em class="sig-param">l1_sigma=0.1</em>, <em class="sig-param">l2_sigma=0.1</em>, <em class="sig-param">batch_size=10</em>, <em class="sig-param">n_segments=5</em>, <em class="sig-param">n_members_segment=1</em>, <em class="sig-param">lr=0.001</em>, <em class="sig-param">patience=10</em>, <em class="sig-param">epochs=300</em>, <em class="sig-param">verbose=0</em>, <em class="sig-param">std=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.set_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the hyperparameters and the settings for the training of the DEM.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>layers</strong> (<em>int</em>) – Number of hidden layers.</li>
-<li><strong>neurons</strong> (<em>int</em>) – Number of neurons in a hidden layers.</li>
-<li><strong>dropout</strong> (<em>float</em>) – Dropout rate for the hidden layer neurons.</li>
-<li><strong>noise</strong> (<em>float</em>) – Standard deviation of the gaussian noise that is added to        the input</li>
-<li><strong>batch_size</strong> – Batch size for the training.</li>
-<li><strong>n_segments</strong> – Number of segments for the generation of members.</li>
-<li><strong>n_members_segment</strong> – number of members that are generated per        segment.</li>
-<li><strong>lr</strong> – the learning rate during training</li>
-<li><strong>patience</strong> – Number of epochs to wait until training is stopped if        score was not improved.</li>
-<li><strong>epochs</strong> – The maximum numberof epochs for the training.</li>
-<li><strong>verbose</strong> – Option to print scores during training to the screen.         Here, 0 means silent.</li>
-<li><strong>std</strong> (<em>boolean</em>) – If True then a deep ensembles with two output neurons        (mean and standard deviation) is used. Otherwise just one output         neuron is used for the regression task.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layers</strong> (<em>int</em>) – Number of hidden layers.</p></li>
+<li><p><strong>neurons</strong> (<em>int</em>) – Number of neurons in a hidden layers.</p></li>
+<li><p><strong>dropout</strong> (<em>float</em>) – Dropout rate for the hidden layer neurons.</p></li>
+<li><p><strong>noise</strong> (<em>float</em>) – Standard deviation of the gaussian noise that is added to        the input</p></li>
+<li><p><strong>batch_size</strong> – Batch size for the training.</p></li>
+<li><p><strong>n_segments</strong> – Number of segments for the generation of members.</p></li>
+<li><p><strong>n_members_segment</strong> – number of members that are generated per        segment.</p></li>
+<li><p><strong>lr</strong> – the learning rate during training</p></li>
+<li><p><strong>patience</strong> – Number of epochs to wait until training is stopped if        score was not improved.</p></li>
+<li><p><strong>epochs</strong> – The maximum numberof epochs for the training.</p></li>
+<li><p><strong>verbose</strong> – Option to print scores during training to the screen.         Here, 0 means silent.</p></li>
+<li><p><strong>std</strong> (<em>boolean</em>) – If True then a deep ensembles with two output neurons        (mean and standard deviation) is used. Otherwise just one output         neuron is used for the regression task.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">L1_hidden:</th><td class="field-body"><p class="first">Coefficent for the L1 penalty term for the hidden layer.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">L2_hidden:</th><td class="field-body"><p class="first">Coefficent for the L2 penalty term for the hidden layer.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">L1_mu:</th><td class="field-body"><p class="first">Coefficent for the L1 penalty term in the mean-output neuron.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">L2_mu:</th><td class="field-body"><p class="first">Coefficent for the L2 penalty term in the mean-output neuron.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">L1_sigma:</th><td class="field-body"><p class="first">Coefficent for the L1 penalty term in the        standard-deviation-output neuron.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">L2_mu:</th><td class="field-body"><p class="first last">Coefficent for the L2 penalty term in the standard-deviation         output neuron.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">L1_hidden</dt>
+<dd class="field-even"><p>Coefficent for the L1 penalty term for the hidden layer.</p>
+</dd>
+<dt class="field-odd">L2_hidden</dt>
+<dd class="field-odd"><p>Coefficent for the L2 penalty term for the hidden layer.</p>
+</dd>
+<dt class="field-even">L1_mu</dt>
+<dd class="field-even"><p>Coefficent for the L1 penalty term in the mean-output neuron.</p>
+</dd>
+<dt class="field-odd">L2_mu</dt>
+<dd class="field-odd"><p>Coefficent for the L2 penalty term in the mean-output neuron.</p>
+</dd>
+<dt class="field-even">L1_sigma</dt>
+<dd class="field-even"><p>Coefficent for the L1 penalty term in the        standard-deviation-output neuron.</p>
+</dd>
+<dt class="field-odd">L2_mu</dt>
+<dd class="field-odd"><p>Coefficent for the L2 penalty term in the standard-deviation         output neuron.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -196,7 +198,7 @@ a gaussian distribution, respectively.</p>
 <span id="encoder-decoder-ed"></span><h3>Encoder-Decoder (ED)<a class="headerlink" href="#module-ninolearn.learn.models.encoderDecoder" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder">
-<em class="property">class </em><code class="descclassname">ninolearn.learn.models.encoderDecoder.</code><code class="descname">EncoderDecoder</code><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.learn.models.encoderDecoder.</code><code class="sig-name descname">EncoderDecoder</code><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>The Encoder-Decoder is an neural network that has the same architecture as
 an Autoencoder. Hence, labal and feature vector have the same dimension.
 In the ninolearn package the model is called Encoder-Decoder because it is
@@ -204,159 +206,128 @@ used for prediction purposes and therefore label and feature vector might
 be soparated by some time lag or even are not the same variable.</p>
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.build_model">
-<code class="descname">build_model</code><span class="sig-paren">(</span><em>n_features</em>, <em>n_labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.build_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.build_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param">n_features</em>, <em class="sig-param">n_labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.build_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.build_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method builds a new member of the ensemble and returns it.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>n_features</strong> (<em>int</em>) – The number of features.</li>
-<li><strong>n_labels</strong> (<em>int</em>) – The number of labels.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_features</strong> (<em>int</em>) – The number of features.</p></li>
+<li><p><strong>n_labels</strong> (<em>int</em>) – The number of labels.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.evaluate">
-<code class="descname">evaluate</code><span class="sig-paren">(</span><em>X</em>, <em>ytrue</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.evaluate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">evaluate</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">ytrue</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model based on the RMSE</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>X</strong> (<em>np.ndarray</em>) – The feature array.</li>
-<li><strong>ytrue</strong> (<em>np.ndarray</em>) – The true label array.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – The feature array.</p></li>
+<li><p><strong>ytrue</strong> (<em>np.ndarray</em>) – The true label array.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>trainX</em>, <em>trainy</em>, <em>valX=None</em>, <em>valy=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">trainX</em>, <em class="sig-param">trainy</em>, <em class="sig-param">valX=None</em>, <em class="sig-param">valy=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit the model. If n_segments is 1, then a validation data set needs to
 be supplied.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>trainX</strong> (<em>np.ndarray</em>) – The training feature set. 2-D array with dimensions        (timesteps, features)</li>
-<li><strong>trainy</strong> (<em>np.ndarray</em>) – The training label set. 2-D array with dimensions        (timesteps, labels)</li>
-<li><strong>valX</strong> (<em>np.ndarray</em>) – The validation feature set. 2-D array with dimensions        (timesteps, features).</li>
-<li><strong>valy</strong> (<em>np.ndarray</em>) – The validation label set. 2-D array with dimensions        (timesteps, labels).</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trainX</strong> (<em>np.ndarray</em>) – The training feature set. 2-D array with dimensions        (timesteps, features)</p></li>
+<li><p><strong>trainy</strong> (<em>np.ndarray</em>) – The training label set. 2-D array with dimensions        (timesteps, labels)</p></li>
+<li><p><strong>valX</strong> (<em>np.ndarray</em>) – The validation feature set. 2-D array with dimensions        (timesteps, features).</p></li>
+<li><p><strong>valy</strong> (<em>np.ndarray</em>) – The validation label set. 2-D array with dimensions        (timesteps, labels).</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit_RandomizedSearch">
-<code class="descname">fit_RandomizedSearch</code><span class="sig-paren">(</span><em>trainX</em>, <em>trainy</em>, <em>n_iter=10</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.fit_RandomizedSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit_RandomizedSearch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_RandomizedSearch</code><span class="sig-paren">(</span><em class="sig-param">trainX</em>, <em class="sig-param">trainy</em>, <em class="sig-param">n_iter=10</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.fit_RandomizedSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit_RandomizedSearch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hyperparameter optimazation using random search.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>trainX</strong> (<em>np.ndarray</em>) – The training feature set. 2-D array with dimensions        (timesteps, features).</li>
-<li><strong>trainy</strong> (<em>np.ndarray</em>) – The training label set. 2-D array with dimensions        (timesteps, labels).</li>
-<li><strong>kwargs</strong> – Keyword arguments are passed to the .fit() method.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trainX</strong> (<em>np.ndarray</em>) – The training feature set. 2-D array with dimensions        (timesteps, features).</p></li>
+<li><p><strong>trainy</strong> (<em>np.ndarray</em>) – The training label set. 2-D array with dimensions        (timesteps, labels).</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments are passed to the .fit() method.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.load">
-<code class="descname">load</code><span class="sig-paren">(</span><em>location=None</em>, <em>dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.load" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">location=None</em>, <em class="sig-param">dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the ensemble.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>location</strong> (<em>str</em>) – Base directory where for all Encoder-Decoder        ensembles.</li>
-<li><strong>dir_name</strong> (<em>str</em>) – The specific directory name in the base directory        were to find the ensemble.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>location</strong> (<em>str</em>) – Base directory where for all Encoder-Decoder        ensembles.</p></li>
+<li><p><strong>dir_name</strong> (<em>str</em>) – The specific directory name in the base directory        were to find the ensemble.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ensemble prediction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>np.ndarray</em>) – Feature set for which the prediction should be made.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.ndarray</em>) – Feature set for which the prediction should be made.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>location=''</em>, <em>dir_name='ed_ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.save" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">location=''</em>, <em class="sig-param">dir_name='ed_ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the ensemble.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>location</strong> (<em>str</em>) – Base directory where to for all Encoder-Decoder        ensembles</li>
-<li><strong>dir_name</strong> (<em>str</em>) – The specific directory name in the base directory        were to save the ensemble.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>location</strong> (<em>str</em>) – Base directory where to for all Encoder-Decoder        ensembles</p></li>
+<li><p><strong>dir_name</strong> (<em>str</em>) – The specific directory name in the base directory        were to save the ensemble.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder.set_parameters">
-<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>neurons=(128</em>, <em>16)</em>, <em>dropout=0.2</em>, <em>noise=0.2</em>, <em>noise_out=0.2</em>, <em>l1_hidden=0.0001</em>, <em>l2_hidden=0.0001</em>, <em>l1_out=0.0001</em>, <em>l2_out=0.0001</em>, <em>batch_size=50</em>, <em>lr=0.0001</em>, <em>n_segments=5</em>, <em>n_members_segment=1</em>, <em>patience=40</em>, <em>epochs=500</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.set_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_parameters</code><span class="sig-paren">(</span><em class="sig-param">neurons=(128</em>, <em class="sig-param">16)</em>, <em class="sig-param">dropout=0.2</em>, <em class="sig-param">noise=0.2</em>, <em class="sig-param">noise_out=0.2</em>, <em class="sig-param">l1_hidden=0.0001</em>, <em class="sig-param">l2_hidden=0.0001</em>, <em class="sig-param">l1_out=0.0001</em>, <em class="sig-param">l2_out=0.0001</em>, <em class="sig-param">batch_size=50</em>, <em class="sig-param">lr=0.0001</em>, <em class="sig-param">n_segments=5</em>, <em class="sig-param">n_members_segment=1</em>, <em class="sig-param">patience=40</em>, <em class="sig-param">epochs=500</em>, <em class="sig-param">verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder.set_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the parameters of the Encoder-Decoder neural network.</p>
 <p>Note, if the parameters are given in a list, ninolearn assumes that
 a the method .fit_RandomizedSearch() is used.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>neurons</strong> (<em>tuple</em><em> (</em><em>list of two tuples for .fit_RandomizedSearch</em><em>(</em><em>)</em><em>)</em>) – The architecture of the Encoder-Decoder. The layer        with the lowest number of neurons is assumed to be the bottleneck layer        for which the activation function is linear. Furthermore, the output        layer has a linear activation as well. All other layers have the ReLU        as activation.</li>
-<li><strong>dropout</strong> (<em>float</em>) – Standard deviation of the Gaussian dropout. Dropout        layers are installed behind each hidden layer in the Encoder and the        Decoder.</li>
-<li><strong>noise</strong> (<em>float</em>) – Standard deviation of Gaussian noise for the input layer.</li>
-<li><strong>noise</strong> – Standard deviation of Gaussian noise for the output        layer.</li>
-<li><strong>l2_hidden</strong> (<em>l1_hidden</em><em>,</em>) – Coefficent for the L1 and the L2 penalty        term for the hidden layer weights.</li>
-<li><strong>l2_hidden</strong> – Coefficent for the L1 and the L2 penalty        term for the output layer weights.</li>
-<li><strong>batch_size</strong> (<em>int</em>) – Batch size  during training of a member of the        Encoder-Decoder.</li>
-<li><strong>lr</strong> (<em>float</em>) – The learning rate.</li>
-<li><strong>n_segments</strong> (<em>int</em>) – The number of segments that are used for the cross-        validation scheme and the training of the Ensemble members.</li>
-<li><strong>n_members_segment</strong> (<em>int</em>) – The number of members that are trained for        one segment.</li>
-<li><strong>patience</strong> (<em>int</em>) – The number of epochs to wait until Early-Stopping        stops the training.</li>
-<li><strong>epochs</strong> (<em>int</em>) – The maximum number of epochs.</li>
-<li><strong>verbose</strong> (<em>int</em>) – Print some progress to screen. Either 0 (silent), 1 or        2.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>neurons</strong> (<em>tuple</em><em> (</em><em>list of two tuples for .fit_RandomizedSearch</em><em>(</em><em>)</em><em>)</em>) – The architecture of the Encoder-Decoder. The layer        with the lowest number of neurons is assumed to be the bottleneck layer        for which the activation function is linear. Furthermore, the output        layer has a linear activation as well. All other layers have the ReLU        as activation.</p></li>
+<li><p><strong>dropout</strong> (<em>float</em>) – Standard deviation of the Gaussian dropout. Dropout        layers are installed behind each hidden layer in the Encoder and the        Decoder.</p></li>
+<li><p><strong>noise</strong> (<em>float</em>) – Standard deviation of Gaussian noise for the input layer.</p></li>
+<li><p><strong>noise</strong> – Standard deviation of Gaussian noise for the output        layer.</p></li>
+<li><p><strong>l2_hidden</strong> (<em>l1_hidden</em><em>,</em>) – Coefficent for the L1 and the L2 penalty        term for the hidden layer weights.</p></li>
+<li><p><strong>l2_hidden</strong> – Coefficent for the L1 and the L2 penalty        term for the output layer weights.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size  during training of a member of the        Encoder-Decoder.</p></li>
+<li><p><strong>lr</strong> (<em>float</em>) – The learning rate.</p></li>
+<li><p><strong>n_segments</strong> (<em>int</em>) – The number of segments that are used for the cross-        validation scheme and the training of the Ensemble members.</p></li>
+<li><p><strong>n_members_segment</strong> (<em>int</em>) – The number of members that are trained for        one segment.</p></li>
+<li><p><strong>patience</strong> (<em>int</em>) – The number of epochs to wait until Early-Stopping        stops the training.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em>) – The maximum number of epochs.</p></li>
+<li><p><strong>verbose</strong> (<em>int</em>) – Print some progress to screen. Either 0 (silent), 1 or        2.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -392,7 +363,7 @@ a the method .fit_RandomizedSearch() is used.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, Paul Petersik.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
     </div>
   </body>
 </html>

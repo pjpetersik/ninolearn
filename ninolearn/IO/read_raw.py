@@ -17,6 +17,9 @@ def nino34_anom():
     data = pd.read_csv(join(rawdir, "nino34.txt"), delim_whitespace=True)
     return data
 
+def oni():
+    return nino_anom(index="3.4", period ="S")
+
 def nino_anom(index="3.4", period ="S", detrend=False):
     """
     read various Nino indeces from the raw directory

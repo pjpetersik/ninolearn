@@ -1,6 +1,6 @@
 from ninolearn.IO import read_raw
 
-import ESMF
+#import ESMF
 import xarray as xr
 import numpy as np
 import xesmf as xe

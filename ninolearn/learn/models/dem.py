@@ -19,6 +19,9 @@ from ninolearn.exceptions import MissingArgumentError
 
 import warnings
 
+import time
+
+
 class DEM(object):
     """
     A deep ensemble model (DEM) predicting  either mean or mean and standard
@@ -203,6 +206,8 @@ class DEM(object):
         """
         Fit the model to training data
         """
+
+        start_time = time.time()
         # clear memory
         K.clear_session()
 
@@ -264,6 +269,11 @@ class DEM(object):
                 j+=1
             i+=1
         self.mean_val_loss = np.mean(self.val_loss)
+
+        # print computation time
+        end_time = time.time()
+        passed_time = np.round(end_time-start_time, decimals=1)
+        print(f'Computation time: {passed_time}s')
 
 
     def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):

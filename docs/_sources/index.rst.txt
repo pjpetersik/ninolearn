@@ -1,10 +1,11 @@
-.. ninolearn documentation master file, created by
+nino.. ninolearn documentation master file, created by
    sphinx-quickstart on Thu Jul 18 11:31:57 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+################################################################
 NinoLearn - A research framemork for statistical ENSO prediction
-================================================================
+################################################################
 NinoLearn is a open source research framework  for statistical ENSO prediction
 that is initiated to **facilitate** collaboration, **speed up** the start up of
 research and make realized research **more transparent, comparable and reproducable**.
@@ -13,9 +14,9 @@ The current framework was developed in 2019 during the Master Thesis of
 Paul Petersik. It lays the groundwork for a further development and the integration
 of other postprocessing routines and statistical models.
 
-
+********************************
 The El Niño Southern Oscillation
-################################
+********************************
 
 The El Niño Southern Oscillation (ENSO) is a coupelled ocean atmosphere phenomenon
 which is present in the equatorial Pacific and affects the weather around the
@@ -23,8 +24,9 @@ world. In its positive phase, temperatures throught the equatorial Pacific are
 relatively warm (El Niño phase). The other way around, temperatures are realtively
 low in the negative phase (La Niña).
 
+**************
 ENSO forecasts
-##############
+**************
 
 The predictive horizon for ENSO forecasts is by far longer than
 for weather forecasts, because of the strong autocorrelation of the ENSO for
@@ -36,8 +38,9 @@ of the system will likely evolve. You can find current forecasts from dynamical
 and statisticalmodels on the website of the Internation Research Insitute for
 Climate and Society (see `here <https://iri.columbia.edu/our-expertise/climate/forecasts/enso/current/>`_).
 
+***************************
 Existing statistical models
-###########################
+***************************
 
 Multiple research statistical models for the ENSO predictions have been
 developed in the past. For instance a working group around
@@ -56,8 +59,9 @@ this initial attempt, `Nooteboom et al. (2018) <https://www.earth-syst-dynam.net
 developed a hybrid model which is a combination out of an Autoregressive
 integrated moving average (ARIMA) and an ANN model.
 
+***********************
 The aim of this package
-#######################
+***********************
 
 The **issue of already existing statisitcal models** is that it can be
 difficult and time consuming to build up on them because:
@@ -76,46 +80,150 @@ The research framework Ninolearn aims to tackle these shortcomings. The framewor
 initiated to **facilitate** collaboration, **speed up** the start up of research
 and make realized research **more transparent, comparable and reproducable**.
 
+************************
 How does NinoLearn work?
-#########################
+************************
 
-NinoLearn aims to automatize various steps within the development process for
-a statisical model.
+NinoLearn aims to automatize and clearly separate the steps that are involved
+within the development process for a statisical model:
+
+1. Download data
+2. Read data
+3. Clean data, harmonize data from different sources
+4. Postprocess data
+5. Build a statistical model
+6. Training the model (following the best practice of a 3-split of the data set into a train, validation and test data set)
+7. Evaluate the model (using standardized tests)
+
+Point 6 and 7 are not included in a standardized way in the current version of
+NinoLearn.
+
+Download
+========
 
 At the start of the development of a statistical model,
 one needs to download data from potentially multiple sources.
 The module :mod:`ninolearn.download` provides routines that make the download
-process for various data source (NCEP reanalysis, ORAS4 dataset, WWV index, ONI index, etc.)
-a *one-liner*.
+process for various data sources (e.g. NCEP reanalysis, ORAS4 data set, Warm
+Water volume index, Oceanic Niño Index, etc.)
+possible within a few lines.
+
+In example for the download of the sea surface temparture (SST)
+data from the ERSSTv5 data set as well as the ONI:
+
+.. code-block:: python
+    :linenos:
+
+    from ninolearn.download import download, sources
+    download(sources.SST_ERSSTv5)
+    download(sources.ONI)
+
+The downloaded data is directly saved into the raw data (*rawdir*) direcotory
+that is specified in :mod:`ninolearn.pathes`.
+
+Data preparation
+================
 
 Furthermore, the module :mod:`ninolearn.postprocess.prepare` provides the user
 with methods to prepare the data such that all postprocessed data sets follow
 the same conventions regarding i.e. the time axis format.
 
-In addition, reading methods in :mod:`ninolearn.IO.read_raw` are available that
-make it easy to read the raw data (not postprocessed) without the need to specify
-all the details about the raw data set e.g. type of method to use to read the
-raw data or number of header lines.
-For the postprocessed data, a the :class:`ninolearn.IO.read_post.data_reader`
-makes it easy to access the postprocessed data in a dynamic way, i.e. selecting
-specific time windows and areas from the desired data set.
+By simply executing
 
-Some more postprocessing methods and classes such as computing anomalies
-(:mod:`ninolearn.postprocess.anomaly`), regriding data to a common grid
-(currently a 2.5°x2.5° grid, :mod:`ninolearn.postprocess.regrid`), principal
+.. code-block:: python
+    :linenos:
+
+    from ninolearn.postprocess.prepare import prep_oni
+    prep_oni()
+
+The downloaded raw data file for the ONI is assigned with a practicable time axis
+which is used for all postprocessed data. Moreover, the prepared data is directly
+saved into the postprocessed data direcotory (*postdir*) that is specified in
+:mod:`ninolearn.pathes`.
+
+Postprocessing
+==============
+
+Some more postprocessing methods and classes are available in modules in the
+sub-package :py:mod:`ninolearn.postprocess`.
+
+
+Computing anomalies (:mod:`ninolearn.postprocess.anomaly`) and regriding data to
+a common grid (currently a 2.5°x2.5° grid, :mod:`ninolearn.postprocess.regrid`)
+is as easy as in the following code snippet for the SST data set from the
+ERSSTv5:
+
+.. code-block:: python
+    :linenos:
+
+    from ninolearn.IO import read_raw
+    from ninolearn.postprocess.anomaly import postprocess
+    from ninolearn.postprocess.regrid import to2_5x2_5
+
+    sst_ERSSTv5 = read_raw.sst_ERSSTv5()
+    sst_ERSSTv5_regrided = to2_5x2_5(sst_ERSSTv5)
+    postprocess(sst_ERSSTv5_regrided)
+
+The method :func:`ninolearn.postprocess.anomaly.postprocess` saves the initial
+raw data file to the postprocessed data directory and renames it following a
+naming convention that makes it easy to access later. Furthermore, seasonal
+anomalies based on the reference period 1981-2010 are computed and the anomlies
+are as well saved to the postprocessed data directory following the naming
+convention.
+
+In addition, more advanced postprocessing methids such as principal
 component analysis (:mod:`ninolearn.postprocess.pca`) and (evolving) complex networks
 (:mod:`ninolearn.postprocess.network`) are provided to facilitate the use of
 these methods with the data set of interest.
 
+Read data
+=========
+
+In addition, reading methods in :mod:`ninolearn.IO.read_raw` are available that
+make it easy to read the raw data (not postprocessed) without the need to specify
+all the details about the raw data set e.g. type of method to use to read the
+raw data or number of header lines. For instance one can read the raw file
+for the ONI as follows:
+
+.. code-block:: python
+    :linenos:
+
+    from ninolearn.IO import read_raw
+    oni_raw = read_raw.oni()
+
+For the postprocessed data, a the :class:`ninolearn.IO.read_post.data_reader`
+makes it easy to access the postprocessed data in a dynamic way, i.e. selecting
+specific time windows and areas from the desired data set. For the ONI and the
+SST anomaly (SSTA) form the ERSSTv5 this looks as follows:
+
+.. code-block:: python
+    :linenos:
+
+    from ninolearn.IO.read_post import data_reader
+
+    reader = data_reader(startdate='1980-01', enddate='2017-12',
+                         lon_min=30, lon_max=280,
+                         lat_min=-30, lat_max=30)
+
+    oni = reader.read_csv('oni')
+    sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')
+
+The ONI and the SSTA are now read for the same time period (January 1980 till
+December 2017) and the SSTA for the specified regions (boundaries in degrees East).
+
+Statistical/Machine Learning models
+===================================
+
 Finally, some models that were developed during the Master Thesis of
 Petersik (2019) are available in :mod:`ninolearn.learn.models`. In particular
 a Deep Ensemble (:mod:`ninolearn.learn.models.dem`) and an Encoder-Decoder
-(:mod:`ninolearn.learn.models.encoderDecoder`) model is available.
+(:mod:`ninolearn.learn.models.encoderDecoder`) model is available. Furthermore,
+some evaluation methods for seasonal evaluation of the model are available
 
 
-
+********
 Contents
-########
+********
 .. toctree::
    :maxdepth: 2
 
@@ -124,8 +232,9 @@ Contents
    tutorials
    forecasts
 
-Literature
-##########
+****************
+Cited literature
+****************
 Tangang, F. T., Hsieh, W. W., & Tang, B. (1997). Forecasting the equatorial
 Pacific sea surface temperatures by neural network models.
 Climate Dynamics, 13(2), 135-147.

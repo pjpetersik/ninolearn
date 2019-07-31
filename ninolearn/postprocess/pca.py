@@ -153,7 +153,7 @@ class pca(PCA):
         for i in range(0, 2):
             fig.add_subplot(221+i)
             plt.title("EOF"+str(i+1))
-            m = Basemap(projection='robin', lon_0=180, resolution='c')
+            m = Basemap(projection='robin', lon_0=-180, resolution='c')
             x, y = m(lon2, lat2)
 
             m.drawparallels(np.arange(-90., 120., 30.))

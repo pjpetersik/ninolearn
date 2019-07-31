@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Installation &#8212; NinoLearn 0.1 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -50,17 +48,23 @@
   <p class="topless"><a href="package.html"
                         title="next chapter">NinoLearn package</a></p>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+<h3><a href="index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package.html">NinoLearn package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forecasts.html">Some forecasts</a></li>
+</ul>
+
         </div>
       </div>
 
@@ -71,7 +75,53 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>To be done.</p>
+<p>NinoLearn works with virtual Conda environments. If you do not have Anaconda
+or Miniconda installed check out <a class="reference external" href="https://conda.io/docs/user-guide/install/">https://conda.io/docs/user-guide/install/</a>.</p>
+<p>To install NinoLearn on your machine clone the master branche of the NinoLearn
+GitHub repository by executing the following snippet in your terminal:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone git@github.com:pjpetersik/ninolearn.git</span>
+</pre></div>
+</div>
+<p>Now put the PYTHONPATH to the base folder of Ninolearn into your .bashrc file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PYTHONPATH</span><span class="s2">:/path/to/ninolearn&quot;</span>
+</pre></div>
+</div>
+<p>Open a new terminal or run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> .bashrc
+</pre></div>
+</div>
+<p>From now on, NinoLearn will be available for your python. Now, a new conda
+environment needs to be initialized such that you have the
+right dependencies within your environment to work with NinoLearn.</p>
+<p>Currently, a .yml file is just generated for python3 and linux.
+For this run the  following command in your terminal:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda env create -f py3_linux.yml</span>
+</pre></div>
+</div>
+<p>If you are on another system you might try:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create --name ninolearn -c conda-forge python=3.6 tensorflow keras matplotlib basemap pandas xarray dask scikit-learn netcdf4 xesmf esmpy python-igraph spyder</span>
+</pre></div>
+</div>
+<p>The environment activated by running</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">source $HOME/miniconda2/bin/activate ninolearn</span>
+</pre></div>
+</div>
+<p>and deactivated by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda deactivate</span>
+</pre></div>
+</div>
+<p>You might consider to put the following <code class="code docutils literal notranslate"><span class="pre">alias</span></code> into your <code class="code docutils literal notranslate"><span class="pre">.bashrc</span></code>
+file to shorten the activation process:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">alias</span> <span class="nv">ninolearn_env</span><span class="o">=</span><span class="s2">&quot;source </span><span class="nv">$HOME</span><span class="s2">/miniconda2/bin/activate ninolearn&quot;</span>
+</pre></div>
+</div>
+<p>Open a new terminal or source the <code class="code docutils literal notranslate"><span class="pre">.bashrc</span></code> file (as above). From now on
+you can activate the environment by running <code class="code docutils literal notranslate"><span class="pre">ninolearn_env</span></code> in your terminal.
+Within this environment NinoLearn will be available for you. Note, that the
+package is still in the beginning of its development. Hence, its certainly not
+free from bugs. If you encouter some problems, feel free to post them as an
+issue on the GitHub repository of
+<a class="reference external" href="https://github.com/pjpetersik/ninolearn">NinoLearn</a>.</p>
 </div>
 
 
@@ -100,7 +150,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, Paul Petersik.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
     </div>
   </body>
 </html>
