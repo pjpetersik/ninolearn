@@ -3,7 +3,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
-import matplotlib.animation as animation
 from matplotlib.ticker import MaxNLocator
 
 import pandas as pd
@@ -19,7 +18,7 @@ from ninolearn.learn.models.encoderDecoder import EncoderDecoder
 from ninolearn.pathes import ed_model_dir
 from ninolearn.private import plotdir
 from ninolearn.utils import print_header
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, rmse
+from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon
 from ninolearn.plot.evaluation import plot_seasonal_skill
 
 from os.path import join

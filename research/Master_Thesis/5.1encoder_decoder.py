@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import matplotlib.pyplot as plt
-import xarray as xr
-import matplotlib.animation as animation
 
 import keras.backend as K
 

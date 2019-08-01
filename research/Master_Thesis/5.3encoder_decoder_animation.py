@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 import matplotlib.animation as animation
-from matplotlib.ticker import MaxNLocator
 
 import pandas as pd
 
@@ -12,14 +9,10 @@ import keras.backend as K
 
 from sklearn.preprocessing import StandardScaler
 
-from scipy.stats import pearsonr
-
 from ninolearn.IO.read_post import data_reader
 from ninolearn.learn.models.encoderDecoder import EncoderDecoder
 from ninolearn.pathes import ed_model_dir
 from ninolearn.utils import print_header
-from ninolearn.learn.evaluation import correlation
-from ninolearn.plot.evaluation import plot_seasonal_skill
 
 plt.close("all")
 

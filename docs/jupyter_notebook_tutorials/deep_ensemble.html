@@ -1,0 +1,1170 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Deep ensemble for ENSO-forecasting &mdash; NinoLearn 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/logo.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Encoder-Decoder model for ENSO-forecasting" href="encoder_decoder.html" />
+    <link rel="prev" title="Postprocess data" href="postprocess_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> NinoLearn
+          
+
+          
+            
+            <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">NinoLearn package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="download_and_read_raw_data.html">Download and read raw data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prepare_data.html">Data preparation and read postprocessed data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess_data.html">Postprocess data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Deep ensemble for ENSO-forecasting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Create-a-data-pipe-line">Create a data pipe line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Split-the-data-set">Split the data set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Fit-the-model">Fit the model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Make-predictions-for-the-test-data-set">Make predictions for the test data set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Plot-the-prediction">Plot the prediction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Evaluate-the-model">Evaluate the model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="encoder_decoder.html">Encoder-Decoder model for ENSO-forecasting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../forecasts.html">Some forecasts</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">NinoLearn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Deep ensemble for ENSO-forecasting</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/jupyter_notebook_tutorials/deep_ensemble.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Deep-ensemble-for-ENSO-forecasting">
+<h1>Deep ensemble for ENSO-forecasting<a class="headerlink" href="#Deep-ensemble-for-ENSO-forecasting" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial you learn how to use a neural network model called Deep Ensemble (DE) for the ENSO forecasting. This network architecture was initially developed <a class="reference external" href="https://papers.nips.cc/paper/7219-simple-and-scalable-predictive-uncertainty-estimation-using-deep-ensembles.pdf">Lakshminarayanan et al. (2017)</a>.</p>
+<p>DEs are feed foreword neural networks that predict the mean and the standard deviation of a Gaussian. Hence, their predicion comes with an uncertainty estimation which is a valuable feature for ENSO-forecasting.</p>
+<div class="section" id="Create-a-data-pipe-line">
+<h2>Create a data pipe line<a class="headerlink" href="#Create-a-data-pipe-line" title="Permalink to this headline">¶</a></h2>
+<p>At first, we define a data pipeline. This is in general quite useful to keep your code clean and also to reuse the pipeline for later purpose.</p>
+<p>The data pipeline generates returns:</p>
+<ol class="arabic simple">
+<li><p>The feature array</p></li>
+<li><p>The label array</p></li>
+<li><p>The time array corresponding to the time of the label</p></li>
+</ol>
+<p>NOTE (again): Lead time is defined as the time that passed between the last observed and the first date of the target season. Hence, negative appear, e.g. if you compare the DJF season with the target season JFM, you have a lead time of -2 month (Last observed date: Feburary 28/29, First date of the target season January 1).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">StandardScaler</span>
+
+<span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">include_time_lag</span>
+<span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+
+<span class="k">def</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">lead_time</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data pipeline for the processing of the data before the Deep Ensemble</span>
+<span class="sd">    is trained.</span>
+
+<span class="sd">    :type lead_time: int</span>
+<span class="sd">    :param lead_time: The lead time in month.</span>
+
+<span class="sd">    :returns: The feature &quot;X&quot; (at observation time), the label &quot;y&quot; (at lead</span>
+<span class="sd">    time), the target season &quot;timey&quot; (least month)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1980-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2018-12&#39;</span><span class="p">)</span>
+
+    <span class="c1"># indeces</span>
+    <span class="n">oni</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+    <span class="n">iod</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;iod&#39;</span><span class="p">)</span>
+    <span class="n">wwv</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;wwv&#39;</span><span class="p">)</span>
+
+    <span class="c1"># seasonal cycle</span>
+    <span class="n">sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">oni</span><span class="p">))</span><span class="o">/</span><span class="mi">12</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="c1"># network metrics</span>
+    <span class="n">network_ssh</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_statistic</span><span class="p">(</span><span class="s1">&#39;network_metrics&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s2">&quot;anom&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">network_ssh</span><span class="p">[</span><span class="s1">&#39;fraction_clusters_size_2&#39;</span><span class="p">]</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">network_ssh</span><span class="p">[</span><span class="s1">&#39;corrected_hamming_distance&#39;</span><span class="p">]</span>
+
+    <span class="c1"># time lag</span>
+    <span class="n">time_lag</span> <span class="o">=</span> <span class="mi">12</span>
+
+    <span class="c1"># shift such that lead time corresponds to the definition of lead time</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1"># process features</span>
+    <span class="n">feature_unscaled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">oni</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">wwv</span><span class="p">,</span> <span class="n">iod</span><span class="p">,</span>
+                                 <span class="n">c2</span><span class="p">,</span> <span class="n">H</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># scale each feature</span>
+    <span class="n">scalerX</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+    <span class="n">Xorg</span> <span class="o">=</span> <span class="n">scalerX</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">feature_unscaled</span><span class="p">)</span>
+
+    <span class="c1"># set nans to 0.</span>
+    <span class="n">Xorg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">Xorg</span><span class="p">)</span>
+
+    <span class="c1"># arange the feature array</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">Xorg</span><span class="p">[:</span><span class="o">-</span><span class="n">lead_time</span><span class="o">-</span><span class="n">shift</span><span class="p">,:]</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">include_time_lag</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">max_lag</span><span class="o">=</span><span class="n">time_lag</span><span class="p">)</span>
+
+    <span class="c1"># arange label</span>
+    <span class="n">yorg</span> <span class="o">=</span> <span class="n">oni</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">yorg</span><span class="p">[</span><span class="n">lead_time</span> <span class="o">+</span> <span class="n">time_lag</span> <span class="o">+</span> <span class="n">shift</span><span class="p">:]</span>
+
+    <span class="c1"># get the time axis of the label</span>
+    <span class="n">timey</span> <span class="o">=</span> <span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">lead_time</span> <span class="o">+</span> <span class="n">time_lag</span> <span class="o">+</span> <span class="n">shift</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timey</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/distributed/utils.py:139: RuntimeWarning: Couldn&#39;t detect a suitable IP address for reaching &#39;8.8.8.8&#39;, defaulting to &#39;127.0.0.1&#39;: [Errno 101] Network is unreachable
+  RuntimeWarning,
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Split-the-data-set">
+<h2>Split the data set<a class="headerlink" href="#Split-the-data-set" title="Permalink to this headline">¶</a></h2>
+<p>For the training and testing of machine learning models it is crucial to split the data set into:</p>
+<ol class="arabic simple">
+<li><p><strong>Train data set</strong> which is used to train the weights of the neural network</p></li>
+<li><p><strong>Validation data set</strong> which is used to check for overfitting (e.g. when using early stopping) and to optimize the hyperparameters</p></li>
+<li><p><strong>Test data set</strong> which is used to to evaluate the trained model.</p></li>
+</ol>
+<p><strong>NOTE:</strong> It is important to understand that hyperparamters must be tuned so that the result is best for the Validation data set and <strong>not</strong> for the test data set. Otherwise you can not rule out the case that the specific hyperparameter setting just works good for the specific test data set but is not generally a good hyperparameter setting.</p>
+<p>In the following cell the train and the validation data set are still one data set, because this array will be later splitted into two arrays when th model is fitted.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.models.dem</span> <span class="k">import</span> <span class="n">DEM</span>
+
+<span class="c1"># clear memory from previous sessions</span>
+<span class="n">K</span><span class="o">.</span><span class="n">clear_session</span><span class="p">()</span>
+
+<span class="c1"># define the lead time</span>
+<span class="n">lead_time</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1"># get the features (X), the label (y) and</span>
+<span class="c1"># the time axis of the label (timey)</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timey</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">lead_time</span><span class="p">)</span>
+
+<span class="c1"># split the data set into</span>
+<span class="n">test_indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">timey</span><span class="o">&gt;=</span><span class="s1">&#39;2001-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">timey</span><span class="o">&lt;=</span><span class="s1">&#39;2018-12-01&#39;</span><span class="p">)</span>
+<span class="n">train_val_indeces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">test_indeces</span><span class="p">)</span>
+
+<span class="n">train_val_X</span><span class="p">,</span> <span class="n">train_val_y</span><span class="p">,</span> <span class="n">train_val_timey</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train_val_indeces</span><span class="p">,:],</span> <span class="n">y</span><span class="p">[</span><span class="n">train_val_indeces</span><span class="p">],</span> <span class="n">timey</span><span class="p">[</span><span class="n">train_val_indeces</span><span class="p">]</span>
+<span class="n">testX</span><span class="p">,</span> <span class="n">testy</span><span class="p">,</span> <span class="n">testtimey</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">test_indeces</span><span class="p">,:],</span> <span class="n">y</span><span class="p">[</span><span class="n">test_indeces</span><span class="p">],</span> <span class="n">timey</span><span class="p">[</span><span class="n">test_indeces</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Fit-the-model">
+<h2>Fit the model<a class="headerlink" href="#Fit-the-model" title="Permalink to this headline">¶</a></h2>
+<p>Now it is time to train the model! For this a random search is used for all keyword arguments that are passed in a <em>list</em> to the DEM.set_parameters() method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># initiated an instance of the DEM (Deep Ensemble Model) class</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">DEM</span><span class="p">()</span>
+
+<span class="c1"># Set parameters</span>
+<span class="n">model</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">noise_in</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">noise_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span>
+                     <span class="n">noise_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">l1_hidden</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l2_hidden</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+                     <span class="n">l1_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l2_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l1_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+                     <span class="n">l2_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0001</span><span class="p">,</span><span class="mf">0.01</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                     <span class="n">n_members_segment</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Use a random search to find the optimal hyperparamteres</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit_RandomizedSearch</span><span class="p">(</span><span class="n">train_val_X</span><span class="p">,</span> <span class="n">train_val_y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+##################################################################
+Search iteration Nr 1/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 45us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 76us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 61us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 79us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 45us/step
+Computation time: 8.4s
+New best hyperparameters
+--------------------------------------
+Mean loss: 0.34392209892849557
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.12378305611318924, &#39;noise_in&#39;: 0.13682762378098945, &#39;noise_mu&#39;: 0.1594007153319167, &#39;noise_sigma&#39;: 0.26941913115524324, &#39;l1_hidden&#39;: 0.15920416814139493, &#39;l2_hidden&#39;: 0.14973220769991027, &#39;l1_mu&#39;: 0.0968840864748789, &#39;l2_mu&#39;: 0.18567445044732792, &#39;l1_sigma&#39;: 0.1606583760628583, &#39;l2_sigma&#39;: 0.02928805643650441, &#39;lr&#39;: 0.0054775495740690665, &#39;batch_size&#39;: 100}
+
+##################################################################
+Search iteration Nr 2/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 51us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 45us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 46us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 51us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 78us/step
+Computation time: 9.3s
+New best hyperparameters
+--------------------------------------
+Mean loss: 0.3435987807486368
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.25141333998178195, &#39;noise_in&#39;: 0.2329862534019585, &#39;noise_mu&#39;: 0.2813460046840733, &#39;noise_sigma&#39;: 0.14595068639744221, &#39;l1_hidden&#39;: 0.08553348071011933, &#39;l2_hidden&#39;: 0.11981746410750115, &#39;l1_mu&#39;: 0.10558548934586615, &#39;l2_mu&#39;: 0.05080434557231146, &#39;l1_sigma&#39;: 0.037151218694687606, &#39;l2_sigma&#39;: 0.19769939661821626, &#39;lr&#39;: 0.006687247196565577, &#39;batch_size&#39;: 100}
+
+##################################################################
+Search iteration Nr 3/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 81us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 121us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 66us/step
+Computation time: 10.3s
+New best hyperparameters
+--------------------------------------
+Mean loss: 0.11411247535244277
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.30452543907304586, &#39;noise_in&#39;: 0.21534727932400557, &#39;noise_mu&#39;: 0.2830000465254644, &#39;noise_sigma&#39;: 0.20073478581880644, &#39;l1_hidden&#39;: 0.08204434904474006, &#39;l2_hidden&#39;: 0.15817156327512816, &#39;l1_mu&#39;: 0.044876511619725834, &#39;l2_mu&#39;: 0.07501615431427888, &#39;l1_sigma&#39;: 0.13807434833687507, &#39;l2_sigma&#39;: 0.003930864203235141, &#39;lr&#39;: 0.005892578009524626, &#39;batch_size&#39;: 100}
+
+##################################################################
+Search iteration Nr 4/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 44us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 84us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 90us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 50us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 64us/step
+Computation time: 8.7s
+
+##################################################################
+Search iteration Nr 5/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 43us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 86us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 73us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 85us/step
+Computation time: 9.3s
+
+##################################################################
+Search iteration Nr 6/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 43us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 45us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 64us/step
+Computation time: 10.0s
+
+##################################################################
+Search iteration Nr 7/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 74us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 55us/step
+Computation time: 9.2s
+
+##################################################################
+Search iteration Nr 8/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 43us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 67us/step
+Computation time: 8.9s
+
+##################################################################
+Search iteration Nr 9/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 46us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 70us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 130us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 44us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Computation time: 9.8s
+
+##################################################################
+Search iteration Nr 10/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 43us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 109us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 48us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 83us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 50us/step
+Computation time: 8.5s
+
+##################################################################
+Search iteration Nr 11/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 46us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 46us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 67us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 63us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 93us/step
+Computation time: 8.7s
+
+##################################################################
+Search iteration Nr 12/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 57us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 82us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 73us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 64us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 60us/step
+Computation time: 9.3s
+
+##################################################################
+Search iteration Nr 13/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 57us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 46us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 78us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 54us/step
+Computation time: 8.9s
+
+##################################################################
+Search iteration Nr 14/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 72us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 54us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 54us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 95us/step
+Computation time: 8.6s
+
+##################################################################
+Search iteration Nr 15/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 48us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 50us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 48us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 57us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 79us/step
+Computation time: 8.6s
+
+##################################################################
+Search iteration Nr 16/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 52us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 60us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 42us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 58us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 83us/step
+Computation time: 8.9s
+
+##################################################################
+Search iteration Nr 17/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 97us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 39us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 84us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 79us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 70us/step
+Computation time: 13.1s
+
+##################################################################
+Search iteration Nr 18/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 54us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 45us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 50us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 109us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 78us/step
+Computation time: 10.5s
+
+##################################################################
+Search iteration Nr 19/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 92us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 59us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 45us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 81us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 75us/step
+Computation time: 8.6s
+
+##################################################################
+Search iteration Nr 20/20
+##################################################################
+
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 54us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 49us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 51us/step
+Computation time: 9.8s
+
+##################################################################
+Refit the model with best hyperparamters
+##################################################################
+
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.30452543907304586, &#39;noise_in&#39;: 0.21534727932400557, &#39;noise_mu&#39;: 0.2830000465254644, &#39;noise_sigma&#39;: 0.20073478581880644, &#39;l1_hidden&#39;: 0.08204434904474006, &#39;l2_hidden&#39;: 0.15817156327512816, &#39;l1_mu&#39;: 0.044876511619725834, &#39;l2_mu&#39;: 0.07501615431427888, &#39;l1_sigma&#39;: 0.13807434833687507, &#39;l2_sigma&#39;: 0.003930864203235141, &#39;lr&#39;: 0.005892578009524626, &#39;batch_size&#39;: 100}
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 56us/step
+Train member Nr 2/5
+--------------------------------------
+46/46 [==============================] - 0s 47us/step
+Train member Nr 3/5
+--------------------------------------
+46/46 [==============================] - 0s 51us/step
+Train member Nr 4/5
+--------------------------------------
+46/46 [==============================] - 0s 50us/step
+Train member Nr 5/5
+--------------------------------------
+46/46 [==============================] - 0s 58us/step
+Computation time: 9.9s
+best loss search: 0.11411247535244277
+loss refitting : 0.14777255660813787
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Make-predictions-for-the-test-data-set">
+<h2>Make predictions for the test data set<a class="headerlink" href="#Make-predictions-for-the-test-data-set" title="Permalink to this headline">¶</a></h2>
+<p>Now we can use the trained models to make predicitons on the test data set to evaluate how good the model perfoms on a data set that it never saw before.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">testX</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Plot-the-prediction">
+<h2>Plot the prediction<a class="headerlink" href="#Plot-the-prediction" title="Permalink to this headline">¶</a></h2>
+<p>Let’s see how the predicion is looking like</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">ninolearn.plot.prediction</span> <span class="k">import</span> <span class="n">plot_prediction</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhspan</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="o">-</span><span class="mi">6</span><span class="p">,</span>
+            <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">axhspan</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="mi">6</span><span class="p">,</span>
+            <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">testtimey</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">testtimey</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># plot the prediction</span>
+<span class="n">plot_prediction</span><span class="p">(</span><span class="n">testtimey</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">pred_std</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;royalblue&#39;</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s1">&#39;navy&#39;</span><span class="p">)</span>
+
+<span class="c1"># plot the observation</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timey</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>[&lt;matplotlib.lines.Line2D at 0x7fd9fe77cb38&gt;]
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_deep_ensemble_10_1.png" src="../_images/jupyter_notebook_tutorials_deep_ensemble_10_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Evaluate-the-model">
+<h2>Evaluate the model<a class="headerlink" href="#Evaluate-the-model" title="Permalink to this headline">¶</a></h2>
+<p>We can evaluate the model a bit more quantitatively using the loss function that was used to train the model, namely the negative-log-likelihood of the Gaussian and the correlation between the predicted mean and the observed ONI index.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.plot.evaluation</span> <span class="k">import</span> <span class="n">plot_correlation</span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">testy</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Loss (Negative-Log-Likelihood): </span><span class="si">{loss}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># make a plot of the seasonal correaltion</span>
+<span class="c1"># note: - pd.tseries.offsets.MonthBegin(1) appears to ensure that the correlations are plotted</span>
+<span class="c1"># agains the correct season</span>
+<span class="n">plot_correlation</span><span class="p">(</span><span class="n">testy</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">testtimey</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">tseries</span><span class="o">.</span><span class="n">offsets</span><span class="o">.</span><span class="n">MonthBegin</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Loss (Negative-Log-Likelihood): 0.1747595046770062
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_deep_ensemble_12_1.png" src="../_images/jupyter_notebook_tutorials_deep_ensemble_12_1.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="encoder_decoder.html" class="btn btn-neutral float-right" title="Encoder-Decoder model for ENSO-forecasting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="postprocess_data.html" class="btn btn-neutral float-left" title="Postprocess data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Paul Petersik
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
