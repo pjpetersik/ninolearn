@@ -36,15 +36,15 @@ def plot_explained_variance(y, pred, time):
 
 def plot_correlation(y, pred, time, title=None):
     """
-    make a bar plot of the explained varince between y and the prediction
+    make a bar plot of the correlation coeficent between y and the prediction
     """
     m = np.arange(1, 13)
     fig, ax = plt.subplots(figsize=(5,2.5))
 
-    rsq, p = correlation(y, pred, time)
+    r, p = correlation(y, pred, time)
 
     ax.set_ylim(0, 1)
-    ax.bar(m, rsq)
+    ax.bar(m, r)
     ax.set_xticks(m)
     ax.set_xticklabels(seas_ticks)
     ax.set_xlabel("Season")

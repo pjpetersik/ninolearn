@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../_static/logo.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="postprocess_data.html" />
+    <link rel="next" title="Postprocess data" href="postprocess_data.html" />
     <link rel="prev" title="Download and read raw data" href="download_and_read_raw_data.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,7 +28,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="postprocess_data.html" title="&lt;no title&gt;"
+          <a href="postprocess_data.html" title="Postprocess data"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="download_and_read_raw_data.html" title="Download and read raw data"
@@ -47,7 +47,7 @@
                         title="previous chapter">Download and read raw data</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="postprocess_data.html"
-                        title="next chapter">&lt;no title&gt;</a></p>
+                        title="next chapter">Postprocess data</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -66,6 +66,8 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="download_and_read_raw_data.html">Download and read raw data</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Data preparation and read postprocessed data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess_data.html">Postprocess data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="neural_networks.html">Deep ensemble for ENSO-forecasting</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../forecasts.html">Some forecasts</a></li>
@@ -283,95 +285,50 @@ div.rendered_html tbody tr:hover {
 <h1>Data preparation and read postprocessed data<a class="headerlink" href="#Data-preparation-and-read-postprocessed-data" title="Permalink to this headline">¶</a></h1>
 <p>Do you remember from the <a class="reference internal" href="download_and_read_raw_data.html"><span class="doc">Download and read raw data</span></a> tutorial, that the ONI had a wired time axis? As a little reminder:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_raw</span> <span class="k">import</span> <span class="n">oni</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_raw</span> <span class="k">import</span> <span class="n">oni</span><span class="p">,</span> <span class="n">wwv_anom</span>
 
 <span class="n">ONI</span> <span class="o">=</span> <span class="n">oni</span><span class="p">()</span>
-<span class="n">ONI</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ONI</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+
+<span class="n">WWV</span> <span class="o">=</span> <span class="n">wwv_anom</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">WWV</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>SEAS</th>
-      <th>YR</th>
-      <th>TOTAL</th>
-      <th>ANOM</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>DJF</td>
-      <td>1950</td>
-      <td>24.72</td>
-      <td>-1.53</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>JFM</td>
-      <td>1950</td>
-      <td>25.17</td>
-      <td>-1.34</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>FMA</td>
-      <td>1950</td>
-      <td>25.75</td>
-      <td>-1.16</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>MAM</td>
-      <td>1950</td>
-      <td>26.12</td>
-      <td>-1.18</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>AMJ</td>
-      <td>1950</td>
-      <td>26.32</td>
-      <td>-1.07</td>
-    </tr>
-  </tbody>
-</table>
-</div></div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+  SEAS    YR  TOTAL  ANOM
+0  DJF  1950  24.72 -1.53
+1  JFM  1950  25.17 -1.34
+2  FMA  1950  25.75 -1.16
+3  MAM  1950  26.12 -1.18
+4  AMJ  1950  26.32 -1.07
+     date        Volume       Anomaly
+0  198001  2.605404e+15  7.657363e+13
+1  198002  2.564434e+15  7.004931e+13
+2  198003  2.514065e+15  5.240853e+13
+3  198004  2.468250e+15  4.008869e+13
+4  198005  2.439852e+15  4.020975e+13
+</pre></div></div>
 </div>
 <p>This time axis is difficult to work with. For this NinoLearn contains a postprocessing method that fixes this for you.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.prepare</span> <span class="k">import</span> <span class="n">prep_oni</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.prepare</span> <span class="k">import</span> <span class="n">prep_oni</span><span class="p">,</span> <span class="n">prep_wwv</span><span class="p">,</span> <span class="n">prep_iod</span>
 
 <span class="n">prep_oni</span><span class="p">()</span>
+<span class="n">prep_wwv</span><span class="p">()</span>
+<span class="n">prep_iod</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -381,43 +338,64 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Prepare ONI timeseries.
+Prepare WWV  timeseries.
+Prepare IOD timeseries.
 </pre></div></div>
 </div>
 <p>All methods from the <code class="docutils literal notranslate"><span class="pre">postprocess</span></code> sub-package save the data directly to the data directory <code class="docutils literal notranslate"><span class="pre">postdir</span></code> that you need to specify in <code class="docutils literal notranslate"><span class="pre">ninolean.pathes</span></code>.</p>
 <p>Now, lets read this data using the data reader for postprocessed data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
 
 <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">()</span>
-<span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1950-02&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1980-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
 <span class="c1"># read from a output csv and choose the anomaly  (processed=&#39;anom&#39;) data</span>
 <span class="n">oni_anom_postprocessed</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;anom&#39;</span><span class="p">)</span>
-<span class="n">oni_anom_postprocessed</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">oni_anom_postprocessed</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+
+<span class="n">wwv_anom_postprocessed</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;wwv&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;anom&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">wwv_anom_postprocessed</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+
+<span class="n">iod_anom_postprocessed</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;iod&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;anom&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">iod_anom_postprocessed</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>time
-1950-02-01   -1.53
-1950-03-01   -1.34
-1950-04-01   -1.16
-1950-05-01   -1.18
-1950-06-01   -1.07
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+time
+1980-01-01    0.64
+1980-02-01    0.59
+1980-03-01    0.46
+1980-04-01    0.34
+1980-05-01    0.38
 Name: anom, dtype: float64
-</pre></div>
-</div>
+time
+1980-01-01    7.657363e+13
+1980-02-01    7.004931e+13
+1980-03-01    5.240853e+13
+1980-04-01    4.008869e+13
+1980-05-01    4.020975e+13
+Name: anom, dtype: float64
+time
+1980-01-01    0.025
+1980-02-01   -0.021
+1980-03-01   -0.251
+1980-04-01    0.103
+1980-05-01    0.148
+Name: anom, dtype: float64
+</pre></div></div>
 </div>
 <p>Now, the data comes in a clean format. Note that the dates to which seasonal value are assigend are the first day of the last month of the three-month season (e.g. JFM 1950 becomes 1950-03-01). This is because throughout NinoLearn only monthly data is used and all monthly data is assigned to the first date of the month. Seasonal data is assigned to the last month of a season to ensure that prediction schemes do NOT accidently include data from future periods.</p>
-<p>Further preparation methods are available in the <code class="docutils literal notranslate"><span class="pre">ninolearn.postprocess.prepare</span></code> modlue for other raw data sets.</p>
+<p>Further preparation methods are available in the <code class="docutils literal notranslate"><span class="pre">ninolearn.postprocess.prepare</span></code> module for other raw data sets.</p>
 </div>
 
 
@@ -436,7 +414,7 @@ Name: anom, dtype: float64
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="postprocess_data.html" title="&lt;no title&gt;"
+          <a href="postprocess_data.html" title="Postprocess data"
              >next</a> |</li>
         <li class="right" >
           <a href="download_and_read_raw_data.html" title="Download and read raw data"

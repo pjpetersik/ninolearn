@@ -141,14 +141,14 @@ def _delete_some_attributes(attrs):
 # =============================================================================
 
 
-def toPostDir(data):
+def toPostDir(data, new):
     """
     Save the basic data to the postdir.
     """
     filename = generateFileName(data.name, dataset=data.dataset, suffix='nc')
     path = join(postdir, filename)
 
-    if exists(path):
+    if exists(path) and not new:
         print(f"{data.name} already saved in post directory")
     else:
         print(f"save {data.name} in post directory")
@@ -217,7 +217,7 @@ def postprocess(data, new=False, ref_period = True):
     :param new: compute the statistics again (default = False)
     """
     small_print_header(f"Process {data.name} from {data.dataset}")
-    toPostDir(data)
+    toPostDir(data, new)
     #TODO: Do this better!
     global reference_period
     reference_period = ref_period

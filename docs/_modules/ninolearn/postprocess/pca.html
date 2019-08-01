@@ -199,7 +199,7 @@
         <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">nino34</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;nino3.4S&#39;</span><span class="p">)</span>
+            <span class="n">nino34</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Allow error when  data is out of range for ONI index.</span>
@@ -240,7 +240,9 @@
                 <span class="n">nino_background</span><span class="p">(</span><span class="n">nino34</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">projection</span><span class="p">)</span></div>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">projection</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="pca.component_map_"><a class="viewcode-back" href="../../../postprocess.html#ninolearn.postprocess.pca.pca.component_map_">[docs]</a>    <span class="k">def</span> <span class="nf">component_map_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eof</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

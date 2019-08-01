@@ -135,7 +135,7 @@ class pca(PCA):
         lon2, lat2 = np.meshgrid(self.lon, self.lat)
 
         try:
-            nino34 = self.reader.read_csv('nino3.4S')
+            nino34 = self.reader.read_csv('oni')
         except IndexError:
             """
             Allow error when  data is out of range for ONI index.
@@ -177,6 +177,8 @@ class pca(PCA):
             except:
                 pass
             plt.plot(self.time, projection)
+
+        plt.show()
 
     def component_map_(self, eof=1):
         """

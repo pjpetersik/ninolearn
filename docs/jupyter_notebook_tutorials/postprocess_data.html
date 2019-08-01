@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../_static/logo.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Some forecasts" href="../forecasts.html" />
+    <link rel="next" title="Deep ensemble for ENSO-forecasting" href="neural_networks.html" />
     <link rel="prev" title="Data preparation and read postprocessed data" href="prepare_data.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,7 +28,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../forecasts.html" title="Some forecasts"
+          <a href="neural_networks.html" title="Deep ensemble for ENSO-forecasting"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="prepare_data.html" title="Data preparation and read postprocessed data"
@@ -46,8 +46,8 @@
   <p class="topless"><a href="prepare_data.html"
                         title="previous chapter">Data preparation and read postprocessed data</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../forecasts.html"
-                        title="next chapter">Some forecasts</a></p>
+  <p class="topless"><a href="neural_networks.html"
+                        title="next chapter">Deep ensemble for ENSO-forecasting</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -67,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="download_and_read_raw_data.html">Download and read raw data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="prepare_data.html">Data preparation and read postprocessed data</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Postprocess data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="neural_networks.html">Deep ensemble for ENSO-forecasting</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../forecasts.html">Some forecasts</a></li>
@@ -284,21 +285,242 @@ div.rendered_html tbody tr:hover {
 <h1>Postprocess data<a class="headerlink" href="#Postprocess-data" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Anomalies">
 <h2>Anomalies<a class="headerlink" href="#Anomalies" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="Principal-component-analysis">
-<h2>Principal component analysis<a class="headerlink" href="#Principal-component-analysis" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="Evolving-climate-networks">
-<h2>Evolving climate networks<a class="headerlink" href="#Evolving-climate-networks" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<p>In ENSO research one most often wants to work with anomaly data. Hence, data where the long time seasonality its removed. Furthermore, it is advisable for regrid all data to a common grid. Here the grid is the 2.5° x 2.5° grid from the NCAR/NCEP reananalysis.</p>
+<p>If the data was already postprocessed and saved in the postprocessed directory, it won’t be computed again if the keyword argument <code class="docutils literal notranslate"><span class="pre">new=False</span></code>. The saved files have a file name following the naming convention:</p>
+<p><code class="docutils literal notranslate"><span class="pre">variablename_dataset_postprocessing.extension</span></code></p>
+<p>This means the unprocessed data is saved to the postprocessed directory as ‘sst_ERSSTv5.nc’ and the anoamaly data as ‘sst_ERSSTv5_anom.nc’. This naming convention makes it easy to access them later using the <code class="docutils literal notranslate"><span class="pre">ninolearn.IO.read_post.data_reader</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO</span> <span class="k">import</span> <span class="n">read_raw</span>
+<span class="kn">from</span> <span class="nn">ninolearn.postprocess.anomaly</span> <span class="k">import</span> <span class="n">postprocess</span>
+<span class="kn">from</span> <span class="nn">ninolearn.postprocess.regrid</span> <span class="k">import</span> <span class="n">to2_5x2_5</span>
+
+<span class="c1"># read raw data from the raw data directory</span>
+<span class="n">sst_ERSSTv5</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">sst_ERSSTv5</span><span class="p">()</span>
+
+<span class="c1"># regrid the raw data to the 2.5° x 2.5° grid from the NCAR/NCEP reananalysis</span>
+<span class="n">sst_ERSSTv5_regrid</span> <span class="o">=</span> <span class="n">to2_5x2_5</span><span class="p">(</span><span class="n">sst_ERSSTv5</span><span class="p">)</span>
+
+<span class="c1"># saves the regridded data to the postprocessed directory,</span>
+<span class="c1"># computes the anomaly and saves the anomaly as well in the postprocessed directory</span>
+<span class="n">postprocess</span><span class="p">(</span><span class="n">sst_ERSSTv5_regrid</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Overwrite existing file: bilinear_89x180_73x144.nc
+ You can set reuse_weights=True to save computing time.
+Process sst from ERSSTv5
+--------------------------------------
+save sst in post directory
+Compute sst anomaly
+Compute and save sst anomaly
+- Read sst climatetology
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Principal-component-analysis-(PCA)">
+<h2>Principal component analysis (PCA)<a class="headerlink" href="#Principal-component-analysis-(PCA)" title="Permalink to this headline">¶</a></h2>
+<p>Now, let’s perform a PCA on the just computed SST anomalies (SSTA). Note, that the naming convention from the previous section now appears in the <code class="docutils literal notranslate"><span class="pre">pca.load_data()</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">from</span> <span class="nn">ninolearn.postprocess.pca</span> <span class="k">import</span> <span class="n">pca</span>
+
+<span class="n">pca_sst</span> <span class="o">=</span> <span class="n">pca</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="c1"># load the data from the post directory</span>
+<span class="n">pca_sst</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;anom&#39;</span><span class="p">,</span> <span class="n">startyear</span><span class="o">=</span><span class="mi">1949</span><span class="p">,</span>
+                  <span class="n">endyear</span><span class="o">=</span><span class="mi">2018</span><span class="p">,</span> <span class="n">lon_min</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">lon_max</span><span class="o">=</span><span class="mi">280</span><span class="p">,</span> <span class="n">lat_min</span><span class="o">=-</span><span class="mi">30</span><span class="p">,</span>
+                  <span class="n">lat_max</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="n">pca_sst</span><span class="o">.</span><span class="n">compute_pca</span><span class="p">()</span>
+
+<span class="c1"># Quicklook on to the leading two EOFs</span>
+<span class="n">pca_sst</span><span class="o">.</span><span class="n">plot_eof</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/MEGA/Studium/UU/Master_thesis/ninolearn/ninolearn/postprocess/pca.py:156: MatplotlibDeprecationWarning:
+The dedent function was deprecated in Matplotlib 3.1 and will be removed in 3.3. Use inspect.cleandoc instead.
+  m = Basemap(projection=&#39;robin&#39;, lon_0=-180, resolution=&#39;c&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_postprocess_data_4_1.png" src="../_images/jupyter_notebook_tutorials_postprocess_data_4_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Evolving-Climate-Networks-(ECNs)">
+<h2>Evolving Climate Networks (ECNs)<a class="headerlink" href="#Evolving-Climate-Networks-(ECNs)" title="Permalink to this headline">¶</a></h2>
+<p>The following cell computes the ECN time series and calculates network metrics from it for the SSTA anomaly field in the equatorial Pacific (<code class="docutils literal notranslate"><span class="pre">lon_min=120,</span> <span class="pre">lon_max=280,</span> <span class="pre">lat_min=-30,</span> <span class="pre">lat_max=30</span></code>) between the year 2000 and 2018 (<code class="docutils literal notranslate"><span class="pre">startyear=2000,</span> <span class="pre">endyear=2018</span></code>). Complex networks are computed for a time window of 12 time steps (<code class="docutils literal notranslate"><span class="pre">window_size=12</span></code>) which is shifted by one time step for the next data point.</p>
+<p>The threshold method is used in this example (also the edge density method is available). This means, connection between two nodes/grid points are established when pearson correlation greater than the threshold.</p>
+<p>The computation may take some time (5-20min).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.network</span> <span class="k">import</span> <span class="n">networkMetricsSeries</span>
+
+<span class="c1"># settings for the computation of the network metrics time series</span>
+<span class="n">nms</span> <span class="o">=</span> <span class="n">networkMetricsSeries</span><span class="p">(</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s2">&quot;anom&quot;</span><span class="p">,</span>
+                           <span class="n">threshold</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span> <span class="n">startyear</span><span class="o">=</span><span class="mi">1949</span><span class="p">,</span> <span class="n">endyear</span><span class="o">=</span><span class="mi">2018</span><span class="p">,</span>
+                           <span class="n">window_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">lon_min</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">lon_max</span><span class="o">=</span><span class="mi">280</span><span class="p">,</span>
+                           <span class="n">lat_min</span><span class="o">=-</span><span class="mi">30</span><span class="p">,</span> <span class="n">lat_max</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># compute the time series</span>
+<span class="n">nms</span><span class="o">.</span><span class="n">computeTimeSeries</span><span class="p">()</span>
+
+<span class="c1"># save the time series again with a name following the naming convention</span>
+<span class="n">nms</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:Wrong input for computation of hamming distance.
+WARNING:Wrong input for computation of corrected hamming distance.
+</pre></div></div>
+</div>
+<p>Now let us read the data from the postprocessed directory</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+
+<span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1950-02&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2018-12&#39;</span><span class="p">)</span>
+
+<span class="c1"># network metrics</span>
+<span class="n">network_sst</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_statistic</span><span class="p">(</span><span class="s1">&#39;network_metrics&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s2">&quot;anom&quot;</span><span class="p">)</span>
+<span class="n">c2</span> <span class="o">=</span> <span class="n">network_sst</span><span class="p">[</span><span class="s1">&#39;fraction_clusters_size_2&#39;</span><span class="p">]</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">network_sst</span><span class="p">[</span><span class="s1">&#39;corrected_hamming_distance&#39;</span><span class="p">]</span>
+
+<span class="c1"># Oceaninc nino index</span>
+<span class="n">oni</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">c2</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">oni</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f28f17e7f28&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_postprocess_data_8_1.png" src="../_images/jupyter_notebook_tutorials_postprocess_data_8_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_postprocess_data_8_2.png" src="../_images/jupyter_notebook_tutorials_postprocess_data_8_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_postprocess_data_8_3.png" src="../_images/jupyter_notebook_tutorials_postprocess_data_8_3.png" />
+</div>
+</div>
+<p>Is there a lead correlation of the <code class="docutils literal notranslate"><span class="pre">c2</span></code> or <code class="docutils literal notranslate"><span class="pre">H</span></code> onto the ONI?</p>
+<p>NOTE: Lead time is defined as the time that passed between the last observed and the first date of the target season. Hence, negative appear, e.g. if you compare the DJF season with the target season JFM, you have a lead time of -2 month (Last observed date: Feburary 28/29, First date of the target season January 1).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">pearson_lag</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">max_lag</span> <span class="o">=</span> <span class="mi">25</span> <span class="c1"># month</span>
+<span class="n">lead_time_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_lag</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">r_oni</span><span class="p">,</span> <span class="n">p_oni</span> <span class="o">=</span> <span class="n">pearson_lag</span><span class="p">(</span><span class="n">oni</span><span class="p">,</span> <span class="n">oni</span><span class="p">,</span> <span class="n">max_lags</span><span class="o">=</span><span class="n">max_lag</span><span class="p">)</span>
+<span class="n">r_c2</span><span class="p">,</span> <span class="n">p_c2</span> <span class="o">=</span> <span class="n">pearson_lag</span><span class="p">(</span><span class="n">oni</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">max_lags</span><span class="o">=</span><span class="n">max_lag</span><span class="p">)</span>
+<span class="n">r_H</span><span class="p">,</span> <span class="n">p_H</span> <span class="o">=</span> <span class="n">pearson_lag</span><span class="p">(</span><span class="n">oni</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">max_lags</span><span class="o">=</span><span class="n">max_lag</span><span class="p">)</span>
+
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_time_arr</span><span class="p">,</span> <span class="n">r_oni</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_time_arr</span><span class="p">,</span><span class="n">r_c2</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_time_arr</span><span class="p">,</span><span class="n">r_H</span><span class="p">)</span>
+
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_lag</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">max_lag</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Lead Time [Month]&#39;</span><span class="p">)</span>
+
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_time_arr</span><span class="p">,</span><span class="n">p_oni</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;ONI&#39;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_time_arr</span><span class="p">,</span><span class="n">p_c2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;c$_2$&#39;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_time_arr</span><span class="p">,</span><span class="n">p_H</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\mathcal</span><span class="si">{H}</span><span class="s1">^*$&#39;</span><span class="p">)</span>
+
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_lag</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;p-value&#39;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Lead Time [Month]&#39;</span><span class="p">)</span>
+
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.legend.Legend at 0x7f28fa6b1400&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_postprocess_data_10_1.png" src="../_images/jupyter_notebook_tutorials_postprocess_data_10_1.png" />
+</div>
+</div>
+<p>Not really!</p>
 </div>
 </div>
 
@@ -318,7 +540,7 @@ div.rendered_html tbody tr:hover {
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../forecasts.html" title="Some forecasts"
+          <a href="neural_networks.html" title="Deep ensemble for ENSO-forecasting"
              >next</a> |</li>
         <li class="right" >
           <a href="prepare_data.html" title="Data preparation and read postprocessed data"

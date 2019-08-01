@@ -205,14 +205,14 @@
 <span class="c1"># =============================================================================</span>
 
 
-<div class="viewcode-block" id="toPostDir"><a class="viewcode-back" href="../../../postprocess.html#ninolearn.postprocess.anomaly.toPostDir">[docs]</a><span class="k">def</span> <span class="nf">toPostDir</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="toPostDir"><a class="viewcode-back" href="../../../postprocess.html#ninolearn.postprocess.anomaly.toPostDir">[docs]</a><span class="k">def</span> <span class="nf">toPostDir</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the basic data to the postdir.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">generateFileName</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">postdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">new</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{data.name}</span><span class="s2"> already saved in post directory&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;save </span><span class="si">{data.name}</span><span class="s2"> in post directory&quot;</span><span class="p">)</span>
@@ -281,7 +281,7 @@
 <span class="sd">    :param new: compute the statistics again (default = False)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">small_print_header</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Process </span><span class="si">{data.name}</span><span class="s2"> from </span><span class="si">{data.dataset}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">toPostDir</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">toPostDir</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
     <span class="c1">#TODO: Do this better!</span>
     <span class="k">global</span> <span class="n">reference_period</span>
     <span class="n">reference_period</span> <span class="o">=</span> <span class="n">ref_period</span>
