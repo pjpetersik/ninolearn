@@ -92,7 +92,7 @@ html_theme = 'sphinx_rtd_theme'# 'sphinxdoc'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {'logo_only': False}
+html_theme_options = {'logo_only': True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -196,6 +196,4 @@ epub_exclude_files = ['search.html']
 
 # -- Logo --
 html_logo = 'logo_small.png'
-html_favicon = 'logo.png'
-
-
+html_favicon = 'logo_favicon.png'
