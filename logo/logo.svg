@@ -15,9 +15,9 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="logo.svg"
-   inkscape:export-filename="/home/paul/MEGA/Studium/UU/Master_thesis/ninolearn/logo/logo_small.png"
-   inkscape:export-xdpi="50.467575"
-   inkscape:export-ydpi="50.467575">
+   inkscape:export-filename="/home/paul/MEGA/Studium/UU/Master_thesis/ninolearn/logo/logo_favicon.png"
+   inkscape:export-xdpi="25.234632"
+   inkscape:export-ydpi="25.234632">
   <defs
      id="defs4">
     <linearGradient
@@ -44,7 +44,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="9.3176886"
+     inkscape:cx="-122.11088"
      inkscape:cy="39.630179"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -76,7 +76,7 @@
      id="layer1"
      transform="translate(-200.22343,-91.71933)">
     <path
-       style="fill:none;stroke:#f5f5f5;stroke-width:2.77083348999999979px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:none;stroke:#2b2b2b;stroke-width:2.77083348999999979px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 525.77101,93.104747 c 0,0 -125.14982,9.647763 -178.125,15.833323 -52.97518,6.18555 -117.74845,2.07233 -138.54168,23.75 -20.79322,21.67767 7.14984,16.39328 17.8125,33.64584 10.66267,17.25257 69.27084,25.72916 87.08336,25.72916 17.8125,0 80.75315,-6.5249 122.70833,-3.95833 41.95519,2.56657 77.45646,18.46777 98.95833,33.64584 21.50186,15.17808 19.79167,39.58333 19.79167,39.58333"
        id="path2996"
        inkscape:connector-curvature="0"
@@ -96,5 +96,5 @@
            y="43.790752"
            style="font-size:11px;fill:#f0f0f0;fill-opacity:1" /></flowRegion><flowPara
          id="flowPara3026"
-         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Serif;-inkscape-font-specification:DejaVu Serif;fill:#f0f0f0;fill-opacity:1">NinoLearn</flowPara></flowRoot>  </g>
+         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#f0f0f0;fill-opacity:1;font-family:DejaVu Serif;-inkscape-font-specification:DejaVu Serif">NinoLearn</flowPara></flowRoot>  </g>
 </svg>

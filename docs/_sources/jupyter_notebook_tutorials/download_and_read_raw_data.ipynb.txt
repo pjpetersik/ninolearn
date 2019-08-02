@@ -64,7 +64,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The sources all are dictionaries have specific keywords specify their download:"
+    "The sources all are dictionaries which have keywords that specify the download:"
    ]
   },
   {

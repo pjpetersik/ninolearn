@@ -166,7 +166,9 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/jupyter_notebook_tutorials/encoder_decoder.ipynb.txt" rel="nofollow"> View page source</a>
+            
+              <a href="https://github.com///blob/jupyter_notebook_tutorials/encoder_decoder.ipynb" class="fa fa-github"> Edit on GitHub</a>
+            
           
         
       </li>
@@ -4358,7 +4360,7 @@ To register the converters:
 <div class="section" id="Animate-the-full-test-prediction">
 <h2>Animate the full test prediction<a class="headerlink" href="#Animate-the-full-test-prediction" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -4398,14 +4400,14 @@ To register the converters:
             <span class="k">yield</span> <span class="n">true</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="n">k</span><span class="p">]],</span> <span class="n">pred</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="n">k</span><span class="p">]],</span> <span class="n">time</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
             <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>
 
-    <span class="n">ani</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">data_gen</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">true</span><span class="p">))</span>
+    <span class="n">ani</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">data_gen</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">true</span><span class="p">))</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ani</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -4419,11 +4421,11 @@ To register the converters:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
-<video width="432" height="504" controls autoplay>
+<video width="432" height="504" controls autoplay loop>
   <source type="video/mp4" src="data:video/mp4;base64,AAAAHGZ0eXBNNFYgAAACAGlzb21pc28yYXZjMQAAAAhmcmVlAAYlEm1kYXQAAAKuBgX//6rcRem9
 5tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTQ4IHIyNzk1IGFhYTlhYTggLSBILjI2NC9NUEVHLTQg
 QVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDE3IC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcv
@@ -11580,6 +11582,9 @@ AAAATGF2ZjU3LjgzLjEwMA==
   <div role="contentinfo">
     <p>
         &copy; Copyright 2019, Paul Petersik
+      <span class="lastupdated">
+        Last updated on True.
+      </span>
 
     </p>
   </div>

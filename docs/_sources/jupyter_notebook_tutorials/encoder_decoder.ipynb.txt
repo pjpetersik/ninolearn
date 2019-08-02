@@ -4120,7 +4120,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": 12,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -4160,20 +4160,20 @@
     "            yield true.loc[time[k]], pred.loc[time[k]], time[k]\n",
     "            k+=1\n",
     "\n",
-    "    ani = animation.FuncAnimation(fig, update, data_gen, interval=100, repeat=False, save_count=len(true))\n",
+    "    ani = animation.FuncAnimation(fig, update, data_gen, interval=100, repeat=True, save_count=len(true))\n",
     "    plt.close(\"all\")\n",
     "    return ani"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 13,
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/html": [
-       "<video width=\"432\" height=\"504\" controls autoplay>\n",
+       "<video width=\"432\" height=\"504\" controls autoplay loop>\n",
        "  <source type=\"video/mp4\" src=\"data:video/mp4;base64,AAAAHGZ0eXBNNFYgAAACAGlzb21pc28yYXZjMQAAAAhmcmVlAAYlEm1kYXQAAAKuBgX//6rcRem9\n",
        "5tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTQ4IHIyNzk1IGFhYTlhYTggLSBILjI2NC9NUEVHLTQg\n",
        "QVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDE3IC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcv\n",
@@ -11308,7 +11308,7 @@
        "<IPython.core.display.HTML object>"
       ]
      },
-     "execution_count": 11,
+     "execution_count": 13,
      "metadata": {},
      "output_type": "execute_result"
     }
