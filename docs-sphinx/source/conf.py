@@ -20,6 +20,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
+from datetime import date
+today_date = date.today()
 
 # -- General configuration ------------------------------------------------
 
@@ -95,8 +97,8 @@ html_theme = 'sphinx_rtd_theme'# 'sphinxdoc'
 html_theme_options = {'logo_only': True}
 
 html_context = {
-"display_github": True, # Add 'Edit on Github' link instead of 'View page source'
-"last_updated": True,
+"display_github": False, # Add 'Edit on Github' link instead of 'View page source'
+"last_updated": today_date.strftime("%B %d, %Y"),
 "commit": False,
 }
 
