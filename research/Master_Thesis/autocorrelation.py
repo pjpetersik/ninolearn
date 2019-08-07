@@ -9,7 +9,7 @@ from ninolearn.plot.evaluation import newcmp
 from os.path import join
 
 plt.close("all")
-reader = data_reader(startdate='1980-02')
+reader = data_reader(startdate='1962-01')
 
 
 oni = reader.read_csv('oni')
@@ -32,6 +32,8 @@ for i in range(12):
 
 levels = np.linspace(0, 1, 20+1)
 fig, ax = plt.subplots(figsize=(5,3.5))
+
+p_value[auto_corr<=0] = 1
 
 m = np.arange(1,13)
 lag_arr = np.arange(max_lag) - 3
