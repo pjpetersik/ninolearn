@@ -8,6 +8,7 @@ from ninolearn.utils import print_header
 
 print_header("Download Data")
 
+#%%
 # =============================================================================
 # Single files
 # =============================================================================
@@ -23,6 +24,7 @@ download(sources.UWIND_NCEP)
 download(sources.VWIND_NCEP)
 download(sources.VWIND_NCEP)
 download(sources.SAT_monthly_NCEP)
+download(sources.otherForecasts)
 
 # =============================================================================
 # Multiple files

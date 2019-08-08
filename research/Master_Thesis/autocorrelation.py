@@ -9,7 +9,7 @@ from ninolearn.plot.evaluation import newcmp
 from os.path import join
 
 plt.close("all")
-reader = data_reader(startdate='1962-01')
+reader = data_reader(startdate='1962-01', enddate='2017-12')
 
 
 oni = reader.read_csv('oni')

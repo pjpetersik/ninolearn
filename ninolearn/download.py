@@ -313,3 +313,10 @@ class sources(object):
             'location': '/Datasets/interp_OLR/'
             }
 
+    otherForecasts = {
+            'downloadType':'http',
+            'url': 'https://iri.columbia.edu/~forecast/ensofcst/Data/ensofcst_ALLto0719',
+            'filename': 'other_forecasts.csv'
+
+            }
+
