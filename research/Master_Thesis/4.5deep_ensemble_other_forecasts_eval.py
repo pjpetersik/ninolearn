@@ -5,12 +5,13 @@ from ninolearn.pathes import postdir
 from ninolearn.private import plotdir
 import matplotlib.pyplot as plt
 from ninolearn.IO.read_post import data_reader
+from ninolearn.learn.evaluation import rmse_monmean
 from scipy.stats import pearsonr
 from matplotlib.ticker import MaxNLocator
 
 plt.close('all')
 
-start = '2002-01'
+start = '2012-01'
 end = '2017-12'
 reader = data_reader(startdate=start, enddate=end)
 oni = reader.read_csv('oni')
@@ -34,6 +35,19 @@ corr_NCEP_CFS = np.zeros(9)
 corr_SCRIPPS = np.zeros(9)
 corr_KMA_SNU = np.zeros(9)
 
+ssrmse_UBC_NNET = np.zeros(9)
+ssrmse_ECMWF = np.zeros(9)
+ssrmse_CFS = np.zeros(9)
+ssrmse_UCLA_TCD = np.zeros(9)
+ssrmse_JMA = np.zeros(9)
+ssrmse_NASA_GMAO = np.zeros(9)
+ssrmse_CPC_MRKOV = np.zeros(9)
+ssrmse_CPC_CA = np.zeros(9)
+ssrmse_CPC_CCA = np.zeros(9)
+ssrmse_NCEP_CFS = np.zeros(9)
+ssrmse_SCRIPPS = np.zeros(9)
+ssrmse_KMA_SNU = np.zeros(9)
+
 def corr(data):
     nans = np.isnan(data)
     n_nans = len(data[np.isnan(data)])
@@ -43,9 +57,20 @@ def corr(data):
         corr=np.nan
     return corr
 
+def ssrmse(data):
+    nans = np.isnan(data)
+    n_nans = len(data[np.isnan(data)])
+    if n_nans<36:
+        ssrmse = rmse_monmean(oni[~nans], data[~nans], oni[~nans].index)
+    else:
+        ssrmse=np.nan
+    return ssrmse
+
 
 for i in range(9):
-    # calculate all seasons scores ONI
+# =============================================================================
+# Correaltion skills
+# =============================================================================
     NASA_GMAO = data_of['NASA GMAO'].loc[start:end, i]
     NCEP_CFS = data_of['NCEP CFS'].loc[start:end, i]
     JMA = data_of['JMA'].loc[start:end, i]
@@ -71,11 +96,30 @@ for i in range(9):
     corr_CPC_MRKOV[i] = corr(CPC_MRKOV)
     corr_CPC_CA[i] = corr(CPC_CA)
     corr_CPC_CCA[i] = corr(CPC_CCA)
+# =============================================================================
+# SSRMSE
+# =============================================================================
+    ssrmse_NASA_GMAO[i] = ssrmse(NASA_GMAO)
+    ssrmse_NCEP_CFS[i] = ssrmse(NCEP_CFS)
+    ssrmse_JMA[i] = ssrmse(JMA)
+    ssrmse_SCRIPPS[i] = ssrmse(SCRIPPS)
+    ssrmse_KMA_SNU[i] = ssrmse(KMA_SNU)
+    ssrmse_ECMWF[i] = ssrmse(ECMWF)
+
+    ssrmse_UBC_NNET[i] = ssrmse(UBC_NNET)
+    ssrmse_UCLA_TCD[i] = ssrmse(UCLA_TCD)
+    ssrmse_CPC_MRKOV[i] = ssrmse(CPC_MRKOV)
+    ssrmse_CPC_CA[i] = ssrmse(CPC_CA)
+    ssrmse_CPC_CCA[i] = ssrmse(CPC_CCA)
 
 corr_DE = np.zeros(4)
+ssrmse_DE = np.zeros(4)
+
 for i in range(4):
     UU_DE_mean = data['UU DE mean'].loc[start:end][:, i]
-    corr_DE[i], _ =  pearsonr(oni, UU_DE_mean)
+    corr_DE[i]=  corr(UU_DE_mean)
+    ssrmse_DE[i]=  ssrmse(UU_DE_mean)
+
 
 #%% =============================================================================
 # Plot
@@ -108,5 +152,36 @@ plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 
-plt.savefig(join(plotdir, 'compare1217.pdf'))
+plt.savefig(join(plotdir, f'compare_corr_{start[2:4]}{end[2:4]}.pdf'))
 
+
+
+
+
+ax = plt.figure(figsize=(6,3)).gca()
+
+plt.plot(lead_arr_of, ssrmse_UBC_NNET, label='UBC NNET', ls='--')
+plt.plot(lead_arr_of, ssrmse_UCLA_TCD, label='UCLA-TCD',  ls='--')
+plt.plot(lead_arr_of, ssrmse_CPC_MRKOV, label='CPC MRKOV', ls='--')
+plt.plot(lead_arr_of, ssrmse_CPC_CA, label='CPC CA', ls='--')
+plt.plot(lead_arr_of, ssrmse_CPC_CCA, label='CPC CCA', ls='--')
+
+plt.plot(lead_arr_of, ssrmse_NASA_GMAO, label='NASA GMAO')
+plt.plot(lead_arr_of, ssrmse_NCEP_CFS, label='NCEP CFS')
+plt.plot(lead_arr_of, ssrmse_JMA, label='JMA')
+plt.plot(lead_arr_of, ssrmse_SCRIPPS, label='SCRIPPS')
+plt.plot(lead_arr_of, ssrmse_ECMWF, label='ECMWF')
+plt.plot(lead_arr_of, ssrmse_KMA_SNU, label='KMA SNU')
+
+plt.plot(lead_arr_DE, ssrmse_DE, c='k', label='UU DE Mean', ls='--', lw=3)
+
+plt.ylim(0., 1.8)
+plt.xlim(0,8)
+plt.xlabel('Lead Time [Month]')
+plt.ylabel('SSRMSE')
+plt.grid()
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+
+plt.savefig(join(plotdir, f'compare_ssrmse_{start[2:4]}{end[2:4]}.pdf'))
