@@ -15,7 +15,7 @@ oni = reader.read_csv('oni')
 data = xr.open_dataset(join(postdir, f'DE_forecasts.nc'))
 data_of = xr.open_dataset(join(postdir, f'other_forecasts.nc'))
 
-lead = 6
+lead = 0
 lead_DE = lead//3
 
 UU_DE_mean = data['UU DE mean'].loc[start:end][:,lead_DE]
@@ -68,7 +68,7 @@ plt.axhspan(-0.5, -6, facecolor='blue',  alpha=0.1,zorder=0)
 plt.axhspan(0.5, 6, facecolor='red', alpha=0.1,zorder=0)
 
 
-plt.title(f"Lead time: {lead} month")
+plt.title(f"Lead time: {lead} months")
 plt.grid()
 plt.xlabel('Time [Year]')
 plt.ylabel('ONI [K]')

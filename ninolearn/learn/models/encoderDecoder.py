@@ -3,7 +3,7 @@ import numpy as np
 
 import keras.backend as K
 from keras.models import Model, save_model, load_model
-from keras.layers import Dense, Input, GaussianDropout
+from keras.layers import Dense, Input, Dropout
 from keras.layers import GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
@@ -150,7 +150,7 @@ class EncoderDecoder(object):
             h = Dense(self.hyperparameters['neurons'][i], activation='relu',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']))(h)
-            h = GaussianDropout(self.hyperparameters['dropout'])(h)
+            h = Dropout(self.hyperparameters['dropout'])(h)
 
         latent = Dense(self.hyperparameters['neurons'][self.bottelneck_layer], activation='linear',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
@@ -166,7 +166,7 @@ class EncoderDecoder(object):
             h = Dense(self.hyperparameters['neurons'][i], activation='relu',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']))(h)
-            h = GaussianDropout(self.hyperparameters['dropout'])(h)
+            h = Dropout(self.hyperparameters['dropout'])(h)
 
         decoded = Dense(n_labels, activation='linear',
                         kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],

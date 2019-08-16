@@ -24,8 +24,8 @@ plt.close("all")
 #%% =============================================================================
 #  process data
 # =============================================================================
-period = ""
-save = False
+period = "_laninalike"
+save = True
 
 if period=="":
     decades_arr = [60, 70, 80, 90, 100, 110]
@@ -159,7 +159,7 @@ for i in range(n_lead):
     plt.xlim(timeytrue[0],timeytrue[-1])
     plt.ylim(-3,3)
 
-    plt.title(f"Lead time: {lead_time} month")
+    plt.title(f"Lead time: {lead_time} months")
     plt.grid()
     plt.tight_layout()
 
@@ -178,16 +178,16 @@ decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalb
 decade_name = ['1962-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
 
 # all season correlation score
-ax = plt.figure(figsize=(6.5,3.)).gca()
+ax = plt.figure(figsize=(6.5,3.5)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_corr[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
     plt.plot(lead_time_arr, decadel_corr_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1982-2017)", lw=2)
-plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1982-2017)", lw=2)
+plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1962-2017)", lw=2)
+plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1962-2017)", lw=2)
 
 plt.ylim(-0.2,1)
 plt.xlim(0, lead_time_arr[-1])
-plt.xlabel('Lead Time [Month]')
+plt.xlabel('Lead Time [Months]')
 plt.ylabel('Correlation coefficient')
 #plt.title('Correlation skill')
 plt.grid()
@@ -200,17 +200,17 @@ if period=="" and save:
     plt.savefig(join(plotdir, f'all_season_corr.jpg'), dpi=360)
 
 #%% all season rmse score
-ax = plt.figure(figsize=(6.5,3.)).gca()
+ax = plt.figure(figsize=(6.5,3.5)).gca()
 
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_rmse[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
     plt.plot(lead_time_arr, decadel_rmse_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1982-2017)", c='k', lw=2)
-plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1982-2017)", c='k', linestyle='--',  lw=2)
+plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1962-2017)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1962-2017)", c='k', linestyle='--',  lw=2)
 
 plt.ylim(0.,2)
 plt.xlim(0, lead_time_arr[-1])
-plt.xlabel('Lead Time [Month]')
+plt.xlabel('Lead Time [Months]')
 plt.ylabel('SSRMSE')
 #plt.title('Normalized RMSE')
 plt.grid()
@@ -222,14 +222,14 @@ if period=="" and save:
     plt.savefig(join(plotdir, f'all_season_rmse.pdf'))
 
 #%% all seasons negative loglikelihood
-ax = plt.figure(figsize=(6.5,3.)).gca()
+ax = plt.figure(figsize=(6.5,3.5)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_nll[j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1983-2017)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_nll, label="Deep Ens.  (1962-2017)", c='k', lw=2)
 
 plt.ylim(-0.5,0.7)
 plt.xlim(0.,lead_time_arr[-1])
-plt.xlabel('Lead Time [Month]')
+plt.xlabel('Lead Time [Months]')
 plt.ylabel('NLL')
 #plt.title('Negative-loglikelihood')
 plt.grid()

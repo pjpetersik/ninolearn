@@ -8,6 +8,8 @@ import numpy as np
 
 from os.path import join
 
+save = False
+
 elnino_ep = np.array([1957, 1965, 1972, 1976, 1982, 1997#  #2015
                       ])
 
@@ -242,5 +244,6 @@ axs[1,1].text(9.2e5, 5.3e6, 'd', weight='bold', size=18,
 
 plt.tight_layout()
 
-plt.savefig(join(plotdir, 'composite.pdf'))
-plt.savefig(join(plotdir, 'composite.jpg'), dpi=360)
+if save:
+    plt.savefig(join(plotdir, 'composite.pdf'))
+    plt.savefig(join(plotdir, 'composite.jpg'), dpi=360)

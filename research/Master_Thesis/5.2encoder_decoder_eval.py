@@ -20,13 +20,24 @@ from ninolearn.private import plotdir
 from ninolearn.utils import print_header
 from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon
 from ninolearn.plot.evaluation import plot_seasonal_skill
+from mpl_toolkits.basemap import Basemap
+from ninolearn.plot.evaluation import newcmp
 
 from os.path import join
 plt.close("all")
 
 #%%free memory from old sessions
 K.clear_session()
-decades_arr = [60, 70, 80, 90, 100, 110]
+period = "_laninalike"
+save = True
+
+if period=="":
+    decades_arr = [60, 70, 80, 90, 100, 110]
+elif period=="_elninolike":
+    decades_arr = [80, 90]
+elif period=="_laninalike":
+    decades_arr = [60, 70, 100, 110]
+
 n_decades = len(decades_arr)
 
 lead_time_arr = np.array([0, 3, 6, 9, 12, 15])
@@ -106,6 +117,7 @@ for i in range(n_lead):
 
     pred_da_full = xr.zeros_like(label[lead+shift:,:,:])
 
+    all_test_indeces = np.zeros_like(timey, dtype=bool)
     for j in range(n_decades):
         decade = decades_arr[j]
 
@@ -113,6 +125,8 @@ for i in range(n_lead):
 
         # get test data
         test_indeces = test_indeces = (timey>=f'{1902+decade}-01-01') & (timey<=f'{1911+decade}-12-01')
+        all_test_indeces = test_indeces | all_test_indeces
+
         testX, testy, testtimey = X[test_indeces,:], y[test_indeces,:], timey[test_indeces]
         testy_oni  = y_oni[test_indeces]
 
@@ -154,7 +168,7 @@ for i in range(n_lead):
     corr_map = np.zeros(label_reshaped.shape[1])
 
     for j in range(len(corr_map)):
-        corr_map[j] = np.corrcoef(pred_da_full_reshaped[:,j], label_reshaped[:,j])[0,1]
+        corr_map[j] = np.corrcoef(pred_da_full_reshaped[all_test_indeces,j], label_reshaped[all_test_indeces,j])[0,1]
     corr_map = corr_map.reshape((label.shape[1:]))
 
     # calculate all seasons scores ONI
@@ -174,11 +188,25 @@ for i in range(n_lead):
 
 
     # Plot correlation map
-    fig, ax = plt.subplots(figsize=(8,2))
-    plt.title(f"Lead time: {lead} month")
-    C=ax.imshow(corr_map, origin='lower', vmin=0, vmax=1)
+    levels = np.arange(0,1.1,0.1)
+    fig, ax = plt.subplots(figsize=(5.5,2))
+    plt.title(f"Lead time: {lead} months")
+    m=Basemap(projection='merc',llcrnrlat=-30,urcrnrlat=30,
+                llcrnrlon=120,urcrnrlon=280,lat_ts=5,resolution='c',ax=ax)
+    lon2, lat2 = np.meshgrid(pred_da_full.lon, pred_da_full.lat)
+    x, y = m(lon2, lat2)
+
+    m.drawparallels(np.arange(-90., 120., 15.), labels=[1,0,0,0], color='grey')
+    m.drawmeridians(np.arange(0., 360., 30.), color='grey', labels=[0,0,0,1],)
+    m.drawmapboundary(fill_color='white')
+    m.drawcoastlines()
+
+    C=m.contourf(x,y, corr_map, origin='lower', vmin=0, vmax=1, levels=levels, extend='min', cmap=newcmp)
     plt.colorbar(C)
-    plt.savefig(join(plotdir, f'ed_corr_map_lead{lead}.pdf'))
+    plt.tight_layout()
+
+    if save:
+        plt.savefig(join(plotdir, f'ed_corr_map_lead{lead}{period}.pdf'))
 
 
     # Plot ONI Forecasts
@@ -196,10 +224,11 @@ for i in range(n_lead):
     plt.xlim(timeytrue[0], timeytrue[-1])
     plt.ylim(-3,3)
 
-    plt.title(f"Lead time: {lead} month")
+    plt.title(f"Lead time: {lead} months")
     plt.grid()
     plt.tight_layout()
-    plt.savefig(join(plotdir, f'ed_pred_lead{lead}.pdf'))
+    if period=="" and save:
+        plt.savefig(join(plotdir, f'ed_pred_lead{lead}.pdf'))
 
 
 #%% =============================================================================
@@ -210,43 +239,45 @@ decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalb
 decade_name = ['1962-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
 
 # all season correlation score ONI
-ax = plt.figure(figsize=(6.5,3.)).gca()
+ax = plt.figure(figsize=(6.5,3.5)).gca()
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_corr[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
     plt.plot(lead_time_arr, decadel_corr_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1982-2017)", lw=2)
-plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1982-2017)", lw=2)
+plt.plot(lead_time_arr, all_season_corr, 'k', label="DE Mean (1962-2017)", lw=2)
+plt.plot(lead_time_arr, all_season_corr_pres,  'k', linestyle='--', label="Persistence (1962-2017)", lw=2)
 
 plt.ylim(-0.2,1)
 plt.xlim(0,lead_time_arr[-1])
-plt.xlabel('Lead Time [Month]')
+plt.xlabel('Lead Time [Months]')
 plt.ylabel('Correlation coefficient')
 #plt.title('Correlation skill')
 plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_all_season_corr.pdf'))
+if period=="" and save:
+    plt.savefig(join(plotdir, f'ed_all_season_corr.pdf'))
 
 #%% all season rmse score
-ax = plt.figure(figsize=(6.5,3.)).gca()
+ax = plt.figure(figsize=(6.5,3.5)).gca()
 
 for j in range(n_decades):
     plt.plot(lead_time_arr, decadel_rmse[j], c=decade_color[j], label=f"DE Mean ({decade_name[j]})")
     plt.plot(lead_time_arr, decadel_rmse_pres[j], c=decade_color[j], linestyle='--', label=f"Persistence ({decade_name[j]})")
-plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1982-2017)", c='k', lw=2)
-plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1982-2017)", c='k', linestyle='--',  lw=2)
+plt.plot(lead_time_arr, all_season_rmse, label="DE Mean (1962-2017)", c='k', lw=2)
+plt.plot(lead_time_arr, all_season_rmse_pres, label="Persistence (1962-2017)", c='k', linestyle='--',  lw=2)
 
 plt.ylim(0.,2)
 plt.xlim(0, lead_time_arr[-1])
-plt.xlabel('Lead Time [Month]')
+plt.xlabel('Lead Time [Months]')
 plt.ylabel('SSRMSE')
 #plt.title('Normalized RMSE')
 plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_all_season_rmse.pdf'))
+if period=="" and save:
+    plt.savefig(join(plotdir, f'ed_all_season_rmse.pdf'))
 
 
 #%% contour skill plots ONI
@@ -254,9 +285,11 @@ plot_seasonal_skill(lead_time_arr, seas_corr.T,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_time_arr, seas_p.T, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
 plt.title('Correlation skill')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_seasonal_corr.pdf'))
+if save:
+    plt.savefig(join(plotdir, f'ed_seasonal_corr{period}.pdf'))
 
 plot_seasonal_skill(lead_time_arr, seas_rmse.T, vmin=0, vmax=1.2, cmap=plt.cm.inferno_r, extend='max')
 plt.title('SRMSE')
 plt.tight_layout()
-plt.savefig(join(plotdir, f'ed_seasonal_rmse.pdf'))
+if save:
+    plt.savefig(join(plotdir, f'ed_seasonal_rmse{period}.pdf'))
