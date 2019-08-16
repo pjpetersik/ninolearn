@@ -234,3 +234,10 @@ def hca_mon():
     data_upsampled = data_raw.resample(time='MS').interpolate('linear')
     data_upsampled.name = 'hca'
     return data_upsampled
+
+
+def other_forecasts():
+    data = pd.read_csv(join(rawdir, "other_forecasts.csv"), error_bad_lines=False,
+                       header=None, names=['row'], delimiter=';')
+
+    return data

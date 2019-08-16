@@ -13,7 +13,6 @@ reader = data_reader(startdate=start, enddate=end)
 oni = reader.read_csv('oni')
 
 data = xr.open_dataset(join(postdir, f'DE_forecasts.nc'))
-data_of = xr.open_dataset(join(postdir, f'other_forecasts.nc'))
 
 lead = 0
 lead_DE = lead//3
@@ -23,27 +22,23 @@ UU_DE_std = data['UU DE std'].loc[start:end][:,lead_DE]
 
 plt.subplots(figsize=(9,3))
 plot_prediction(UU_DE_mean.target_season.values, UU_DE_mean.values,std=UU_DE_std.values,
-                alpha=0.4
-                )
+                alpha=0.4)
 
-target_season = data_of['target_season'].loc[start:end].to_pandas()
+NASA_GMAO = reader.read_other_forecasts('NASA GMAO', lead)
+NCEP_CFS = reader.read_other_forecasts('NCEP CFS', lead)
+JMA = reader.read_other_forecasts('JMA', lead)
+SCRIPPS =  reader.read_other_forecasts('SCRIPPS', lead)
+ECMWF = reader.read_other_forecasts('ECMWF', lead)
+KMA_SNU = reader.read_other_forecasts('KMA SNU', lead)
+UBC_NNET = reader.read_other_forecasts('UBC NNET', lead)
+UCLA_TCD = reader.read_other_forecasts('UCLA-TCD', lead)
+CPC_MRKOV = reader.read_other_forecasts('CPC MRKOV', lead)
+CPC_CA = reader.read_other_forecasts('CPC CA', lead)
+CPC_CCA = reader.read_other_forecasts('CPC CCA', lead)
 
-NASA_GMAO = data_of['NASA GMAO'].loc[start:end, lead]
-NCEP_CFS = data_of['NCEP CFS'].loc[start:end, lead]
-JMA = data_of['JMA'].loc[start:end, lead]
-SCRIPPS =  data_of['SCRIPPS'].loc[start:end, lead]
-ECMWF = data_of['ECMWF'].loc[start:end, lead]
-KMA_SNU = data_of['KMA SNU'].loc[start:end, lead]
+target_season = NASA_GMAO.target_season
 
-UBC_NNET = data_of['UBC NNET'].loc[start:end, lead]
-UCLA_TCD = data_of['UCLA-TCD'].loc[start:end, lead]
-CPC_MRKOV = data_of['CPC_MRKOV'].loc[start:end, lead]
-CPC_CA = data_of['CPC_CA'].loc[start:end, lead]
-CPC_CCA = data_of['CPC_CCA'].loc[start:end, lead]
-
-
-
-
+#%%
 alpha = 1
 plt.plot(target_season, UBC_NNET, alpha=alpha, label='UBC NNET', ls='--')
 plt.plot(target_season, UCLA_TCD, alpha=alpha, label='UCLA-TCD', ls='--')

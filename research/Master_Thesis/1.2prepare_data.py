@@ -12,7 +12,7 @@ import numpy as np
 from ninolearn.utils import print_header
 from ninolearn.postprocess.prepare import prep_oni, prep_nino_month, prep_wwv
 from ninolearn.postprocess.prepare import prep_iod, prep_K_index, prep_wwv_proxy
-from ninolearn.postprocess.prepare import calc_warm_pool_edge
+from ninolearn.postprocess.prepare import calc_warm_pool_edge, prep_other_forecasts
 
 print_header("Prepare Data")
 
@@ -108,3 +108,8 @@ postprocess(tauy)
 # Postprocessing based on already postprocessd data
 # =============================================================================
 calc_warm_pool_edge()
+
+# =============================================================================
+# Prepare the other forecasts
+# =============================================================================
+prep_other_forecasts()

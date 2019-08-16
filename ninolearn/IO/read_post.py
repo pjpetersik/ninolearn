@@ -100,6 +100,17 @@ class data_reader(object):
         self._check_dates(data, f"{variable} - {statistic}" )
         return data.loc[self.startdate:self.enddate]
 
+    def read_other_forecasts(self, model, lead):
+        """
+        Read forecasts from other models.
+
+        :type model: str
+        :param model: Model name.
+        """
+        ds = xr.open_dataset(join(postdir, f'other_forecasts.nc'))
+        data = ds[model].loc[self.startdate:self.enddate, lead]
+        return data
+
     def _check_dates(self, data, name):
         """
         Checks if provided start and end date are in the bounds of the data
