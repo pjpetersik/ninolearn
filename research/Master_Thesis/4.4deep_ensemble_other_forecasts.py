@@ -74,5 +74,5 @@ plt.xlabel('Time [Year]')
 plt.ylabel('ONI [K]')
 plt.tight_layout()
 
-plt.savefig(join(plotdir, f'compare_prediction_lead{lead}.pdf'))
+#plt.savefig(join(plotdir, f'compare_prediction_lead{lead}.pdf'))
 
