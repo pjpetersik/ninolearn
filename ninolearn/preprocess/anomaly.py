@@ -8,7 +8,7 @@ from os.path import join, exists
 import xarray as xr
 import pandas as pd
 
-from ninolearn.pathes import postdir
+from ninolearn.pathes import processeddir
 from ninolearn.utils import generateFileName, small_print_header
 
 # =============================================================================
@@ -39,7 +39,7 @@ def computeMeanClimatology(data):
     """
     filename = generateFileName(data.name, dataset=data.dataset,
                                 processed='meanclim', suffix='nc')
-    path = join(postdir, filename)
+    path = join(processeddir, filename)
 
     if not exists(path):
         print(f"- Compute {data.name} climatetology")
@@ -66,7 +66,7 @@ def computeStdClimatology(data):
     """
     filename = generateFileName(data.name, dataset=data.dataset,
                                 processed='stdclim', suffix='nc')
-    path = join(postdir, filename)
+    path = join(processeddir, filename)
 
     if not exists(path):
         print(f"- Compute {data.name} climatetology")
@@ -141,12 +141,12 @@ def _delete_some_attributes(attrs):
 # =============================================================================
 
 
-def toPostDir(data, new):
+def toProcessedDir(data, new):
     """
-    Save the basic data to the postdir.
+    Save the basic data to the processeddir.
     """
     filename = generateFileName(data.name, dataset=data.dataset, suffix='nc')
-    path = join(postdir, filename)
+    path = join(processeddir, filename)
 
     if exists(path) and not new:
         print(f"{data.name} already saved in post directory")
@@ -156,11 +156,11 @@ def toPostDir(data, new):
 
 def saveAnomaly(data, new, compute=True):
     """
-    save deviation to postdir
+    save deviation to processeddir
     """
     filename = generateFileName(data.name, dataset=data.dataset,
                                 processed='anom', suffix='nc')
-    path = join(postdir, filename)
+    path = join(processeddir, filename)
 
     if exists(path) and not new:
         print(f"{data.name} anomaly already computed")
@@ -187,11 +187,11 @@ def saveAnomaly(data, new, compute=True):
 
 def saveNormAnomaly(data, new):
     """
-    save deviation to postdir
+    save deviation to processeddir
     """
     filename = generateFileName(data.name, dataset=data.dataset,
                                 processed='normanom', suffix='nc')
-    path = join(postdir, filename)
+    path = join(processeddir, filename)
 
     if exists(path) and not new:
         print(f"{data.name} normed anomaly already computed")
@@ -217,7 +217,7 @@ def postprocess(data, new=False, ref_period = True):
     :param new: compute the statistics again (default = False)
     """
     small_print_header(f"Process {data.name} from {data.dataset}")
-    toPostDir(data, new)
+    toProcessedDir(data, new)
     #TODO: Do this better!
     global reference_period
     reference_period = ref_period

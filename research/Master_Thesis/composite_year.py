@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 
 from mpl_toolkits.basemap import Basemap
 from mpl_toolkits.axes_grid1 import make_axes_locatable

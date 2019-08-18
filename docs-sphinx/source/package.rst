@@ -7,5 +7,5 @@ NinoLearn package
 
    download
    io
-   postprocess
+   preprocess
    learn

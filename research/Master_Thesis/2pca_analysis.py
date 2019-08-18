@@ -1,5 +1,5 @@
-from ninolearn.postprocess.pca import pca
-from ninolearn.IO.read_post import data_reader
+from ninolearn.preprocess.pca import pca
+from ninolearn.IO.read_processed import data_reader
 import matplotlib.pyplot as plt
 
 plt.close("all")

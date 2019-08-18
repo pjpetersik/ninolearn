@@ -6,8 +6,8 @@ from scipy.special import binom
 import logging
 from timeit import default_timer as timer
 
-from ninolearn.IO.read_post import data_reader
-from ninolearn.pathes import postdir
+from ninolearn.IO.read_processed import data_reader
+from ninolearn.pathes import processeddir
 from ninolearn.utils import largest_indices, generateFileName
 
 
@@ -398,7 +398,7 @@ class networkMetricsSeries(object):
             pass
         elif self.edge_density is not None:
             pass
-        self.data.to_csv(join(postdir, filename))
+        self.data.to_csv(join(processeddir, filename))
 
     def computeTimeSeries(self):
         """

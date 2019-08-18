@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr

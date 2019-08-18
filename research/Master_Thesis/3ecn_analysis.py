@@ -1,5 +1,5 @@
 from ninolearn.utils import print_header
-from ninolearn.postprocess.network import networkMetricsSeries
+from ninolearn.preprocess.network import networkMetricsSeries
 
 print_header("Network Metrics")
 

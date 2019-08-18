@@ -1,0 +1,493 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ninolearn.preprocess.prepare &mdash; NinoLearn 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/logo_favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../package.html">NinoLearn package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../forecasts.html">Some forecasts</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">NinoLearn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ninolearn.preprocess.prepare</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ninolearn.preprocess.prepare</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is a collection of methods that are needed to convert the raw</span>
+<span class="sd">data to a same format.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">mkdir</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">ninolearn.IO</span> <span class="k">import</span> <span class="n">read_raw</span>
+<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">rawdir</span><span class="p">,</span> <span class="n">processeddir</span>
+<span class="kn">from</span> <span class="nn">ninolearn.IO.read_processed</span> <span class="k">import</span> <span class="n">data_reader</span>
+
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">processeddir</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;make a data directory at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">processeddir</span><span class="p">)</span>
+    <span class="n">mkdir</span><span class="p">(</span><span class="n">processeddir</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="season_to_month"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.season_to_month">[docs]</a><span class="k">def</span> <span class="nf">season_to_month</span><span class="p">(</span><span class="n">season</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    translates a 3-month season string to the corresponding integer of the</span>
+<span class="sd">    last month of the season (to ensure not to include any future information</span>
+<span class="sd">    when predictions are made later with this data)</span>
+
+<span class="sd">    :type season: string</span>
+<span class="sd">    :param season: Season represented by three letters such as &#39;DJF&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">switcher</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;DJF&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="s1">&#39;JFM&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s1">&#39;FMA&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="s1">&#39;MAM&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s1">&#39;AMJ&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                <span class="s1">&#39;MJJ&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+                <span class="s1">&#39;JJA&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                <span class="s1">&#39;JAS&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+                <span class="s1">&#39;ASO&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s1">&#39;SON&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+                <span class="s1">&#39;OND&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="s1">&#39;NDJ&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">switcher</span><span class="p">[</span><span class="n">season</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="season_shift_year"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.season_shift_year">[docs]</a><span class="k">def</span> <span class="nf">season_shift_year</span><span class="p">(</span><span class="n">season</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    when the function .season_to_month() is applied the year related to</span>
+<span class="sd">    NDJ needs to be shifted by 1.</span>
+
+<span class="sd">    :type season: string</span>
+<span class="sd">    :param season: Season represented by three letters such as &#39;DJF&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">switcher</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;DJF&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;JFM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;FMA&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;MAM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;AMJ&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;MJJ&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;JJA&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;JAS&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;ASO&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;SON&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;OND&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;NDJ&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">switcher</span><span class="p">[</span><span class="n">season</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="prep_oni"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_oni">[docs]</a><span class="k">def</span> <span class="nf">prep_oni</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a time axis corresponding to the first day of the central month of a</span>
+<span class="sd">    3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename</span>
+<span class="sd">    some axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prepare ONI timeseries.&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">oni</span><span class="p">()</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">YR</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">SEAS</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">season_shift_year</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+           <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">SEAS</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">season_to_month</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+           <span class="s1">&#39;day&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">YR</span><span class="o">.</span><span class="n">values</span><span class="o">/</span><span class="n">data</span><span class="o">.</span><span class="n">YR</span><span class="o">.</span><span class="n">values</span><span class="p">})</span>
+    <span class="n">dti</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">dti</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ANOM&#39;</span><span class="p">:</span> <span class="s1">&#39;anom&#39;</span><span class="p">})</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;oni.csv&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="prep_nino_month"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_nino_month">[docs]</a><span class="k">def</span> <span class="nf">prep_nino_month</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;3.4&quot;</span><span class="p">,</span> <span class="n">detrend</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a time axis corresponding to the first day of the central month.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prepare monthly Nino3.4 timeseries.&quot;</span><span class="p">)</span>
+    <span class="n">period</span> <span class="o">=</span><span class="s2">&quot;M&quot;</span>
+
+    <span class="n">rawdata</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">nino_anom</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">detrend</span><span class="o">=</span><span class="n">detrend</span><span class="p">)</span>
+    <span class="n">rawdata</span> <span class="o">=</span> <span class="n">rawdata</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ANOM&#39;</span><span class="p">:</span> <span class="s1">&#39;anomNINO1+2&#39;</span><span class="p">,</span>
+                                                 <span class="s1">&#39;ANOM.1&#39;</span><span class="p">:</span> <span class="s1">&#39;anomNINO3&#39;</span><span class="p">,</span>
+                                                 <span class="s1">&#39;ANOM.2&#39;</span><span class="p">:</span> <span class="s1">&#39;anomNINO4&#39;</span><span class="p">,</span>
+                                                 <span class="s1">&#39;ANOM.3&#39;</span><span class="p">:</span> <span class="s1">&#39;anomNINO3.4&#39;</span><span class="p">})</span>
+
+    <span class="n">dftime</span> <span class="o">=</span> <span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="n">rawdata</span><span class="o">.</span><span class="n">YR</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+           <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="n">rawdata</span><span class="o">.</span><span class="n">MON</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+           <span class="s1">&#39;day&#39;</span><span class="p">:</span> <span class="n">rawdata</span><span class="o">.</span><span class="n">YR</span><span class="o">.</span><span class="n">values</span><span class="o">/</span><span class="n">rawdata</span><span class="o">.</span><span class="n">YR</span><span class="o">.</span><span class="n">values</span><span class="p">})</span>
+    <span class="n">dti</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">dftime</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">rawdata</span><span class="p">[</span><span class="n">f</span><span class="s2">&quot;anomNINO</span><span class="si">{index}</span><span class="s2">&quot;</span><span class="p">])</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">dti</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">f</span><span class="s1">&#39;anomNINO</span><span class="si">{index}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;anom&#39;</span><span class="p">})</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;nino</span><span class="si">{index}{period}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">detrend</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;detrend&quot;</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;.csv&#39;</span><span class="p">))</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="prep_wwv"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_wwv">[docs]</a><span class="k">def</span> <span class="nf">prep_wwv</span><span class="p">(</span><span class="n">cardinal_direction</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a time axis corresponding to the first day of the central month of a</span>
+<span class="sd">    3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename</span>
+<span class="sd">    some axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Prepare WWV </span><span class="si">{cardinal_direction}</span><span class="s2"> timeseries.&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">wwv_anom</span><span class="p">(</span><span class="n">cardinal_direction</span><span class="o">=</span><span class="n">cardinal_direction</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span>
+           <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span>
+           <span class="s1">&#39;day&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">date</span><span class="o">/</span><span class="n">data</span><span class="o">.</span><span class="n">date</span><span class="p">})</span>
+    <span class="n">dti</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">dti</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Anomaly&#39;</span><span class="p">:</span> <span class="s1">&#39;anom&#39;</span><span class="p">})</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;wwv</span><span class="si">{cardinal_direction}</span><span class="s1">.csv&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="prep_K_index"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_K_index">[docs]</a><span class="k">def</span> <span class="nf">prep_K_index</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    function that edits the Kirimati index from Bunge and Clarke (2014)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">K_index</span><span class="p">()</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;anom&#39;</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;kindex.csv&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="prep_wwv_proxy"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_wwv_proxy">[docs]</a><span class="k">def</span> <span class="nf">prep_wwv_proxy</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a wwv proxy index that uses the K-index from Bunge and Clarke (2014)</span>
+<span class="sd">    for the time period between 1955 and 1979</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">reader_wwv</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1980-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2018-12&#39;</span><span class="p">)</span>
+    <span class="n">wwv</span> <span class="o">=</span> <span class="n">reader_wwv</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;wwv&#39;</span><span class="p">)</span>
+
+    <span class="n">reader_kindex</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1955-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;1979-12&#39;</span><span class="p">)</span>
+    <span class="n">kindex</span> <span class="o">=</span> <span class="n">reader_kindex</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;kindex&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10e12</span>
+
+    <span class="n">wwv_proxy</span> <span class="o">=</span> <span class="n">kindex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wwv</span><span class="p">)</span>
+    <span class="n">wwv_proxy</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;wwv_proxy.csv&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="prep_iod"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_iod">[docs]</a><span class="k">def</span> <span class="nf">prep_iod</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepare the IOD index dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prepare IOD timeseries.&quot;</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">iod</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="n">dti</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;1870-01-01&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;2018-12-01&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="n">dti</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;anom&#39;</span><span class="p">])</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="s1">&#39;iod.csv&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="calc_warm_pool_edge"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.calc_warm_pool_edge">[docs]</a><span class="k">def</span> <span class="nf">calc_warm_pool_edge</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    calculate the warm pool edge</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1948-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2018-12&#39;</span><span class="p">,</span><span class="n">lon_min</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">lon_max</span><span class="o">=</span><span class="mi">290</span><span class="p">)</span>
+    <span class="n">sst</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_netcdf</span><span class="p">(</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">sst_eq</span> <span class="o">=</span> <span class="n">sst</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+    <span class="n">warm_pool_edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sst_eq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">indeces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sst_eq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># TODO  not very efficent</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sst_eq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">sst_eq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">&gt;</span><span class="mf">28.</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">indeces</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+
+        <span class="n">slope</span> <span class="o">=</span> <span class="n">sst_eq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">index</span><span class="p">]</span> <span class="o">-</span> <span class="n">sst_eq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">intercept28C</span> <span class="o">=</span> <span class="p">(</span><span class="n">sst_eq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">index</span><span class="p">]</span> <span class="o">-</span> <span class="mf">28.</span><span class="p">)</span> <span class="o">*</span> <span class="n">slope</span> <span class="o">+</span> <span class="n">index</span>
+
+        <span class="n">warm_pool_edge</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">intercept28C</span> <span class="o">*</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="mf">111.321</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">warm_pool_edge</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="n">sst</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">])</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="s1">&#39;wp_edge.csv&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">warm_pool_edge</span><span class="p">,</span> <span class="n">indeces</span></div>
+
+
+<div class="viewcode-block" id="prep_other_forecasts"><a class="viewcode-back" href="../../../preprocess.html#ninolearn.preprocess.prepare.prep_other_forecasts">[docs]</a><span class="k">def</span> <span class="nf">prep_other_forecasts</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get other forecasts into a decent format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">other_forecasts</span><span class="p">()</span>
+
+    <span class="n">n_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># the first target season is assumed not to change</span>
+    <span class="n">first_target_season</span> <span class="o">=</span> <span class="s1">&#39;2002-04-01&#39;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_rows</span><span class="p">)):</span>
+        <span class="n">row_str</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">row_str</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Forecast&quot;</span><span class="p">:</span>
+            <span class="n">last_issued</span> <span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">row_str</span><span class="p">[</span><span class="mi">16</span><span class="p">:],</span> <span class="s1">&#39;%b %Y&#39;</span><span class="p">)</span>
+            <span class="k">break</span>
+
+    <span class="n">last_target_season</span> <span class="o">=</span> <span class="n">last_issued</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">tseries</span><span class="o">.</span><span class="n">offsets</span><span class="o">.</span><span class="n">MonthBegin</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">target_season</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">first_target_season</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">last_target_season</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
+
+    <span class="n">n_timesteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_season</span><span class="p">)</span>
+
+    <span class="n">lead_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+    <span class="n">n_lead</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_time</span><span class="p">)</span>
+
+    <span class="c1"># dummy array for the purpose to be filled</span>
+    <span class="n">dummy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_timesteps</span><span class="p">,</span> <span class="n">n_lead</span><span class="p">))</span>
+    <span class="n">dummy</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">save_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_rows</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># read the row</span>
+            <span class="n">row_str</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1"># check if it is the last line of a forecast block</span>
+            <span class="k">if</span> <span class="n">row_str</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;end&#39;</span><span class="p">:</span>
+                <span class="n">j</span><span class="o">+=</span><span class="mi">1</span>
+
+            <span class="c1"># check if it is a number otherwise go the except</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+
+            <span class="c1"># allocate a new entry if model is new</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="n">row_str</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">52</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">save_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">model_name</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">save_data</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span> <span class="o">=</span>  <span class="n">dummy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># write data to the considered target period</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+                <span class="n">save_data</span><span class="p">[</span><span class="n">model_name</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row_str</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">4</span><span class="p">])</span>
+
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+
+    <span class="c1"># make the final save dictionary</span>
+    <span class="n">save_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># replace model names that have a &#39;/&#39;  in their name (otherwise saving as</span>
+    <span class="c1"># netCDF would not be possible)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">save_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">key_save</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">save_dict</span><span class="p">[</span><span class="n">key_save</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="s1">&#39;target_season&#39;</span><span class="p">,</span> <span class="s1">&#39;lead&#39;</span><span class="p">],</span> <span class="n">save_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="c1"># maka the final Data set</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">save_dict</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;target_season&#39;</span><span class="p">:</span> <span class="n">target_season</span><span class="p">,</span>
+                                       <span class="s1">&#39;lead&#39;</span><span class="p">:</span> <span class="n">lead_time</span> <span class="p">})</span>
+
+    <span class="c1"># replace -999 with nans</span>
+    <span class="n">ds</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ds</span><span class="o">!=-</span><span class="mi">999</span><span class="p">)</span>
+
+    <span class="c1"># from unit cK to K</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">/</span><span class="mi">100</span>
+
+    <span class="c1"># save data</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;other_forecasts.nc&#39;</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Paul Petersik
+      <span class="lastupdated">
+        Last updated on August 18, 2019.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

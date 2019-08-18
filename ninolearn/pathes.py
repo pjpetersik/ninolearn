@@ -13,6 +13,6 @@ except ImportError:
     raise ImportError("Cannot import name 'datadir'. Specifiy the path to your data directory using the name 'datadir' in the  ninolearn.private module which you may not commit to you public repository")
 
 rawdir = join(datadir, 'raw')
-postdir = join(datadir, 'post')
+processeddir = join(datadir, 'processed')
 modeldir = join(datadir, 'model')
 ed_model_dir = join(datadir, 'ED_model')

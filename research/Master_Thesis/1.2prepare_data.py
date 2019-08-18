@@ -10,9 +10,9 @@ the warm pool edge.
 import numpy as np
 
 from ninolearn.utils import print_header
-from ninolearn.postprocess.prepare import prep_oni, prep_nino_month, prep_wwv
-from ninolearn.postprocess.prepare import prep_iod, prep_K_index, prep_wwv_proxy
-from ninolearn.postprocess.prepare import calc_warm_pool_edge, prep_other_forecasts
+from ninolearn.preprocess.prepare import prep_oni, prep_nino_month, prep_wwv
+from ninolearn.preprocess.prepare import prep_iod, prep_K_index, prep_wwv_proxy
+from ninolearn.preprocess.prepare import calc_warm_pool_edge, prep_other_forecasts
 
 print_header("Prepare Data")
 
@@ -34,8 +34,8 @@ prep_wwv_proxy()
 # Prepare the gridded data
 # =============================================================================
 from ninolearn.IO import read_raw
-from ninolearn.postprocess.anomaly import postprocess, saveAnomaly
-from ninolearn.postprocess.regrid import to2_5x2_5
+from ninolearn.preprocess.anomaly import postprocess, saveAnomaly
+from ninolearn.preprocess.regrid import to2_5x2_5
 
 # postprocess sst data from ERSSTv5
 sst_ERSSTv5 = read_raw.sst_ERSSTv5()

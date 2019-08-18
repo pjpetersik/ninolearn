@@ -4,7 +4,7 @@ from sklearn.metrics import r2_score
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 from os.path import join
 from ninolearn.private import plotdir
 # =============================================================================

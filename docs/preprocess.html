@@ -1,0 +1,614 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Preprocess &mdash; NinoLearn 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/logo_favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Learn" href="learn.html" />
+    <link rel="prev" title="Input/Output" href="io.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">NinoLearn package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input/Output</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocess</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.prepare">Data preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.network">Evolving complex networks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.pca">Principal Component Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="learn.html">Learn</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forecasts.html">Some forecasts</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">NinoLearn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="package.html">NinoLearn package</a> &raquo;</li>
+        
+      <li>Preprocess</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/preprocess.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="preprocess">
+<h1>Preprocess<a class="headerlink" href="#preprocess" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ninolearn.preprocess.prepare">
+<span id="data-preparation"></span><h2>Data preparation<a class="headerlink" href="#module-ninolearn.preprocess.prepare" title="Permalink to this headline">¶</a></h2>
+<p>This module is a collection of methods that are needed to convert the raw
+data to a same format.</p>
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.calc_warm_pool_edge">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">calc_warm_pool_edge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#calc_warm_pool_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.calc_warm_pool_edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the warm pool edge</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_K_index">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_K_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_K_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_K_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>function that edits the Kirimati index from Bunge and Clarke (2014)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_iod">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_iod</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_iod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_iod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the IOD index dataframe</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_nino_month">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_nino_month</code><span class="sig-paren">(</span><em class="sig-param">index='3.4'</em>, <em class="sig-param">detrend=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_nino_month"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_nino_month" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a time axis corresponding to the first day of the central month.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_oni">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_oni</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_oni"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_oni" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a time axis corresponding to the first day of the central month of a
+3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
+some axis.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_other_forecasts">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_other_forecasts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_other_forecasts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_other_forecasts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get other forecasts into a decent format.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_wwv">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_wwv</code><span class="sig-paren">(</span><em class="sig-param">cardinal_direction=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_wwv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_wwv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a time axis corresponding to the first day of the central month of a
+3-month season. For example: DJF 2019 becomes 2019-01-01. Further, rename
+some axis.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.prep_wwv_proxy">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">prep_wwv_proxy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#prep_wwv_proxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.prep_wwv_proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a wwv proxy index that uses the K-index from Bunge and Clarke (2014)
+for the time period between 1955 and 1979</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.season_shift_year">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">season_shift_year</code><span class="sig-paren">(</span><em class="sig-param">season</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#season_shift_year"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.season_shift_year" title="Permalink to this definition">¶</a></dt>
+<dd><p>when the function .season_to_month() is applied the year related to
+NDJ needs to be shifted by 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>season</strong> (<em>string</em>) – Season represented by three letters such as ‘DJF’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.prepare.season_to_month">
+<code class="sig-prename descclassname">ninolearn.preprocess.prepare.</code><code class="sig-name descname">season_to_month</code><span class="sig-paren">(</span><em class="sig-param">season</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/prepare.html#season_to_month"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.prepare.season_to_month" title="Permalink to this definition">¶</a></dt>
+<dd><p>translates a 3-month season string to the corresponding integer of the
+last month of the season (to ensure not to include any future information
+when predictions are made later with this data)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>season</strong> (<em>string</em>) – Season represented by three letters such as ‘DJF’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-ninolearn.preprocess.anomaly"></span><p>This module contains a bunch of mehtods to compute seasonal anomalies.</p>
+<p>Currently the reference period is 1981-2010.</p>
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.computeAnomaly">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">computeAnomaly</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#computeAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.computeAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the seasonality</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.computeMeanClimatology">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">computeMeanClimatology</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#computeMeanClimatology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.computeMeanClimatology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monthly means</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.computeNormAnomaly">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">computeNormAnomaly</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#computeNormAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.computeNormAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the seasonality</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.computeStdClimatology">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">computeStdClimatology</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#computeStdClimatology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.computeStdClimatology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monthly stds</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.postprocess">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">new=False</em>, <em class="sig-param">ref_period=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.postprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine all the postprocessing functions in one data routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – xarray data array</p></li>
+<li><p><strong>new</strong> – compute the statistics again (default = False)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.saveAnomaly">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">saveAnomaly</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">new</em>, <em class="sig-param">compute=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#saveAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.saveAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>save deviation to processeddir</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.saveNormAnomaly">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">saveNormAnomaly</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#saveNormAnomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.saveNormAnomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>save deviation to processeddir</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.preprocess.anomaly.toProcessedDir">
+<code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">toProcessedDir</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#toProcessedDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.toProcessedDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the basic data to the processeddir.</p>
+</dd></dl>
+
+<span class="target" id="module-ninolearn.preprocess.regrid"></span><dl class="function">
+<dt id="ninolearn.preprocess.regrid.to2_5x2_5">
+<code class="sig-prename descclassname">ninolearn.preprocess.regrid.</code><code class="sig-name descname">to2_5x2_5</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/regrid.html#to2_5x2_5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.regrid.to2_5x2_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regrids data the 2.5x2.5 from the NCEP reanalysis data set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – An xarray dataArray or DataSet with with dimensions named    ‘lat’ and ‘lon’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ninolearn.preprocess.network">
+<span id="evolving-complex-networks"></span><h2>Evolving complex networks<a class="headerlink" href="#module-ninolearn.preprocess.network" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ninolearn.preprocess.network.climateNetwork">
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.preprocess.network.</code><code class="sig-name descname">climateNetwork</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Child object of the igraph.Graph class for the construction of a complex
+climate network.</p>
+<dl class="method">
+<dt id="ninolearn.preprocess.network.climateNetwork.cluster_fraction">
+<code class="sig-name descname">cluster_fraction</code><span class="sig-paren">(</span><em class="sig-param">size=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork.cluster_fraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork.cluster_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fraction of the nodes that are part of a cluster of the
+given size (default: size=2).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – Size of the cluster. Default:2.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.climateNetwork.corrected_hamming_distance">
+<code class="sig-name descname">corrected_hamming_distance</code><span class="sig-paren">(</span><em class="sig-param">other_adjacency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork.corrected_hamming_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork.corrected_hamming_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Hamming distance of the climate Network to the provided
+other Network (by supplying the adjacency of the other Network).
+Computation is done as described in Radebach et al. (2013).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other_adjacency</strong> – The adjacency of the other climate Network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.climateNetwork.from_adjacency">
+<em class="property">classmethod </em><code class="sig-name descname">from_adjacency</code><span class="sig-paren">(</span><em class="sig-param">adjacency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork.from_adjacency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork.from_adjacency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an igraph network form a adjacency matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>adjacency</strong> (<em>np.ndarray</em>) – The NxN adjacency array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.climateNetwork.from_correalation_matrix">
+<em class="property">classmethod </em><code class="sig-name descname">from_correalation_matrix</code><span class="sig-paren">(</span><em class="sig-param">correalation_matrix</em>, <em class="sig-param">threshold=None</em>, <em class="sig-param">edge_density=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork.from_correalation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork.from_correalation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate an igraph network from a correlation matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>correalation_matrix</strong> – The NxN correlation matrix that should be        used to generate the network.</p></li>
+<li><p><strong>threshold</strong> – If NOT none but float between 0 and 1, a network        with a fixed global threshold is generated.</p></li>
+</ul>
+</dd>
+</dl>
+<p>NOTE: EITHER the threshold OR the edge density method can be used!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>edge_density</strong> – If NOT none but float between 0 and 1, a network        with a fixed edge density where the strongest links are part of network        is generated. Note, EITHER the threshold OR the edge density method can        be used!</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.climateNetwork.giant_fraction">
+<code class="sig-name descname">giant_fraction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork.giant_fraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork.giant_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fraction of the nodes that are part of the giant component.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.climateNetwork.hamming_distance">
+<code class="sig-name descname">hamming_distance</code><span class="sig-paren">(</span><em class="sig-param">other_adjacency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#climateNetwork.hamming_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.climateNetwork.hamming_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Hamming distance of the climate Network to the provided
+other Network (by supplying the adjacency of the other Network).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other_adjacency</strong> – The adjacency of the other climate Network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ninolearn.preprocess.network.networkMetricsSeries">
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.preprocess.network.</code><code class="sig-name descname">networkMetricsSeries</code><span class="sig-paren">(</span><em class="sig-param">variable</em>, <em class="sig-param">dataset</em>, <em class="sig-param">processed='anom'</em>, <em class="sig-param">threshold=None</em>, <em class="sig-param">edge_density=None</em>, <em class="sig-param">startyear=1948</em>, <em class="sig-param">endyear=2018</em>, <em class="sig-param">window_size=12</em>, <em class="sig-param">lon_min=120</em>, <em class="sig-param">lon_max=260</em>, <em class="sig-param">lat_min=-30</em>, <em class="sig-param">lat_max=30</em>, <em class="sig-param">verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#networkMetricsSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.networkMetricsSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for the computation of network metrics time series</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variable</strong> (<em>str</em>) – The variable for which the network time series should    be computed.</p></li>
+<li><p><strong>dataset</strong> (<em>str</em>) – The dataset that should be used to build the network.</p></li>
+<li><p><strong>processed</strong> (<em>str</em>) – Either ‘’,’anom’ or ‘normanom’.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – the threshold for a the correlation coeficent between    two grid point to be considered as connected.</p></li>
+<li><p><strong>startyear</strong> – The first year for which the network analysis should    be done.</p></li>
+<li><p><strong>endyear</strong> – The last year for which the network analysis should be    done.</p></li>
+<li><p><strong>window_size</strong> – The size of the window for which the network    metrics are computed.</p></li>
+<li><p><strong>lon_min</strong><strong>,</strong><strong>lon_max</strong> – The minimum and the maximum values of the    longitude grid for which the metrics shell be computed     (from 0 to 360 degrees east).</p></li>
+<li><p><strong>lat_min</strong><strong>,</strong><strong>lat_max</strong> – The minimum and the maximum values of the    latitude grid for which the metrics shell be computed    (from -180 to 180 degrees east).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="ninolearn.preprocess.network.networkMetricsSeries.computeNetworkMetrics">
+<code class="sig-name descname">computeNetworkMetrics</code><span class="sig-paren">(</span><em class="sig-param">corrcoef</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#networkMetricsSeries.computeNetworkMetrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.networkMetricsSeries.computeNetworkMetrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>computes network metrics from a correlation matrix in combination with
+the already given threshold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>corrcoef</strong> – The correlation matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.networkMetricsSeries.computeTimeSeries">
+<code class="sig-name descname">computeTimeSeries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#networkMetricsSeries.computeTimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.networkMetricsSeries.computeTimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the evolving complex network timeseries, the corresping
+metrics and save the results to a csv-file in the data directory</p>
+<p>NOTE: Specify the data directory as ‘datadir’ in the ninolear.private
+module which you may not push the public repository.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.network.networkMetricsSeries.initalizeSeries">
+<code class="sig-name descname">initalizeSeries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/network.html#networkMetricsSeries.initalizeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.network.networkMetricsSeries.initalizeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>initializes the pandas Series and array that saves the adjacency of the
+network from the previous time step.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ninolearn.preprocess.pca">
+<span id="principal-component-analysis"></span><h2>Principal Component Analysis<a class="headerlink" href="#module-ninolearn.preprocess.pca" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ninolearn.preprocess.pca.pca">
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.preprocess.pca.</code><code class="sig-name descname">pca</code><span class="sig-paren">(</span><em class="sig-param">n_components=None</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">whiten=False</em>, <em class="sig-param">svd_solver='auto'</em>, <em class="sig-param">tol=0.0</em>, <em class="sig-param">iterated_power='auto'</em>, <em class="sig-param">random_state=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class extends the PCA class of the sklearn.decomposition.pca module.    It facilitates the loading of the data from the postprocessed directory,    wraps the fit function of the PCA class, has a saving routine for the    computed pca component and can plot the EOF to get more insight into the    results.</p>
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.component_map_">
+<code class="sig-name descname">component_map_</code><span class="sig-paren">(</span><em class="sig-param">eof=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.component_map_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.component_map_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the components as a map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eof</strong> – The leading eof (default:1).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.compute_pca">
+<code class="sig-name descname">compute_pca</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.compute_pca"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.compute_pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple wrapper around the PCA.fit() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.load_data">
+<code class="sig-name descname">load_data</code><span class="sig-paren">(</span><em class="sig-param">variable</em>, <em class="sig-param">dataset</em>, <em class="sig-param">processed='anom'</em>, <em class="sig-param">startyear=1949</em>, <em class="sig-param">endyear=2018</em>, <em class="sig-param">lon_min=120</em>, <em class="sig-param">lon_max=280</em>, <em class="sig-param">lat_min=-30</em>, <em class="sig-param">lat_max=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data for PCA analysis from the desired postprocessed data set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variable</strong> (<em>str</em>) – The variable for which the PCA will be done.</p></li>
+<li><p><strong>dataset</strong> (<em>str</em>) – The data set that should be used for the PCA.</p></li>
+<li><p><strong>processed</strong> (<em>str</em>) – Either ‘’,’anom’ or ‘normanom’.</p></li>
+<li><p><strong>startyear</strong> – The start year for the time series for which the PCA        is done.</p></li>
+<li><p><strong>endyear</strong> – The last year for the time series for which the PCA        is done.</p></li>
+<li><p><strong>lon_min</strong><strong>,</strong><strong>lon_max</strong> – The minimum and the maximum values of the        longitude grid for which the metrics shell be computed         (from 0 to 360 degrees east)</p></li>
+<li><p><strong>lat_min</strong><strong>,</strong><strong>lat_max</strong> – The min and the max values of the latitude        grid for which the metrics shell be computed (from -180 to 180 degrees        east)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.pc_projection">
+<code class="sig-name descname">pc_projection</code><span class="sig-paren">(</span><em class="sig-param">eof=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.pc_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.pc_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the amplitude timeseries of the specified eof.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eof</strong> – The nth leading eof (default:1).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.plot_eof">
+<code class="sig-name descname">plot_eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.plot_eof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.plot_eof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a plot for the first leading EOFs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">extension=''</em>, <em class="sig-param">filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the first three pca components to a csv-file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.preprocess.pca.pca.set_eof_array">
+<code class="sig-name descname">set_eof_array</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/pca.html#pca.set_eof_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.pca.pca.set_eof_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genrates the array that will be analyzed with the EOF.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="learn.html" class="btn btn-neutral float-right" title="Learn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="io.html" class="btn btn-neutral float-left" title="Input/Output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Paul Petersik
+      <span class="lastupdated">
+        Last updated on August 18, 2019.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

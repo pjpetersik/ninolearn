@@ -11,13 +11,13 @@ from datetime import datetime
 import xarray as xr
 
 from ninolearn.IO import read_raw
-from ninolearn.pathes import rawdir, postdir
-from ninolearn.IO.read_post import data_reader
+from ninolearn.pathes import rawdir, processeddir
+from ninolearn.IO.read_processed import data_reader
 
 
-if not exists(postdir):
-    print("make a data directory at %s" % postdir)
-    mkdir(postdir)
+if not exists(processeddir):
+    print("make a data directory at %s" % processeddir)
+    mkdir(processeddir)
 
 
 def season_to_month(season):
@@ -86,7 +86,7 @@ def prep_oni():
     data.index = dti
     data.index.name = 'time'
     data = data.rename(index=str, columns={'ANOM': 'anom'})
-    data.to_csv(join(postdir, f'oni.csv'))
+    data.to_csv(join(processeddir, f'oni.csv'))
 
 def prep_nino_month(index="3.4", detrend=False):
     """
@@ -118,7 +118,7 @@ def prep_nino_month(index="3.4", detrend=False):
         filename = ''.join(filename, "detrend")
     filename = ''.join((filename,'.csv'))
 
-    data.to_csv(join(postdir, filename))
+    data.to_csv(join(processeddir, filename))
 
 def prep_wwv(cardinal_direction=""):
     """
@@ -137,7 +137,7 @@ def prep_wwv(cardinal_direction=""):
     data.index = dti
     data.index.name = 'time'
     data = data.rename(index=str, columns={'Anomaly': 'anom'})
-    data.to_csv(join(postdir, f'wwv{cardinal_direction}.csv'))
+    data.to_csv(join(processeddir, f'wwv{cardinal_direction}.csv'))
 
 def prep_K_index():
     """
@@ -146,7 +146,7 @@ def prep_K_index():
     data = read_raw.K_index()
     data.index.name = 'time'
     data.name = 'anom'
-    data.to_csv(join(postdir, f'kindex.csv'), header=True)
+    data.to_csv(join(processeddir, f'kindex.csv'), header=True)
 
 def prep_wwv_proxy():
     """
@@ -161,7 +161,7 @@ def prep_wwv_proxy():
     kindex = reader_kindex.read_csv('kindex') * 10e12
 
     wwv_proxy = kindex.append(wwv)
-    wwv_proxy.to_csv(join(postdir, f'wwv_proxy.csv'), header=True)
+    wwv_proxy.to_csv(join(processeddir, f'wwv_proxy.csv'), header=True)
 
 
 def prep_iod():
@@ -179,7 +179,7 @@ def prep_iod():
     df = pd.DataFrame(data=data.values,index=dti, columns=['anom'])
     df.index.name = 'time'
 
-    df.to_csv(join(postdir, 'iod.csv'))
+    df.to_csv(join(processeddir, 'iod.csv'))
 
 def calc_warm_pool_edge():
     """
@@ -206,7 +206,7 @@ def calc_warm_pool_edge():
     df = pd.DataFrame(data=warm_pool_edge,index=sst.time.values, columns=['total'])
     df.index.name = 'time'
 
-    df.to_csv(join(postdir, 'wp_edge.csv'))
+    df.to_csv(join(processeddir, 'wp_edge.csv'))
     return warm_pool_edge, indeces
 
 
@@ -287,4 +287,4 @@ def prep_other_forecasts():
     ds = ds/100
 
     # save data
-    ds.to_netcdf(join(postdir, f'other_forecasts.nc'))
+    ds.to_netcdf(join(processeddir, f'other_forecasts.nc'))

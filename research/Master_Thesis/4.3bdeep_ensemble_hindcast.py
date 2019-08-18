@@ -10,7 +10,7 @@ from os.path import join
 from keras import backend as K
 
 from ninolearn.learn.models.dem import DEM
-from ninolearn.pathes import modeldir, postdir
+from ninolearn.pathes import modeldir, processeddir
 
 from ninolearn.utils import print_header
 from data_pipeline import pipeline
@@ -80,4 +80,4 @@ ds = xr.Dataset({'UU DE mean': (['target_season', 'lead'],  pred_mean_save),
                          }
                 )
 
-ds.to_netcdf(join(postdir, f'DE_forecasts.nc'))
+ds.to_netcdf(join(processeddir, f'DE_forecasts.nc'))

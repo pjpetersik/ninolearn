@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Postprocess" href="postprocess.html" />
+    <link rel="next" title="Preprocess" href="preprocess.html" />
     <link rel="prev" title="Download" href="download.html" /> 
 </head>
 
@@ -96,10 +96,10 @@
 <li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Input/Output</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.IO.read_raw">Reading the raw data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reading-the-postprocessed-data">Reading the postprocessed data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reading-the-processed-data">Reading the processed data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="postprocess.html">Postprocess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocess.html">Preprocess</a></li>
 <li class="toctree-l2"><a class="reference internal" href="learn.html">Learn</a></li>
 </ul>
 </li>
@@ -287,20 +287,20 @@ data sets</p>
 </dd></dl>
 
 </div>
-<div class="section" id="reading-the-postprocessed-data">
-<h2>Reading the postprocessed data<a class="headerlink" href="#reading-the-postprocessed-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="reading-the-processed-data">
+<h2>Reading the processed data<a class="headerlink" href="#reading-the-processed-data" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="ninolearn.IO.read_post.data_reader">
-<em class="property">class </em><code class="sig-prename descclassname">ninolearn.IO.read_post.</code><code class="sig-name descname">data_reader</code><span class="sig-paren">(</span><em class="sig-param">startdate='1980-01'</em>, <em class="sig-param">enddate='2018-12'</em>, <em class="sig-param">lon_min=120</em>, <em class="sig-param">lon_max=280</em>, <em class="sig-param">lat_min=-30</em>, <em class="sig-param">lat_max=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_post.html#data_reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_post.data_reader" title="Permalink to this definition">¶</a></dt>
+<dt id="ninolearn.IO.read_processed.data_reader">
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.IO.read_processed.</code><code class="sig-name descname">data_reader</code><span class="sig-paren">(</span><em class="sig-param">startdate='1980-01'</em>, <em class="sig-param">enddate='2018-12'</em>, <em class="sig-param">lon_min=120</em>, <em class="sig-param">lon_max=280</em>, <em class="sig-param">lat_min=-30</em>, <em class="sig-param">lat_max=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_processed.html#data_reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_processed.data_reader" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="ninolearn.IO.read_post.data_reader.read_csv">
-<code class="sig-name descname">read_csv</code><span class="sig-paren">(</span><em class="sig-param">variable</em>, <em class="sig-param">processed='anom'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_post.html#data_reader.read_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_post.data_reader.read_csv" title="Permalink to this definition">¶</a></dt>
+<dt id="ninolearn.IO.read_processed.data_reader.read_csv">
+<code class="sig-name descname">read_csv</code><span class="sig-paren">(</span><em class="sig-param">variable</em>, <em class="sig-param">processed='anom'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_processed.html#data_reader.read_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_processed.data_reader.read_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>get data from processed csv</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ninolearn.IO.read_post.data_reader.read_netcdf">
-<code class="sig-name descname">read_netcdf</code><span class="sig-paren">(</span><em class="sig-param">variable</em>, <em class="sig-param">dataset=''</em>, <em class="sig-param">processed=''</em>, <em class="sig-param">chunks=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_post.html#data_reader.read_netcdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_post.data_reader.read_netcdf" title="Permalink to this definition">¶</a></dt>
+<dt id="ninolearn.IO.read_processed.data_reader.read_netcdf">
+<code class="sig-name descname">read_netcdf</code><span class="sig-paren">(</span><em class="sig-param">variable</em>, <em class="sig-param">dataset=''</em>, <em class="sig-param">processed=''</em>, <em class="sig-param">chunks=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_processed.html#data_reader.read_netcdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_processed.data_reader.read_netcdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>wrapper for xarray.open_dataarray.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -315,8 +315,8 @@ data sets</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ninolearn.IO.read_post.data_reader.read_other_forecasts">
-<code class="sig-name descname">read_other_forecasts</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">lead</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_post.html#data_reader.read_other_forecasts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_post.data_reader.read_other_forecasts" title="Permalink to this definition">¶</a></dt>
+<dt id="ninolearn.IO.read_processed.data_reader.read_other_forecasts">
+<code class="sig-name descname">read_other_forecasts</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">lead</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/IO/read_processed.html#data_reader.read_other_forecasts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.IO.read_processed.data_reader.read_other_forecasts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read forecasts from other models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -338,7 +338,7 @@ data sets</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="postprocess.html" class="btn btn-neutral float-right" title="Postprocess" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="preprocess.html" class="btn btn-neutral float-right" title="Preprocess" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="download.html" class="btn btn-neutral float-left" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

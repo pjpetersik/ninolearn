@@ -1,9 +1,9 @@
 from os.path import join
 import xarray as xr
 from ninolearn.private import plotdir
-from ninolearn.pathes import postdir
+from ninolearn.pathes import processeddir
 import matplotlib.pyplot as plt
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 from ninolearn.plot.prediction import plot_prediction
 plt.close('all')
 
@@ -12,7 +12,7 @@ end = '2017-12'
 reader = data_reader(startdate=start, enddate=end)
 oni = reader.read_csv('oni')
 
-data = xr.open_dataset(join(postdir, f'DE_forecasts.nc'))
+data = xr.open_dataset(join(processeddir, f'DE_forecasts.nc'))
 
 lead = 0
 lead_DE = lead//3

@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 from ninolearn.utils import include_time_lag
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 
 def pipeline(lead_time,  return_persistance=False):
     """

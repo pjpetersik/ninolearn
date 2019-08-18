@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 from ninolearn.plot.nino_timeseries import nino_background
 from ninolearn.utils import scale
-from statsmodels.tsa.stattools import ccf
 from scipy.stats import spearmanr
 from sklearn import linear_model
 

@@ -3,7 +3,7 @@ import pandas as pd
 import xarray as xr
 import gc
 
-from ninolearn.pathes import postdir
+from ninolearn.pathes import processeddir
 from ninolearn.utils import generateFileName
 
 #TODO: Write a routine that generates this list
@@ -43,7 +43,7 @@ class data_reader(object):
         """
         get data from processed csv
         """
-        data = pd.read_csv(join(postdir, f"{variable}.csv"),
+        data = pd.read_csv(join(processeddir, f"{variable}.csv"),
                            index_col=0, parse_dates=True)
 
 
@@ -63,7 +63,7 @@ class data_reader(object):
         filename = generateFileName(variable, dataset,
                                     processed=processed, suffix="nc")
 
-        data = xr.open_dataarray(join(postdir, filename), chunks=chunks)
+        data = xr.open_dataarray(join(processeddir, filename), chunks=chunks)
 
         regrided = ['GODAS', 'ERSSTv5', 'ORAS4', 'NODC', 'NCAR']
 
@@ -95,7 +95,7 @@ class data_reader(object):
                                     processed=processed, suffix="csv")
         filename = '-'.join([statistic, filename])
 
-        data = pd.read_csv(join(postdir, filename),
+        data = pd.read_csv(join(processeddir, filename),
                            index_col=0, parse_dates=True)
         self._check_dates(data, f"{variable} - {statistic}" )
         return data.loc[self.startdate:self.enddate]
@@ -107,7 +107,7 @@ class data_reader(object):
         :type model: str
         :param model: Model name.
         """
-        ds = xr.open_dataset(join(postdir, f'other_forecasts.nc'))
+        ds = xr.open_dataset(join(processeddir, f'other_forecasts.nc'))
         data = ds[model].loc[self.startdate:self.enddate, lead]
         return data
 

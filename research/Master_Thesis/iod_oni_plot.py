@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 from ninolearn.private import plotdir
 
 from os.path import join

@@ -9,7 +9,7 @@ import keras.backend as K
 
 from sklearn.preprocessing import StandardScaler
 
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.learn.evaluation import rmse

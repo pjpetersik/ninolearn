@@ -7,10 +7,10 @@ from mpl_toolkits.basemap import Basemap
 from os.path import join
 import pandas as pd
 
-from ninolearn.IO.read_post import data_reader
+from ninolearn.IO.read_processed import data_reader
 from ninolearn.utils import scale
 from ninolearn.private import plotdir
-from ninolearn.postprocess.pca import pca
+from ninolearn.preprocess.pca import pca
 from composites_CP_EP import winter_nino
 
 

@@ -8,8 +8,8 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib import cm
 from scipy.signal import detrend
 
-from ninolearn.IO.read_post import data_reader
-from ninolearn.pathes import postdir
+from ninolearn.IO.read_processed import data_reader
+from ninolearn.pathes import processeddir
 from ninolearn.utils import generateFileName, scaleMax
 from ninolearn.plot.nino_timeseries import nino_background
 
@@ -126,7 +126,7 @@ class pca(PCA):
 
         filename = '-'.join(['pca', filename])
 
-        self.df.to_csv(join(postdir, filename))
+        self.df.to_csv(join(processeddir, filename))
 
     def plot_eof(self):
         """

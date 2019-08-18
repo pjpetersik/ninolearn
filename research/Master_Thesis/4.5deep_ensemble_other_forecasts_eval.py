@@ -1,11 +1,11 @@
 from os.path import join
 import xarray as xr
 import numpy as np
-from ninolearn.pathes import postdir
+from ninolearn.pathes import processeddir
 from ninolearn.private import plotdir
 import matplotlib.pyplot as plt
-from ninolearn.IO.read_post import data_reader
-from ninolearn.learn.evaluation import rmse_monmean
+from ninolearn.IO.read_processed import data_reader
+from ninolearn.learn.evaluation.skillMeasures import mean_srmse
 from scipy.stats import pearsonr
 from matplotlib.ticker import MaxNLocator
 
@@ -16,8 +16,8 @@ end = '2017-12'
 reader = data_reader(startdate=start, enddate=end)
 oni = reader.read_csv('oni')
 
-data = xr.open_dataset(join(postdir, f'DE_forecasts.nc'))
-data_of = xr.open_dataset(join(postdir, f'other_forecasts.nc'))
+data = xr.open_dataset(join(processeddir, f'DE_forecasts.nc'))
+data_of = xr.open_dataset(join(processeddir, f'other_forecasts.nc'))
 
 lead_arr_of = np.arange(9)
 lead_arr_DE = np.array([0,3,6,9])
@@ -61,7 +61,7 @@ def ssrmse(data):
     nans = np.isnan(data)
     n_nans = len(data[np.isnan(data)])
     if n_nans<36:
-        ssrmse = rmse_monmean(oni[~nans], data[~nans], oni[~nans].index)
+        ssrmse = mean_srmse(oni[~nans], data[~nans], oni[~nans].index)
     else:
         ssrmse=np.nan
     return ssrmse
@@ -80,9 +80,9 @@ for i in range(9):
 
     UBC_NNET = data_of['UBC NNET'].loc[start:end, i]
     UCLA_TCD = data_of['UCLA-TCD'].loc[start:end, i]
-    CPC_MRKOV = data_of['CPC_MRKOV'].loc[start:end, i]
-    CPC_CA = data_of['CPC_CA'].loc[start:end, i]
-    CPC_CCA = data_of['CPC_CCA'].loc[start:end, i]
+    CPC_MRKOV = data_of['CPC MRKOV'].loc[start:end, i]
+    CPC_CA = data_of['CPC CA'].loc[start:end, i]
+    CPC_CCA = data_of['CPC CCA'].loc[start:end, i]
 
     corr_NASA_GMAO[i] = corr(NASA_GMAO)
     corr_NCEP_CFS[i] = corr(NCEP_CFS)
