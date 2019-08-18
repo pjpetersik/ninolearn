@@ -161,7 +161,7 @@
 
 <span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">save_model</span><span class="p">,</span> <span class="n">load_model</span>
-<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">GaussianDropout</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Dropout</span>
 <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">GaussianNoise</span>
 <span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="k">import</span> <span class="n">Adam</span>
 <span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">EarlyStopping</span>
@@ -172,14 +172,14 @@
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
 
 
-<span class="kn">from</span> <span class="nn">ninolearn.learn.evaluation</span> <span class="k">import</span> <span class="n">rmse</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.evaluation.skillMeasures</span> <span class="k">import</span> <span class="n">rmse</span>
 <span class="kn">from</span> <span class="nn">ninolearn.exceptions</span> <span class="k">import</span> <span class="n">MissingArgumentError</span>
 <span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">small_print_header</span><span class="p">,</span> <span class="n">print_header</span>
 
 
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<div class="viewcode-block" id="EncoderDecoder"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder">[docs]</a><span class="k">class</span> <span class="nc">EncoderDecoder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder">[docs]</a><span class="k">class</span> <span class="nc">EncoderDecoder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Encoder-Decoder is an neural network that has the same architecture as</span>
 <span class="sd">    an Autoencoder. Hence, labal and feature vector have the same dimension.</span>
@@ -187,7 +187,7 @@
 <span class="sd">    used for prediction purposes and therefore label and feature vector might</span>
 <span class="sd">    be soparated by some time lag or even are not the same variable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="EncoderDecoder.set_parameters"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurons</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<div class="viewcode-block" id="EncoderDecoder.set_parameters"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurons</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
                        <span class="n">noise_out</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">l1_hidden</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">l2_hidden</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
                        <span class="n">l1_out</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">l2_out</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
                        <span class="n">lr</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_members_segment</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -283,7 +283,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_members</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_members_segment</span></div>
 
 
-<div class="viewcode-block" id="EncoderDecoder.build_model"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.build_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_labels</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.build_model"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.build_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_labels</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The method builds a new member of the ensemble and returns it.</span>
 
@@ -308,7 +308,7 @@
             <span class="n">h</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span>
                       <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_hidden&#39;</span><span class="p">],</span>
                                                             <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l2_hidden&#39;</span><span class="p">]))(</span><span class="n">h</span><span class="p">)</span>
-            <span class="n">h</span> <span class="o">=</span> <span class="n">GaussianDropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">])(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">])(</span><span class="n">h</span><span class="p">)</span>
 
         <span class="n">latent</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">bottelneck_layer</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
                       <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_hidden&#39;</span><span class="p">],</span>
@@ -324,7 +324,7 @@
             <span class="n">h</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;neurons&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span>
                       <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_hidden&#39;</span><span class="p">],</span>
                                                             <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l2_hidden&#39;</span><span class="p">]))(</span><span class="n">h</span><span class="p">)</span>
-            <span class="n">h</span> <span class="o">=</span> <span class="n">GaussianDropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">])(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">])(</span><span class="n">h</span><span class="p">)</span>
 
         <span class="n">decoded</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">n_labels</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
                         <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;l1_out&#39;</span><span class="p">],</span>
@@ -338,7 +338,7 @@
         <span class="k">return</span> <span class="n">encoder_decoder</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">decoder</span></div>
 
 
-<div class="viewcode-block" id="EncoderDecoder.fit"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="n">valX</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.fit"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="n">valX</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the model. If n_segments is 1, then a validation data set needs to</span>
 <span class="sd">        be supplied.</span>
@@ -423,7 +423,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_val_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Mean loss: </span><span class="si">{self.mean_val_loss}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EncoderDecoder.fit_RandomizedSearch"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit_RandomizedSearch">[docs]</a>    <span class="k">def</span> <span class="nf">fit_RandomizedSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span>  <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.fit_RandomizedSearch"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.fit_RandomizedSearch">[docs]</a>    <span class="k">def</span> <span class="nf">fit_RandomizedSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span>  <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hyperparameter optimazation using random search.</span>
 
@@ -486,7 +486,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;best loss search: </span><span class="si">{best_loss}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;loss refitting : </span><span class="si">{self.mean_val_loss}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EncoderDecoder.predict"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.predict"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensemble prediction.</span>
 
@@ -498,7 +498,7 @@
             <span class="n">pred_ens</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pred_ens</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">pred_ens</span></div>
 
-<div class="viewcode-block" id="EncoderDecoder.evaluate"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ytrue</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.evaluate"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ytrue</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the model based on the RMSE</span>
 
@@ -512,7 +512,7 @@
         <span class="k">return</span> <span class="n">rmse</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span> <span class="n">ypred</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="EncoderDecoder.save"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;ed_ensemble&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.save"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;ed_ensemble&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the ensemble.</span>
 
@@ -536,7 +536,7 @@
             <span class="n">save_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">path_h5</span><span class="p">,</span> <span class="n">include_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="EncoderDecoder.load"><a class="viewcode-back" href="../../../../learn.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;ensemble&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="EncoderDecoder.load"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.encoderDecoder.EncoderDecoder.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;ensemble&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the ensemble.</span>
 
@@ -580,7 +580,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on August 06, 2019.
+        Last updated on August 18, 2019.
       </span>
 
     </p>

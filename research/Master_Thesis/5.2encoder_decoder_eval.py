@@ -18,10 +18,10 @@ from ninolearn.learn.models.encoderDecoder import EncoderDecoder
 from ninolearn.pathes import ed_model_dir
 from ninolearn.private import plotdir
 from ninolearn.utils import print_header
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon
-from ninolearn.plot.evaluation import plot_seasonal_skill
+from ninolearn.learn.evaluation.skillMeasures import mean_srmse, seasonal_srmse, seasonal_correlation
+from ninolearn.plot.evaluation import plot_seasonal_skill, newcmp
 from mpl_toolkits.basemap import Basemap
-from ninolearn.plot.evaluation import newcmp
+
 
 from os.path import join
 plt.close("all")
@@ -154,8 +154,8 @@ for i in range(n_lead):
         decadel_corr[j, i], decadel_p[j, i] = pearsonr(testy_oni, pred_oni)
         decadel_corr_pres[j, i], decadel_p_pers[j, i] = pearsonr(testy_oni, pred_pers_oni)
 
-        decadel_rmse[j, i] = rmse_monmean(testy_oni, pred_oni, testtimey - pd.tseries.offsets.MonthBegin(1))
-        decadel_rmse_pres[j, i] = rmse_monmean(testy_oni, pred_pers_oni, testtimey - pd.tseries.offsets.MonthBegin(1))
+        decadel_rmse[j, i] = mean_srmse(testy_oni, pred_oni, testtimey - pd.tseries.offsets.MonthBegin(1))
+        decadel_rmse_pres[j, i] = mean_srmse(testy_oni, pred_pers_oni, testtimey - pd.tseries.offsets.MonthBegin(1))
 
         # make the full time series
         pred_full_oni = np.append(pred_full_oni, pred_oni)
@@ -175,16 +175,16 @@ for i in range(n_lead):
     all_season_corr[i], all_season_p[i] = pearsonr(true_oni, pred_full_oni)
     all_season_corr_pres[i], all_season_p_pers[i] = pearsonr(true_oni, pred_persistance_full_oni)
 
-    all_season_rmse[i] = rmse_monmean(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    all_season_rmse_pres[i] = rmse_monmean(true_oni, pred_persistance_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    all_season_rmse[i] = mean_srmse(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    all_season_rmse_pres[i] = mean_srmse(true_oni, pred_persistance_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
 
      # seasonal skills
-    seas_corr[:, i], seas_p[:, i] = correlation(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    seas_corr_pers[:, i], seas_p_pers[:, i] = correlation(true_oni, pred_persistance_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_corr[:, i], seas_p[:, i] = seasonal_correlation(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_corr_pers[:, i], seas_p_pers[:, i] = seasonal_correlation(true_oni, pred_persistance_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
-    seas_rmse[:, i] = rmse_mon(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    seas_rmse_pers[:, i] = rmse_mon(true_oni, pred_persistance_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_rmse[:, i] = seasonal_srmse(true_oni, pred_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_rmse_pers[:, i] = seasonal_srmse(true_oni, pred_persistance_full_oni, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
 
     # Plot correlation map

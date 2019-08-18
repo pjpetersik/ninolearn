@@ -165,11 +165,13 @@
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">mkdir</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
 <span class="kn">from</span> <span class="nn">ninolearn.IO</span> <span class="k">import</span> <span class="n">read_raw</span>
-<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">postdir</span>
-
+<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">rawdir</span><span class="p">,</span> <span class="n">postdir</span>
 <span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+
 
 <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">postdir</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;make a data directory at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">postdir</span><span class="p">)</span>
@@ -364,6 +366,86 @@
 
     <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">postdir</span><span class="p">,</span> <span class="s1">&#39;wp_edge.csv&#39;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">warm_pool_edge</span><span class="p">,</span> <span class="n">indeces</span></div>
+
+
+<div class="viewcode-block" id="prep_other_forecasts"><a class="viewcode-back" href="../../../postprocess.html#ninolearn.postprocess.prepare.prep_other_forecasts">[docs]</a><span class="k">def</span> <span class="nf">prep_other_forecasts</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get other forecasts into a decent format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">other_forecasts</span><span class="p">()</span>
+
+    <span class="n">n_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># the first target season is assumed not to change</span>
+    <span class="n">first_target_season</span> <span class="o">=</span> <span class="s1">&#39;2002-04-01&#39;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_rows</span><span class="p">)):</span>
+        <span class="n">row_str</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">row_str</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Forecast&quot;</span><span class="p">:</span>
+            <span class="n">last_issued</span> <span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">row_str</span><span class="p">[</span><span class="mi">16</span><span class="p">:],</span> <span class="s1">&#39;%b %Y&#39;</span><span class="p">)</span>
+            <span class="k">break</span>
+
+    <span class="n">last_target_season</span> <span class="o">=</span> <span class="n">last_issued</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">tseries</span><span class="o">.</span><span class="n">offsets</span><span class="o">.</span><span class="n">MonthBegin</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">target_season</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">first_target_season</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">last_target_season</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
+
+    <span class="n">n_timesteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_season</span><span class="p">)</span>
+
+    <span class="n">lead_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+    <span class="n">n_lead</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_time</span><span class="p">)</span>
+
+    <span class="c1"># dummy array for the purpose to be filled</span>
+    <span class="n">dummy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_timesteps</span><span class="p">,</span> <span class="n">n_lead</span><span class="p">))</span>
+    <span class="n">dummy</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">save_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_rows</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># read the row</span>
+            <span class="n">row_str</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1"># check if it is the last line of a forecast block</span>
+            <span class="k">if</span> <span class="n">row_str</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;end&#39;</span><span class="p">:</span>
+                <span class="n">j</span><span class="o">+=</span><span class="mi">1</span>
+
+            <span class="c1"># check if it is a number otherwise go the except</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+
+            <span class="c1"># allocate a new entry if model is new</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="n">row_str</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">52</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">save_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">model_name</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">save_data</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span> <span class="o">=</span>  <span class="n">dummy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># write data to the considered target period</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+                <span class="n">save_data</span><span class="p">[</span><span class="n">model_name</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row_str</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">4</span><span class="p">])</span>
+
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+
+    <span class="c1"># make the final save dictionary</span>
+    <span class="n">save_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># replace model names that have a &#39;/&#39;  in their name (otherwise saving as</span>
+    <span class="c1"># netCDF would not be possible)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">save_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">key_save</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">save_dict</span><span class="p">[</span><span class="n">key_save</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="s1">&#39;target_season&#39;</span><span class="p">,</span> <span class="s1">&#39;lead&#39;</span><span class="p">],</span> <span class="n">save_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="c1"># maka the final Data set</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">save_dict</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;target_season&#39;</span><span class="p">:</span> <span class="n">target_season</span><span class="p">,</span>
+                                       <span class="s1">&#39;lead&#39;</span><span class="p">:</span> <span class="n">lead_time</span> <span class="p">})</span>
+
+    <span class="c1"># replace -999 with nans</span>
+    <span class="n">ds</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ds</span><span class="o">!=-</span><span class="mi">999</span><span class="p">)</span>
+
+    <span class="c1"># from unit cK to K</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">/</span><span class="mi">100</span>
+
+    <span class="c1"># save data</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">postdir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;other_forecasts.nc&#39;</span><span class="p">))</span></div>
 </pre></div>
 
            </div>
@@ -378,7 +460,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on August 06, 2019.
+        Last updated on August 18, 2019.
       </span>
 
     </p>

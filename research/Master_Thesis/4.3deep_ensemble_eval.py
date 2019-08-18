@@ -11,7 +11,7 @@ from keras import backend as K
 
 from ninolearn.learn.models.dem import DEM
 from ninolearn.pathes import modeldir
-from ninolearn.learn.evaluation import rmse_monmean, correlation, rmse_mon, seasonal_nll
+from ninolearn.learn.evaluation.skillMeasures import mean_srmse, seasonal_srmse, seasonal_correlation, seasonal_nll
 from ninolearn.plot.prediction import plot_prediction
 from ninolearn.plot.evaluation import plot_seasonal_skill
 from ninolearn.utils import print_header
@@ -109,8 +109,8 @@ for i in range(n_lead):
         decadel_corr[j, i], decadel_p[j, i] = pearsonr(testy, pred_mean)
         decadel_corr_pres[j, i], decadel_p_pers[j, i] = pearsonr(testy, pred_pers)
 
-        decadel_rmse[j, i] = rmse_monmean(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1))
-        decadel_rmse_pres[j, i] = rmse_monmean(testy, pred_pers, testtimey - pd.tseries.offsets.MonthBegin(1))
+        decadel_rmse[j, i] = mean_srmse(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1))
+        decadel_rmse_pres[j, i] = mean_srmse(testy, pred_pers, testtimey - pd.tseries.offsets.MonthBegin(1))
 
         decadel_nll[j, i] = model.evaluate(testy, pred_mean, pred_std)
 
@@ -129,17 +129,17 @@ for i in range(n_lead):
     all_season_corr[i], all_season_p[i] = pearsonr(ytrue, pred_mean_full)
     all_season_corr_pres[i], all_season_p_pers[i] = pearsonr(ytrue, pred_persistance_full)
 
-    all_season_rmse[i] = rmse_monmean(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    all_season_rmse_pres[i] = rmse_monmean(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    all_season_rmse[i] = mean_srmse(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    all_season_rmse_pres[i] = mean_srmse(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
     all_season_nll[i] = model.evaluate(ytrue, pred_mean_full, pred_std_full)
 
     # seasonal skills
-    seas_corr[:, i], seas_p[:, i] = correlation(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    seas_corr_pers[:, i], seas_p_pers[:, i] = correlation(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_corr[:, i], seas_p[:, i] = seasonal_correlation(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_corr_pers[:, i], seas_p_pers[:, i] = seasonal_correlation(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
-    seas_rmse[:, i] = rmse_mon(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
-    seas_rmse_pers[:, i] = rmse_mon(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_rmse[:, i] = seasonal_srmse(ytrue, pred_mean_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
+    seas_rmse_pers[:, i] = seasonal_srmse(ytrue, pred_persistance_full, timeytrue - pd.tseries.offsets.MonthBegin(1))
 
     seas_nll[:, i] = seasonal_nll(ytrue, pred_mean_full, pred_std_full,
                                   timeytrue - pd.tseries.offsets.MonthBegin(1), model.evaluate)

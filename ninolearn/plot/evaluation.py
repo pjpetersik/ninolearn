@@ -3,7 +3,7 @@ from matplotlib.colors import ListedColormap
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
-from ninolearn.learn.evaluation import explained_variance, correlation
+from ninolearn.learn.evaluation.skillMeasures import seasonal_correlation
 
 seismic = plt.cm.get_cmap('seismic', 256)
 newcolors = seismic(np.linspace(0, 1, 256))
@@ -17,23 +17,6 @@ seas_ticks = ['DJF', 'JFM', 'FMA', 'MAM', 'AMJ', 'MJJ',
 mon_ticks = ['J', 'F', 'M', 'A', 'M', 'J',
                         'J', 'A', 'S', 'O', 'N', 'D']
 
-def plot_explained_variance(y, pred, time):
-    """
-    make a bar plot of the explained varince between y and the prediction
-    """
-    m = np.arange(1, 13)
-    fig, ax = plt.subplots()
-
-    rsq = explained_variance(y, pred, time)
-
-    ax.set_ylim(0, 1)
-    ax.bar(m, rsq)
-    ax.set_xticks(m)
-    ax.set_xticklabels(seas_ticks)
-    ax.set_xlabel("Season")
-    ax.set_ylabel(f"$r^2$")
-    ax.set_title(f"$r^2 =$ {round(np.corrcoef(y,pred)[0,1]**2, 2)}")
-
 def plot_correlation(y, pred, time, title=None):
     """
     make a bar plot of the correlation coeficent between y and the prediction
@@ -41,7 +24,7 @@ def plot_correlation(y, pred, time, title=None):
     m = np.arange(1, 13)
     fig, ax = plt.subplots(figsize=(5,2.5))
 
-    r, p = correlation(y, pred, time)
+    r, p = seasonal_correlation(y, pred, time)
 
     ax.set_ylim(0, 1)
     ax.bar(m, r)

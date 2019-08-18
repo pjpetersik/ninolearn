@@ -14,7 +14,7 @@ from os import mkdir, listdir, getcwd
 from shutil import rmtree
 
 
-from ninolearn.learn.evaluation import rmse
+from ninolearn.learn.evaluation.skillMeasures import rmse
 from ninolearn.exceptions import MissingArgumentError
 from ninolearn.utils import small_print_header, print_header
 

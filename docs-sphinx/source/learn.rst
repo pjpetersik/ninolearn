@@ -1,14 +1,9 @@
+#####
 Learn
 #####
-Models
-******
 
-Deep Ensemble Model (DEM)
--------------------------
-.. automodule:: ninolearn.learn.models.dem
-    :members:
+.. toctree::
+   :maxdepth: 2
 
-Encoder-Decoder (ED)
---------------------
-.. automodule:: ninolearn.learn.models.encoderDecoder
-    :members:
+   models
+   evaluation

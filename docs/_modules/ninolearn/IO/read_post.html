@@ -258,6 +258,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_dates</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{variable}</span><span class="s2"> - </span><span class="si">{statistic}</span><span class="s2">&quot;</span> <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">startdate</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">enddate</span><span class="p">]</span>
 
+<div class="viewcode-block" id="data_reader.read_other_forecasts"><a class="viewcode-back" href="../../../io.html#ninolearn.IO.read_post.data_reader.read_other_forecasts">[docs]</a>    <span class="k">def</span> <span class="nf">read_other_forecasts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">lead</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read forecasts from other models.</span>
+
+<span class="sd">        :type model: str</span>
+<span class="sd">        :param model: Model name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">postdir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;other_forecasts.nc&#39;</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">startdate</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">enddate</span><span class="p">,</span> <span class="n">lead</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
     <span class="k">def</span> <span class="nf">_check_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if provided start and end date are in the bounds of the data</span>
@@ -303,7 +314,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on August 06, 2019.
+        Last updated on August 18, 2019.
       </span>
 
     </p>

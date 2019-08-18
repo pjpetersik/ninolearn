@@ -13,7 +13,7 @@ from os import mkdir, listdir, getcwd
 from shutil import rmtree
 
 from ninolearn.learn.losses import nll_gaussian
-from ninolearn.learn.evaluation import rmse
+from ninolearn.learn.evaluation.skillMeasures import rmse
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.exceptions import MissingArgumentError
 

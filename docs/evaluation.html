@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Evaluation &mdash; NinoLearn 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/logo_favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="tutorials.html" />
+    <link rel="prev" title="Models" href="models.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">NinoLearn package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input/Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess.html">Postprocess</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="learn.html">Learn</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Evaluation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-ninolearn.learn.evaluation.skillMeasures">Skill measures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forecasts.html">Some forecasts</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">NinoLearn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="package.html">NinoLearn package</a> &raquo;</li>
+        
+          <li><a href="learn.html">Learn</a> &raquo;</li>
+        
+      <li>Evaluation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/evaluation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="evaluation">
+<h1>Evaluation<a class="headerlink" href="#evaluation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ninolearn.learn.evaluation.skillMeasures">
+<span id="skill-measures"></span><h2>Skill measures<a class="headerlink" href="#module-ninolearn.learn.evaluation.skillMeasures" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ninolearn.learn.evaluation.skillMeasures.inside_fraction">
+<code class="sig-prename descclassname">ninolearn.learn.evaluation.skillMeasures.</code><code class="sig-name descname">inside_fraction</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">pred_mean</em>, <em class="sig-param">pred_std</em>, <em class="sig-param">std_level=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/evaluation/skillMeasures.html#inside_fraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.evaluation.skillMeasures.inside_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fraction of how much of the true observation is in the    confindence interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ytrue</strong> – The true observation.</p></li>
+<li><p><strong>pred_mean</strong> (<em>array_like</em>) – The mean of the prediction.</p></li>
+<li><p><strong>pred_std</strong> (<em>array_like</em>) – The standard deviation of the prediction.</p></li>
+<li><p><strong>std_level</strong> (<em>int</em>) – The standard deviation of the confidence interval.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The fraction  of the observation that is in the confidence    interval.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.learn.evaluation.skillMeasures.mean_srmse">
+<code class="sig-prename descclassname">ninolearn.learn.evaluation.skillMeasures.</code><code class="sig-name descname">mean_srmse</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">predict</em>, <em class="sig-param">time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/evaluation/skillMeasures.html#mean_srmse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.evaluation.skillMeasures.mean_srmse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean SRMSE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>array_like</em>) – The true observation.</p></li>
+<li><p><strong>pred</strong> (<em>array_like</em>) – The prediction.</p></li>
+<li><p><strong>y</strong> – The corresponding time array for the target season.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The mean SRMSE value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.learn.evaluation.skillMeasures.rmse">
+<code class="sig-prename descclassname">ninolearn.learn.evaluation.skillMeasures.</code><code class="sig-name descname">rmse</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">predict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/evaluation/skillMeasures.html#rmse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.evaluation.skillMeasures.rmse" title="Permalink to this definition">¶</a></dt>
+<dd><p>The root-mean-squarred error (RMSE) for a given observation and prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>array_like</em>) – The true observation.</p></li>
+<li><p><strong>pred</strong> (<em>array_like</em>) – The prediction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The RMSE value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.learn.evaluation.skillMeasures.seasonal_correlation">
+<code class="sig-prename descclassname">ninolearn.learn.evaluation.skillMeasures.</code><code class="sig-name descname">seasonal_correlation</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">pred</em>, <em class="sig-param">time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/evaluation/skillMeasures.html#seasonal_correlation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.evaluation.skillMeasures.seasonal_correlation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pearson correlation coefficient for each season. This function uses the    scipy.stats.pearsonr function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>array_like</em>) – The true observation.</p></li>
+<li><p><strong>pred</strong> (<em>array_like</em>) – The prediction.</p></li>
+<li><p><strong>y</strong> – The corresponding time array for the target season.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array_like</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>r, p. Returns the Pearson correlation coefficent (r) and the    correspondarray of p-value. Both have length 12 (values for each season).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.learn.evaluation.skillMeasures.seasonal_nll">
+<code class="sig-prename descclassname">ninolearn.learn.evaluation.skillMeasures.</code><code class="sig-name descname">seasonal_nll</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">pred_mean</em>, <em class="sig-param">pred_std</em>, <em class="sig-param">time</em>, <em class="sig-param">evaluate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/evaluation/skillMeasures.html#seasonal_nll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.evaluation.skillMeasures.seasonal_nll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Negative log-likelihood (NLL) for each season.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>array_like</em>) – The true observation.</p></li>
+<li><p><strong>pred</strong> (<em>array_like</em>) – The prediction.</p></li>
+<li><p><strong>y</strong> – The corresponding time array for the target season.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array_like</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns the NLL for each season. Array has length 12    (value for each season).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ninolearn.learn.evaluation.skillMeasures.seasonal_srmse">
+<code class="sig-prename descclassname">ninolearn.learn.evaluation.skillMeasures.</code><code class="sig-name descname">seasonal_srmse</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">pred</em>, <em class="sig-param">time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/evaluation/skillMeasures.html#seasonal_srmse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.evaluation.skillMeasures.seasonal_srmse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standardized RMSE (RMSE) for each season. Standardized means in this case    that the RMSE is divided by the standard deviation of the correpsonding    season.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>array_like</em>) – The true observation.</p></li>
+<li><p><strong>pred</strong> (<em>array_like</em>) – The prediction.</p></li>
+<li><p><strong>y</strong> – The corresponding time array for the target season.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array_like</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns the SRMSE for each season. Array has length 12 (value for    each season).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="models.html" class="btn btn-neutral float-left" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Paul Petersik
+      <span class="lastupdated">
+        Last updated on August 18, 2019.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
