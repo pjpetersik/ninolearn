@@ -11,7 +11,7 @@ from datetime import datetime
 import xarray as xr
 
 from ninolearn.IO import read_raw
-from ninolearn.pathes import rawdir, processeddir
+from ninolearn.pathes import processeddir
 from ninolearn.IO.read_processed import data_reader
 
 

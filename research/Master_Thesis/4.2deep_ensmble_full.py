@@ -18,12 +18,12 @@ K.clear_session()
 # Deep ensemble
 # =============================================================================
 decades = [60, 70, 80, 90, 100, 110]
-decades = [80]
-for lead_time in [6, 0]:
+
+for lead_time in [0, 3, 6, 9, 12, 15]:
     X, y, timey, yp = pipeline(lead_time, return_persistance=True)
     print_header(f'Lead time: {lead_time} month')
+
     for decade in decades:
-        K.clear_session()
         small_print_header(f'Test period: {1902+decade}-01-01 till {1911+decade}-12-01')
 
         # jump loop iteration if already trained

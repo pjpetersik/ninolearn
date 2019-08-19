@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from ninolearn.IO.read_processed import data_reader
 from ninolearn.plot.evaluation  import plot_correlation
 from ninolearn.plot.prediction import plot_prediction
-from ninolearn.learn.evaluation import rmse
+from ninolearn.learn.evaluation.skillMeasures import rmse
 from ninolearn.learn.models.dem import DEM
 from ninolearn.utils import print_header, include_time_lag, basin_means
 from ninolearn.pathes import modeldir
@@ -88,9 +88,7 @@ futuretime = pd.date_range(start='2019-01-01',
                                         end=pd.to_datetime('2019-01-01')+pd.tseries.offsets.MonthEnd(lead_time+shift),
                                         freq='MS')
 
-test_indeces = (timey>='2002-01-01') & (timey<='2017-12-01')
-#test_indeces = (timey>='2012-01-01') & (timey<='2018-12-01')
-#test_indeces = (timey>='1992-01-01') & (timey<='2001-12-01')
+test_indeces = (timey>='2012-01-01') & (timey<='2017-12-01')
 
 train_indeces = np.invert(test_indeces)
 
@@ -102,18 +100,15 @@ testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces
 # =============================================================================
 model = DEM()
 
-#model.set_parameters(layers=1, dropout=0.2, noise=0.4, l1_hidden=0.003,
-#            l2_hidden=0.15, l1_mu=0.007, l2_mu=0.19, l1_sigma=0., l2_sigma=0.03,
-#            lr=0.005, batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
-#            patience=30, verbose=0, std=True)
+model.set_parameters(layers=1, neurons=16, dropout=[0.0,0.5],
+                     noise_in=[0.0,0.5], noise_mu=0.0, noise_sigma=0.0, noise_alpha=0.,
+                     l1_hidden=[0, 0.2], l2_hidden=[0.,0.2],
+                     l1_mu=0., l2_mu=0.,
+                     l1_sigma=0, l2_sigma=0.,
+                     l1_alpha=0., l2_alpha=0.,
+                     lr=[0.0001, 0.01], batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
+                     patience=30, verbose=0, pdf='skewed')
 
-model.set_parameters(layers=1, dropout=[0.1,0.5], noise_in=[0.1,0.5], noise_sigma=[0.1,0.5], noise_mu=[0.1, 0.5], l1_hidden=[0, 0.2],
-            l2_hidden=[0.,0.2], l1_mu=[0., 0.2], l2_mu=[0.,0.2], l1_sigma=[0.,0.2], l2_sigma=[0.,0.2],
-            lr=[0.0001, 0.01], batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
-            patience=30, verbose=0, std=True)
-
-
-#model.get_pretrained_weights(location=modeldir, dir_name=f'pre_ensemble_lead{lead_time}')
 
 model.fit_RandomizedSearch(trainX, trainy, n_iter=100)
 
@@ -123,8 +118,10 @@ pred_mean, pred_std = model.predict(testX)
 loss = model.evaluate(testy, pred_mean, pred_std)
 print_header(f"Loss: {loss}")
 
-if model.std:
+if model.pdf == "normal":
     ens_dir=f'ensemble_lead{lead_time}'
+elif model.pdf == "skewed":
+    ens_dir=f'ensemble_skew_lead{lead_time}'
 else:
     ens_dir=f'simple_ensemble_lead{lead_time}'
 
@@ -208,7 +205,6 @@ std_pred.plot()
 
 # plot explained variance
 plot_correlation(testy, pred_mean, testtimey - pd.tseries.offsets.MonthBegin(1), title="")
-
 
 # Error distribution
 plt.subplots()

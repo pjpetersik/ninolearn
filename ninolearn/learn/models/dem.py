@@ -12,7 +12,7 @@ from os.path import join, exists
 from os import mkdir, listdir, getcwd
 from shutil import rmtree
 
-from ninolearn.learn.losses import nll_gaussian
+from ninolearn.learn.losses import nll_gaussian, nll_skewed_gaussian
 from ninolearn.learn.evaluation.skillMeasures import rmse
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.exceptions import MissingArgumentError
@@ -29,11 +29,18 @@ class DEM(object):
     the hidden layer. It is trained using the MSE or negative-log-likelihood of
     a gaussian distribution, respectively.
     """
+    def __del__(self):
+        K.clear_session()
+
+
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
-                       noise_mu=0.1, noise_sigma=0.1, l1_hidden=0.1, l2_hidden=0.1,
-                       l1_mu=0.0, l2_mu=0.1, l1_sigma=0.1, l2_sigma=0.1,
+                       noise_mu=0.1, noise_sigma=0.1, noise_alpha=0.1,
+                       l1_hidden=0.1, l2_hidden=0.1,
+                       l1_mu=0.0, l2_mu=0.1,
+                       l1_sigma=0.1, l2_sigma=0.1,
+                       l1_alpha=0.1, l2_alpha=0.1,
                        batch_size=10, n_segments=5, n_members_segment=1,
-                       lr=0.001, patience = 10, epochs=300, verbose=0, std=True):
+                       lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal'):
         """
         Set the hyperparameters and the settings for the training of the DEM.
 
@@ -96,10 +103,11 @@ class DEM(object):
         # hyperparameters
         self.hyperparameters = {'layers': layers, 'neurons': neurons,
                 'dropout': dropout, 'noise_in': noise_in, 'noise_mu': noise_mu,
-                'noise_sigma': noise_sigma,
+                'noise_sigma': noise_sigma, 'noise_alpha': noise_alpha,
                 'l1_hidden': l1_hidden, 'l2_hidden': l2_hidden,
                 'l1_mu': l1_mu, 'l2_mu': l2_mu,
                 'l1_sigma': l1_sigma, 'l2_sigma': l2_sigma,
+                'l1_alpha': l1_alpha, 'l2_alpha': l2_alpha,
                 'lr': lr, 'batch_size': batch_size}
 
         # hyperparameters for randomized search
@@ -123,13 +131,18 @@ class DEM(object):
         self.verbose = verbose
 
         # model choice
-        self.std = std
+        self.pdf = pdf
 
-        if self.std:
+        if self.pdf=="normal":
             self.loss = nll_gaussian
             self.loss_name = 'nll_gaussian'
 
-        else:
+
+        elif self.pdf=="skewed":
+            self.loss = nll_skewed_gaussian
+            self.loss_name = 'nll_skewed_gaussian'
+
+        elif self.pdf is None:
             self.loss = 'mse'
             self.loss_name = 'mean_squared_error'
 
@@ -152,7 +165,7 @@ class DEM(object):
         """
         # initialize optimizer and early stopping
         self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=0,
+        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=1,
                    mode='min', restore_best_weights=True)
 
         inputs = Input(shape=(n_features,))
@@ -171,7 +184,6 @@ class DEM(object):
                         name=f'hidden_dropout_{i}')(h)
 
 
-
         mu = Dense(1, activation='linear',
                    kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'],
                                                          self.hyperparameters['l2_mu']),
@@ -183,7 +195,7 @@ class DEM(object):
                            name='noise_mu')(mu)
 
 
-        if self.std:
+        if self.pdf=='normal' or self.pdf=='skewed':
             sigma = Dense(1, activation='softplus',
                           kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_sigma'],
                                                                 self.hyperparameters['l2_sigma']),
@@ -193,10 +205,23 @@ class DEM(object):
             sigma = GaussianNoise(self.hyperparameters['noise_sigma'],
                                   name='noise_sigma')(sigma)
 
-            outputs = concatenate([mu, sigma])
+        if self.pdf=='skewed':
+            alpha = Dense(1, activation='linear',
+                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_alpha'],
+                                                             self.hyperparameters['l2_alpha']),
+                       kernel_initializer='random_uniform',
+                       bias_initializer='zeros',
+                       name='alpha_output')(h)
 
-        else:
+            alpha = GaussianNoise(self.hyperparameters['noise_alpha'],
+                           name='noise_alpha')(alpha)
+
+        if self.pdf is None:
             outputs = mu
+        elif self.pdf=='normal':
+            outputs = concatenate([mu, sigma])
+        elif self.pdf=='skewed':
+            outputs = concatenate([mu, sigma, alpha])
 
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -324,9 +349,13 @@ class DEM(object):
         :param X: The features
 
         """
-        if self.std:
+        if self.pdf=='normal':
             pred_ens = np.zeros((X.shape[0], 2, self.n_members))
-        else:
+
+        elif self.pdf=='skewed':
+            pred_ens = np.zeros((X.shape[0], 3, self.n_members))
+
+        elif self.pdf is None:
             pred_ens = np.zeros((X.shape[0], 1, self.n_members))
 
         for i in range(self.n_members):
@@ -339,11 +368,15 @@ class DEM(object):
         returns the ensemble mixture results
         """
         mix_mean = pred[:,0,:].mean(axis=1)
-        if self.std:
+        if self.pdf=='normal':
             mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
             mix_std = np.sqrt(mix_var)
 
-        else:
+        elif self.pdf=='skewed':
+            mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
+            mix_std = np.sqrt(mix_var)
+
+        elif self.pdf is None:
             mix_std = None
 
         return mix_mean, mix_std
@@ -412,7 +445,12 @@ class DEM(object):
             self.ensemble.append(load_model(file_path))
 
         output_neurons = self.ensemble[0].get_output_shape_at(0)[1]
+
         if output_neurons==2:
-            self.std = True
+            self.pdf = 'normal'
+
+        elif output_neurons==3:
+            self.pdf = 'skewed'
+
         else:
-            self.std = False
+            self.pdf = None
