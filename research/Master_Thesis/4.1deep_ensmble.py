@@ -107,8 +107,7 @@ model.set_parameters(layers=1, neurons=16, dropout=[0.0,0.5],
                      l1_sigma=0, l2_sigma=0.,
                      l1_alpha=0., l2_alpha=0.,
                      lr=[0.0001, 0.01], batch_size=100, epochs=500, n_segments=5, n_members_segment=1,
-                     patience=30, verbose=0, pdf='skewed')
-
+                     patience=30, verbose=0, pdf='normal')
 
 model.fit_RandomizedSearch(trainX, trainy, n_iter=100)
 

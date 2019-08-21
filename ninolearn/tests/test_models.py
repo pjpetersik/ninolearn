@@ -2,13 +2,17 @@ from ninolearn.learn.models.dem import DEM
 from ninolearn.learn.models.encoderDecoder import EncoderDecoder
 from ninolearn.tests.checks import check_core_methods, check_regularizer
 import numpy as np
-import pytest
+
 
 # =============================================================================
 # Deep Ensemble
 # =============================================================================
 def test_DEM_Methods():
     check_core_methods(DEM)
+
+def test_DEM_variabels():
+    assert DEM.name == 'dem'
+    assert DEM.long_name == 'Deep Ensemble Model'
 
 def test_DEM_set_paramters():
     """

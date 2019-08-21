@@ -29,9 +29,9 @@ class DEM(object):
     the hidden layer. It is trained using the MSE or negative-log-likelihood of
     a gaussian distribution, respectively.
     """
+
     def __del__(self):
         K.clear_session()
-
 
     def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
                        noise_mu=0.1, noise_sigma=0.1, noise_alpha=0.1,
@@ -40,7 +40,8 @@ class DEM(object):
                        l1_sigma=0.1, l2_sigma=0.1,
                        l1_alpha=0.1, l2_alpha=0.1,
                        batch_size=10, n_segments=5, n_members_segment=1,
-                       lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal'):
+                       lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal',
+                       name='dem'):
         """
         Set the hyperparameters and the settings for the training of the DEM.
 
@@ -94,10 +95,12 @@ class DEM(object):
         :param verbose: Option to print scores during training to the screen. \
         Here, 0 means silent.
 
-        :type std: boolean
-        :param std: If True then a deep ensembles with two output neurons\
-        (mean and standard deviation) is used. Otherwise just one output \
-        neuron is used for the regression task.
+        :type pdf: str
+        :param pdf: The distribution which shell be predicted. Either 'simple'
+        (just one value), 'normal' (Gaussian) or 'skewed' (skewed Gaussian).
+
+        :type name: str
+        :param name: The name of the model.
 
         """
         # hyperparameters
@@ -132,19 +135,31 @@ class DEM(object):
 
         # model choice
         self.pdf = pdf
+        self.get_model_desc(pdf)
+        self.name = name
 
-        if self.pdf=="normal":
+    def get_model_desc(self, pdf):
+        """
+        Assignes sum weights description to the model depending on which
+        predicted distribution is selected.
+        """
+        if pdf=="normal":
             self.loss = nll_gaussian
             self.loss_name = 'nll_gaussian'
+            self.n_outputs = 2
+            self.output_names =  ['mean', 'std']
 
-
-        elif self.pdf=="skewed":
+        elif pdf=="skewed":
             self.loss = nll_skewed_gaussian
             self.loss_name = 'nll_skewed_gaussian'
+            self.n_outputs = 3
+            self.output_names =  ['location', 'scale', 'shape']
 
-        elif self.pdf is None:
+        elif pdf is None:
             self.loss = 'mse'
             self.loss_name = 'mean_squared_error'
+            self.n_outputs = 1
+            self.output_names =  ['prediction']
 
     def get_pretrained_weights(self, location=None,  dir_name='pre_ensemble'):
         """
@@ -368,18 +383,22 @@ class DEM(object):
         returns the ensemble mixture results
         """
         mix_mean = pred[:,0,:].mean(axis=1)
+
         if self.pdf=='normal':
             mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
             mix_std = np.sqrt(mix_var)
+            return [mix_mean, mix_std]
 
         elif self.pdf=='skewed':
             mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
             mix_std = np.sqrt(mix_var)
+            print("Mixture prediction for skewed distribution is not ready!")
+            return mix_mean, mix_std, None
 
         elif self.pdf is None:
-            mix_std = None
+            return mix_mean
 
-        return mix_mean, mix_std
+
 
     def evaluate(self, ytrue, mean_pred, std_pred=False):
         """
@@ -429,12 +448,13 @@ class DEM(object):
             path_h5 = join(path, f"member{i}.h5")
             self.ensemble[i].save_weights(path_h5)
 
-    def load(self, location=None,  dir_name='ensemble'):
+    def load(self, location=None,  dir_name='dem'):
         """
         Load the ensemble
         """
         if location is None:
             location = getcwd()
+
         path = join(location, dir_name)
         files = listdir(path)
         self.n_members = len(files)
@@ -451,6 +471,7 @@ class DEM(object):
 
         elif output_neurons==3:
             self.pdf = 'skewed'
-
         else:
             self.pdf = None
+
+        self.get_model_desc(self.pdf)
