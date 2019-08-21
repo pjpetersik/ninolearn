@@ -100,6 +100,16 @@ class data_reader(object):
         self._check_dates(data, f"{variable} - {statistic}" )
         return data.loc[self.startdate:self.enddate]
 
+    def read_forecasts(self, model_name, lead):
+        """
+        Read forecasts from a NinoLearn model.
+        """
+
+        ds = xr.open_dataset(join(processeddir, f'{model_name}_forecasts.nc'))
+        data = ds.loc[{'target_season': slice(self.startdate, self.enddate),
+                       'lead': lead}]
+        return data
+
     def read_other_forecasts(self, model, lead):
         """
         Read forecasts from other models.

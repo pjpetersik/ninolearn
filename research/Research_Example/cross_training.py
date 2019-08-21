@@ -49,7 +49,7 @@ def pipeline(lead_time,  return_persistance=False):
 
 
     # time lag
-    time_lag = 12
+    time_lag = 6
 
     # shift such that lead time corresponds to the definition of lead time
     shift = 3

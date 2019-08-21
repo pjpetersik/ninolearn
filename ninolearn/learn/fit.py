@@ -1,3 +1,6 @@
+"""
+This module aims to standardize the training and evaluation procedure.
+"""
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -6,8 +9,20 @@ from os.path import join
 
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
+from ninolearn.IO.read_processed import data_reader
+from ninolearn.learn.evaluation.skillMeasures import mean_srmse
 
+from scipy.stats import pearsonr
+
+
+# evaluation decades
 decades = [1962, 1972, 1982, 1992, 2002, 2012]
+n_decades = len(decades)
+
+# lead times for the evaluation
+lead_times = [0, 3, 6, 9, 12, 15]
+n_lead = len(lead_times)
+
 
 def cross_training(model, pipeline, n_iter, **kwargs):
     """
@@ -47,7 +62,6 @@ def cross_training(model, pipeline, n_iter, **kwargs):
 
             del m
 
-
 def cross_hindcast(model, pipeline, model_name):
     """
     Generate a hindcast from 1962 till today using the models which were
@@ -59,13 +73,10 @@ def cross_hindcast(model, pipeline, model_name):
     .cross_training().
     """
 
-    lead_time_arr = np.array([0, 3, 6, 9])
-    n_lead = len(lead_time_arr)
-
     first_lead_loop = True
 
     for i in range(n_lead):
-        lead_time = lead_time_arr[i]
+        lead_time = lead_times[i]
         print_header(f'Lead time: {lead_time} months')
 
         X, y, timey, y_persistance = pipeline(lead_time, return_persistance=True)
@@ -101,6 +112,13 @@ def cross_hindcast(model, pipeline, model_name):
             timeytrue = timeytrue.append(testtimey)
             del m
 
+        if timeytrue[0]!=pd.to_datetime('1962-01-01'):
+            expected_first_date = '1962-01-01'
+            got_first_date = timeytrue[0].isoformat()[:10]
+
+            raise Exception(f"The first predicted date for lead time {lead_time} \
+                            is {got_first_date} but expected {expected_first_date}")
+
         # allocate arrays and variables for which the full length of the time
         # series must be known
         if first_lead_loop:
@@ -116,8 +134,74 @@ def cross_hindcast(model, pipeline, model_name):
         save_dict[output_names[i]] = (['target_season', 'lead'],  pred_save[i,:,:])
 
     ds = xr.Dataset(save_dict, coords={'target_season': timeytrue,
-                                       'lead': lead_time_arr} )
+                                       'lead': lead_times} )
     ds.to_netcdf(join(processeddir, f'{model_name}_forecasts.nc'))
 
-def cross_evaluation(model):
+
+def evaluation_correlation(model_name, variable_name = 'mean'):
+    """
+    Evaluate the model using the correlation skill for the full time series.
+
+    :type model_name: str
+    :param model_name: The name of the model.
+
+    :type variable_name: str
+    :param variable_name: The name of the variable which shell be evaluated\
+    against the ONI prediction.
+    """
+    reader = data_reader(startdate='1962-01', enddate='2017-12')
+
+    # scores for the full timeseries
+    r = np.zeros(n_lead)
+    p = np.zeros(n_lead)
+
+    for i in range(n_lead):
+        lead_time = lead_times[i]
+        print_header(f'Lead time: {lead_time} months')
+
+        pred_all = reader.read_forecasts(model_name, lead_time)
+        pred = pred_all[variable_name]
+        obs = reader.read_csv('oni')
+
+        # calculate all seasons scores
+        r[i], p[i] = pearsonr(obs, pred)
+    return r, p
+
+def evaluation_srmse(model_name, variable_name = 'mean'):
+    """
+    Evaluate the model using the standardized root-mean-squarred error (SRMSE)
+    for the full time series. Standardized means that the the the RMSE of each
+    season is divided by the corresponding standard deviation of the ONI in
+    that season (standard deviation has a seasonal cycle). Then, these
+    seasonal SRMSE averaged to get the SRMSE of the full time series..
+
+    :type model_name: str
+    :param model_name: The name of the model.
+
+    :type variable_name: str
+    :param variable_name: The name of the variable which shell be evaluated\
+    against the ONI prediction.
+    """
+    reader = data_reader(startdate='1962-01', enddate='2017-12')
+
+    # scores for the full timeseries
+    srmse = np.zeros(n_lead)
+
+    for i in range(n_lead):
+        lead_time = lead_times[i]
+        print_header(f'Lead time: {lead_time} months')
+
+        pred_all = reader.read_forecasts(model_name, lead_time)
+        pred = pred_all[variable_name]
+        obs = reader.read_csv('oni')
+
+        srmse[i] = mean_srmse(obs, pred, obs.index - pd.tseries.offsets.MonthBegin(1))
+
+    return srmse
+
+
+def evaluation_seasonal(model, model_name, variable_name = 'mean'):
+    pass
+
+def evaluation_decadal(model, model_name, variable_name = 'mean'):
     pass
