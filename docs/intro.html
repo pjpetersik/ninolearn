@@ -296,7 +296,7 @@ that is specified in <code class="xref py py-mod docutils literal notranslate"><
 </div>
 <div class="section" id="data-preparation">
 <h3>Data preparation<a class="headerlink" href="#data-preparation" title="Permalink to this headline">¶</a></h3>
-<p>Furthermore, the module <a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.prepare" title="ninolearn.postprocess.prepare"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.prepare</span></code></a> provides the user
+<p>Furthermore, the module <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.prepare</span></code> provides the user
 with methods to prepare the data such that all postprocessed data sets follow
 the same conventions regarding i.e. the time axis format.</p>
 <p>By simply executing</p>
@@ -314,7 +314,7 @@ saved into the postprocessed data direcotory (<em>postdir</em>) that is specifie
 <h3>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
 <p>Some more postprocessing methods and classes are available in modules in the
 sub-package <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess</span></code>.</p>
-<p>Computing anomalies (<a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.anomaly" title="ninolearn.postprocess.anomaly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.anomaly</span></code></a>) and regriding data to
+<p>Computing anomalies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.anomaly</span></code>) and regriding data to
 a common grid (currently a 2.5°x2.5° grid, <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.regrid</span></code>)
 is as easy as in the following code snippet for the SST data set from the
 ERSSTv5:</p>
@@ -333,15 +333,15 @@ ERSSTv5:</p>
 <span class="n">postprocess</span><span class="p">(</span><span class="n">sst_ERSSTv5_regrided</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
-<p>The method <a class="reference internal" href="postprocess.html#ninolearn.postprocess.anomaly.postprocess" title="ninolearn.postprocess.anomaly.postprocess"><code class="xref py py-func docutils literal notranslate"><span class="pre">ninolearn.postprocess.anomaly.postprocess()</span></code></a> saves the initial
+<p>The method <code class="xref py py-func docutils literal notranslate"><span class="pre">ninolearn.postprocess.anomaly.postprocess()</span></code> saves the initial
 raw data file to the postprocessed data directory and renames it following a
 naming convention that makes it easy to access later. Furthermore, seasonal
 anomalies based on the reference period 1981-2010 are computed and the anomlies
 are as well saved to the postprocessed data directory following the naming
 convention.</p>
 <p>In addition, more advanced postprocessing methids such as principal
-component analysis (<a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.pca" title="ninolearn.postprocess.pca"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.pca</span></code></a>) and (evolving) complex networks
-(<a class="reference internal" href="postprocess.html#module-ninolearn.postprocess.network" title="ninolearn.postprocess.network"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.network</span></code></a>) are provided to facilitate the use of
+component analysis (<code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.pca</span></code>) and (evolving) complex networks
+(<code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.postprocess.network</span></code>) are provided to facilitate the use of
 these methods with the data set of interest.</p>
 </div>
 <div class="section" id="read-data">
@@ -356,7 +356,7 @@ for the ONI as follows:</p>
 <span class="n">oni_raw</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">oni</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>For the postprocessed data, a the <a class="reference internal" href="io.html#ninolearn.IO.read_post.data_reader" title="ninolearn.IO.read_post.data_reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.IO.read_post.data_reader</span></code></a>
+<p>For the postprocessed data, a the <code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.IO.read_post.data_reader</span></code>
 makes it easy to access the postprocessed data in a dynamic way, i.e. selecting
 specific time windows and areas from the desired data set. For the ONI and the
 SST anomaly (SSTA) form the ERSSTv5 this looks as follows:</p>
@@ -384,8 +384,8 @@ December 2017) and the SSTA for the specified regions (boundaries in degrees Eas
 <h3>Statistical/Machine Learning models<a class="headerlink" href="#statistical-machine-learning-models" title="Permalink to this headline">¶</a></h3>
 <p>Finally, some models that were developed during the Master Thesis of
 Petersik (2019) are available in <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models</span></code>. In particular
-a Deep Ensemble (<a class="reference internal" href="learn.html#module-ninolearn.learn.models.dem" title="ninolearn.learn.models.dem"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.dem</span></code></a>) and an Encoder-Decoder
-(<a class="reference internal" href="learn.html#module-ninolearn.learn.models.encoderDecoder" title="ninolearn.learn.models.encoderDecoder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.encoderDecoder</span></code></a>) model is available. Furthermore,
+a Deep Ensemble (<a class="reference internal" href="models.html#module-ninolearn.learn.models.dem" title="ninolearn.learn.models.dem"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.dem</span></code></a>) and an Encoder-Decoder
+(<code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.encoderDecoder</span></code>) model is available. Furthermore,
 some evaluation methods for seasonal evaluation of the model are available</p>
 </div>
 </div>
@@ -425,7 +425,7 @@ Earth Syst. Dynam., 9, 969–983.</p>
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on August 18, 2019.
+        Last updated on September 02, 2019.
       </span>
 
     </p>

@@ -8,19 +8,19 @@ from ninolearn.learn.evaluation import evaluation_srmse, evaluation_decadal_srms
 from pipeline import pipeline
 
 # training
-cross_training(DEM, pipeline, 1,
-               layers=1, dropout=[0.1, 0.5], noise_in=[0.1,0.5], noise_sigma=[0.1,0.5],
-               noise_mu=[0.1,0.5], l1_hidden=[0.0, 0.2], l2_hidden=[0, 0.2],
-               l1_mu=[0.0, 0.2], l2_mu=[0.0, 0.2], l1_sigma=[0.0, 0.2],
-               l2_sigma=[0.0, 0.2], lr=[0.0001,0.01], batch_size=100,
-               epochs=500, n_segments=5,
-               n_members_segment=1, patience=30, verbose=0,
-               pdf="normal", name="dem")
+#cross_training(DEM, pipeline, 1,
+#               layers=1, dropout=[0.1, 0.5], noise_in=[0.1,0.5], noise_sigma=[0.1,0.5],
+#               noise_mu=[0.1,0.5], l1_hidden=[0.0, 0.2], l2_hidden=[0, 0.2],
+#               l1_mu=[0.0, 0.2], l2_mu=[0.0, 0.2], l1_sigma=[0.0, 0.2],
+#               l2_sigma=[0.0, 0.2], lr=[0.0001,0.01], batch_size=100,
+#               epochs=500, n_segments=5,
+#               n_members_segment=1, patience=30, verbose=0,
+#               pdf="normal", name="dem")
 
 # make the hindcast that is used for the evaluation
 cross_hindcast(DEM, pipeline, 'dem')
 
-# evaluate the model onto the full time series
+## evaluate the model onto the full time series
 r, p  = evaluation_correlation('dem')
 srmse = evaluation_srmse('dem')
 

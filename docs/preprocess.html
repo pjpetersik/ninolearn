@@ -97,6 +97,8 @@
 <li class="toctree-l2"><a class="reference internal" href="io.html">Input/Output</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocess</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.prepare">Data preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.regrid">Regrid data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.anomaly">Compute anomalies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.network">Evolving complex networks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ninolearn.preprocess.pca">Principal Component Analysis</a></li>
 </ul>
@@ -280,7 +282,24 @@ when predictions are made later with this data)</p>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-ninolearn.preprocess.anomaly"></span><p>This module contains a bunch of mehtods to compute seasonal anomalies.</p>
+</div>
+<div class="section" id="module-ninolearn.preprocess.regrid">
+<span id="regrid-data"></span><h2>Regrid data<a class="headerlink" href="#module-ninolearn.preprocess.regrid" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ninolearn.preprocess.regrid.to2_5x2_5">
+<code class="sig-prename descclassname">ninolearn.preprocess.regrid.</code><code class="sig-name descname">to2_5x2_5</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/regrid.html#to2_5x2_5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.regrid.to2_5x2_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regrids data the 2.5x2.5 from the NCEP reanalysis data set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – An xarray dataArray or DataSet with with dimensions named    ‘lat’ and ‘lon’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ninolearn.preprocess.anomaly">
+<span id="compute-anomalies"></span><h2>Compute anomalies<a class="headerlink" href="#module-ninolearn.preprocess.anomaly" title="Permalink to this headline">¶</a></h2>
+<p>This module contains a bunch of mehtods to compute seasonal anomalies.</p>
 <p>Currently the reference period is 1981-2010.</p>
 <dl class="function">
 <dt id="ninolearn.preprocess.anomaly.computeAnomaly">
@@ -336,17 +355,6 @@ when predictions are made later with this data)</p>
 <dt id="ninolearn.preprocess.anomaly.toProcessedDir">
 <code class="sig-prename descclassname">ninolearn.preprocess.anomaly.</code><code class="sig-name descname">toProcessedDir</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/anomaly.html#toProcessedDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.anomaly.toProcessedDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the basic data to the processeddir.</p>
-</dd></dl>
-
-<span class="target" id="module-ninolearn.preprocess.regrid"></span><dl class="function">
-<dt id="ninolearn.preprocess.regrid.to2_5x2_5">
-<code class="sig-prename descclassname">ninolearn.preprocess.regrid.</code><code class="sig-name descname">to2_5x2_5</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/preprocess/regrid.html#to2_5x2_5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.preprocess.regrid.to2_5x2_5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regrids data the 2.5x2.5 from the NCEP reanalysis data set.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – An xarray dataArray or DataSet with with dimensions named    ‘lat’ and ‘lon’.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -581,7 +589,7 @@ network from the previous time step.</p>
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on August 18, 2019.
+        Last updated on September 02, 2019.
       </span>
 
     </p>

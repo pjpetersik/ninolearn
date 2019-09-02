@@ -2,8 +2,11 @@
 Evaluation
 ##########
 
+.. automodule:: ninolearn.learn.evaluation
+    :members:
+
 **************
 Skill measures
 **************
-.. automodule:: ninolearn.learn.evaluation.skillMeasures
+.. automodule:: ninolearn.learn.skillMeasures
     :members:

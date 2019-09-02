@@ -8,35 +8,35 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ninolearn.learn.evaluation.skillMeasure &mdash; NinoLearn 0.1 documentation</title>
+  <title>ninolearn.learn.skillMeasures &mdash; NinoLearn 0.1 documentation</title>
   
 
   
   
-    <link rel="shortcut icon" href="../../../../_static/logo_favicon.png"/>
+    <link rel="shortcut icon" href="../../../_static/logo_favicon.png"/>
   
   
   
 
   
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
     
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
 
   
-  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" /> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,12 +50,12 @@
           
 
           
-            <a href="../../../../index.html">
+            <a href="../../../index.html">
           
 
           
             
-            <img src="../../../../_static/logo_small.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -70,7 +70,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -88,11 +88,11 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../package.html">NinoLearn package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../forecasts.html">Some forecasts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../package.html">NinoLearn package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../forecasts.html">Some forecasts</a></li>
 </ul>
 
             
@@ -107,7 +107,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">NinoLearn</a>
+          <a href="../../../index.html">NinoLearn</a>
         
       </nav>
 
@@ -136,13 +136,11 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-          <li><a href="../evaluation.html">ninolearn.learn.evaluation</a> &raquo;</li>
-        
-      <li>ninolearn.learn.evaluation.skillMeasure</li>
+      <li>ninolearn.learn.skillMeasures</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -157,7 +155,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for ninolearn.learn.evaluation.skillMeasure</h1><div class="highlight"><pre>
+  <h1>Source code for ninolearn.learn.skillMeasures</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_squared_error</span>
@@ -165,7 +163,7 @@
 <span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">scale</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span>
 
-<div class="viewcode-block" id="seasonal_correlation"><a class="viewcode-back" href="../../../../evaluation.html#ninolearn.learn.evaluation.skillMeasure.seasonal_correlation">[docs]</a><span class="k">def</span> <span class="nf">seasonal_correlation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<div class="viewcode-block" id="seasonal_correlation"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.seasonal_correlation">[docs]</a><span class="k">def</span> <span class="nf">seasonal_correlation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pearson correlation coefficient for each season. This function uses the\</span>
 <span class="sd">    scipy.stats.pearsonr function.</span>
@@ -192,7 +190,7 @@
         <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">y_sel</span><span class="p">,</span> <span class="n">pred_sel</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">p</span></div>
 
-<div class="viewcode-block" id="rmse"><a class="viewcode-back" href="../../../../evaluation.html#ninolearn.learn.evaluation.skillMeasure.rmse">[docs]</a><span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">):</span>
+<div class="viewcode-block" id="rmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.rmse">[docs]</a><span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The root-mean-squarred error (RMSE) for a given observation and prediction.</span>
 
@@ -207,7 +205,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="seasonal_srmse"><a class="viewcode-back" href="../../../../evaluation.html#ninolearn.learn.evaluation.skillMeasure.seasonal_srmse">[docs]</a><span class="k">def</span> <span class="nf">seasonal_srmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<div class="viewcode-block" id="seasonal_srmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.seasonal_srmse">[docs]</a><span class="k">def</span> <span class="nf">seasonal_srmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Standardized RMSE (RMSE) for each season. Standardized means in this case\</span>
 <span class="sd">    that the RMSE is divided by the standard deviation of the correpsonding\</span>
@@ -235,7 +233,7 @@
         <span class="n">SRMSE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_sel</span><span class="p">,</span> <span class="n">pred_sel</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y_sel</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">SRMSE</span></div>
 
-<div class="viewcode-block" id="mean_srmse"><a class="viewcode-back" href="../../../../evaluation.html#ninolearn.learn.evaluation.skillMeasure.mean_srmse">[docs]</a><span class="k">def</span> <span class="nf">mean_srmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<div class="viewcode-block" id="mean_srmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.mean_srmse">[docs]</a><span class="k">def</span> <span class="nf">mean_srmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mean SRMSE.</span>
 
@@ -257,7 +255,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">seasonal_SRMSE</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="seasonal_nll"><a class="viewcode-back" href="../../../../evaluation.html#ninolearn.learn.evaluation.skillMeasure.seasonal_nll">[docs]</a><span class="k">def</span> <span class="nf">seasonal_nll</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">):</span>
+<div class="viewcode-block" id="seasonal_nll"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.seasonal_nll">[docs]</a><span class="k">def</span> <span class="nf">seasonal_nll</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Negative log-likelihood (NLL) for each season.</span>
 
@@ -284,7 +282,7 @@
     <span class="k">return</span> <span class="n">score</span></div>
 
 
-<div class="viewcode-block" id="inside_fraction"><a class="viewcode-back" href="../../../../evaluation.html#ninolearn.learn.evaluation.skillMeasure.inside_fraction">[docs]</a><span class="k">def</span> <span class="nf">inside_fraction</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">std_level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="inside_fraction"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.inside_fraction">[docs]</a><span class="k">def</span> <span class="nf">inside_fraction</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">std_level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the fraction of how much of the true observation is in the\</span>
 <span class="sd">    confindence interval.</span>

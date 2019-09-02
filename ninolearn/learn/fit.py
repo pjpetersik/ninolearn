@@ -11,7 +11,7 @@ from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
 
 # evaluation decades
-decades = [1962, 1972, 1982, 1992, 2002, 2012, 2017]
+decades = [1962, 1972, 1982, 1992, 2002, 2012, 2018]
 n_decades = len(decades)
 
 # lead times for the evaluation
@@ -80,15 +80,15 @@ def cross_hindcast(model, pipeline, model_name):
         timeytrue = pd.DatetimeIndex([])
 
         first_dec_loop = True
-        for decade in decades:
-            small_print_header(f'Predict: {decade}-01-01 till {decade+9}-12-01')
+        for j in range(n_decades-1):
+            small_print_header(f'Predict: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
 
             # test indices
-            test_indeces = (timey>=f'{decade}-01-01') & (timey<=f'{decade+9}-12-01')
+            test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
             testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
             m = model()
-            m.load(location=modeldir, dir_name=f'{model_name}_decade{decade}_lead{lead_time}')
+            m.load(location=modeldir, dir_name=f'{model_name}_decade{decades[j]}_lead{lead_time}')
 
             # allocate arrays and variables for which the model must be loaded
             if first_dec_loop:
@@ -128,6 +128,9 @@ def cross_hindcast(model, pipeline, model_name):
     for i in range(n_outputs):
         save_dict[output_names[i]] = (['target_season', 'lead'],  pred_save[i,:,:])
 
+    print(save_dict)
     ds = xr.Dataset(save_dict, coords={'target_season': timeytrue,
                                        'lead': lead_times} )
     ds.to_netcdf(join(processeddir, f'{model_name}_forecasts.nc'))
+    ds.close()
+

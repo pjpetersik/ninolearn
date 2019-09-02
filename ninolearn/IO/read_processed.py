@@ -106,8 +106,7 @@ class data_reader(object):
         """
 
         ds = xr.open_dataset(join(processeddir, f'{model_name}_forecasts.nc'))
-        data = ds.loc[{'target_season': slice(self.startdate, self.enddate),
-                       'lead': lead}]
+        data = ds.loc[{'target_season': slice(self.startdate, self.enddate), 'lead': lead}]
         return data
 
     def read_other_forecasts(self, model, lead):

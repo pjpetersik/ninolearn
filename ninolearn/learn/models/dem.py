@@ -96,12 +96,11 @@ class DEM(object):
         Here, 0 means silent.
 
         :type pdf: str
-        :param pdf: The distribution which shell be predicted. Either 'simple'
+        :param pdf: The distribution which shell be predicted. Either 'simple'\
         (just one value), 'normal' (Gaussian) or 'skewed' (skewed Gaussian).
 
         :type name: str
         :param name: The name of the model.
-
         """
         # hyperparameters
         self.hyperparameters = {'layers': layers, 'neurons': neurons,

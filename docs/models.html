@@ -95,7 +95,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="package.html">NinoLearn package</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
 <li class="toctree-l2"><a class="reference internal" href="io.html">Input/Output</a></li>
-<li class="toctree-l2"><a class="reference internal" href="postprocess.html">Postprocess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocess.html">Preprocess</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="learn.html">Learn</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Models</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#module-ninolearn.learn.models.dem">Deep Ensemble Model (DEM)</a></li>
@@ -231,6 +231,13 @@ a gaussian distribution, respectively.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ninolearn.learn.models.dem.DEM.get_model_desc">
+<code class="sig-name descname">get_model_desc</code><span class="sig-paren">(</span><em class="sig-param">pdf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.get_model_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.get_model_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assignes sum weights description to the model depending on which
+predicted distribution is selected.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.get_pretrained_weights">
 <code class="sig-name descname">get_pretrained_weights</code><span class="sig-paren">(</span><em class="sig-param">location=None</em>, <em class="sig-param">dir_name='pre_ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.get_pretrained_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.get_pretrained_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads weights from a pretrained model</p>
@@ -238,7 +245,7 @@ a gaussian distribution, respectively.</p>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.load">
-<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">location=None</em>, <em class="sig-param">dir_name='ensemble'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.load" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">location=None</em>, <em class="sig-param">dir_name='dem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the ensemble</p>
 </dd></dl>
 
@@ -270,7 +277,7 @@ a gaussian distribution, respectively.</p>
 
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.set_parameters">
-<code class="sig-name descname">set_parameters</code><span class="sig-paren">(</span><em class="sig-param">layers=1</em>, <em class="sig-param">neurons=16</em>, <em class="sig-param">dropout=0.2</em>, <em class="sig-param">noise_in=0.1</em>, <em class="sig-param">noise_mu=0.1</em>, <em class="sig-param">noise_sigma=0.1</em>, <em class="sig-param">l1_hidden=0.1</em>, <em class="sig-param">l2_hidden=0.1</em>, <em class="sig-param">l1_mu=0.0</em>, <em class="sig-param">l2_mu=0.1</em>, <em class="sig-param">l1_sigma=0.1</em>, <em class="sig-param">l2_sigma=0.1</em>, <em class="sig-param">batch_size=10</em>, <em class="sig-param">n_segments=5</em>, <em class="sig-param">n_members_segment=1</em>, <em class="sig-param">lr=0.001</em>, <em class="sig-param">patience=10</em>, <em class="sig-param">epochs=300</em>, <em class="sig-param">verbose=0</em>, <em class="sig-param">std=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.set_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_parameters</code><span class="sig-paren">(</span><em class="sig-param">layers=1</em>, <em class="sig-param">neurons=16</em>, <em class="sig-param">dropout=0.2</em>, <em class="sig-param">noise_in=0.1</em>, <em class="sig-param">noise_mu=0.1</em>, <em class="sig-param">noise_sigma=0.1</em>, <em class="sig-param">noise_alpha=0.1</em>, <em class="sig-param">l1_hidden=0.1</em>, <em class="sig-param">l2_hidden=0.1</em>, <em class="sig-param">l1_mu=0.0</em>, <em class="sig-param">l2_mu=0.1</em>, <em class="sig-param">l1_sigma=0.1</em>, <em class="sig-param">l2_sigma=0.1</em>, <em class="sig-param">l1_alpha=0.1</em>, <em class="sig-param">l2_alpha=0.1</em>, <em class="sig-param">batch_size=10</em>, <em class="sig-param">n_segments=5</em>, <em class="sig-param">n_members_segment=1</em>, <em class="sig-param">lr=0.001</em>, <em class="sig-param">patience=10</em>, <em class="sig-param">epochs=300</em>, <em class="sig-param">verbose=0</em>, <em class="sig-param">pdf='normal'</em>, <em class="sig-param">name='dem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.set_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the hyperparameters and the settings for the training of the DEM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -286,7 +293,8 @@ a gaussian distribution, respectively.</p>
 <li><p><strong>patience</strong> – Number of epochs to wait until training is stopped if        score was not improved.</p></li>
 <li><p><strong>epochs</strong> – The maximum numberof epochs for the training.</p></li>
 <li><p><strong>verbose</strong> – Option to print scores during training to the screen.         Here, 0 means silent.</p></li>
-<li><p><strong>std</strong> (<em>boolean</em>) – If True then a deep ensembles with two output neurons        (mean and standard deviation) is used. Otherwise just one output         neuron is used for the regression task.</p></li>
+<li><p><strong>pdf</strong> (<em>str</em>) – The distribution which shell be predicted. Either ‘simple’        (just one value), ‘normal’ (Gaussian) or ‘skewed’ (skewed Gaussian).</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the model.</p></li>
 </ul>
 </dd>
 <dt class="field-even">L1_hidden</dt>
@@ -476,7 +484,7 @@ a the method .fit_RandomizedSearch() is used.</p>
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on August 18, 2019.
+        Last updated on September 02, 2019.
       </span>
 
     </p>
