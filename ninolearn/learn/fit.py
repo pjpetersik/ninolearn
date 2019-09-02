@@ -9,14 +9,9 @@ from os.path import join
 
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
-from ninolearn.IO.read_processed import data_reader
-from ninolearn.learn.evaluation.skillMeasures import mean_srmse
-
-from scipy.stats import pearsonr
-
 
 # evaluation decades
-decades = [1962, 1972, 1982, 1992, 2002, 2012]
+decades = [1962, 1972, 1982, 1992, 2002, 2012, 2017]
 n_decades = len(decades)
 
 # lead times for the evaluation
@@ -136,72 +131,3 @@ def cross_hindcast(model, pipeline, model_name):
     ds = xr.Dataset(save_dict, coords={'target_season': timeytrue,
                                        'lead': lead_times} )
     ds.to_netcdf(join(processeddir, f'{model_name}_forecasts.nc'))
-
-
-def evaluation_correlation(model_name, variable_name = 'mean'):
-    """
-    Evaluate the model using the correlation skill for the full time series.
-
-    :type model_name: str
-    :param model_name: The name of the model.
-
-    :type variable_name: str
-    :param variable_name: The name of the variable which shell be evaluated\
-    against the ONI prediction.
-    """
-    reader = data_reader(startdate='1962-01', enddate='2017-12')
-
-    # scores for the full timeseries
-    r = np.zeros(n_lead)
-    p = np.zeros(n_lead)
-
-    for i in range(n_lead):
-        lead_time = lead_times[i]
-        print_header(f'Lead time: {lead_time} months')
-
-        pred_all = reader.read_forecasts(model_name, lead_time)
-        pred = pred_all[variable_name]
-        obs = reader.read_csv('oni')
-
-        # calculate all seasons scores
-        r[i], p[i] = pearsonr(obs, pred)
-    return r, p
-
-def evaluation_srmse(model_name, variable_name = 'mean'):
-    """
-    Evaluate the model using the standardized root-mean-squarred error (SRMSE)
-    for the full time series. Standardized means that the the the RMSE of each
-    season is divided by the corresponding standard deviation of the ONI in
-    that season (standard deviation has a seasonal cycle). Then, these
-    seasonal SRMSE averaged to get the SRMSE of the full time series..
-
-    :type model_name: str
-    :param model_name: The name of the model.
-
-    :type variable_name: str
-    :param variable_name: The name of the variable which shell be evaluated\
-    against the ONI prediction.
-    """
-    reader = data_reader(startdate='1962-01', enddate='2017-12')
-
-    # scores for the full timeseries
-    srmse = np.zeros(n_lead)
-
-    for i in range(n_lead):
-        lead_time = lead_times[i]
-        print_header(f'Lead time: {lead_time} months')
-
-        pred_all = reader.read_forecasts(model_name, lead_time)
-        pred = pred_all[variable_name]
-        obs = reader.read_csv('oni')
-
-        srmse[i] = mean_srmse(obs, pred, obs.index - pd.tseries.offsets.MonthBegin(1))
-
-    return srmse
-
-
-def evaluation_seasonal(model, model_name, variable_name = 'mean'):
-    pass
-
-def evaluation_decadal(model, model_name, variable_name = 'mean'):
-    pass
