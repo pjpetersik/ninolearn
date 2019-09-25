@@ -6,7 +6,7 @@ from ninolearn.IO.read_processed import data_reader
 
 
 
-def pipeline(lead_time,  return_persistance=False):
+def pipeline(lead_time, return_persistance=False):
     """
     Data pipeline for the processing of the data before the Deep Ensemble
     is trained.

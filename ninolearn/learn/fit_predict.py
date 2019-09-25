@@ -1,6 +1,22 @@
 """
-This module aims to standardize the training and evaluation procedure.
+This module aims to standardize the training and evaluation procedure of machine
+learning models that are used for the ENSO prediction. At the
+core of the standardized training and evaluation is the split of the entire
+time series into several decades, namely 1962-1971, 1972-1981, ...,2012-2018.
+
+At first, one of these decades is spared for later evaluation. Then, the remaining
+data set is used in the :func:`ninolearn.learn.fit_predict.cross_fit` method to train the model AND optimize the
+architecture of the model, the so-called hyperparameter optimization. This
+hyperparameters optimization is currently done using a random search algorithm.
+The described procedure is repeated until each decade was once spared for later
+evaluation.
+
+With the :func:`ninolearn.learn.fit_predict.cross_predict` method a prediction for the full time series
+of the ONI can be made. Here, for each decade, the model that was NOT trained on
+the corresponding decade is used for the prediction.
 """
+
+
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -18,22 +34,22 @@ n_decades = len(decades)
 lead_times = [0, 3, 6, 9, 12, 15]
 n_lead = len(lead_times)
 
-
-def cross_training(model, pipeline, n_iter, **kwargs):
+def cross_fit(model, pipeline, n_iter, **kwargs):
     """
-    Training the model on different training sets in which each time a period\
-    corresponing to a decade out of 1962-1971, 1972-1981, ..., 2012-last \
-    ovserved date is spared.
+    Training of the model on different training sets in which each time a\
+    period corresponing to a decade out of 1962-1971, 1972-1981, ...,\
+    2012-2018 is spared for later testing.
 
     :param model: A model that follows the guidelines how a model object\
     should be set up.
 
-    :param pipeline: a function that takes lead time as argument and returns\
+    :param pipeline: A function that takes lead time as argument and returns\
     the corresponding feature, label, time and persistance.
 
-    :param save_dir: The prefix of the save directory.
+    :type n_iter: int
+    :param n_iter: The number of iterations for the random search.
 
-    :param **kwargs: Arguments that shell be passed to the .set_parameter() \
+    :param **kwargs: Arguments that shell be passed to the .set_parameter()\
     method of the provided model.
     """
 
@@ -53,19 +69,19 @@ def cross_training(model, pipeline, n_iter, **kwargs):
             m = model()
             m.set_parameters(**kwargs)
             m.fit_RandomizedSearch(trainX, trainy, n_iter=n_iter)
-            m.save(location=modeldir, dir_name=f'{m.name}_decade{decade}_lead{lead_time}')
+            m.save(location=modeldir, dir_name=f"{m.hyperparameters['name']}_decade{decade}_lead{lead_time}")
 
             del m
 
-def cross_hindcast(model, pipeline, model_name):
+def cross_predict(model, pipeline, model_name):
     """
     Generate a hindcast from 1962 till today using the models which were
-    trained by the .cross_training() method.
+    trained by the .cross_fit() method.
 
     :param model: The considered model.
 
     :param pipeline: The data pipeline that already was used before in \
-    .cross_training().
+    .cross_fit().
     """
 
     first_lead_loop = True

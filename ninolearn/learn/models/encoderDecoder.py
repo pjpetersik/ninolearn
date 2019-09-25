@@ -141,7 +141,6 @@ class EncoderDecoder(object):
         self.es = EarlyStopping(monitor=f'val_mean_squared_error', min_delta=0.0, patience=self.patience, verbose=1,
                    mode='min', restore_best_weights=True)
 
-
         inputs = Input(shape=(n_features,))
         h = GaussianNoise(self.hyperparameters['noise'])(inputs)
 
@@ -176,7 +175,6 @@ class EncoderDecoder(object):
 
         # endocder-decoder model
         encoder_decoder = Model(inputs, decoder(encoder(inputs)), name='encoder_decoder')
-
         return encoder_decoder, encoder, decoder
 
 
@@ -352,7 +350,6 @@ class EncoderDecoder(object):
         """
         ypred, dummy = self.predict(X)
         return rmse(ytrue, ypred)
-
 
     def save(self, location='', dir_name='ed_ensemble'):
         """

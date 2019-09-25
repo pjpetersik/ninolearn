@@ -1,4 +1,98 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Sep 25 09:40:30 2019
+
+@author: paul
+"""
 import numpy as np
+
+class baseModel(object):
+    def set_parameters(self, **kwargs):
+
+        # hyperparameters
+        self.hyperparameters = kwargs
+
+        # hyperparameters for randomized search
+        self.hyperparameters_search = {}
+
+        for key in self.hyperparameters.keys():
+            if type(self.hyperparameters[key]) is list:
+                if len(self.hyperparameters[key])>0:
+                    self.hyperparameters_search[key] = self.hyperparameters[key].copy()
+
+
+    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+        # check if hyperparameters where provided in lists for randomized search
+        if len(self.hyperparameters_search) == 0:
+            raise Exception("No variable indicated for hyperparameter search!")
+
+        #iterate with randomized hyperparameters
+        best_loss = np.inf
+        for i in range(n_iter):
+            print(f"Search iteration Nr {i+1}/{n_iter}")
+
+            # random selection of hyperparameters
+            for key in self.hyperparameters_search.keys():
+                low = self.hyperparameters_search[key][0]
+                high = self.hyperparameters_search[key][1]
+
+                if type(low) is float and type(high) is float:
+                    self.hyperparameters[key] = np.random.uniform(low, high)
+
+                if type(low) is int and type(high) is int:
+                    self.hyperparameters[key] = np.random.randint(low, high+1)
+
+                if type(low) is tuple and type(high) is tuple:
+                    hyp_list = []
+                    for i in range(len(low)):
+                        hyp_list.append(np.random.randint(low[i], high[i]+1))
+                    self.hyperparameters[key] = tuple(hyp_list)
+
+            self.fit(trainX, trainy, **kwargs)
+
+            # check if validation score was enhanced
+            if self.mean_val_loss<best_loss:
+                best_loss = self.mean_val_loss
+                self.best_hyperparameters = self.hyperparameters.copy()
+
+                print("New best hyperparameters")
+                print(f"Mean loss: {best_loss}")
+                print(self.best_hyperparameters)
+
+        # refit the model with optimized hyperparameter
+        # AND to have the weights of the DE for the best hyperparameters again
+        print("Refit the model with best hyperparamters")
+
+        self.hyperparameters = self.best_hyperparameters.copy()
+        print(self.hyperparameters)
+        self.fit(trainX, trainy, **kwargs)
+
+        print(f"best loss search: {best_loss}")
+        print(f"loss refitting : {self.mean_val_loss}")
+
+
+    def fit(self):
+        raise NameError("Function 'fit' is not defined!")
+
+    def predict(self):
+        raise NameError("Function 'fit' is not defined!")
+
+    def save(self):
+        raise NameError("Function 'save' is not defined!")
+
+    def load(self):
+        raise NameError("Function 'load' is not defined!")
+
+
+
+# =============================================================================
+# =============================================================================
+# =============================================================================
+#
+# =============================================================================
+# =============================================================================
+# =============================================================================
 
 import keras.backend as K
 from keras.models import Model, save_model, load_model
@@ -21,7 +115,7 @@ import warnings
 
 import time
 
-class DEM(object):
+class DEM(baseModel):
     """
     A deep ensemble model (DEM) predicting  either mean or mean and standard
     deviation with one hidden layer having the ReLU function as activation for
@@ -31,110 +125,6 @@ class DEM(object):
 
     def __del__(self):
         K.clear_session()
-
-    def set_parameters(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
-                       noise_mu=0.1, noise_sigma=0.1, noise_alpha=0.1,
-                       l1_hidden=0.1, l2_hidden=0.1,
-                       l1_mu=0.0, l2_mu=0.1,
-                       l1_sigma=0.1, l2_sigma=0.1,
-                       l1_alpha=0.1, l2_alpha=0.1,
-                       batch_size=10, n_segments=5, n_members_segment=1,
-                       lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal',
-                       name='dem'):
-        """
-        Set the hyperparameters and the settings for the training of the DEM.
-
-        :type layers: int
-        :param layers: Number of hidden layers.
-
-        :type neurons: int
-        :param neurons: Number of neurons in a hidden layers.
-
-        :type dropout: float
-        :param dropout: Dropout rate for the hidden layer neurons.
-
-        :type noise: float
-        :param noise: Standard deviation of the gaussian noise that is added to\
-        the input
-
-        :type l1_hidden: float
-        :l1_hidden: Coefficent for the L1 penalty term for the hidden layer.
-
-        :type l2_hidden: float
-        :l2_hidden: Coefficent for the L2 penalty term for the hidden layer.
-
-        :type l1_mu: float
-        :l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.
-
-        :type l2_mu: float
-        :l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.
-
-        :type l1_sigma: float
-        :l1_sigma: Coefficent for the L1 penalty term in the\
-        standard-deviation-output neuron.
-
-        :type l2_mu: float
-        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation \
-        output neuron.
-
-        :param batch_size: Batch size for the training.
-
-        :param n_segments: Number of segments for the generation of members.
-
-        :param n_members_segment: number of members that are generated per\
-        segment.
-
-        :param lr: the learning rate during training
-
-        :param patience: Number of epochs to wait until training is stopped if\
-        score was not improved.
-
-        :param epochs: The maximum numberof epochs for the training.
-
-        :param verbose: Option to print scores during training to the screen. \
-        Here, 0 means silent.
-
-        :type pdf: str
-        :param pdf: The distribution which shell be predicted. Either 'simple'\
-        (just one value), 'normal' (Gaussian) or 'skewed' (skewed Gaussian).
-
-        :type name: str
-        :param name: The name of the model.
-        """
-        # hyperparameters
-        self.hyperparameters = {'layers': layers, 'neurons': neurons,
-                'dropout': dropout, 'noise_in': noise_in, 'noise_mu': noise_mu,
-                'noise_sigma': noise_sigma, 'noise_alpha': noise_alpha,
-                'l1_hidden': l1_hidden, 'l2_hidden': l2_hidden,
-                'l1_mu': l1_mu, 'l2_mu': l2_mu,
-                'l1_sigma': l1_sigma, 'l2_sigma': l2_sigma,
-                'l1_alpha': l1_alpha, 'l2_alpha': l2_alpha,
-                'lr': lr, 'batch_size': batch_size}
-
-        # hyperparameters for randomized search
-        self.hyperparameters_search = {}
-
-        for key in self.hyperparameters.keys():
-            if type(self.hyperparameters[key]) is list:
-                if len(self.hyperparameters[key])>0:
-                    self.hyperparameters_search[key] = self.hyperparameters[key].copy()
-
-        # traning/validation split
-        self.n_segments = n_segments
-        self.n_members_segment = n_members_segment
-
-        # derived parameters
-        self.n_members = self.n_segments * self.n_members_segment
-
-        # training settings
-        self.patience = patience
-        self.epochs = epochs
-        self.verbose = verbose
-
-        # model choice
-        self.pdf = pdf
-        self.get_model_desc(pdf)
-        self.name = name
 
     def get_model_desc(self, pdf):
         """
@@ -159,26 +149,18 @@ class DEM(object):
             self.n_outputs = 1
             self.output_names =  ['prediction']
 
-    def get_pretrained_weights(self, location=None,  dir_name='pre_ensemble'):
-        """
-        Loads weights from a pretrained model
-        """
-        if location is None:
-            location = getcwd()
-        path = join(location, dir_name)
-        file = listdir(path)[0]
-        file_path = join(path, file)
-
-        self.pretrained_weights =  file_path
-
 
     def build_model(self, n_features):
         """
         The method builds a new member of the ensemble and returns it.
         """
+        # derived parameters
+        self.hyperparameters['n_members'] = self.hyperparameters['n_segments'] * self.hyperparameters['n_members_segment']
+        self.get_model_desc(self.hyperparameters['pdf'])
+
         # initialize optimizer and early stopping
         self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.patience, verbose=1,
+        self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.hyperparameters['patience'], verbose=1,
                    mode='min', restore_best_weights=True)
 
         inputs = Input(shape=(n_features,))
@@ -208,7 +190,7 @@ class DEM(object):
                            name='noise_mu')(mu)
 
 
-        if self.pdf=='normal' or self.pdf=='skewed':
+        if self.hyperparameters['pdf']=='normal' or self.hyperparameters['pdf']=='skewed':
             sigma = Dense(1, activation='softplus',
                           kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_sigma'],
                                                                 self.hyperparameters['l2_sigma']),
@@ -218,7 +200,7 @@ class DEM(object):
             sigma = GaussianNoise(self.hyperparameters['noise_sigma'],
                                   name='noise_sigma')(sigma)
 
-        if self.pdf=='skewed':
+        if self.hyperparameters['pdf']=='skewed':
             alpha = Dense(1, activation='linear',
                        kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_alpha'],
                                                              self.hyperparameters['l2_alpha']),
@@ -229,11 +211,11 @@ class DEM(object):
             alpha = GaussianNoise(self.hyperparameters['noise_alpha'],
                            name='noise_alpha')(alpha)
 
-        if self.pdf is None:
+        if self.hyperparameters['pdf'] is None:
             outputs = mu
-        elif self.pdf=='normal':
+        elif self.hyperparameters['pdf']=='normal':
             outputs = concatenate([mu, sigma])
-        elif self.pdf=='skewed':
+        elif self.hyperparameters['pdf']=='skewed':
             outputs = concatenate([mu, sigma, alpha])
 
         model = Model(inputs=inputs, outputs=outputs)
@@ -254,19 +236,19 @@ class DEM(object):
         self.history = []
         self.val_loss = []
 
-        self.segment_len = trainX.shape[0]//self.n_segments
+        self.segment_len = trainX.shape[0]//self.hyperparameters['n_segments']
 
-        if self.n_segments==1 and (valX is not None or valy is not None):
+        if self.hyperparameters['n_segments']==1 and (valX is not None or valy is not None):
              warnings.warn("Validation and test data set are the same if n_segements is 1!")
 
         i = 0
-        while i<self.n_members_segment:
+        while i<self.hyperparameters['n_members_segment']:
             j = 0
-            while j<self.n_segments:
-                n_ens_sel = len(self.ensemble)
-                small_print_header(f"Train member Nr {n_ens_sel+1}/{self.n_members}")
-
+            while j<self.hyperparameters['n_segments']:
                 ensemble_member = self.build_model(trainX.shape[1])
+
+                n_ens_sel = len(self.ensemble)
+                small_print_header(f"Train member Nr {n_ens_sel+1}/{self.hyperparameters['n_members']}")
 
                 if use_pretrained:
                     ensemble_member.load_weights(self.pretrained_weights)
@@ -274,7 +256,7 @@ class DEM(object):
                 ensemble_member.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.loss])
 
                 # validate on the spare segment
-                if self.n_segments!=1:
+                if self.hyperparameters['n_segments']!=1:
                     if valX is not None or valy is not None:
                         warnings.warn("Validation data set will be one of the segments. The provided validation data set is not used!")
 
@@ -287,7 +269,7 @@ class DEM(object):
                     valyens = trainy[start_ind:end_ind]
 
                 # validate on test data set
-                elif self.n_segments==1:
+                elif self.hyperparameters['n_segments']==1:
                     if valX is None or valy is None:
                         raise MissingArgumentError("When segments length is 1, a validation data set must be provided.")
                     trainXens = trainX
@@ -296,8 +278,8 @@ class DEM(object):
                     valyens = valy
 
                 history = ensemble_member.fit(trainXens, trainyens,
-                                            epochs=self.epochs, batch_size=self.hyperparameters['batch_size'],
-                                            verbose=self.verbose,
+                                            epochs=self.hyperparameters['epochs'], batch_size=self.hyperparameters['batch_size'],
+                                            verbose=self.hyperparameters['verbose'],
                                             shuffle=True, callbacks=[self.es],
                                             validation_data=(valXens, valyens))
 
@@ -362,16 +344,16 @@ class DEM(object):
         :param X: The features
 
         """
-        if self.pdf=='normal':
-            pred_ens = np.zeros((X.shape[0], 2, self.n_members))
+        if self.hyperparameters['pdf']=='normal':
+            pred_ens = np.zeros((X.shape[0], 2, self.hyperparameters['n_members']))
 
-        elif self.pdf=='skewed':
-            pred_ens = np.zeros((X.shape[0], 3, self.n_members))
+        elif self.hyperparameters['pdf']=='skewed':
+            pred_ens = np.zeros((X.shape[0], 3, self.hyperparameters['n_members']))
 
-        elif self.pdf is None:
-            pred_ens = np.zeros((X.shape[0], 1, self.n_members))
+        elif self.hyperparameters['pdf'] is None:
+            pred_ens = np.zeros((X.shape[0], 1, self.hyperparameters['n_members']))
 
-        for i in range(self.n_members):
+        for i in range(self.hyperparameters['n_members']):
             pred_ens[:,:,i] = self.ensemble[i].predict(X)
         return self._mixture(pred_ens)
 
@@ -382,18 +364,18 @@ class DEM(object):
         """
         mix_mean = pred[:,0,:].mean(axis=1)
 
-        if self.pdf=='normal':
+        if self.hyperparameters['pdf']=='normal':
             mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
             mix_std = np.sqrt(mix_var)
             return [mix_mean, mix_std]
 
-        elif self.pdf=='skewed':
+        elif self.hyperparameters['pdf']=='skewed':
             mix_var = np.mean(pred[:,0,:]**2 + pred[:,1,:]**2, axis=1)  - mix_mean**2
             mix_std = np.sqrt(mix_var)
             print("Mixture prediction for skewed distribution is not ready!")
             return mix_mean, mix_std, None
 
-        elif self.pdf is None:
+        elif self.hyperparameters['pdf'] is None:
             return mix_mean
 
 
@@ -427,7 +409,7 @@ class DEM(object):
             rmtree(path)
             mkdir(path)
 
-        for i in range(self.n_members):
+        for i in range(self.hyperparameters['n_members']):
             path_h5 = join(path, f"member{i}.h5")
             save_model(self.ensemble[i], path_h5, include_optimizer=False)
 
@@ -442,7 +424,7 @@ class DEM(object):
             rmtree(path)
             mkdir(path)
 
-        for i in range(self.n_members):
+        for i in range(self.hyperparameters['n_members']):
             path_h5 = join(path, f"member{i}.h5")
             self.ensemble[i].save_weights(path_h5)
 
@@ -455,7 +437,8 @@ class DEM(object):
 
         path = join(location, dir_name)
         files = listdir(path)
-        self.n_members = len(files)
+        self.hyperparameters = {}
+        self.hyperparameters['n_members'] = len(files)
         self.ensemble = []
 
         for file in files:
@@ -465,11 +448,13 @@ class DEM(object):
         output_neurons = self.ensemble[0].get_output_shape_at(0)[1]
 
         if output_neurons==2:
-            self.pdf = 'normal'
+            self.hyperparameters['pdf'] = 'normal'
 
         elif output_neurons==3:
-            self.pdf = 'skewed'
+            self.hyperparameters['pdf'] = 'skewed'
         else:
-            self.pdf = None
+            self.hyperparameters['pdf'] = None
 
-        self.get_model_desc(self.pdf)
+        self.get_model_desc(self.hyperparameters['pdf'])
+
+

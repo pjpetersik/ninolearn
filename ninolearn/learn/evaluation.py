@@ -5,7 +5,7 @@ from ninolearn.utils import print_header
 
 from ninolearn.IO.read_processed import data_reader
 from ninolearn.learn.skillMeasures import mean_srmse, seasonal_correlation, seasonal_srmse
-from ninolearn.learn.fit import lead_times, n_lead, decades, n_decades
+from ninolearn.learn.fit_predict import lead_times, n_lead, decades, n_decades
 from scipy.stats import pearsonr
 
 
