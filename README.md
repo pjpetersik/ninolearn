@@ -1,5 +1,10 @@
 <img src="https://github.com/pjpetersik/ninolearn/blob/master/logo/logo.png" width="250">
 
+[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-latest-url]: https://pjpetersik.github.io/ninolearn/
+
+[![latest][docs-latest-img]][docs-latest-url]
+
 NinoLearn is a research framework for the application of machine learning (ML)
 methods for the prediction of the El Nino-Southern Oscillation (ENSO).
 
