@@ -2,5 +2,5 @@
 Training and predicting
 #######################
 
-.. automodule:: ninolearn.learn.fit_predict
+.. automodule:: ninolearn.learn.fit
     :members:

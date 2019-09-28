@@ -6,5 +6,5 @@ Learn
    :maxdepth: 2
 
    models
-   fit_predict
+   fit
    evaluation

@@ -42,6 +42,7 @@ def download(info_dict, **kwargs):
         downloadHTTP(info_dict, **kwargs)
 
     elif info_dict['downloadType']=='local':
+        print(f"Copy {info_dict['name']} to data directory")
         shutil.copy(info_dict['path'], join(rawdir, info_dict['name']))
 
 
