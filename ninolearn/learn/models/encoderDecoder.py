@@ -1,6 +1,5 @@
 import numpy as np
 
-
 import keras.backend as K
 from keras.models import Model, save_model, load_model
 from keras.layers import Dense, Input, Dropout

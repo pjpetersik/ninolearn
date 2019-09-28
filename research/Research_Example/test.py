@@ -8,7 +8,24 @@ Created on Wed Sep 25 09:40:30 2019
 import numpy as np
 
 class baseModel(object):
-    def set_parameters(self, **kwargs):
+    """
+    The class from which each new model should inherit. Because of the
+    inheritance, standardized training and testing will be possible.
+
+    Errors will be raised if mandotory functions are not overwritten
+    by the child model. Mandetory functions are:
+        · .fit
+        · .predict
+        · .save
+        · .load
+    """
+    def set_hyperparameters(self, **kwargs):
+        """
+        Set the hyperparameters for the model that are provided as keyword
+        arguments.
+
+        :param kwargs: The hyperparameters that are used in the child model.
+        """
 
         # hyperparameters
         self.hyperparameters = kwargs
@@ -23,6 +40,18 @@ class baseModel(object):
 
 
     def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+        """
+        This method performs a random search in the hyperparamter space.
+
+        :param trainX: The feature set.
+
+        :param: trainy: The label set.
+
+        :param n_iter: The number of iterations for the random search.
+
+        :param kwargs: Keyword arguments that are passed to the fit method.
+        """
+
         # check if hyperparameters where provided in lists for randomized search
         if len(self.hyperparameters_search) == 0:
             raise Exception("No variable indicated for hyperparameter search!")
@@ -84,8 +113,6 @@ class baseModel(object):
     def load(self):
         raise NameError("Function 'load' is not defined!")
 
-
-
 # =============================================================================
 # =============================================================================
 # =============================================================================
@@ -122,9 +149,88 @@ class DEM(baseModel):
     the hidden layer. It is trained using the MSE or negative-log-likelihood of
     a gaussian distribution, respectively.
     """
-
     def __del__(self):
         K.clear_session()
+
+    def __init__(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
+                       noise_mu=0.1, noise_sigma=0.1, noise_alpha=0.1,
+                       l1_hidden=0.1, l2_hidden=0.1,
+                       l1_mu=0.0, l2_mu=0.1,
+                       l1_sigma=0.1, l2_sigma=0.1,
+                       l1_alpha=0.1, l2_alpha=0.1,
+                       batch_size=10, n_segments=5, n_members_segment=1,
+                       lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal',
+                       name='dem'):
+        """
+        Set the hyperparameters and the settings for the training of the DEM.
+
+        :type layers: int
+        :param layers: Number of hidden layers.
+
+        :type neurons: int
+        :param neurons: Number of neurons in a hidden layers.
+
+        :type dropout: float
+        :param dropout: Dropout rate for the hidden layer neurons.
+
+        :type noise: float
+        :param noise: Standard deviation of the gaussian noise that is added to\
+        the input
+
+        :type l1_hidden: float
+        :l1_hidden: Coefficent for the L1 penalty term for the hidden layer.
+
+        :type l2_hidden: float
+        :l2_hidden: Coefficent for the L2 penalty term for the hidden layer.
+
+        :type l1_mu: float
+        :l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.
+
+        :type l2_mu: float
+        :l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.
+
+        :type l1_sigma: float
+        :l1_sigma: Coefficent for the L1 penalty term in the\
+        standard-deviation-output neuron.
+
+        :type l2_mu: float
+        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation \
+        output neuron.
+
+        :param batch_size: Batch size for the training.
+
+        :param n_segments: Number of segments for the generation of members.
+
+        :param n_members_segment: number of members that are generated per\
+        segment.
+
+        :param lr: the learning rate during training
+
+        :param patience: Number of epochs to wait until training is stopped if\
+        score was not improved.
+
+        :param epochs: The maximum numberof epochs for the training.
+
+        :param verbose: Option to print scores during training to the screen. \
+        Here, 0 means silent.
+
+        :type pdf: str
+        :param pdf: The distribution which shell be predicted. Either 'simple'\
+        (just one value), 'normal' (Gaussian) or 'skewed' (skewed Gaussian).
+
+        :type name: str
+        :param name: The name of the model.
+        """
+
+        self.set_hyperparameters(layers=layers, neurons=neurons, dropout=dropout,
+                                 noise_in=noise_in, noise_mu=noise_mu,
+                                 noise_sigma=noise_sigma, noise_alpha=noise_alpha,
+                                 l1_hidden=l1_hidden, l2_hidden=l2_hidden, l1_mu=l1_mu, l2_mu=l2_mu,
+                                 l1_sigma=l1_sigma, l2_sigma=l2_sigma,
+                                 l1_alpha=l1_alpha, l2_alpha=l2_alpha,
+                                 batch_size=batch_size, n_segments=n_segments, n_members_segment=n_members_segment,
+                                 lr=lr, patience=patience, epochs=epochs, verbose=verbose, pdf=pdf,
+                                 name=name)
 
     def get_model_desc(self, pdf):
         """
@@ -148,7 +254,6 @@ class DEM(baseModel):
             self.loss_name = 'mean_squared_error'
             self.n_outputs = 1
             self.output_names =  ['prediction']
-
 
     def build_model(self, n_features):
         """

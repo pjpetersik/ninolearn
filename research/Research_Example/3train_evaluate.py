@@ -18,7 +18,7 @@ cross_fit(DEM, pipeline, 1, neurons=16,
                n_members_segment=1, patience=30, verbose=0,
                pdf="normal", name="dem")
 
-# make the hindcast that is used for the evaluation
+#%% make the hindcast that is used for the evaluation
 cross_predict(DEM, pipeline, 'dem')
 
 # evaluate the model onto the full time series
