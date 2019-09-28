@@ -1,17 +1,30 @@
+import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from os.path import join
 
 from ninolearn.learn.models.dem import DEM
 from ninolearn.learn.fit import cross_hindcast, n_decades, lead_times, decade_color, decade_name
 from ninolearn.learn.evaluation import evaluation_correlation, evaluation_decadal_correlation, evaluation_seasonal_correlation
 from ninolearn.learn.evaluation import evaluation_srmse, evaluation_decadal_srmse, evaluation_seasonal_srmse
 from ninolearn.plot.evaluation import plot_seasonal_skill
+from ninolearn.plot.prediction import plot_prediction
+from ninolearn.IO.read_processed import data_reader
+from ninolearn.pathes import processeddir
 
 from cross_training import pipeline
-#%%
-cross_hindcast(DEM, pipeline, 'dem')
 
+#cross_hindcast(DEM, pipeline, 'dem')
+
+start = '1962-01'
+end = '2017-12'
+reader = data_reader(startdate=start, enddate=end)
+oni = reader.read_csv('oni')
+data = xr.open_dataset(join(processeddir, f'dem_forecasts.nc'))
+
+lead = 0
+plot_prediction(data.target_season.values, data['mean'].loc[{'lead':lead}], data['std'].loc[{'lead':lead}])
 #%% =============================================================================
 # All season correlation skill
 # =============================================================================

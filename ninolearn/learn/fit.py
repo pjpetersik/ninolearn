@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from os.path import join
+from os.path import join, exists
 
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
@@ -45,17 +45,21 @@ def cross_training(model, pipeline, n_iter, **kwargs):
         print_header(f'Lead time: {lead_time} month')
 
         for j in range(n_decades-1):
-            small_print_header(f'Test period: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
-
-            test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
-            train_indeces = np.invert(test_indeces)
-
-            trainX, trainy = X[train_indeces,:], y[train_indeces]
-
             m = model(**kwargs)
-            m.fit_RandomizedSearch(trainX, trainy, n_iter=n_iter)
-            m.save(location=modeldir, dir_name=f"{m.hyperparameters['name']}_decade{decades[j]}_lead{lead_time}")
+            dir_name = f"{m.hyperparameters['name']}_decade{decades[j]}_lead{lead_time}"
 
+            if not exists(join(modeldir, dir_name)):
+                small_print_header(f'Test period: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
+
+                test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
+                train_indeces = np.invert(test_indeces)
+
+                trainX, trainy = X[train_indeces,:], y[train_indeces]
+
+                m.fit_RandomizedSearch(trainX, trainy, n_iter=n_iter)
+                m.save(location=modeldir, dir_name=dir_name)
+            else:
+                print(f'{dir_name} already exists')
             del m
 
 def cross_hindcast(model, pipeline, model_name):

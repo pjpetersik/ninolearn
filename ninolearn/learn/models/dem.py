@@ -15,7 +15,7 @@ from shutil import rmtree
 from ninolearn.learn.models.baseModel import baseModel
 from ninolearn.learn.losses import nll_gaussian, nll_skewed_gaussian
 from ninolearn.learn.skillMeasures import rmse
-from ninolearn.utils import print_header, small_print_header
+from ninolearn.utils import small_print_header
 from ninolearn.exceptions import MissingArgumentError
 
 import warnings
@@ -275,6 +275,7 @@ class DEM(baseModel):
             i+=1
         self.mean_val_loss = np.mean(self.val_loss)
 
+        print(f'Loss: {self.mean_val_loss}')
         # print computation time
         end_time = time.time()
         passed_time = np.round(end_time-start_time, decimals=1)
@@ -362,7 +363,6 @@ class DEM(baseModel):
 
         elif self.hyperparameters['pdf'] is None:
             return mix_mean
-
 
 
     def evaluate(self, ytrue, mean_pred, std_pred=False):

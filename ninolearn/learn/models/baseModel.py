@@ -48,6 +48,8 @@ class baseModel(object):
         :param kwargs: Keyword arguments that are passed to the fit method.
         """
 
+        self.history_RandomizedSearch = []
+
         # check if hyperparameters where provided in lists for randomized search
         if len(self.hyperparameters_search) == 0:
             raise Exception("No variable indicated for hyperparameter search!")
@@ -75,6 +77,7 @@ class baseModel(object):
                     self.hyperparameters[key] = tuple(hyp_list)
 
             self.fit(trainX, trainy, **kwargs)
+            self.history_RandomizedSearch.append(self.mean_val_loss)
 
             # check if validation score was enhanced
             if self.mean_val_loss<best_loss:
