@@ -208,14 +208,27 @@ SST anomaly (SSTA) form the ERSSTv5 this looks as follows:
 The ONI and the SSTA are now read for the same time period (January 1980 till
 December 2017) and the SSTA for the specified regions (boundaries in degrees East).
 
-Statistical/Machine Learning models
-===================================
+Machine Learning
+================
 
-Finally, some models that were developed during the Master Thesis of
-Petersik (2019) are available in :mod:`ninolearn.learn.models`. In particular
+For the training and evaluation of machine learning models, NinoLearn aims to
+standardize the corresponding procedures.
+
+New models within NinoLearn need to be set up in a specific way, such that
+they can be trained and evaluated following standardized procedures. At the moment,
+this is still work in progress and just some parts of the code are brought into
+a user friendly style.
+
+The module :mod:`ninolearn.learn.models` already contains some models that were
+developed during the Master Thesis of Petersik (2019)`. In particular
 a Deep Ensemble (:mod:`ninolearn.learn.models.dem`) and an Encoder-Decoder
-(:mod:`ninolearn.learn.models.encoderDecoder`) model is available. Furthermore,
-some evaluation methods for seasonal evaluation of the model are available
+(:mod:`ninolearn.learn.models.encoderDecoder`) model is available.
+
+The modlue :mod:`ninolearn.learn.fit_predict` contains methods for a standardized
+training of the model and the corresponding prediction. In the module
+:mod:`ninolearn.learn.evaluation`, some methods are gathered to evaluate
+models for on the entire time series as well as on different seasons and decades
+using the RMSE and the Pearson correlation.
 
 ****************
 Cited literature

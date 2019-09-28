@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ninolearn.learn.fit &mdash; NinoLearn 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/logo_favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../package.html">NinoLearn package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../forecasts.html">Some forecasts</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">NinoLearn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ninolearn.learn.fit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ninolearn.learn.fit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module aims to standardize the training and evaluation procedure.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+
+<span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">print_header</span><span class="p">,</span> <span class="n">small_print_header</span>
+<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">modeldir</span><span class="p">,</span> <span class="n">processeddir</span>
+
+<span class="c1"># evaluation decades</span>
+<span class="n">decades</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1962</span><span class="p">,</span> <span class="mi">1972</span><span class="p">,</span> <span class="mi">1982</span><span class="p">,</span> <span class="mi">1992</span><span class="p">,</span> <span class="mi">2002</span><span class="p">,</span> <span class="mi">2012</span><span class="p">,</span> <span class="mi">2018</span><span class="p">]</span>
+<span class="n">n_decades</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">decades</span><span class="p">)</span>
+
+<span class="c1"># lead times for the evaluation</span>
+<span class="n">lead_times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span>
+<span class="n">n_lead</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_times</span><span class="p">)</span>
+
+<span class="n">decade_color</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;violet&#39;</span><span class="p">,</span> <span class="s1">&#39;limegreen&#39;</span><span class="p">,</span> <span class="s1">&#39;darkgoldenrod&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;royalblue&#39;</span><span class="p">]</span>
+<span class="n">decade_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1962-1971&#39;</span><span class="p">,</span> <span class="s1">&#39;1972-1981&#39;</span><span class="p">,</span> <span class="s1">&#39;1982-1991&#39;</span><span class="p">,</span> <span class="s1">&#39;1992-2001&#39;</span><span class="p">,</span> <span class="s1">&#39;2002-2011&#39;</span><span class="p">,</span> <span class="s1">&#39;2012-2017&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="cross_training"><a class="viewcode-back" href="../../../fit.html#ninolearn.learn.fit.cross_training">[docs]</a><span class="k">def</span> <span class="nf">cross_training</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">n_iter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Training the model on different training sets in which each time a period\</span>
+<span class="sd">    corresponing to a decade out of 1962-1971, 1972-1981, ..., 2012-last \</span>
+<span class="sd">    ovserved date is spared.</span>
+
+<span class="sd">    :param model: A model that follows the guidelines how a model object\</span>
+<span class="sd">    should be set up.</span>
+
+<span class="sd">    :param pipeline: a function that takes lead time as argument and returns\</span>
+<span class="sd">    the corresponding feature, label, time and persistance.</span>
+
+<span class="sd">    :param save_dir: The prefix of the save directory.</span>
+
+<span class="sd">    :param **kwargs: Arguments that shell be passed to the .set_parameter() \</span>
+<span class="sd">    method of the provided model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">lead_time</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">]:</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timey</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">lead_time</span><span class="p">,</span> <span class="n">return_persistance</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_time}</span><span class="s1"> month&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">small_print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Test period: </span><span class="si">{decades[j]}</span><span class="s1">-01-01 till {decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
+
+            <span class="n">test_indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">timey</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">timey</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;{decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
+            <span class="n">train_indeces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">test_indeces</span><span class="p">)</span>
+
+            <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train_indeces</span><span class="p">,:],</span> <span class="n">y</span><span class="p">[</span><span class="n">train_indeces</span><span class="p">]</span>
+
+            <span class="n">m</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">fit_RandomizedSearch</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">)</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{m.hyperparameters[&#39;name&#39;]}</span><span class="s2">_decade</span><span class="si">{decades[j]}</span><span class="s2">_lead</span><span class="si">{lead_time}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">del</span> <span class="n">m</span></div>
+
+<div class="viewcode-block" id="cross_hindcast"><a class="viewcode-back" href="../../../fit.html#ninolearn.learn.fit.cross_hindcast">[docs]</a><span class="k">def</span> <span class="nf">cross_hindcast</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a hindcast from 1962 till today using the models which were</span>
+<span class="sd">    trained by the .cross_training() method.</span>
+
+<span class="sd">    :param model: The considered model.</span>
+
+<span class="sd">    :param pipeline: The data pipeline that already was used before in \</span>
+<span class="sd">    .cross_training().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">first_lead_loop</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
+        <span class="n">lead_time</span> <span class="o">=</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_time}</span><span class="s1"> months&#39;</span><span class="p">)</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timey</span><span class="p">,</span> <span class="n">y_persistance</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">lead_time</span><span class="p">,</span> <span class="n">return_persistance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">ytrue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="n">timeytrue</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([])</span>
+
+        <span class="n">first_dec_loop</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">small_print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Predict: </span><span class="si">{decades[j]}</span><span class="s1">-01-01 till {decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
+
+            <span class="c1"># test indices</span>
+            <span class="n">test_indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">timey</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">timey</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;{decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
+            <span class="n">testX</span><span class="p">,</span> <span class="n">testy</span><span class="p">,</span> <span class="n">testtimey</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">test_indeces</span><span class="p">,:],</span> <span class="n">y</span><span class="p">[</span><span class="n">test_indeces</span><span class="p">],</span> <span class="n">timey</span><span class="p">[</span><span class="n">test_indeces</span><span class="p">]</span>
+
+            <span class="n">m</span> <span class="o">=</span> <span class="n">model</span><span class="p">()</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{model_name}</span><span class="s1">_decade</span><span class="si">{decades[j]}</span><span class="s1">_lead</span><span class="si">{lead_time}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># allocate arrays and variables for which the model must be loaded</span>
+            <span class="k">if</span> <span class="n">first_dec_loop</span><span class="p">:</span>
+                <span class="n">n_outputs</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">n_outputs</span>
+                <span class="n">output_names</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">output_names</span>
+                <span class="n">pred_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_outputs</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">first_dec_loop</span><span class="o">=</span><span class="kc">False</span>
+
+            <span class="c1"># make prediction</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="o">.</span><span class="n">n_outputs</span><span class="p">,</span> <span class="n">testX</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">pred</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">testX</span><span class="p">)</span>
+
+            <span class="c1"># make the full time series</span>
+            <span class="n">pred_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_full</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ytrue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span> <span class="n">testy</span><span class="p">)</span>
+            <span class="n">timeytrue</span> <span class="o">=</span> <span class="n">timeytrue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">testtimey</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">m</span>
+
+        <span class="k">if</span> <span class="n">timeytrue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s1">&#39;1962-01-01&#39;</span><span class="p">):</span>
+            <span class="n">expected_first_date</span> <span class="o">=</span> <span class="s1">&#39;1962-01-01&#39;</span>
+            <span class="n">got_first_date</span> <span class="o">=</span> <span class="n">timeytrue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
+
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The first predicted date for lead time </span><span class="si">{lead_time}</span><span class="s2"> </span><span class="se">\</span>
+<span class="s2">                            is </span><span class="si">{got_first_date}</span><span class="s2"> but expected </span><span class="si">{expected_first_date}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># allocate arrays and variables for which the full length of the time</span>
+        <span class="c1"># series must be known</span>
+        <span class="k">if</span> <span class="n">first_lead_loop</span><span class="p">:</span>
+            <span class="n">n_time</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeytrue</span><span class="p">)</span>
+            <span class="n">pred_save</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_outputs</span><span class="p">,</span> <span class="n">n_time</span><span class="p">,</span> <span class="n">n_lead</span><span class="p">))</span>
+            <span class="n">first_lead_loop</span><span class="o">=</span><span class="kc">False</span>
+
+        <span class="n">pred_save</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span>  <span class="n">pred_full</span>
+
+    <span class="c1"># Save data to a netcdf file</span>
+    <span class="n">save_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_outputs</span><span class="p">):</span>
+        <span class="n">save_dict</span><span class="p">[</span><span class="n">output_names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="p">([</span><span class="s1">&#39;target_season&#39;</span><span class="p">,</span> <span class="s1">&#39;lead&#39;</span><span class="p">],</span>  <span class="n">pred_save</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:])</span>
+
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">save_dict</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;target_season&#39;</span><span class="p">:</span> <span class="n">timeytrue</span><span class="p">,</span>
+                                       <span class="s1">&#39;lead&#39;</span><span class="p">:</span> <span class="n">lead_times</span><span class="p">}</span> <span class="p">)</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">processeddir</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{model_name}</span><span class="s1">_forecasts.nc&#39;</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Paul Petersik
+      <span class="lastupdated">
+        Last updated on September 28, 2019.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

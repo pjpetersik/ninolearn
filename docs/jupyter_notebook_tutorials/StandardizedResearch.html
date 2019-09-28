@@ -1,0 +1,2138 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Standardized Research &mdash; NinoLearn 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/logo_favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Deep ensemble for ENSO-forecasting" href="deep_ensemble.html" />
+    <link rel="prev" title="Postprocess data" href="postprocess_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">NinoLearn package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="download_and_read_raw_data.html">Download and read raw data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prepare_data.html">Data preparation and read postprocessed data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess_data.html">Postprocess data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Standardized Research</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Download">Download</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Prepare-data">Prepare data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Build-a-new-Model">Build a new Model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Data-pipeline">Data pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#The-model">The model</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Cross-train-the-model">Cross train the model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Make-hindcast">Make hindcast</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Evaluation">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deep_ensemble.html">Deep ensemble for ENSO-forecasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encoder_decoder.html">Encoder-Decoder model for ENSO-forecasting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../forecasts.html">Some forecasts</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">NinoLearn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Standardized Research</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/jupyter_notebook_tutorials/StandardizedResearch.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Standardized-Research">
+<h1>Standardized Research<a class="headerlink" href="#Standardized-Research" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial covers in a simple example of a Lasso regression model all steps in the development process of a new model that follows the standards of NinoLearn.</p>
+<div class="section" id="Download">
+<h2>Download<a class="headerlink" href="#Download" title="Permalink to this headline">¶</a></h2>
+<p>Download four indeces which we want to use to predict the Oceaninc Nino Index (ONI):</p>
+<ol class="arabic simple">
+<li><p>The ONI index itself.</p></li>
+<li><p>The Dipole Mode Index of the Indian Ocean Dipole (IOD)</p></li>
+<li><p>The Warm Water Volume (WWV)</p></li>
+<li><p>The Kiritimati Index that can be used as WWV proxy form 1955 onwards.</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.download</span> <span class="k">import</span> <span class="n">download</span><span class="p">,</span> <span class="n">sources</span>
+
+<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">ONI</span><span class="p">)</span>
+<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">IOD</span><span class="p">)</span>
+<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">WWV</span><span class="p">)</span>
+<span class="n">download</span><span class="p">(</span><span class="n">sources</span><span class="o">.</span><span class="n">KINDEX</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+oni.txt already downloaded
+iod.txt already downloaded
+wwv.dat already downloaded
+Copy Kindex.mat to data directory
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Prepare-data">
+<h2>Prepare data<a class="headerlink" href="#Prepare-data" title="Permalink to this headline">¶</a></h2>
+<p>Extract the essential data form the raw files and move them into preprocessed data directory. If you are interested what these functions exactly do, check out there source code.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.preprocess.prepare</span> <span class="k">import</span> <span class="n">prep_oni</span><span class="p">,</span> <span class="n">prep_wwv</span>
+<span class="kn">from</span> <span class="nn">ninolearn.preprocess.prepare</span> <span class="k">import</span> <span class="n">prep_iod</span><span class="p">,</span> <span class="n">prep_K_index</span><span class="p">,</span> <span class="n">prep_wwv_proxy</span>
+
+
+<span class="n">prep_oni</span><span class="p">()</span>
+<span class="n">prep_wwv</span><span class="p">()</span>
+<span class="n">prep_iod</span><span class="p">()</span>
+<span class="n">prep_K_index</span><span class="p">()</span>
+
+<span class="c1"># combines the WWV and the K-Index to one WWV proxy</span>
+<span class="n">prep_wwv_proxy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Prepare ONI timeseries.
+Prepare WWV  timeseries.
+Prepare IOD timeseries.
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Build-a-new-Model">
+<h2>Build a new Model<a class="headerlink" href="#Build-a-new-Model" title="Permalink to this headline">¶</a></h2>
+<p>Here an example of an multilinear (Lasso) regression model is given that is based on the scikit-learn python package.</p>
+<div class="section" id="Data-pipeline">
+<h3>Data pipeline<a class="headerlink" href="#Data-pipeline" title="Permalink to this headline">¶</a></h3>
+<p>First a data pipeline is build. The pipeline is used during training, prediction and evaluation to generate the feature, the label, the time as well as (optional) the persistance forecast.</p>
+<p>When you build a new data pipeline, it needs to have the same structure as the code block below.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># import the data reader to read data from the preprocessed data directory</span>
+<span class="kn">from</span> <span class="nn">ninolearn.IO.read_processed</span> <span class="k">import</span> <span class="n">data_reader</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">lead_time</span><span class="p">,</span>  <span class="n">return_persistance</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data pipeline for the processing of the data before the lasso regression model</span>
+<span class="sd">    is trained.</span>
+
+<span class="sd">    :type lead_time: int</span>
+<span class="sd">    :param lead_time: The lead time in month.</span>
+
+<span class="sd">    :type return_persistance: boolean</span>
+<span class="sd">    :param return_persistance: Return as the persistance as well.</span>
+
+<span class="sd">    :returns: The feature &quot;X&quot; (at observation time), the label &quot;y&quot; (at lead</span>
+<span class="sd">    time), the target season &quot;timey&quot; (least month) and if selected the</span>
+<span class="sd">    label at observation time &quot;y_persistance&quot;. Hence, the output comes as:</span>
+<span class="sd">    X, y, timey, y_persistance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># initialize the reader</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1960-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Load data</span>
+    <span class="c1"># HERE you could load other data sources</span>
+    <span class="n">oni</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+    <span class="n">wwv</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;wwv_proxy&#39;</span><span class="p">)</span>
+    <span class="n">iod</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;iod&#39;</span><span class="p">)</span>
+
+    <span class="c1"># the shift data by 3 in addition to lead time shift (due to definition</span>
+    <span class="c1"># of lead time) as in barnston et al. (2012)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1"># Make feature</span>
+    <span class="c1"># HERE you need to stack you data if you loaded different data sets</span>
+    <span class="n">Xorg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">oni</span><span class="p">,</span> <span class="n">wwv</span><span class="p">,</span> <span class="n">iod</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">Xorg</span><span class="p">[:</span><span class="o">-</span><span class="n">lead_time</span><span class="o">-</span><span class="n">shift</span><span class="p">,:]</span>
+
+    <span class="c1"># arange label</span>
+    <span class="n">yorg</span> <span class="o">=</span> <span class="n">oni</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">yorg</span><span class="p">[</span><span class="n">lead_time</span> <span class="o">+</span> <span class="n">shift</span><span class="p">:]</span>
+
+    <span class="c1"># get the time axis of the label</span>
+    <span class="n">timey</span> <span class="o">=</span> <span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">lead_time</span> <span class="o">+</span> <span class="n">shift</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">return_persistance</span><span class="p">:</span>
+        <span class="n">y_persistance</span> <span class="o">=</span> <span class="n">yorg</span><span class="p">[:</span> <span class="o">-</span> <span class="n">lead_time</span> <span class="o">-</span> <span class="n">shift</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timey</span><span class="p">,</span> <span class="n">y_persistance</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timey</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="The-model">
+<h3>The model<a class="headerlink" href="#The-model" title="Permalink to this headline">¶</a></h3>
+<p>First of all, the newly designed model needs to inherit from the baseModel such that the model can be trained and evaluated in a standardized procedure furhter down.</p>
+<p>The model has mandatory variables and functions that need to be included. These parts are highlighted in the following with the comment “MANDATORY”</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># import the baseModel from which the mlr class needs to inherit</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.models.baseModel</span> <span class="k">import</span> <span class="n">baseModel</span>
+
+<span class="c1"># import the sklearn model that we want to use for the ENSO forecast</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">Lasso</span>
+
+<span class="c1"># import some packages and methods to saving the model later</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">mkdir</span>
+
+<span class="c1"># MANDATORY: Needs to in herit from the class baseModel</span>
+<span class="k">class</span> <span class="nc">mlr</span><span class="p">(</span><span class="n">baseModel</span><span class="p">):</span>
+
+    <span class="c1"># MANDETORY: Define how many outputs your model has</span>
+    <span class="n">n_outputs</span><span class="o">=</span><span class="mi">1</span>
+
+    <span class="c1"># MANDETORY: The name that is used when predictions are saved in an netCDF file.</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>
+
+
+    <span class="c1"># MANDETORY: The model needs to have a .__init__() method.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mlr&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The model needs to have an __init__ function. That takes contains</span>
+<span class="sd">        receives the hyperparameters of the model as well as the name of the</span>
+<span class="sd">        model as keyword arguments</span>
+
+<span class="sd">        :type alpha: float</span>
+<span class="sd">        :param alpha: The coefficent for the lasso penatly term.</span>
+
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param name: The name of the model that is used to save it to a file after training.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#  MANDETORY: Apply the .set_hyperparameters function to all keyword arguments.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_hyperparameters</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+
+
+    <span class="c1"># MANDETORY: The model needs to have a .fit() function that takes trainX, trainy as arguments.</span>
+    <span class="c1"># Very complex models, e.g. neural networks would need to split the trainX and trainy variables further</span>
+    <span class="c1"># to generate a validation data set, which is than used to calculate</span>
+    <span class="c1"># the self.mean_val_loss and to check for overfitting.</span>
+    <span class="c1"># Here, we don&#39;t need to do so because the model is not very complex and</span>
+    <span class="c1"># we have plenty of data to train the model.</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the fit function of the model.</span>
+
+<span class="sd">        :param trainX: The features.</span>
+<span class="sd">        :param trainy: The label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#Initialize the Lasso model form the sci-kit learn package</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Lasso</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span>
+
+        <span class="c1"># fit the model to the training data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span><span class="n">trainy</span><span class="p">)</span>
+
+        <span class="c1"># MANDETORY: Save the Score under self.mean_val_loss. This variable</span>
+        <span class="c1"># will be used to be optimized during the random search later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_val_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">)</span>
+
+    <span class="c1"># MANDATORY: The model needs to have a .fit() function that takes as arguments.</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a prediction.</span>
+
+<span class="sd">        :param: A feature set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># MANDATORY: Function needs to return a value (the prediction).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="c1"># MANDATORY: The model needs to have a .save() function. The location where to save the model</span>
+    <span class="c1"># is defined by the keyword arguments &#39;location&#39; and &#39;name&#39;</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;mlr&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Arguments of this function are mandetory and used to systemically</span>
+<span class="sd">        save models in your modeldir.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">f</span><span class="s1">&#39;model.sav&#39;</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+
+    <span class="c1"># MANDATORY: The model needs to have a .load() function. The location where to saved model can be found</span>
+    <span class="c1"># is defined by the keyword arguments &#39;location&#39; and &#39;name&#39;</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="s1">&#39;mlr&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Arguments of this function are mandetory and used to systemically</span>
+<span class="sd">        load models from your modeldir.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">f</span><span class="s1">&#39;model.sav&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Cross-train-the-model">
+<h2>Cross train the model<a class="headerlink" href="#Cross-train-the-model" title="Permalink to this headline">¶</a></h2>
+<p>In the cross_training() function the model is trained on a 5 of 6 time “decades” (1962-1971, 1972-1981,…, 2012-2018). For each decade, 50 search iterations with a random uniform choice of <code class="docutils literal notranslate"><span class="pre">alpha</span></code> between 0. and 0.001 is performed. The model that has the best score (in terms of <code class="docutils literal notranslate"><span class="pre">self.mean_val_loss</span></code>, see above) is saved in the model directory.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.learn.fit</span> <span class="k">import</span> <span class="n">cross_training</span>
+<span class="n">cross_training</span><span class="p">(</span><span class="n">mlr</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.001</span><span class="p">],</span>  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mlr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+##################################################################
+Lead time: 0 month
+##################################################################
+
+Test period: 1962-01-01 till 1971-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.8106135985626924
+{&#39;alpha&#39;: 0.0008448053091838476, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+New best hyperparameters
+Mean loss: 0.8106113110020755
+{&#39;alpha&#39;: 0.0009450544904209117, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009450544904209117, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.8106113110020755
+loss refitting : 0.8106113110020755
+Test period: 1972-01-01 till 1981-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.8033610008593687
+{&#39;alpha&#39;: 0.0008152493646114315, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.8033584266742897
+{&#39;alpha&#39;: 0.0009244888695926357, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+New best hyperparameters
+Mean loss: 0.8033565882553046
+{&#39;alpha&#39;: 0.0009951921066748688, &#39;name&#39;: &#39;mlr&#39;}
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009951921066748688, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.8033565882553046
+loss refitting : 0.8033565882553046
+Test period: 1982-01-01 till 1991-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.7993762934423297
+{&#39;alpha&#39;: 7.929448971816933e-05, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.7993761720648452
+{&#39;alpha&#39;: 0.00012138058863570511, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.7993680048119511
+{&#39;alpha&#39;: 0.0007635595638904729, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.799364854701847
+{&#39;alpha&#39;: 0.0008956632689939055, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+New best hyperparameters
+Mean loss: 0.7993625713230104
+{&#39;alpha&#39;: 0.0009803538579006284, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009803538579006284, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.7993625713230104
+loss refitting : 0.7993625713230104
+Test period: 1992-01-01 till 2001-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.7802925936399516
+{&#39;alpha&#39;: 0.0004953922098552358, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.7802840737627595
+{&#39;alpha&#39;: 0.0008785498957682372, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008785498957682372, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.7802840737627595
+loss refitting : 0.7802840737627595
+Test period: 2002-01-01 till 2011-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.8173486609899766
+{&#39;alpha&#39;: 0.0008235973597579491, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008235973597579491, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.8173486609899766
+loss refitting : 0.8173486609899766
+Test period: 2012-01-01 till 2017-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.7984574545153191
+{&#39;alpha&#39;: 0.0002996363737972141, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.7984569341768185
+{&#39;alpha&#39;: 0.0003557153373916584, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+New best hyperparameters
+Mean loss: 0.7984546138119801
+{&#39;alpha&#39;: 0.0005389067511472671, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+New best hyperparameters
+Mean loss: 0.7984480497638325
+{&#39;alpha&#39;: 0.0008683538480832983, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008683538480832983, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.7984480497638325
+loss refitting : 0.7984480497638325
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 40.23964849168195, tolerance: 0.04095336691099477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 33.01923187205651, tolerance: 0.04095336691099477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 35.19052855362797, tolerance: 0.04095336691099477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 39.29179123494179, tolerance: 0.04095336691099477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 39.266681921327134, tolerance: 0.039655819790575926
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 35.99481741546664, tolerance: 0.039655819790575926
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 37.2053402714577, tolerance: 0.039655819790575926
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 37.42189895267371, tolerance: 0.039655819790575926
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 37.46526322062531, tolerance: 0.03857872286212915
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 36.95813523569301, tolerance: 0.042236785863874346
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 37.21729497934877, tolerance: 0.042236785863874346
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 35.48605254518435, tolerance: 0.042236785863874346
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 38.76403851787407, tolerance: 0.04380148128824477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 35.86214014465777, tolerance: 0.04380148128824477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 41.27820040884892, tolerance: 0.04380148128824477
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 35.86214014465777, tolerance: 0.04380148128824477
+  positive)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+##################################################################
+Lead time: 3 month
+##################################################################
+
+Test period: 1962-01-01 till 1971-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.49092346319541486
+{&#39;alpha&#39;: 0.0002989252380302798, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.4909190253461144
+{&#39;alpha&#39;: 0.0006537106274708973, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+New best hyperparameters
+Mean loss: 0.49091169355947606
+{&#39;alpha&#39;: 0.0009928331541415494, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009928331541415494, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.49091169355947606
+loss refitting : 0.49091169355947606
+Test period: 1972-01-01 till 1981-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.4871443869754234
+{&#39;alpha&#39;: 0.0001776669758017594, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.48712767393323564
+{&#39;alpha&#39;: 0.0009849172251825584, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009849172251825584, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.48712767393323564
+loss refitting : 0.48712767393323564
+Test period: 1982-01-01 till 1991-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.44146513839490703
+{&#39;alpha&#39;: 0.00015494457553779384, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.4414512476814326
+{&#39;alpha&#39;: 0.0008900641771292767, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008900641771292767, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.4414512476814326
+loss refitting : 0.4414512476814326
+Test period: 1992-01-01 till 2001-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.4080446708583289
+{&#39;alpha&#39;: 0.000532347479115731, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.408043474121071
+{&#39;alpha&#39;: 0.0008802012706779978, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+New best hyperparameters
+Mean loss: 0.4080429904329187
+{&#39;alpha&#39;: 0.0009865843083603871, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009865843083603871, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.4080429904329187
+loss refitting : 0.4080429904329187
+Test period: 2002-01-01 till 2011-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.502828882555912
+{&#39;alpha&#39;: 0.0004630208084042519, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.5028224237271047
+{&#39;alpha&#39;: 0.00086259607823077, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 92.64671432873374, tolerance: 0.04281813089473684
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 105.12495448511727, tolerance: 0.04281813089473684
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 103.17928611994908, tolerance: 0.04095175024561404
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 103.69724593189628, tolerance: 0.04095175024561404
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 65.94546569656481, tolerance: 0.04095175024561404
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 110.25068882393843, tolerance: 0.03965519614035089
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 102.77379582588011, tolerance: 0.03965519614035089
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 113.1800999823656, tolerance: 0.038577602877192974
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 105.45054768897336, tolerance: 0.038577602877192974
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 109.90336857166177, tolerance: 0.038577602877192974
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 110.68219979146276, tolerance: 0.038577602877192974
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 103.65571575682127, tolerance: 0.04223538471929825
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 98.33163644496966, tolerance: 0.04223538471929825
+  positive)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.00086259607823077, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.5028224237271047
+loss refitting : 0.5028224237271047
+Test period: 2012-01-01 till 2017-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.45871552730807363
+{&#39;alpha&#39;: 0.00016482060033029634, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.45871167628837095
+{&#39;alpha&#39;: 0.0005478075014466319, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.4587112370581302
+{&#39;alpha&#39;: 0.0005755188344207655, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.4587102562538542
+{&#39;alpha&#39;: 0.0006330346901371928, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+New best hyperparameters
+Mean loss: 0.4587066017533024
+{&#39;alpha&#39;: 0.0008122392235762485, &#39;name&#39;: &#39;mlr&#39;}
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008122392235762485, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.4587066017533024
+loss refitting : 0.4587066017533024
+
+##################################################################
+Lead time: 6 month
+##################################################################
+
+Test period: 1962-01-01 till 1971-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.27431728996028126
+{&#39;alpha&#39;: 0.0008445356559353962, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+New best hyperparameters
+Mean loss: 0.27431537224982916
+{&#39;alpha&#39;: 0.0009262286485882141, &#39;name&#39;: &#39;mlr&#39;}
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009262286485882141, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.27431537224982916
+loss refitting : 0.27431537224982916
+Test period: 1972-01-01 till 1981-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.3145193283039043
+{&#39;alpha&#39;: 0.00025205098543457305, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.31451904154174126
+{&#39;alpha&#39;: 0.0002910163849713866, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.3145116811839685
+{&#39;alpha&#39;: 0.0007923561074979505, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.3145114674959093
+{&#39;alpha&#39;: 0.0008022448084027107, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008022448084027107, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.3145114674959093
+loss refitting : 0.3145114674959093
+Test period: 1982-01-01 till 1991-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.2371737135841713
+{&#39;alpha&#39;: 0.00020266626570944024, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.2371630210906328
+{&#39;alpha&#39;: 0.0008814144683871659, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 115.48361077412414, tolerance: 0.043800864546925576
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 109.4033038679784, tolerance: 0.043800864546925576
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 117.44269265005664, tolerance: 0.043800864546925576
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 113.96050188636595, tolerance: 0.043800864546925576
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 116.28257360313305, tolerance: 0.043800864546925576
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 113.5438988095005, tolerance: 0.043800864546925576
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 152.24464457897508, tolerance: 0.04281152659611993
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 151.07329932969378, tolerance: 0.04281152659611993
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 135.30299571602748, tolerance: 0.04281152659611993
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 117.6430669683975, tolerance: 0.04094752437389772
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 117.6430669683975, tolerance: 0.04094752437389772
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 146.72422129113104, tolerance: 0.03964769823633156
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 125.25198025413701, tolerance: 0.03964769823633156
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 148.41910821799976, tolerance: 0.03964769823633156
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 131.01572336631793, tolerance: 0.03964769823633156
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 136.91538257743105, tolerance: 0.03964769823633156
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 148.30434212825085, tolerance: 0.03964769823633156
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 131.01572336631793, tolerance: 0.03964769823633156
+  positive)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.23716082806203398
+{&#39;alpha&#39;: 0.0009632276887789458, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009632276887789458, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.23716082806203398
+loss refitting : 0.23716082806203398
+Test period: 1992-01-01 till 2001-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.2192541456025923
+{&#39;alpha&#39;: 0.00035586937840802267, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.2192400662406192
+{&#39;alpha&#39;: 0.0009894072575981545, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009894072575981545, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.2192400662406192
+loss refitting : 0.2192400662406192
+Test period: 2002-01-01 till 2011-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.29632065357694637
+{&#39;alpha&#39;: 0.00024676490138882644, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.2963172860211464
+{&#39;alpha&#39;: 0.0005796813536760296, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+New best hyperparameters
+Mean loss: 0.29631317355393394
+{&#39;alpha&#39;: 0.0008197738185443134, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008197738185443134, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.29631317355393394
+loss refitting : 0.29631317355393394
+Test period: 2012-01-01 till 2017-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.2716115143291067
+{&#39;alpha&#39;: 0.0004864058439882926, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.27160983645345915
+{&#39;alpha&#39;: 0.0005971601264433636, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.2716009882207501
+{&#39;alpha&#39;: 0.0009947198138391023, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009947198138391023, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.2716009882207501
+loss refitting : 0.2716009882207501
+
+##################################################################
+Lead time: 9 month
+##################################################################
+
+Test period: 1962-01-01 till 1971-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.21139355737092413
+{&#39;alpha&#39;: 2.7631888413418126e-05, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.21138285425559689
+{&#39;alpha&#39;: 0.000903237246455752, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.2113806833338664
+{&#39;alpha&#39;: 0.0009905350357707478, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 139.6776766793417, tolerance: 0.038572468571428584
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 136.61882561454527, tolerance: 0.038572468571428584
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 133.58156106989912, tolerance: 0.038572468571428584
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 136.61882561454527, tolerance: 0.038572468571428584
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 142.4850122009647, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 141.24039098471772, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 130.960235186482, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 119.78489140588205, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 90.24693363537547, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 140.13428473700878, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 119.78489140588205, tolerance: 0.04223082109347443
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 146.5739323492736, tolerance: 0.04379322936585365
+  positive)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+New best hyperparameters
+Mean loss: 0.2113805974238232
+{&#39;alpha&#39;: 0.0009938319585721844, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009938319585721844, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.2113805974238232
+loss refitting : 0.2113805974238232
+Test period: 1972-01-01 till 1981-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.2502472315136235
+{&#39;alpha&#39;: 0.0007821497008985297, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.2502458319720503
+{&#39;alpha&#39;: 0.0008460610524463392, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008460610524463392, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.2502458319720503
+loss refitting : 0.2502458319720503
+Test period: 1982-01-01 till 1991-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.16751436432946432
+{&#39;alpha&#39;: 0.0008870160623736071, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+New best hyperparameters
+Mean loss: 0.16751130899098632
+{&#39;alpha&#39;: 0.0009992959249863346, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009992959249863346, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.16751130899098632
+loss refitting : 0.16751130899098632
+Test period: 1992-01-01 till 2001-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.1687238683243265
+{&#39;alpha&#39;: 0.000436630977827316, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.1687167402444656
+{&#39;alpha&#39;: 0.0007917160554955454, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.1687113934606571
+{&#39;alpha&#39;: 0.000976721242278369, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.000976721242278369, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.1687113934606571
+loss refitting : 0.1687113934606571
+Test period: 2002-01-01 till 2011-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.22940293391828284
+{&#39;alpha&#39;: 0.0007903098808739869, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+New best hyperparameters
+Mean loss: 0.22940259951523104
+{&#39;alpha&#39;: 0.0008075216856723589, &#39;name&#39;: &#39;mlr&#39;}
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008075216856723589, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.22940259951523104
+loss refitting : 0.22940259951523104
+Test period: 2012-01-01 till 2017-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.22301587446120108
+{&#39;alpha&#39;: 2.688006309681057e-05, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.22301581719314323
+{&#39;alpha&#39;: 6.966689786456893e-05, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.22301085251966424
+{&#39;alpha&#39;: 0.0006024717256586858, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.22301004539605607
+{&#39;alpha&#39;: 0.0006489936349463186, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+New best hyperparameters
+Mean loss: 0.2230038537459852
+{&#39;alpha&#39;: 0.0009315671831207879, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009315671831207879, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.2230038537459852
+loss refitting : 0.2230038537459852
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 142.241405768542, tolerance: 0.0385633895567376
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 133.15860216513093, tolerance: 0.0385633895567376
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 164.9175549643414, tolerance: 0.043780262483660126
+  positive)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+##################################################################
+Lead time: 12 month
+##################################################################
+
+Test period: 1962-01-01 till 1971-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.21390857977044342
+{&#39;alpha&#39;: 0.0009098061157914434, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009098061157914434, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.21390857977044342
+loss refitting : 0.21390857977044342
+Test period: 1972-01-01 till 1981-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.24529410726020137
+{&#39;alpha&#39;: 6.229838142678145e-05, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.24529400471762108
+{&#39;alpha&#39;: 0.00010780868601701654, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.24529396893468203
+{&#39;alpha&#39;: 0.00011968377462212332, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.24529300359539616
+{&#39;alpha&#39;: 0.0002953034335787722, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+New best hyperparameters
+Mean loss: 0.2452887246546709
+{&#39;alpha&#39;: 0.0006405075645376713, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+New best hyperparameters
+Mean loss: 0.2452862253023229
+{&#39;alpha&#39;: 0.0007739139143300094, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+New best hyperparameters
+Mean loss: 0.24528490678017079
+{&#39;alpha&#39;: 0.0008357552230818994, &#39;name&#39;: &#39;mlr&#39;}
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008357552230818994, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.24528490678017079
+loss refitting : 0.24528490678017079
+Test period: 1982-01-01 till 1991-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.1517814303138746
+{&#39;alpha&#39;: 0.0008745880452648772, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.15177820529119168
+{&#39;alpha&#39;: 0.0009941031056481854, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009941031056481854, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.15177820529119168
+loss refitting : 0.15177820529119168
+Test period: 1992-01-01 till 2001-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.16419176042869388
+{&#39;alpha&#39;: 0.0006921207058702689, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.1641889037562354
+{&#39;alpha&#39;: 0.0008097078337849529, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.16418819808886187
+{&#39;alpha&#39;: 0.0008362118138932378, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+New best hyperparameters
+Mean loss: 0.1641869042029388
+{&#39;alpha&#39;: 0.0008827437398750827, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0008827437398750827, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.1641869042029388
+loss refitting : 0.1641869042029388
+Test period: 2002-01-01 till 2011-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.231681487996667
+{&#39;alpha&#39;: 0.0007790345013753138, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+New best hyperparameters
+Mean loss: 0.2316808221571448
+{&#39;alpha&#39;: 0.0008137907969184328, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+New best hyperparameters
+Mean loss: 0.23167899858104235
+{&#39;alpha&#39;: 0.0009021503595772909, &#39;name&#39;: &#39;mlr&#39;}
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009021503595772909, &#39;name&#39;: &#39;mlr&#39;}
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 142.71632933496014, tolerance: 0.040939952869875215
+  positive)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+best loss search: 0.23167899858104235
+loss refitting : 0.23167899858104235
+Test period: 2012-01-01 till 2017-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.22786923732996922
+{&#39;alpha&#39;: 0.00016585815800330495, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.22785660692317644
+{&#39;alpha&#39;: 0.0009717295355145644, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009717295355145644, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.22785660692317644
+loss refitting : 0.22785660692317644
+
+##################################################################
+Lead time: 15 month
+##################################################################
+
+Test period: 1962-01-01 till 1971-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.19874248721686383
+{&#39;alpha&#39;: 0.0003784842586502949, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.19873967985591193
+{&#39;alpha&#39;: 0.0005960228672037833, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.19873900786283827
+{&#39;alpha&#39;: 0.0006371715884773969, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+New best hyperparameters
+Mean loss: 0.19873690363383245
+{&#39;alpha&#39;: 0.0007515881752910485, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.19873279222377171
+{&#39;alpha&#39;: 0.0009356017764303298, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009356017764303298, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.19873279222377171
+loss refitting : 0.19873279222377171
+Test period: 1972-01-01 till 1981-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.20672357669191876
+{&#39;alpha&#39;: 0.0006004961428140476, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+New best hyperparameters
+Mean loss: 0.20671590797771744
+{&#39;alpha&#39;: 0.0009738757747658191, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009738757747658191, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.20671590797771744
+loss refitting : 0.20671590797771744
+Test period: 1982-01-01 till 1991-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.10825670576930246
+{&#39;alpha&#39;: 0.0008498118231350193, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.10825490113511682
+{&#39;alpha&#39;: 0.0009199244223681159, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009199244223681159, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.10825490113511682
+loss refitting : 0.10825490113511682
+Test period: 1992-01-01 till 2001-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.1423615152121891
+{&#39;alpha&#39;: 0.00028460308126565314, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.14235914195612465
+{&#39;alpha&#39;: 0.00047830430767023936, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+New best hyperparameters
+Mean loss: 0.14235684957911632
+{&#39;alpha&#39;: 0.0006095202968525362, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 6/10
+New best hyperparameters
+Mean loss: 0.14235366038430042
+{&#39;alpha&#39;: 0.0007550479060528971, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+New best hyperparameters
+Mean loss: 0.14234697950294706
+{&#39;alpha&#39;: 0.0009930243503253442, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009930243503253442, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.14234697950294706
+loss refitting : 0.14234697950294706
+Test period: 2002-01-01 till 2011-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.19813465707934885
+{&#39;alpha&#39;: 0.00047122152154130235, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+New best hyperparameters
+Mean loss: 0.19813177311715946
+{&#39;alpha&#39;: 0.0006807812851124569, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 4/10
+New best hyperparameters
+Mean loss: 0.1981302432685501
+{&#39;alpha&#39;: 0.0007691067371458813, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0007691067371458813, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.1981302432685501
+loss refitting : 0.1981302432685501
+Test period: 2012-01-01 till 2017-12-01
+--------------------------------------
+Search iteration Nr 1/10
+New best hyperparameters
+Mean loss: 0.18203583671479406
+{&#39;alpha&#39;: 0.0009260424171382484, &#39;name&#39;: &#39;mlr&#39;}
+Search iteration Nr 2/10
+Search iteration Nr 3/10
+Search iteration Nr 4/10
+Search iteration Nr 5/10
+Search iteration Nr 6/10
+Search iteration Nr 7/10
+Search iteration Nr 8/10
+Search iteration Nr 9/10
+Search iteration Nr 10/10
+Refit the model with best hyperparamters
+{&#39;alpha&#39;: 0.0009260424171382484, &#39;name&#39;: &#39;mlr&#39;}
+best loss search: 0.18203583671479406
+loss refitting : 0.18203583671479406
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 139.92396885962606, tolerance: 0.042794297419354844
+  positive)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:475: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Duality gap: 171.04576313358606, tolerance: 0.03962804137992832
+  positive)
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Make-hindcast">
+<h2>Make hindcast<a class="headerlink" href="#Make-hindcast" title="Permalink to this headline">¶</a></h2>
+<p>Now, each model makes the forecast for the decade on which it was NOT trained by the function cross_training().</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.learn.fit</span> <span class="k">import</span> <span class="n">cross_hindcast</span>
+<span class="n">cross_hindcast</span><span class="p">(</span><span class="n">mlr</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="s1">&#39;mlr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+##################################################################
+Lead time: 0 months
+##################################################################
+
+Predict: 1962-01-01 till 1971-12-01
+--------------------------------------
+Predict: 1972-01-01 till 1981-12-01
+--------------------------------------
+Predict: 1982-01-01 till 1991-12-01
+--------------------------------------
+Predict: 1992-01-01 till 2001-12-01
+--------------------------------------
+Predict: 2002-01-01 till 2011-12-01
+--------------------------------------
+Predict: 2012-01-01 till 2017-12-01
+--------------------------------------
+
+##################################################################
+Lead time: 3 months
+##################################################################
+
+Predict: 1962-01-01 till 1971-12-01
+--------------------------------------
+Predict: 1972-01-01 till 1981-12-01
+--------------------------------------
+Predict: 1982-01-01 till 1991-12-01
+--------------------------------------
+Predict: 1992-01-01 till 2001-12-01
+--------------------------------------
+Predict: 2002-01-01 till 2011-12-01
+--------------------------------------
+Predict: 2012-01-01 till 2017-12-01
+--------------------------------------
+
+##################################################################
+Lead time: 6 months
+##################################################################
+
+Predict: 1962-01-01 till 1971-12-01
+--------------------------------------
+Predict: 1972-01-01 till 1981-12-01
+--------------------------------------
+Predict: 1982-01-01 till 1991-12-01
+--------------------------------------
+Predict: 1992-01-01 till 2001-12-01
+--------------------------------------
+Predict: 2002-01-01 till 2011-12-01
+--------------------------------------
+Predict: 2012-01-01 till 2017-12-01
+--------------------------------------
+
+##################################################################
+Lead time: 9 months
+##################################################################
+
+Predict: 1962-01-01 till 1971-12-01
+--------------------------------------
+Predict: 1972-01-01 till 1981-12-01
+--------------------------------------
+Predict: 1982-01-01 till 1991-12-01
+--------------------------------------
+Predict: 1992-01-01 till 2001-12-01
+--------------------------------------
+Predict: 2002-01-01 till 2011-12-01
+--------------------------------------
+Predict: 2012-01-01 till 2017-12-01
+--------------------------------------
+
+##################################################################
+Lead time: 12 months
+##################################################################
+
+Predict: 1962-01-01 till 1971-12-01
+--------------------------------------
+Predict: 1972-01-01 till 1981-12-01
+--------------------------------------
+Predict: 1982-01-01 till 1991-12-01
+--------------------------------------
+Predict: 1992-01-01 till 2001-12-01
+--------------------------------------
+Predict: 2002-01-01 till 2011-12-01
+--------------------------------------
+Predict: 2012-01-01 till 2017-12-01
+--------------------------------------
+
+##################################################################
+Lead time: 15 months
+##################################################################
+
+Predict: 1962-01-01 till 1971-12-01
+--------------------------------------
+Predict: 1972-01-01 till 1981-12-01
+--------------------------------------
+Predict: 1982-01-01 till 1991-12-01
+--------------------------------------
+Predict: 1992-01-01 till 2001-12-01
+--------------------------------------
+Predict: 2002-01-01 till 2011-12-01
+--------------------------------------
+Predict: 2012-01-01 till 2017-12-01
+--------------------------------------
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Evaluation">
+<h2>Evaluation<a class="headerlink" href="#Evaluation" title="Permalink to this headline">¶</a></h2>
+<p>Finally the model can be evaluated using the Pearson correlation and she standardized root-mean-squarred error (SRMSE). The SRMSE is the RMSE that is divided by the standard deviation of each season. This skill measure needs to be used instead of the RMSE because the ONI has a seasonal cycle of the standard deviation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="k">import</span> <span class="n">MaxNLocator</span>
+
+
+<span class="kn">from</span> <span class="nn">ninolearn.learn.fit</span> <span class="k">import</span> <span class="n">n_decades</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">,</span> <span class="n">decade_color</span><span class="p">,</span> <span class="n">decade_name</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.evaluation</span> <span class="k">import</span> <span class="n">evaluation_correlation</span><span class="p">,</span> <span class="n">evaluation_decadal_correlation</span><span class="p">,</span> <span class="n">evaluation_seasonal_correlation</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.evaluation</span> <span class="k">import</span> <span class="n">evaluation_srmse</span><span class="p">,</span> <span class="n">evaluation_decadal_srmse</span><span class="p">,</span> <span class="n">evaluation_seasonal_srmse</span>
+<span class="kn">from</span> <span class="nn">ninolearn.plot.evaluation</span> <span class="k">import</span> <span class="n">plot_seasonal_skill</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># All season correlation skill</span>
+<span class="c1"># =============================================================================</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<span class="c1"># scores on the full time series</span>
+<span class="n">r</span><span class="p">,</span> <span class="n">p</span>  <span class="o">=</span> <span class="n">evaluation_correlation</span><span class="p">(</span><span class="s1">&#39;mlr&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;prediction&#39;</span><span class="p">)</span>
+
+<span class="c1"># score in different decades</span>
+<span class="n">r_dec</span><span class="p">,</span> <span class="n">p_dec</span> <span class="o">=</span> <span class="n">evaluation_decadal_correlation</span><span class="p">(</span><span class="s1">&#39;mlr&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;prediction&#39;</span><span class="p">)</span>
+
+<span class="c1"># plot correlation skills</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">r_dec</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">decade_color</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Deep Ens.  (</span><span class="si">{decade_name[j]}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Deep Ens.  (1962-2017)&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="n">lead_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Lead Time [Months]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_StandardizedResearch_14_0.png" src="../_images/jupyter_notebook_tutorials_StandardizedResearch_14_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># All season SRMSE skill</span>
+<span class="c1"># =============================================================================</span>
+<span class="n">srmse_dec</span> <span class="o">=</span> <span class="n">evaluation_decadal_srmse</span><span class="p">(</span><span class="s1">&#39;mlr&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;prediction&#39;</span><span class="p">)</span>
+<span class="n">srmse</span> <span class="o">=</span> <span class="n">evaluation_srmse</span><span class="p">(</span><span class="s1">&#39;mlr&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;prediction&#39;</span><span class="p">)</span>
+
+<span class="c1"># plot SRMSE skills</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">srmse_dec</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">decade_color</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Deep Ens.  (</span><span class="si">{decade_name[j]}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">srmse</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Deep Ens.  (1962-2017)&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="n">lead_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Lead Time [Months]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;SRMSE&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_StandardizedResearch_15_0.png" src="../_images/jupyter_notebook_tutorials_StandardizedResearch_15_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># Seasonal skills</span>
+<span class="c1"># =============================================================================</span>
+<span class="c1"># evaluate the model in different seasons</span>
+<span class="n">r_seas</span><span class="p">,</span> <span class="n">p_seas</span> <span class="o">=</span> <span class="n">evaluation_seasonal_correlation</span><span class="p">(</span><span class="s1">&#39;mlr&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;prediction&#39;</span><span class="p">)</span>
+
+<span class="n">plot_seasonal_skill</span><span class="p">(</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">r_seas</span><span class="p">,</span>  <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">13</span><span class="p">),</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">p_seas</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">linestyles</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="s1">&#39;dotted&#39;</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Correlation skill&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">srsme_seas</span> <span class="o">=</span> <span class="n">evaluation_seasonal_srmse</span><span class="p">(</span><span class="s1">&#39;mlr&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;prediction&#39;</span><span class="p">)</span>
+<span class="n">plot_seasonal_skill</span><span class="p">(</span><span class="n">lead_times</span><span class="p">,</span> <span class="n">srsme_seas</span><span class="p">,</span>  <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">inferno_r</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;SRMSE skill&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_StandardizedResearch_16_0.png" src="../_images/jupyter_notebook_tutorials_StandardizedResearch_16_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyter_notebook_tutorials_StandardizedResearch_16_1.png" src="../_images/jupyter_notebook_tutorials_StandardizedResearch_16_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="deep_ensemble.html" class="btn btn-neutral float-right" title="Deep ensemble for ENSO-forecasting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="postprocess_data.html" class="btn btn-neutral float-left" title="Postprocess data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Paul Petersik
+      <span class="lastupdated">
+        Last updated on September 28, 2019.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

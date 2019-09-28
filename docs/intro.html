@@ -38,7 +38,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="install.html" />
-    <link rel="prev" title="NinoLearn - A research framemork for statistical ENSO prediction" href="index.html" /> 
+    <link rel="prev" title="NinoLearn - A research framework for statistical ENSO prediction" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -100,7 +100,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#data-preparation">Data preparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#postprocessing">Postprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#read-data">Read data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#statistical-machine-learning-models">Statistical/Machine Learning models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#machine-learning">Machine Learning</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#cited-literature">Cited literature</a></li>
@@ -380,13 +380,23 @@ SST anomaly (SSTA) form the ERSSTv5 this looks as follows:</p>
 <p>The ONI and the SSTA are now read for the same time period (January 1980 till
 December 2017) and the SSTA for the specified regions (boundaries in degrees East).</p>
 </div>
-<div class="section" id="statistical-machine-learning-models">
-<h3>Statistical/Machine Learning models<a class="headerlink" href="#statistical-machine-learning-models" title="Permalink to this headline">¶</a></h3>
-<p>Finally, some models that were developed during the Master Thesis of
-Petersik (2019) are available in <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models</span></code>. In particular
+<div class="section" id="machine-learning">
+<h3>Machine Learning<a class="headerlink" href="#machine-learning" title="Permalink to this headline">¶</a></h3>
+<p>For the training and evaluation of machine learning models, NinoLearn aims to
+standardize the corresponding procedures.</p>
+<p>New models within NinoLearn need to be set up in a specific way, such that
+they can be trained and evaluated following standardized procedures. At the moment,
+this is still work in progress and just some parts of the code are brought into
+a user friendly style.</p>
+<p>The module <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models</span></code> already contains some models that were
+developed during the Master Thesis of Petersik (2019)`. In particular
 a Deep Ensemble (<a class="reference internal" href="models.html#module-ninolearn.learn.models.dem" title="ninolearn.learn.models.dem"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.dem</span></code></a>) and an Encoder-Decoder
-(<code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.encoderDecoder</span></code>) model is available. Furthermore,
-some evaluation methods for seasonal evaluation of the model are available</p>
+(<a class="reference internal" href="models.html#module-ninolearn.learn.models.encoderDecoder" title="ninolearn.learn.models.encoderDecoder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.models.encoderDecoder</span></code></a>) model is available.</p>
+<p>The modlue <code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.fit_predict</span></code> contains methods for a standardized
+training of the model and the corresponding prediction. In the module
+<a class="reference internal" href="evaluation.html#module-ninolearn.learn.evaluation" title="ninolearn.learn.evaluation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ninolearn.learn.evaluation</span></code></a>, some methods are gathered to evaluate
+models for on the entire time series as well as on different seasons and decades
+using the RMSE and the Pearson correlation.</p>
 </div>
 </div>
 <div class="section" id="cited-literature">
@@ -414,7 +424,7 @@ Earth Syst. Dynam., 9, 969–983.</p>
         <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="NinoLearn - A research framemork for statistical ENSO prediction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="NinoLearn - A research framework for statistical ENSO prediction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -425,7 +435,7 @@ Earth Syst. Dynam., 9, 969–983.</p>
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 02, 2019.
+        Last updated on September 28, 2019.
       </span>
 
     </p>

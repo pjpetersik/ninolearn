@@ -191,8 +191,6 @@
     <span class="n">obs</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_times[i]}</span><span class="s1"> months&#39;</span><span class="p">)</span>
-
         <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
@@ -227,8 +225,6 @@
     <span class="n">obs</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_times[i]}</span><span class="s1"> months&#39;</span><span class="p">)</span>
-
         <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
@@ -263,14 +259,11 @@
     <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_times[i]}</span><span class="s1"> months&#39;</span><span class="p">)</span>
-
         <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01 till </span><span class="si">{decades[j+1]}</span><span class="s1">-12-01&#39;</span> <span class="p">)</span>
-            <span class="n">indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j+1]}</span><span class="s1">-12-01&#39;</span><span class="p">)</span>
+            <span class="n">indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;{decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
             <span class="n">decadal_r</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">decadal_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">indeces</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pred</span><span class="p">[</span><span class="n">indeces</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">decadal_r</span><span class="p">,</span> <span class="n">decadal_p</span></div>
@@ -302,13 +295,12 @@
     <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_times[i]}</span><span class="s1"> months&#39;</span><span class="p">)</span>
 
         <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01 till </span><span class="si">{decades[j+1]}</span><span class="s1">-12-01&#39;</span> <span class="p">)</span>
+
             <span class="n">indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j+1]}</span><span class="s1">-12-01&#39;</span><span class="p">)</span>
 
             <span class="n">decadal_srmse</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_srmse</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">indeces</span><span class="p">],</span> <span class="n">pred</span><span class="p">[</span><span class="n">indeces</span><span class="p">],</span>
@@ -345,7 +337,6 @@
     <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_times[i]}</span><span class="s1"> months&#39;</span><span class="p">)</span>
 
         <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
@@ -381,8 +372,6 @@
     <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_times[i]}</span><span class="s1"> months&#39;</span><span class="p">)</span>
-
         <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
@@ -403,7 +392,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 02, 2019.
+        Last updated on September 28, 2019.
       </span>
 
     </p>

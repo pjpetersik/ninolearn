@@ -4,11 +4,11 @@
    contain the root `toctree` directive.
 
 ################################################################
-NinoLearn - A research framemork for statistical ENSO prediction
+NinoLearn - A research framework for statistical ENSO prediction
 ################################################################
 NinoLearn is a open source research framework  for statistical ENSO prediction
 that is initiated to **facilitate** collaboration, **speed up** the start up of
-research and make realized research **more transparent, comparable and reproducable**.
+research and make realized research **more transparent, comparable and reproducible**.
 
 The current framework was developed in 2019 during the Master Thesis of
 Paul Petersik and is available on GitHub

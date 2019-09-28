@@ -6,4 +6,5 @@ Learn
    :maxdepth: 2
 
    models
+   fit
    evaluation

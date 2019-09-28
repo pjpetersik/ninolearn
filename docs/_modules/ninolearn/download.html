@@ -168,7 +168,7 @@
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 
-<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">rawdir</span>
+<span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">rawdir</span><span class="p">,</span> <span class="n">basedir</span>
 
 <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">rawdir</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;make a data directory at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">rawdir</span><span class="p">)</span>
@@ -197,7 +197,11 @@
         <span class="n">downloadFTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;downloadType&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;http&#39;</span><span class="p">:</span>
-        <span class="n">downloadHTTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="n">downloadHTTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;downloadType&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;local&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Copy </span><span class="si">{info_dict[&#39;name&#39;]}</span><span class="s2"> to data directory&quot;</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">join</span><span class="p">(</span><span class="n">rawdir</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span></div>
 
 
 <div class="viewcode-block" id="downloadFTP"><a class="viewcode-back" href="../../download.html#ninolearn.download.downloadFTP">[docs]</a><span class="k">def</span> <span class="nf">downloadFTP</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -476,6 +480,11 @@
             <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://iri.columbia.edu/~forecast/ensofcst/Data/ensofcst_ALLto0719&#39;</span><span class="p">,</span>
             <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;other_forecasts.csv&#39;</span>
 
+            <span class="p">}</span>
+
+    <span class="n">KINDEX</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;downloadType&#39;</span><span class="p">:</span><span class="s1">&#39;local&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Kindex.mat&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span><span class="s1">&#39;ninolearn/data/Kindex.mat&#39;</span><span class="p">)</span>
             <span class="p">}</span></div>
 
 </pre></div>
@@ -492,7 +501,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 02, 2019.
+        Last updated on September 28, 2019.
       </span>
 
     </p>
