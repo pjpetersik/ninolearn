@@ -10,7 +10,7 @@ from os.path import join
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
 from ninolearn.IO.read_processed import data_reader
-from ninolearn.learn.evaluation.skillMeasures import mean_srmse
+from ninolearn.learn.skillMeasures import mean_srmse
 
 from scipy.stats import pearsonr
 
@@ -23,6 +23,8 @@ n_decades = len(decades)
 lead_times = [0, 3, 6, 9, 12, 15]
 n_lead = len(lead_times)
 
+decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalblue']
+decade_name = ['1962-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
 
 def cross_training(model, pipeline, n_iter, **kwargs):
     """
@@ -43,7 +45,7 @@ def cross_training(model, pipeline, n_iter, **kwargs):
     """
 
     for lead_time in [0, 3, 6, 9, 12, 15]:
-        X, y, timey, yp = pipeline(lead_time, return_persistance=True)
+        X, y, timey = pipeline(lead_time, return_persistance=False)
 
         print_header(f'Lead time: {lead_time} month')
 
@@ -57,7 +59,7 @@ def cross_training(model, pipeline, n_iter, **kwargs):
 
             m = model(**kwargs)
             m.fit_RandomizedSearch(trainX, trainy, n_iter=n_iter)
-            m.save(location=modeldir, dir_name=f'{m.name}_decade{decade}_lead{lead_time}')
+            m.save(location=modeldir, dir_name=f"{m.hyperparameters['name']}_decade{decade}_lead{lead_time}")
 
             del m
 

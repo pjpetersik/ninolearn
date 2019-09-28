@@ -5,7 +5,6 @@ The following script downloads all data that was relevant for my master thesis.
 from ninolearn.download import download, sources
 from ninolearn.utils import print_header
 
-
 print_header("Download Data")
 
 #%%

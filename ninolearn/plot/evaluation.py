@@ -3,7 +3,7 @@ from matplotlib.colors import ListedColormap
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
-from ninolearn.learn.evaluation.skillMeasures import seasonal_correlation
+from ninolearn.learn.skillMeasures import seasonal_correlation
 
 seismic = plt.cm.get_cmap('seismic', 256)
 newcolors = seismic(np.linspace(0, 1, 256))
