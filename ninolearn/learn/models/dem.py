@@ -279,47 +279,47 @@ class DEM(baseModel):
         end_time = time.time()
         passed_time = np.round(end_time-start_time, decimals=1)
         print(f'Computation time: {passed_time}s')
-
-
-    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
-
-        # check if hyperparameters where provided in lists for randomized search
-        if len(self.hyperparameters_search) == 0:
-            raise Exception("No variable indicated for hyperparameter search!")
-
-        #iterate with randomized hyperparameters
-        best_loss = np.inf
-        for i in range(n_iter):
-            print_header(f"Search iteration Nr {i+1}/{n_iter}")
-
-            # random selection of hyperparameters
-            for key in self.hyperparameters_search.keys():
-                low = self.hyperparameters_search[key][0]
-                high = self.hyperparameters_search[key][1]
-
-                self.hyperparameters[key] = np.random.uniform(low, high)
-
-            self.fit(trainX, trainy, **kwargs)
-
-            # check if validation score was enhanced
-            if self.mean_val_loss<best_loss:
-                best_loss = self.mean_val_loss
-                self.best_hyperparameters = self.hyperparameters.copy()
-
-                small_print_header("New best hyperparameters")
-                print(f"Mean loss: {best_loss}")
-                print(self.best_hyperparameters)
-
-        # refit the model with optimized hyperparameter
-        # AND to have the weights of the DE for the best hyperparameters again
-        print_header("Refit the model with best hyperparamters")
-
-        self.hyperparameters = self.best_hyperparameters.copy()
-        print(self.hyperparameters)
-        self.fit(trainX, trainy, **kwargs)
-
-        print(f"best loss search: {best_loss}")
-        print(f"loss refitting : {self.mean_val_loss}")
+#
+#
+#    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+#
+#        # check if hyperparameters where provided in lists for randomized search
+#        if len(self.hyperparameters_search) == 0:
+#            raise Exception("No variable indicated for hyperparameter search!")
+#
+#        #iterate with randomized hyperparameters
+#        best_loss = np.inf
+#        for i in range(n_iter):
+#            print_header(f"Search iteration Nr {i+1}/{n_iter}")
+#
+#            # random selection of hyperparameters
+#            for key in self.hyperparameters_search.keys():
+#                low = self.hyperparameters_search[key][0]
+#                high = self.hyperparameters_search[key][1]
+#
+#                self.hyperparameters[key] = np.random.uniform(low, high)
+#
+#            self.fit(trainX, trainy, **kwargs)
+#
+#            # check if validation score was enhanced
+#            if self.mean_val_loss<best_loss:
+#                best_loss = self.mean_val_loss
+#                self.best_hyperparameters = self.hyperparameters.copy()
+#
+#                small_print_header("New best hyperparameters")
+#                print(f"Mean loss: {best_loss}")
+#                print(self.best_hyperparameters)
+#
+#        # refit the model with optimized hyperparameter
+#        # AND to have the weights of the DE for the best hyperparameters again
+#        print_header("Refit the model with best hyperparamters")
+#
+#        self.hyperparameters = self.best_hyperparameters.copy()
+#        print(self.hyperparameters)
+#        self.fit(trainX, trainy, **kwargs)
+#
+#        print(f"best loss search: {best_loss}")
+#        print(f"loss refitting : {self.mean_val_loss}")
 
     def predict(self, X):
         """
