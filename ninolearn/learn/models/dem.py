@@ -111,6 +111,7 @@ class DEM(baseModel):
                                  batch_size=batch_size, n_segments=n_segments, n_members_segment=n_members_segment,
                                  lr=lr, patience=patience, epochs=epochs, verbose=verbose, pdf=pdf,
                                  name=name)
+        self.get_model_desc(self.hyperparameters['pdf'])
 
     def get_model_desc(self, pdf):
         """
@@ -141,7 +142,6 @@ class DEM(baseModel):
         """
         # derived parameters
         self.hyperparameters['n_members'] = self.hyperparameters['n_segments'] * self.hyperparameters['n_members_segment']
-        self.get_model_desc(self.hyperparameters['pdf'])
 
         # initialize optimizer and early stopping
         self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)

@@ -9,10 +9,10 @@ from ninolearn.learn.evaluation import evaluation_srmse, evaluation_decadal_srms
 from ninolearn.plot.evaluation import plot_seasonal_skill
 
 from cross_training import pipeline
-#
+#%%
 cross_hindcast(DEM, pipeline, 'dem')
 
-# =============================================================================
+#%% =============================================================================
 # All season correlation skill
 # =============================================================================
 
@@ -25,8 +25,9 @@ r_dec, p_dec = evaluation_decadal_correlation('dem')
 
 # plot correlation skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
-for j in range(n_decades):
-    plt.plot(lead_times, r_dec[j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
+
+for j in range(n_decades-1):
+    plt.plot(lead_times, r_dec[:,j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
 plt.plot(lead_times, r, label="Deep Ens.  (1962-2017)", c='k', lw=2)
 
 plt.ylim(0,1)
@@ -38,7 +39,7 @@ plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 
-# =============================================================================
+#%% =============================================================================
 # All season SRMSE skill
 # =============================================================================
 srmse_dec = evaluation_decadal_srmse('dem')
@@ -46,8 +47,8 @@ srmse = evaluation_srmse('dem')
 
 # plot SRMSE skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
-for j in range(n_decades):
-    plt.plot(lead_times, srmse_dec[j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
+for j in range(n_decades-1):
+    plt.plot(lead_times, srmse_dec[:,j], c=decade_color[j], label=f"Deep Ens.  ({decade_name[j]})")
 plt.plot(lead_times, srmse, label="Deep Ens.  (1962-2017)", c='k', lw=2)
 
 plt.ylim(0,1.5)

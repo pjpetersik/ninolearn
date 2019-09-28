@@ -5,7 +5,7 @@ from ninolearn.utils import print_header
 
 from ninolearn.IO.read_processed import data_reader
 from ninolearn.learn.skillMeasures import mean_srmse, seasonal_correlation, seasonal_srmse
-from ninolearn.learn.fit_predict import lead_times, n_lead, decades, n_decades
+from ninolearn.learn.fit import lead_times, n_lead, decades, n_decades
 from scipy.stats import pearsonr
 
 
@@ -33,8 +33,6 @@ def evaluation_correlation(model_name, variable_name = 'mean'):
     obs = reader.read_csv('oni')
 
     for i in range(n_lead):
-        print_header(f'Lead time: {lead_times[i]} months')
-
         pred_all = reader.read_forecasts(model_name, lead_times[i])
         pred = pred_all[variable_name]
 
@@ -69,8 +67,6 @@ def evaluation_srmse(model_name, variable_name = 'mean'):
     obs = reader.read_csv('oni')
 
     for i in range(n_lead):
-        print_header(f'Lead time: {lead_times[i]} months')
-
         pred_all = reader.read_forecasts(model_name, lead_times[i])
         pred = pred_all[variable_name]
 
@@ -105,14 +101,11 @@ def evaluation_decadal_correlation(model_name, variable_name = 'mean'):
     obs_time = obs.index
 
     for i in range(n_lead):
-        print_header(f'Lead time: {lead_times[i]} months')
-
         pred_all = reader.read_forecasts(model_name, lead_times[i])
         pred = pred_all[variable_name]
 
         for j in range(n_decades-1):
-            print(f'{decades[j]}-01-01 till {decades[j+1]}-12-01' )
-            indeces = (obs_time>=f'{decades[j]}-01-01') & (obs_time<=f'{decades[j+1]}-12-01')
+            indeces = (obs_time>=f'{decades[j]}-01-01') & (obs_time<=f'{decades[j+1]-1}-12-01')
             decadal_r[i, j], decadal_p[i, j] = pearsonr(obs[indeces].values, pred[indeces].values)
 
     return decadal_r, decadal_p
@@ -144,13 +137,12 @@ def evaluation_decadal_srmse(model_name, variable_name = 'mean'):
     obs_time = obs.index
 
     for i in range(n_lead):
-        print_header(f'Lead time: {lead_times[i]} months')
 
         pred_all = reader.read_forecasts(model_name, lead_times[i])
         pred = pred_all[variable_name]
 
         for j in range(n_decades-1):
-            print(f'{decades[j]}-01-01 till {decades[j+1]}-12-01' )
+
             indeces = (obs_time>=f'{decades[j]}-01-01') & (obs_time<=f'{decades[j+1]}-12-01')
 
             decadal_srmse[i, j] = mean_srmse(obs[indeces], pred[indeces],
@@ -187,7 +179,6 @@ def evaluation_seasonal_correlation(model_name, variable_name='mean'):
     obs_time = obs.index
 
     for i in range(n_lead):
-        print_header(f'Lead time: {lead_times[i]} months')
 
         pred_all = reader.read_forecasts(model_name, lead_times[i])
         pred = pred_all[variable_name]
@@ -223,8 +214,6 @@ def evaluation_seasonal_srmse(model_name, variable_name='mean'):
     obs_time = obs.index
 
     for i in range(n_lead):
-        print_header(f'Lead time: {lead_times[i]} months')
-
         pred_all = reader.read_forecasts(model_name, lead_times[i])
         pred = pred_all[variable_name]
 

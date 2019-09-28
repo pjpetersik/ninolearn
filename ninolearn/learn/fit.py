@@ -9,14 +9,9 @@ from os.path import join
 
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
-from ninolearn.IO.read_processed import data_reader
-from ninolearn.learn.skillMeasures import mean_srmse
-
-from scipy.stats import pearsonr
-
 
 # evaluation decades
-decades = [1962, 1972, 1982, 1992, 2002, 2012]
+decades = [1962, 1972, 1982, 1992, 2002, 2012, 2018]
 n_decades = len(decades)
 
 # lead times for the evaluation
@@ -49,17 +44,17 @@ def cross_training(model, pipeline, n_iter, **kwargs):
 
         print_header(f'Lead time: {lead_time} month')
 
-        for decade in decades:
-            small_print_header(f'Test period: {decade}-01-01 till {decade+9}-12-01')
+        for j in range(n_decades-1):
+            small_print_header(f'Test period: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
 
-            test_indeces = (timey>=f'{decade}-01-01') & (timey<=f'{decade+9}-12-01')
+            test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
             train_indeces = np.invert(test_indeces)
 
             trainX, trainy = X[train_indeces,:], y[train_indeces]
 
             m = model(**kwargs)
             m.fit_RandomizedSearch(trainX, trainy, n_iter=n_iter)
-            m.save(location=modeldir, dir_name=f"{m.hyperparameters['name']}_decade{decade}_lead{lead_time}")
+            m.save(location=modeldir, dir_name=f"{m.hyperparameters['name']}_decade{decades[j]}_lead{lead_time}")
 
             del m
 
@@ -86,15 +81,15 @@ def cross_hindcast(model, pipeline, model_name):
         timeytrue = pd.DatetimeIndex([])
 
         first_dec_loop = True
-        for decade in decades:
-            small_print_header(f'Predict: {decade}-01-01 till {decade+9}-12-01')
+        for j in range(n_decades-1):
+            small_print_header(f'Predict: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
 
             # test indices
-            test_indeces = (timey>=f'{decade}-01-01') & (timey<=f'{decade+9}-12-01')
+            test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
             testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
             m = model()
-            m.load(location=modeldir, dir_name=f'{model_name}_decade{decade}_lead{lead_time}')
+            m.load(location=modeldir, dir_name=f'{model_name}_decade{decades[j]}_lead{lead_time}')
 
             # allocate arrays and variables for which the model must be loaded
             if first_dec_loop:
