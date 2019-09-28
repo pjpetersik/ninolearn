@@ -224,7 +224,7 @@ developed during the Master Thesis of Petersik (2019)`. In particular
 a Deep Ensemble (:mod:`ninolearn.learn.models.dem`) and an Encoder-Decoder
 (:mod:`ninolearn.learn.models.encoderDecoder`) model is available.
 
-The modlue :mod:`ninolearn.learn.fit_predict` contains methods for a standardized
+The modlue :mod:`ninolearn.learn.fit` contains methods for a standardized
 training of the model and the corresponding prediction. In the module
 :mod:`ninolearn.learn.evaluation`, some methods are gathered to evaluate
 models for on the entire time series as well as on different seasons and decades

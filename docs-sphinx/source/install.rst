@@ -78,8 +78,8 @@ file to shorten the activation process:
 Open a new terminal or source the :code:`.bashrc` file (as above). From now on
 you can activate the environment by running :code:`ninolearn_env` in your terminal.
 Within this environment NinoLearn will be available for you. To make the code working
-you need to enter some directory pathes into the file 'privateTEMPLATE.py' in the 'ninolearn'
-directory. Then, rename the file to 'private.py'. You may not push this file to
+you need to enter some directory pathes into the file :code:`privateTEMPLATE.py`
+in the :code:`ninolearn` directory. Then, rename the file to 'private.py'. You may not push this file to
 a public repository.
 
 Note, that the package is still in the beginning of its development. Hence, its certainly not
