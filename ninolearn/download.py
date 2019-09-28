@@ -10,7 +10,7 @@ from os import remove, mkdir
 import gzip
 import shutil
 
-from ninolearn.pathes import rawdir
+from ninolearn.pathes import rawdir, basedir
 
 if not exists(rawdir):
     print("make a data directory at %s" % rawdir)
@@ -40,6 +40,9 @@ def download(info_dict, **kwargs):
 
     elif info_dict['downloadType']=='http':
         downloadHTTP(info_dict, **kwargs)
+
+    elif info_dict['downloadType']=='local':
+        shutil.copy(info_dict['path'], join(rawdir, info_dict['name']))
 
 
 def downloadFTP(info_dict, outdir='',
@@ -318,5 +321,10 @@ class sources(object):
             'url': 'https://iri.columbia.edu/~forecast/ensofcst/Data/ensofcst_ALLto0719',
             'filename': 'other_forecasts.csv'
 
+            }
+
+    KINDEX = {'downloadType':'local',
+              'name': 'Kindex.mat',
+              'path': join(basedir,'ninolearn/data/Kindex.mat')
             }
 
