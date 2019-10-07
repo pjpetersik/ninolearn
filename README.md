@@ -1,4 +1,6 @@
-<img src="https://github.com/pjpetersik/ninolearn/blob/master/logo/logo.png" width="250">
+# NinoLearn
+
+<img src="https://github.com/pjpetersik/ninolearn/blob/master/logo/logo.png" width="250" align="right">
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [docs-latest-url]: https://pjpetersik.github.io/ninolearn/
