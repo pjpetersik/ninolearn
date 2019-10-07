@@ -11,7 +11,9 @@ from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
 
 # evaluation decades
-decades = [1962, 1972, 1982, 1992, 2002, 2012, 2018]
+decades = [1963, 1972, 1982, 1992, 2002, 2012, 2018]
+decades_elninolike = []
+
 n_decades = len(decades)
 
 # lead times for the evaluation
@@ -19,7 +21,7 @@ lead_times = [0, 3, 6, 9, 12, 15]
 n_lead = len(lead_times)
 
 decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalblue']
-decade_name = ['1962-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
+decade_name = ['1963-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
 
 def cross_training(model, pipeline, n_iter, **kwargs):
     """
@@ -112,8 +114,8 @@ def cross_hindcast(model, pipeline, model_name):
             timeytrue = timeytrue.append(testtimey)
             del m
 
-        if timeytrue[0]!=pd.to_datetime('1962-01-01'):
-            expected_first_date = '1962-01-01'
+        if timeytrue[0]!=pd.to_datetime('1963-01-01'):
+            expected_first_date = '1963-01-01'
             got_first_date = timeytrue[0].isoformat()[:10]
 
             raise Exception(f"The first predicted date for lead time {lead_time} \

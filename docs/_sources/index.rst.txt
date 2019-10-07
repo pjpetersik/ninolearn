@@ -10,11 +10,15 @@ NinoLearn is a open source research framework  for statistical ENSO prediction
 that is initiated to **facilitate** collaboration, **speed up** the start up of
 research and make realized research **more transparent, comparable and reproducible**.
 
+..  youtube:: 91Mw8y9HqZc
+    :width: 100%
+
 The current framework was developed in 2019 during the Master Thesis of
 Paul Petersik and is available on GitHub
 (see `here <https://github.com/pjpetersik/ninolearn>`_). It lays the groundwork
 for a further development and the integration
 of other postprocessing routines and statistical models.
+
 
 
 ********

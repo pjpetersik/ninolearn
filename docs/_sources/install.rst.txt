@@ -10,7 +10,7 @@ GitHub repository by executing the following snippet in your terminal:
 
 .. code-block:: console
 
-    git clone git@github.com:pjpetersik/ninolearn.git
+    git clone https://github.com/pjpetersik/ninolearn
 
 Now put the PYTHONPATH to the base folder of Ninolearn into your .bashrc file:
 

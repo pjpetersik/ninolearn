@@ -7,10 +7,11 @@ class baseModel(object):
 
     Errors will be raised if mandotory functions are not overwritten
     by the child model. Mandetory functions are:
-        · .fit
-        · .predict
-        · .save
-        · .load
+
+        1. fit
+        2. predict
+        3. save
+        4. load
     """
     def __init__(self):
         raise NameError("Function '__init__' is not defined")
@@ -41,7 +42,7 @@ class baseModel(object):
 
         :param trainX: The feature set.
 
-        :param: trainy: The label set.
+        :param trainy: The label set.
 
         :param n_iter: The number of iterations for the random search.
 

@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Training and predicting" href="fit_predict.html" />
+    <link rel="next" title="Training and predicting" href="fit.html" />
     <link rel="prev" title="Learn" href="learn.html" /> 
 </head>
 
@@ -98,11 +98,11 @@
 <li class="toctree-l2"><a class="reference internal" href="preprocess.html">Preprocess</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="learn.html">Learn</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Models</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#module-ninolearn.learn.models.dem">Deep Ensemble Model (DEM)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ninolearn.learn.models.encoderDecoder">Encoder-Decoder (ED)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ninolearn.learn.models.baseModel">Base Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#developed-models">Developed models</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="fit_predict.html">Training and predicting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fit.html">Training and predicting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
 </ul>
 </li>
@@ -204,8 +204,64 @@
 </style>
 <div class="section" id="models">
 <h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+<p>The basic idea behind all of the NinoLearn models is that they inherit some
+more general functions from the <a class="reference internal" href="#ninolearn.learn.models.baseModel.baseModel" title="ninolearn.learn.models.baseModel.baseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ninolearn.learn.models.baseModel.baseModel</span></code></a>
+class. In this is done, such that all models can be trained following the same
+standards. In particular, this is done such that the methods
+<a class="reference internal" href="fit.html#ninolearn.learn.fit.cross_training" title="ninolearn.learn.fit.cross_training"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ninolearn.learn.fit.cross_training()</span></code></a> and
+<a class="reference internal" href="fit.html#ninolearn.learn.fit.cross_hindcast" title="ninolearn.learn.fit.cross_hindcast"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ninolearn.learn.fit.cross_hindcast()</span></code></a> work equally for each new model.</p>
+<div class="section" id="module-ninolearn.learn.models.baseModel">
+<span id="base-model"></span><h2>Base Model<a class="headerlink" href="#module-ninolearn.learn.models.baseModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ninolearn.learn.models.baseModel.baseModel">
+<em class="property">class </em><code class="sig-prename descclassname">ninolearn.learn.models.baseModel.</code><code class="sig-name descname">baseModel</code><a class="reference internal" href="_modules/ninolearn/learn/models/baseModel.html#baseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.baseModel.baseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class from which each new model should inherit. Because of the
+inheritance, standardized training and testing will be possible.</p>
+<p>Errors will be raised if mandotory functions are not overwritten
+by the child model. Mandetory functions are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>fit</p></li>
+<li><p>predict</p></li>
+<li><p>save</p></li>
+<li><p>load</p></li>
+</ol>
+</div></blockquote>
+<dl class="method">
+<dt id="ninolearn.learn.models.baseModel.baseModel.fit_RandomizedSearch">
+<code class="sig-name descname">fit_RandomizedSearch</code><span class="sig-paren">(</span><em class="sig-param">trainX</em>, <em class="sig-param">trainy</em>, <em class="sig-param">n_iter=10</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/baseModel.html#baseModel.fit_RandomizedSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.baseModel.baseModel.fit_RandomizedSearch" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method performs a random search in the hyperparamter space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trainX</strong> – The feature set.</p></li>
+<li><p><strong>trainy</strong> – The label set.</p></li>
+<li><p><strong>n_iter</strong> – The number of iterations for the random search.</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments that are passed to the fit method.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ninolearn.learn.models.baseModel.baseModel.set_hyperparameters">
+<code class="sig-name descname">set_hyperparameters</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/baseModel.html#baseModel.set_hyperparameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.baseModel.baseModel.set_hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the hyperparameters for the model that are provided as keyword
+arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – The hyperparameters that are used in the child model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="developed-models">
+<h2>Developed models<a class="headerlink" href="#developed-models" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-ninolearn.learn.models.dem">
-<span id="deep-ensemble-model-dem"></span><h2>Deep Ensemble Model (DEM)<a class="headerlink" href="#module-ninolearn.learn.models.dem" title="Permalink to this headline">¶</a></h2>
+<span id="deep-ensemble-model-dem"></span><h3>Deep Ensemble Model (DEM)<a class="headerlink" href="#module-ninolearn.learn.models.dem" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ninolearn.learn.models.dem.DEM">
 <em class="property">class </em><code class="sig-prename descclassname">ninolearn.learn.models.dem.</code><code class="sig-name descname">DEM</code><span class="sig-paren">(</span><em class="sig-param">layers=1</em>, <em class="sig-param">neurons=16</em>, <em class="sig-param">dropout=0.2</em>, <em class="sig-param">noise_in=0.1</em>, <em class="sig-param">noise_mu=0.1</em>, <em class="sig-param">noise_sigma=0.1</em>, <em class="sig-param">noise_alpha=0.1</em>, <em class="sig-param">l1_hidden=0.1</em>, <em class="sig-param">l2_hidden=0.1</em>, <em class="sig-param">l1_mu=0.0</em>, <em class="sig-param">l2_mu=0.1</em>, <em class="sig-param">l1_sigma=0.1</em>, <em class="sig-param">l2_sigma=0.1</em>, <em class="sig-param">l1_alpha=0.1</em>, <em class="sig-param">l2_alpha=0.1</em>, <em class="sig-param">batch_size=10</em>, <em class="sig-param">n_segments=5</em>, <em class="sig-param">n_members_segment=1</em>, <em class="sig-param">lr=0.001</em>, <em class="sig-param">patience=10</em>, <em class="sig-param">epochs=300</em>, <em class="sig-param">verbose=0</em>, <em class="sig-param">pdf='normal'</em>, <em class="sig-param">name='dem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM" title="Permalink to this definition">¶</a></dt>
@@ -213,6 +269,31 @@
 deviation with one hidden layer having the ReLU function as activation for
 the hidden layer. It is trained using the MSE or negative-log-likelihood of
 a gaussian distribution, respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layers</strong> (<em>int</em>) – Number of hidden layers.</p></li>
+<li><p><strong>neurons</strong> (<em>int</em>) – Number of neurons in a hidden layers.</p></li>
+<li><p><strong>dropout</strong> (<em>float</em>) – Dropout rate for the hidden layer neurons.</p></li>
+<li><p><strong>noise</strong> (<em>float</em>) – Standard deviation of the gaussian noise that is added to    the input</p></li>
+<li><p><strong>l1_hidden</strong> (<em>float</em>) – Coefficent for the L1 penalty term for the hidden layer.</p></li>
+<li><p><strong>l2_hidden</strong> (<em>float</em>) – Coefficent for the L2 penalty term for the hidden layer.</p></li>
+<li><p><strong>l1_mu</strong> (<em>float</em>) – Coefficent for the L1 penalty term in the mean-output neuron.</p></li>
+<li><p><strong>l2_mu</strong> (<em>float</em>) – Coefficent for the L2 penalty term in the mean-output neuron.</p></li>
+<li><p><strong>l1_sigma</strong> (<em>float</em>) – Coefficent for the L1 penalty term in the    standard-deviation-output neuron.</p></li>
+<li><p><strong>l2_mu</strong> – Coefficent for the L2 penalty term in the standard-deviation     output neuron.</p></li>
+<li><p><strong>batch_size</strong> – Batch size for the training.</p></li>
+<li><p><strong>n_segments</strong> – Number of segments for the generation of members.</p></li>
+<li><p><strong>n_members_segment</strong> – number of members that are generated per    segment.</p></li>
+<li><p><strong>lr</strong> – the learning rate during training</p></li>
+<li><p><strong>patience</strong> – Number of epochs to wait until training is stopped if    score was not improved.</p></li>
+<li><p><strong>epochs</strong> – The maximum numberof epochs for the training.</p></li>
+<li><p><strong>verbose</strong> – Option to print scores during training to the screen.     Here, 0 means silent.</p></li>
+<li><p><strong>pdf</strong> (<em>str</em>) – The distribution which shell be predicted. Either ‘simple’    (just one value), ‘normal’ (Gaussian) or ‘skewed’ (skewed Gaussian).</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the model.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="ninolearn.learn.models.dem.DEM.build_model">
 <code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param">n_features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ninolearn/learn/models/dem.html#DEM.build_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.dem.DEM.build_model" title="Permalink to this definition">¶</a></dt>
@@ -274,7 +355,7 @@ predicted distribution is selected.</p>
 
 </div>
 <div class="section" id="module-ninolearn.learn.models.encoderDecoder">
-<span id="encoder-decoder-ed"></span><h2>Encoder-Decoder (ED)<a class="headerlink" href="#module-ninolearn.learn.models.encoderDecoder" title="Permalink to this headline">¶</a></h2>
+<span id="encoder-decoder-ed"></span><h3>Encoder-Decoder (ED)<a class="headerlink" href="#module-ninolearn.learn.models.encoderDecoder" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ninolearn.learn.models.encoderDecoder.EncoderDecoder">
 <em class="property">class </em><code class="sig-prename descclassname">ninolearn.learn.models.encoderDecoder.</code><code class="sig-name descname">EncoderDecoder</code><a class="reference internal" href="_modules/ninolearn/learn/models/encoderDecoder.html#EncoderDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ninolearn.learn.models.encoderDecoder.EncoderDecoder" title="Permalink to this definition">¶</a></dt>
@@ -413,6 +494,7 @@ a the method .fit_RandomizedSearch() is used.</p>
 
 </div>
 </div>
+</div>
 
 
            </div>
@@ -422,7 +504,7 @@ a the method .fit_RandomizedSearch() is used.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="fit_predict.html" class="btn btn-neutral float-right" title="Training and predicting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="fit.html" class="btn btn-neutral float-right" title="Training and predicting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="learn.html" class="btn btn-neutral float-left" title="Learn" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -436,7 +518,7 @@ a the method .fit_RandomizedSearch() is used.</p>
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 28, 2019.
+        Last updated on Oktober 07, 2019.
       </span>
 
     </p>

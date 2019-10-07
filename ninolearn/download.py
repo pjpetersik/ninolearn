@@ -234,7 +234,7 @@ class sources(object):
             'filename': 'nino34detrend.txt'
             }
 
-    NINOindeces = {
+    NINOindices = {
             'downloadType':'http',
             'url': 'https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.81-10.ascii',
             'filename': 'nino_1_4.txt'

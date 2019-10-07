@@ -163,13 +163,15 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
 
 <span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">print_header</span><span class="p">,</span> <span class="n">small_print_header</span>
 <span class="kn">from</span> <span class="nn">ninolearn.pathes</span> <span class="k">import</span> <span class="n">modeldir</span><span class="p">,</span> <span class="n">processeddir</span>
 
 <span class="c1"># evaluation decades</span>
-<span class="n">decades</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1962</span><span class="p">,</span> <span class="mi">1972</span><span class="p">,</span> <span class="mi">1982</span><span class="p">,</span> <span class="mi">1992</span><span class="p">,</span> <span class="mi">2002</span><span class="p">,</span> <span class="mi">2012</span><span class="p">,</span> <span class="mi">2018</span><span class="p">]</span>
+<span class="n">decades</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1963</span><span class="p">,</span> <span class="mi">1972</span><span class="p">,</span> <span class="mi">1982</span><span class="p">,</span> <span class="mi">1992</span><span class="p">,</span> <span class="mi">2002</span><span class="p">,</span> <span class="mi">2012</span><span class="p">,</span> <span class="mi">2018</span><span class="p">]</span>
+<span class="n">decades_elninolike</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="n">n_decades</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">decades</span><span class="p">)</span>
 
 <span class="c1"># lead times for the evaluation</span>
@@ -177,7 +179,7 @@
 <span class="n">n_lead</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_times</span><span class="p">)</span>
 
 <span class="n">decade_color</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;violet&#39;</span><span class="p">,</span> <span class="s1">&#39;limegreen&#39;</span><span class="p">,</span> <span class="s1">&#39;darkgoldenrod&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;royalblue&#39;</span><span class="p">]</span>
-<span class="n">decade_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1962-1971&#39;</span><span class="p">,</span> <span class="s1">&#39;1972-1981&#39;</span><span class="p">,</span> <span class="s1">&#39;1982-1991&#39;</span><span class="p">,</span> <span class="s1">&#39;1992-2001&#39;</span><span class="p">,</span> <span class="s1">&#39;2002-2011&#39;</span><span class="p">,</span> <span class="s1">&#39;2012-2017&#39;</span><span class="p">]</span>
+<span class="n">decade_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1963-1971&#39;</span><span class="p">,</span> <span class="s1">&#39;1972-1981&#39;</span><span class="p">,</span> <span class="s1">&#39;1982-1991&#39;</span><span class="p">,</span> <span class="s1">&#39;1992-2001&#39;</span><span class="p">,</span> <span class="s1">&#39;2002-2011&#39;</span><span class="p">,</span> <span class="s1">&#39;2012-2017&#39;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="cross_training"><a class="viewcode-back" href="../../../fit.html#ninolearn.learn.fit.cross_training">[docs]</a><span class="k">def</span> <span class="nf">cross_training</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">n_iter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -203,17 +205,21 @@
         <span class="n">print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Lead time: </span><span class="si">{lead_time}</span><span class="s1"> month&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">small_print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Test period: </span><span class="si">{decades[j]}</span><span class="s1">-01-01 till {decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
-
-            <span class="n">test_indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">timey</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">timey</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;{decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
-            <span class="n">train_indeces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">test_indeces</span><span class="p">)</span>
-
-            <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train_indeces</span><span class="p">,:],</span> <span class="n">y</span><span class="p">[</span><span class="n">train_indeces</span><span class="p">]</span>
-
             <span class="n">m</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">fit_RandomizedSearch</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">)</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{m.hyperparameters[&#39;name&#39;]}</span><span class="s2">_decade</span><span class="si">{decades[j]}</span><span class="s2">_lead</span><span class="si">{lead_time}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">dir_name</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{m.hyperparameters[&#39;name&#39;]}</span><span class="s2">_decade</span><span class="si">{decades[j]}</span><span class="s2">_lead</span><span class="si">{lead_time}</span><span class="s2">&quot;</span>
 
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)):</span>
+                <span class="n">small_print_header</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Test period: </span><span class="si">{decades[j]}</span><span class="s1">-01-01 till {decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
+
+                <span class="n">test_indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">timey</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">timey</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;{decades[j+1]-1}-12-01&#39;</span><span class="p">)</span>
+                <span class="n">train_indeces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">test_indeces</span><span class="p">)</span>
+
+                <span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train_indeces</span><span class="p">,:],</span> <span class="n">y</span><span class="p">[</span><span class="n">train_indeces</span><span class="p">]</span>
+
+                <span class="n">m</span><span class="o">.</span><span class="n">fit_RandomizedSearch</span><span class="p">(</span><span class="n">trainX</span><span class="p">,</span> <span class="n">trainy</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">)</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="n">dir_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{dir_name}</span><span class="s1"> already exists&#39;</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">m</span></div>
 
 <div class="viewcode-block" id="cross_hindcast"><a class="viewcode-back" href="../../../fit.html#ninolearn.learn.fit.cross_hindcast">[docs]</a><span class="k">def</span> <span class="nf">cross_hindcast</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
@@ -266,8 +272,8 @@
             <span class="n">timeytrue</span> <span class="o">=</span> <span class="n">timeytrue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">testtimey</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">m</span>
 
-        <span class="k">if</span> <span class="n">timeytrue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s1">&#39;1962-01-01&#39;</span><span class="p">):</span>
-            <span class="n">expected_first_date</span> <span class="o">=</span> <span class="s1">&#39;1962-01-01&#39;</span>
+        <span class="k">if</span> <span class="n">timeytrue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s1">&#39;1963-01-01&#39;</span><span class="p">):</span>
+            <span class="n">expected_first_date</span> <span class="o">=</span> <span class="s1">&#39;1963-01-01&#39;</span>
             <span class="n">got_first_date</span> <span class="o">=</span> <span class="n">timeytrue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
 
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The first predicted date for lead time </span><span class="si">{lead_time}</span><span class="s2"> </span><span class="se">\</span>
@@ -304,7 +310,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 28, 2019.
+        Last updated on Oktober 07, 2019.
       </span>
 
     </p>

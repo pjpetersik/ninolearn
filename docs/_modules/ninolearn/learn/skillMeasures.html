@@ -163,6 +163,11 @@
 <span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">scale</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span>
 
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># Correlation score</span>
+<span class="c1"># =============================================================================</span>
+
 <div class="viewcode-block" id="seasonal_correlation"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.seasonal_correlation">[docs]</a><span class="k">def</span> <span class="nf">seasonal_correlation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pearson correlation coefficient for each season. This function uses the\</span>
@@ -189,6 +194,11 @@
         <span class="n">pred_sel</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">month</span><span class="p">])</span>
         <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">y_sel</span><span class="p">,</span> <span class="n">pred_sel</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">p</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1">#  SRMSE score</span>
+<span class="c1"># =============================================================================</span>
 
 <div class="viewcode-block" id="rmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.rmse">[docs]</a><span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -254,8 +264,23 @@
     <span class="n">seasonal_SRMSE</span> <span class="o">=</span> <span class="n">seasonal_srmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">seasonal_SRMSE</span><span class="p">)</span></div>
 
+<span class="c1"># =============================================================================</span>
+<span class="c1"># NEGATIVE LOG-LIKELIHOOD SCORE</span>
+<span class="c1"># =============================================================================</span>
 
-<div class="viewcode-block" id="seasonal_nll"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.seasonal_nll">[docs]</a><span class="k">def</span> <span class="nf">seasonal_nll</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">):</span>
+<div class="viewcode-block" id="nll_gaussian"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.nll_gaussian">[docs]</a><span class="k">def</span> <span class="nf">nll_gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Negative - log -likelihood for the prediction of a gaussian probability</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">first</span>  <span class="o">=</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pred_std</span><span class="p">))</span>
+    <span class="n">second</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">pred_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span>  <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pred_std</span><span class="p">))</span>
+    <span class="n">summed</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="n">second</span>
+
+    <span class="n">nll</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">summed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nll</span></div>
+
+<div class="viewcode-block" id="seasonal_nll"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.seasonal_nll">[docs]</a><span class="k">def</span> <span class="nf">seasonal_nll</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Negative log-likelihood (NLL) for each season.</span>
 
@@ -278,9 +303,12 @@
         <span class="n">y_sel</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">month</span><span class="p">]</span>
         <span class="n">pred_mean_sel</span> <span class="o">=</span> <span class="n">pred_mean</span><span class="p">[</span><span class="n">month</span><span class="p">]</span>
         <span class="n">pred_std_sel</span> <span class="o">=</span> <span class="n">pred_std</span><span class="p">[</span><span class="n">month</span><span class="p">]</span>
-        <span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">y_sel</span><span class="p">,</span> <span class="n">pred_mean_sel</span><span class="p">,</span> <span class="n">pred_std_sel</span><span class="p">)</span>
+        <span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nll_gaussian</span><span class="p">(</span><span class="n">y_sel</span><span class="p">,</span> <span class="n">pred_mean_sel</span><span class="p">,</span> <span class="n">pred_std_sel</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">score</span></div>
 
+<span class="c1"># =============================================================================</span>
+<span class="c1"># INSIDE MARGINS</span>
+<span class="c1"># =============================================================================</span>
 
 <div class="viewcode-block" id="inside_fraction"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.skillMeasures.inside_fraction">[docs]</a><span class="k">def</span> <span class="nf">inside_fraction</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred_mean</span><span class="p">,</span> <span class="n">pred_std</span><span class="p">,</span> <span class="n">std_level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -325,7 +353,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 28, 2019.
+        Last updated on Oktober 07, 2019.
       </span>
 
     </p>

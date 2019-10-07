@@ -5,6 +5,11 @@ from sklearn.metrics import mean_squared_error
 from ninolearn.utils import scale
 from scipy.stats import pearsonr
 
+
+# =============================================================================
+# Correlation score
+# =============================================================================
+
 def seasonal_correlation(y, pred, time):
     """
     Pearson correlation coefficient for each season. This function uses the\
@@ -31,6 +36,11 @@ def seasonal_correlation(y, pred, time):
         pred_sel = scale(pred[month])
         r[i], p[i] = pearsonr(y_sel, pred_sel)
     return r, p
+
+
+# =============================================================================
+#  SRMSE score
+# =============================================================================
 
 def rmse(y, predict):
     """
@@ -96,8 +106,23 @@ def mean_srmse(y, predict, time):
     seasonal_SRMSE = seasonal_srmse(y, predict, time)
     return np.mean(seasonal_SRMSE)
 
+# =============================================================================
+# NEGATIVE LOG-LIKELIHOOD SCORE
+# =============================================================================
 
-def seasonal_nll(y, pred_mean, pred_std, time, evaluate):
+def nll_gaussian(y, pred_mean, pred_std):
+    """
+    Negative - log -likelihood for the prediction of a gaussian probability
+    """
+
+    first  =  0.5 * np.log(np.square(pred_std))
+    second =  np.square(y - pred_mean) / (2  * np.square(pred_std))
+    summed = first + second
+
+    nll =  np.mean(summed, axis=-1)
+    return nll
+
+def seasonal_nll(y, pred_mean, pred_std, time):
     """
     Negative log-likelihood (NLL) for each season.
 
@@ -120,9 +145,12 @@ def seasonal_nll(y, pred_mean, pred_std, time, evaluate):
         y_sel = y[month]
         pred_mean_sel = pred_mean[month]
         pred_std_sel = pred_std[month]
-        score[i] = evaluate(y_sel, pred_mean_sel, pred_std_sel)
+        score[i] = nll_gaussian(y_sel, pred_mean_sel, pred_std_sel)
     return score
 
+# =============================================================================
+# INSIDE MARGINS
+# =============================================================================
 
 def inside_fraction(y, pred_mean, pred_std, std_level=1):
     """

@@ -162,9 +162,37 @@
 <span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">print_header</span>
 
 <span class="kn">from</span> <span class="nn">ninolearn.IO.read_processed</span> <span class="k">import</span> <span class="n">data_reader</span>
-<span class="kn">from</span> <span class="nn">ninolearn.learn.skillMeasures</span> <span class="k">import</span> <span class="n">mean_srmse</span><span class="p">,</span> <span class="n">seasonal_correlation</span><span class="p">,</span> <span class="n">seasonal_srmse</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.skillMeasures</span> <span class="k">import</span> <span class="n">seasonal_correlation</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.skillMeasures</span> <span class="k">import</span> <span class="n">mean_srmse</span><span class="p">,</span> <span class="n">seasonal_srmse</span>
+<span class="kn">from</span> <span class="nn">ninolearn.learn.skillMeasures</span> <span class="k">import</span> <span class="n">nll_gaussian</span>
+
 <span class="kn">from</span> <span class="nn">ninolearn.learn.fit</span> <span class="k">import</span> <span class="n">lead_times</span><span class="p">,</span> <span class="n">n_lead</span><span class="p">,</span> <span class="n">decades</span><span class="p">,</span> <span class="n">n_decades</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># ALL SEASONS EVALUATION</span>
+<span class="c1"># =============================================================================</span>
+
+<div class="viewcode-block" id="evaluation_nll"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_nll">[docs]</a><span class="k">def</span> <span class="nf">evaluation_nll</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">mean_name</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">std_name</span><span class="o">=</span><span class="s1">&#39;std&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate the model using the negativ log-likelihood skill for the full time series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+
+    <span class="c1"># scores for the full timeseries</span>
+    <span class="n">nll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_lead</span><span class="p">)</span>
+
+    <span class="c1"># ONI observation</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
+        <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">mean_name</span><span class="p">]</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">std_name</span><span class="p">]</span>
+
+        <span class="c1"># calculate all seasons scores</span>
+        <span class="n">nll</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nll_gaussian</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nll</span></div>
 
 
 <div class="viewcode-block" id="evaluation_correlation"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_correlation">[docs]</a><span class="k">def</span> <span class="nf">evaluation_correlation</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">):</span>
@@ -181,7 +209,7 @@
 <span class="sd">    :returns: The correlation skill for the 0, 3, 6, 9, 12 and 15-month lead\</span>
 <span class="sd">    time and the corresponding p values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1962-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
     <span class="c1"># scores for the full timeseries</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_lead</span><span class="p">)</span>
@@ -216,7 +244,7 @@
 <span class="sd">    :returns: The standardized RMSE for the 0, 3, 6, 9, 12 and 15-month lead\</span>
 <span class="sd">    time.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1962-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
     <span class="c1"># scores for the full timeseries</span>
     <span class="n">srmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_lead</span><span class="p">)</span>
@@ -233,9 +261,41 @@
     <span class="k">return</span> <span class="n">srmse</span></div>
 
 
+<span class="c1"># =============================================================================</span>
+<span class="c1"># DECADAL EVALUATION</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="evaluation_decadal_nll"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_decadal_nll">[docs]</a><span class="k">def</span> <span class="nf">evaluation_decadal_nll</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">mean_name</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">std_name</span><span class="o">=</span><span class="s1">&#39;std&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate the model in the decades 1963-1971, 1972-1981, ..., 2012-2017 \</span>
+<span class="sd">    using the negative log-likelihood.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+
+    <span class="c1"># decadal scores</span>
+    <span class="n">decadal_nll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_lead</span><span class="p">,</span> <span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># ONI observation</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+    <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
+
+        <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">pred_mean</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">mean_name</span><span class="p">]</span>
+        <span class="n">pred_std</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">std_name</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+
+            <span class="n">indeces</span> <span class="o">=</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&gt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j]}</span><span class="s1">-01-01&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">obs_time</span><span class="o">&lt;=</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{decades[j+1]}</span><span class="s1">-12-01&#39;</span><span class="p">)</span>
+
+            <span class="n">decadal_nll</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">nll_gaussian</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">indeces</span><span class="p">],</span> <span class="n">pred_mean</span><span class="p">[</span><span class="n">indeces</span><span class="p">],</span> <span class="n">pred_std</span><span class="p">[</span><span class="n">indeces</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">decadal_nll</span></div>
+
+
 <div class="viewcode-block" id="evaluation_decadal_correlation"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_decadal_correlation">[docs]</a><span class="k">def</span> <span class="nf">evaluation_decadal_correlation</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Evaluate the model in the decades 1962-1971, 1972-1981, ..., 2012-2017 using the correlation skill-</span>
+<span class="sd">    Evaluate the model in the decades 1963-1971, 1972-1981, ..., 2012-2017 using the correlation skill-</span>
 
 <span class="sd">    :type model_name: str</span>
 <span class="sd">    :param model_name: The name of the model.</span>
@@ -248,7 +308,7 @@
 <span class="sd">    time and the corresponding p values for the respective decades. The\</span>
 <span class="sd">    returned arrays have the shape (lead time, decades).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1962-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
     <span class="c1"># decadal scores</span>
     <span class="n">decadal_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_lead</span><span class="p">,</span> <span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -269,9 +329,9 @@
     <span class="k">return</span> <span class="n">decadal_r</span><span class="p">,</span> <span class="n">decadal_p</span></div>
 
 
-<div class="viewcode-block" id="evaluation_decadal_srmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_decadal_srmse">[docs]</a><span class="k">def</span> <span class="nf">evaluation_decadal_srmse</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluation_decadal_srmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_decadal_srmse">[docs]</a><span class="k">def</span> <span class="nf">evaluation_decadal_srmse</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">decadal</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Evaluate the model in the decades 1962-1971, 1972-1981, ..., 2012-2017 \</span>
+<span class="sd">    Evaluate the model in the decades 1963-1971, 1972-1981, ..., 2012-2017 \</span>
 <span class="sd">    using the standardized RMSE.</span>
 
 <span class="sd">    :type model_name: str</span>
@@ -285,7 +345,7 @@
 <span class="sd">    time respective decades. The returned array has the shape (lead time, \</span>
 <span class="sd">    decades).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1962-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
     <span class="c1"># decadal scores</span>
     <span class="n">decadal_srmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_lead</span><span class="p">,</span> <span class="n">n_decades</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -308,8 +368,11 @@
 
     <span class="k">return</span> <span class="n">decadal_srmse</span></div>
 
+<span class="c1"># =============================================================================</span>
+<span class="c1"># SEASONAL EVALUATION</span>
+<span class="c1"># =============================================================================</span>
 
-<div class="viewcode-block" id="evaluation_seasonal_correlation"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_seasonal_correlation">[docs]</a><span class="k">def</span> <span class="nf">evaluation_seasonal_correlation</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluation_seasonal_correlation"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_seasonal_correlation">[docs]</a><span class="k">def</span> <span class="nf">evaluation_seasonal_correlation</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate the model in different seasons using the correlation skill.</span>
 
@@ -323,22 +386,29 @@
 <span class="sd">    :returns: The correlation skill for different seasons and the \</span>
 <span class="sd">    0, 3, 6, 9, 12 and 15-month lead time and the corresponding p values for\</span>
 <span class="sd">    the respective seasons and lead times. The returned arrays have the shape \</span>
-<span class="sd">    (lead time, season). The season corresponding to the the array entry [:,0]</span>
+<span class="sd">    (lead time, season). The season corresponding to the the array entry [:,0]\</span>
 <span class="sd">    is DJF and to [:,1] is JFM (and so on).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1962-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
     <span class="c1"># seasonal scores</span>
     <span class="n">seasonal_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_lead</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
     <span class="n">seasonal_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_lead</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
 
     <span class="c1"># ONI observation</span>
-    <span class="n">obs</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+    <span class="n">oni</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">background</span><span class="o">==</span><span class="s2">&quot;el-nino-like&quot;</span><span class="p">:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">oni</span><span class="p">[(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&gt;=</span><span class="mi">1982</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&lt;=</span><span class="mi">2001</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="n">background</span><span class="o">==</span><span class="s2">&quot;la-nina-like&quot;</span><span class="p">:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">oni</span><span class="p">[(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&lt;</span><span class="mi">1982</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&gt;</span><span class="mi">2001</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="n">background</span><span class="o">==</span><span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">oni</span>
     <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
 
-        <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">loc</span><span class="p">[{</span><span class="s1">&#39;target_season&#39;</span><span class="p">:</span><span class="n">obs_time</span><span class="p">}]</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
         <span class="n">seasonal_r</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">seasonal_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">seasonal_correlation</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">obs_time</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">tseries</span><span class="o">.</span><span class="n">offsets</span><span class="o">.</span><span class="n">MonthBegin</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -346,7 +416,7 @@
     <span class="k">return</span> <span class="n">seasonal_r</span><span class="p">,</span> <span class="n">seasonal_p</span></div>
 
 
-<div class="viewcode-block" id="evaluation_seasonal_srmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_seasonal_srmse">[docs]</a><span class="k">def</span> <span class="nf">evaluation_seasonal_srmse</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluation_seasonal_srmse"><a class="viewcode-back" href="../../../evaluation.html#ninolearn.learn.evaluation.evaluation_seasonal_srmse">[docs]</a><span class="k">def</span> <span class="nf">evaluation_seasonal_srmse</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate the model in different seasons using the standardized RMSE.</span>
 
@@ -359,20 +429,28 @@
 
 <span class="sd">    :returns: The SRMSE for different seasons and the \</span>
 <span class="sd">    0, 3, 6, 9, 12 and 15-month lead times. The returned arrays have the shape \</span>
-<span class="sd">    (lead time, season). The season corresponding to the the array entry [:,0]</span>
+<span class="sd">    (lead time, season). The season corresponding to the the array entry [:,0]\</span>
 <span class="sd">    is DJF and to [:,1] is JFM (and so on).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1962-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1963-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
 
     <span class="c1"># seasonal scores</span>
     <span class="n">seas_srmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_lead</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
 
     <span class="c1"># ONI observation</span>
-    <span class="n">obs</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+    <span class="n">oni</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;oni&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">background</span><span class="o">==</span><span class="s2">&quot;el-nino-like&quot;</span><span class="p">:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">oni</span><span class="p">[(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&gt;=</span><span class="mi">1982</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&lt;=</span><span class="mi">2001</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="n">background</span><span class="o">==</span><span class="s2">&quot;la-nina-like&quot;</span><span class="p">:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">oni</span><span class="p">[(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&lt;</span><span class="mi">1982</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">oni</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">&gt;</span><span class="mi">2001</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="n">background</span><span class="o">==</span><span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">oni</span>
+
     <span class="n">obs_time</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_lead</span><span class="p">):</span>
-        <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">pred_all</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_forecasts</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">lead_times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">loc</span><span class="p">[{</span><span class="s1">&#39;target_season&#39;</span><span class="p">:</span><span class="n">obs_time</span><span class="p">}]</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_all</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
 
         <span class="n">seas_srmse</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">seasonal_srmse</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">obs_time</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">tseries</span><span class="o">.</span><span class="n">offsets</span><span class="o">.</span><span class="n">MonthBegin</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -392,7 +470,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 28, 2019.
+        Last updated on Oktober 07, 2019.
       </span>
 
     </p>

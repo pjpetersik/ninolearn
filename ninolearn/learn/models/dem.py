@@ -28,6 +28,64 @@ class DEM(baseModel):
     deviation with one hidden layer having the ReLU function as activation for
     the hidden layer. It is trained using the MSE or negative-log-likelihood of
     a gaussian distribution, respectively.
+
+
+    :type layers: int
+    :param layers: Number of hidden layers.
+
+    :type neurons: int
+    :param neurons: Number of neurons in a hidden layers.
+
+    :type dropout: float
+    :param dropout: Dropout rate for the hidden layer neurons.
+
+    :type noise: float
+    :param noise: Standard deviation of the gaussian noise that is added to\
+    the input
+
+    :type l1_hidden: float
+    :param l1_hidden: Coefficent for the L1 penalty term for the hidden layer.
+
+    :type l2_hidden: float
+    :param l2_hidden: Coefficent for the L2 penalty term for the hidden layer.
+
+    :type l1_mu: float
+    :param l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.
+
+    :type l2_mu: float
+    :param l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.
+
+    :type l1_sigma: float
+    :param l1_sigma: Coefficent for the L1 penalty term in the\
+    standard-deviation-output neuron.
+
+    :type l2_mu: float
+    :param l2_mu: Coefficent for the L2 penalty term in the standard-deviation \
+    output neuron.
+
+    :param batch_size: Batch size for the training.
+
+    :param n_segments: Number of segments for the generation of members.
+
+    :param n_members_segment: number of members that are generated per\
+    segment.
+
+    :param lr: the learning rate during training
+
+    :param patience: Number of epochs to wait until training is stopped if\
+    score was not improved.
+
+    :param epochs: The maximum numberof epochs for the training.
+
+    :param verbose: Option to print scores during training to the screen. \
+    Here, 0 means silent.
+
+    :type pdf: str
+    :param pdf: The distribution which shell be predicted. Either 'simple'\
+    (just one value), 'normal' (Gaussian) or 'skewed' (skewed Gaussian).
+
+    :type name: str
+    :param name: The name of the model.
     """
     def __del__(self):
         K.clear_session()
@@ -41,66 +99,6 @@ class DEM(baseModel):
                        batch_size=10, n_segments=5, n_members_segment=1,
                        lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal',
                        name='dem'):
-        """
-        Set the hyperparameters and the settings for the training of the DEM.
-
-        :type layers: int
-        :param layers: Number of hidden layers.
-
-        :type neurons: int
-        :param neurons: Number of neurons in a hidden layers.
-
-        :type dropout: float
-        :param dropout: Dropout rate for the hidden layer neurons.
-
-        :type noise: float
-        :param noise: Standard deviation of the gaussian noise that is added to\
-        the input
-
-        :type l1_hidden: float
-        :l1_hidden: Coefficent for the L1 penalty term for the hidden layer.
-
-        :type l2_hidden: float
-        :l2_hidden: Coefficent for the L2 penalty term for the hidden layer.
-
-        :type l1_mu: float
-        :l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.
-
-        :type l2_mu: float
-        :l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.
-
-        :type l1_sigma: float
-        :l1_sigma: Coefficent for the L1 penalty term in the\
-        standard-deviation-output neuron.
-
-        :type l2_mu: float
-        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation \
-        output neuron.
-
-        :param batch_size: Batch size for the training.
-
-        :param n_segments: Number of segments for the generation of members.
-
-        :param n_members_segment: number of members that are generated per\
-        segment.
-
-        :param lr: the learning rate during training
-
-        :param patience: Number of epochs to wait until training is stopped if\
-        score was not improved.
-
-        :param epochs: The maximum numberof epochs for the training.
-
-        :param verbose: Option to print scores during training to the screen. \
-        Here, 0 means silent.
-
-        :type pdf: str
-        :param pdf: The distribution which shell be predicted. Either 'simple'\
-        (just one value), 'normal' (Gaussian) or 'skewed' (skewed Gaussian).
-
-        :type name: str
-        :param name: The name of the model.
-        """
 
         self.set_hyperparameters(layers=layers, neurons=neurons, dropout=dropout,
                                  noise_in=noise_in, noise_mu=noise_mu,

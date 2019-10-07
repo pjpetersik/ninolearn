@@ -84,11 +84,73 @@ def pipeline(lead_time,  return_persistance=False):
     else:
         return X, y, timey
 
+def pipeline_small(lead_time,  return_persistance=False):
+    """
+    Data pipeline for the processing of the data before the Deep Ensemble
+    is trained.
+
+    :type lead_time: int
+    :param lead_time: The lead time in month.
+
+    :type return_persistance: boolean
+    :param return_persistance: Return as the persistance as well.
+
+    :returns: The feature "X" (at observation time), the label "y" (at lead
+    time), the target season "timey" (least month) and if selected the
+    label at observation time "y_persistance". Hence, the output comes as:
+    X, y, timey, y_persistance.
+    """
+    reader = data_reader(startdate='1960-01', enddate='2017-12')
+
+    # indeces
+    oni = reader.read_csv('oni')
+
+    wwv = reader.read_csv('wwv_proxy')
+
+    # seasonal cycle
+    sc = np.cos(np.arange(len(oni))/12*2*np.pi)
+
+    # decadel variation of leading eof
+    pca_dec = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')['pca1']
+
+    # time lag
+    time_lag = 3
+
+    # shift such that lead time corresponds to the definition of lead time
+    shift = 3
+
+    # process features
+    feature_unscaled = np.stack((oni, sc, wwv, pca_dec), axis=1)
+
+    # scale each feature
+    scalerX = StandardScaler()
+    Xorg = scalerX.fit_transform(feature_unscaled)
+
+    # set nans to 0.
+    Xorg = np.nan_to_num(Xorg)
+
+    # arange the feature array
+    X = Xorg[:-lead_time-shift,:]
+    X = include_time_lag(X, max_lag=time_lag)
+
+    # arange label
+    yorg = oni.values
+    y = yorg[lead_time + time_lag + shift:]
+
+    # get the time axis of the label
+    timey = oni.index[lead_time + time_lag + shift:]
+
+    if return_persistance:
+        y_persistance = yorg[time_lag: - lead_time - shift]
+        return X, y, timey, y_persistance
+    else:
+        return X, y, timey
+
 if __name__=="__main__":
-    cross_training(DEM, pipeline, 200,
+    cross_training(DEM, pipeline_small, 200,
                    layers=1, dropout=[0.1, 0.5], noise_in=[0.1,0.5], noise_sigma=[0.1, 0.5],
                    noise_mu=[0.1, 0.5], l1_hidden=[0.0, 0.02], l2_hidden=[0., 0.02],
                    l1_mu=[0.0, 0.02], l2_mu=[0.0, 0.02], l1_sigma=[0.0, 0.02],
                    l2_sigma=[0.0, 0.02], lr=[0.0001,0.01], batch_size=100,
                    epochs=500, n_segments=5, n_members_segment=1, patience=30,
-                   verbose=0, pdf="normal", name="dem")
+                   verbose=0, pdf="normal", name="dem_small")

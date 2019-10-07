@@ -173,7 +173,7 @@
 <span class="kn">from</span> <span class="nn">ninolearn.learn.models.baseModel</span> <span class="k">import</span> <span class="n">baseModel</span>
 <span class="kn">from</span> <span class="nn">ninolearn.learn.losses</span> <span class="k">import</span> <span class="n">nll_gaussian</span><span class="p">,</span> <span class="n">nll_skewed_gaussian</span>
 <span class="kn">from</span> <span class="nn">ninolearn.learn.skillMeasures</span> <span class="k">import</span> <span class="n">rmse</span>
-<span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">print_header</span><span class="p">,</span> <span class="n">small_print_header</span>
+<span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">small_print_header</span>
 <span class="kn">from</span> <span class="nn">ninolearn.exceptions</span> <span class="k">import</span> <span class="n">MissingArgumentError</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -186,6 +186,64 @@
 <span class="sd">    deviation with one hidden layer having the ReLU function as activation for</span>
 <span class="sd">    the hidden layer. It is trained using the MSE or negative-log-likelihood of</span>
 <span class="sd">    a gaussian distribution, respectively.</span>
+
+
+<span class="sd">    :type layers: int</span>
+<span class="sd">    :param layers: Number of hidden layers.</span>
+
+<span class="sd">    :type neurons: int</span>
+<span class="sd">    :param neurons: Number of neurons in a hidden layers.</span>
+
+<span class="sd">    :type dropout: float</span>
+<span class="sd">    :param dropout: Dropout rate for the hidden layer neurons.</span>
+
+<span class="sd">    :type noise: float</span>
+<span class="sd">    :param noise: Standard deviation of the gaussian noise that is added to\</span>
+<span class="sd">    the input</span>
+
+<span class="sd">    :type l1_hidden: float</span>
+<span class="sd">    :param l1_hidden: Coefficent for the L1 penalty term for the hidden layer.</span>
+
+<span class="sd">    :type l2_hidden: float</span>
+<span class="sd">    :param l2_hidden: Coefficent for the L2 penalty term for the hidden layer.</span>
+
+<span class="sd">    :type l1_mu: float</span>
+<span class="sd">    :param l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.</span>
+
+<span class="sd">    :type l2_mu: float</span>
+<span class="sd">    :param l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.</span>
+
+<span class="sd">    :type l1_sigma: float</span>
+<span class="sd">    :param l1_sigma: Coefficent for the L1 penalty term in the\</span>
+<span class="sd">    standard-deviation-output neuron.</span>
+
+<span class="sd">    :type l2_mu: float</span>
+<span class="sd">    :param l2_mu: Coefficent for the L2 penalty term in the standard-deviation \</span>
+<span class="sd">    output neuron.</span>
+
+<span class="sd">    :param batch_size: Batch size for the training.</span>
+
+<span class="sd">    :param n_segments: Number of segments for the generation of members.</span>
+
+<span class="sd">    :param n_members_segment: number of members that are generated per\</span>
+<span class="sd">    segment.</span>
+
+<span class="sd">    :param lr: the learning rate during training</span>
+
+<span class="sd">    :param patience: Number of epochs to wait until training is stopped if\</span>
+<span class="sd">    score was not improved.</span>
+
+<span class="sd">    :param epochs: The maximum numberof epochs for the training.</span>
+
+<span class="sd">    :param verbose: Option to print scores during training to the screen. \</span>
+<span class="sd">    Here, 0 means silent.</span>
+
+<span class="sd">    :type pdf: str</span>
+<span class="sd">    :param pdf: The distribution which shell be predicted. Either &#39;simple&#39;\</span>
+<span class="sd">    (just one value), &#39;normal&#39; (Gaussian) or &#39;skewed&#39; (skewed Gaussian).</span>
+
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param name: The name of the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">K</span><span class="o">.</span><span class="n">clear_session</span><span class="p">()</span>
@@ -199,66 +257,6 @@
                        <span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_members_segment</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                        <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">patience</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span><span class="p">,</span>
                        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dem&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the hyperparameters and the settings for the training of the DEM.</span>
-
-<span class="sd">        :type layers: int</span>
-<span class="sd">        :param layers: Number of hidden layers.</span>
-
-<span class="sd">        :type neurons: int</span>
-<span class="sd">        :param neurons: Number of neurons in a hidden layers.</span>
-
-<span class="sd">        :type dropout: float</span>
-<span class="sd">        :param dropout: Dropout rate for the hidden layer neurons.</span>
-
-<span class="sd">        :type noise: float</span>
-<span class="sd">        :param noise: Standard deviation of the gaussian noise that is added to\</span>
-<span class="sd">        the input</span>
-
-<span class="sd">        :type l1_hidden: float</span>
-<span class="sd">        :l1_hidden: Coefficent for the L1 penalty term for the hidden layer.</span>
-
-<span class="sd">        :type l2_hidden: float</span>
-<span class="sd">        :l2_hidden: Coefficent for the L2 penalty term for the hidden layer.</span>
-
-<span class="sd">        :type l1_mu: float</span>
-<span class="sd">        :l1_mu: Coefficent for the L1 penalty term in the mean-output neuron.</span>
-
-<span class="sd">        :type l2_mu: float</span>
-<span class="sd">        :l2_mu: Coefficent for the L2 penalty term in the mean-output neuron.</span>
-
-<span class="sd">        :type l1_sigma: float</span>
-<span class="sd">        :l1_sigma: Coefficent for the L1 penalty term in the\</span>
-<span class="sd">        standard-deviation-output neuron.</span>
-
-<span class="sd">        :type l2_mu: float</span>
-<span class="sd">        :l2_mu: Coefficent for the L2 penalty term in the standard-deviation \</span>
-<span class="sd">        output neuron.</span>
-
-<span class="sd">        :param batch_size: Batch size for the training.</span>
-
-<span class="sd">        :param n_segments: Number of segments for the generation of members.</span>
-
-<span class="sd">        :param n_members_segment: number of members that are generated per\</span>
-<span class="sd">        segment.</span>
-
-<span class="sd">        :param lr: the learning rate during training</span>
-
-<span class="sd">        :param patience: Number of epochs to wait until training is stopped if\</span>
-<span class="sd">        score was not improved.</span>
-
-<span class="sd">        :param epochs: The maximum numberof epochs for the training.</span>
-
-<span class="sd">        :param verbose: Option to print scores during training to the screen. \</span>
-<span class="sd">        Here, 0 means silent.</span>
-
-<span class="sd">        :type pdf: str</span>
-<span class="sd">        :param pdf: The distribution which shell be predicted. Either &#39;simple&#39;\</span>
-<span class="sd">        (just one value), &#39;normal&#39; (Gaussian) or &#39;skewed&#39; (skewed Gaussian).</span>
-
-<span class="sd">        :type name: str</span>
-<span class="sd">        :param name: The name of the model.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_hyperparameters</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span> <span class="n">neurons</span><span class="o">=</span><span class="n">neurons</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
                                  <span class="n">noise_in</span><span class="o">=</span><span class="n">noise_in</span><span class="p">,</span> <span class="n">noise_mu</span><span class="o">=</span><span class="n">noise_mu</span><span class="p">,</span>
@@ -433,6 +431,7 @@
             <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_val_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span><span class="p">)</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Loss: </span><span class="si">{self.mean_val_loss}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="c1"># print computation time</span>
         <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="n">passed_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">end_time</span><span class="o">-</span><span class="n">start_time</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -520,7 +519,6 @@
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">mix_mean</span>
-
 
 
 <div class="viewcode-block" id="DEM.evaluate"><a class="viewcode-back" href="../../../../models.html#ninolearn.learn.models.dem.DEM.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ytrue</span><span class="p">,</span> <span class="n">mean_pred</span><span class="p">,</span> <span class="n">std_pred</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -615,7 +613,7 @@
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on September 28, 2019.
+        Last updated on Oktober 07, 2019.
       </span>
 
     </p>

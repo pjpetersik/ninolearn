@@ -19,7 +19,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
-
+sys.path.append(os.path.abspath('exts'))
 from datetime import date
 today_date = date.today()
 
@@ -36,7 +36,8 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'nbsphinx']
+    'nbsphinx',
+    'youtube']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

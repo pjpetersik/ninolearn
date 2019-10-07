@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def nino_background(nino_data, nino_treshold=0.5):
+def nino_background(nino_data, ax=None, nino_treshold=0.5):
     """
     Generates a plotbackground based on values of the Nino3.4 Index
     """
@@ -27,11 +27,20 @@ def nino_background(nino_data, nino_treshold=0.5):
             sign = nino_color.loc[start_date]
 
             alpha = (windowmax - nino_treshold)/(ninomax-nino_treshold) * 0.5
-
-            if sign > 0:
-                plt.axvspan(start_date, end_date, facecolor='red', alpha=alpha)
+            if ax is None:
+                if sign > 0:
+                    plt.axvspan(start_date, end_date, facecolor='red', alpha=alpha)
+                else:
+                    plt.axvspan(start_date,
+                                end_date,
+                                facecolor='blue',
+                                alpha=alpha)
             else:
-                plt.axvspan(start_date,
-                            end_date,
-                            facecolor='blue',
-                            alpha=alpha)
+                if sign > 0:
+                    ax.axvspan(start_date, end_date, facecolor='red', alpha=alpha)
+                else:
+                    ax.axvspan(start_date,
+                                end_date,
+                                facecolor='blue',
+                                alpha=alpha)
+
