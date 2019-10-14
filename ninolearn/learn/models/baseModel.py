@@ -65,7 +65,7 @@ class baseModel(object):
                 low = self.hyperparameters_search[key][0]
                 high = self.hyperparameters_search[key][1]
 
-                if type(low) is float and type(high) is float:
+                if type(low) is float or type(high) is float:
                     self.hyperparameters[key] = np.random.uniform(low, high)
 
                 if type(low) is int and type(high) is int:

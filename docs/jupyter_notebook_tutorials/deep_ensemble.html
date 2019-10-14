@@ -413,8 +413,8 @@ div.rendered_html tbody tr:hover {
 <li><p>The time array corresponding to the time of the label</p></li>
 </ol>
 <p>NOTE (again): Lead time is defined as the time that passed between the last observed and the first date of the target season. Hence, negative appear, e.g. if you compare the DJF season with the target season JFM, you have a lead time of -2 month (Last observed date: Feburary 28/29, First date of the target season January 1).</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -422,7 +422,7 @@ div.rendered_html tbody tr:hover {
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">StandardScaler</span>
 
 <span class="kn">from</span> <span class="nn">ninolearn.utils</span> <span class="k">import</span> <span class="n">include_time_lag</span>
-<span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+<span class="kn">from</span> <span class="nn">ninolearn.IO.read_processed</span> <span class="k">import</span> <span class="n">data_reader</span>
 
 <span class="k">def</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">lead_time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -482,15 +482,6 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/distributed/utils.py:139: RuntimeWarning: Couldn&#39;t detect a suitable IP address for reaching &#39;8.8.8.8&#39;, defaulting to &#39;127.0.0.1&#39;: [Errno 101] Network is unreachable
-  RuntimeWarning,
-</pre></div></div>
-</div>
 </div>
 <div class="section" id="Split-the-data-set">
 <h2>Split the data set<a class="headerlink" href="#Split-the-data-set" title="Permalink to this headline">¶</a></h2>
@@ -503,7 +494,7 @@ div.rendered_html tbody tr:hover {
 <p><strong>NOTE:</strong> It is important to understand that hyperparamters must be tuned so that the result is best for the Validation data set and <strong>not</strong> for the test data set. Otherwise you can not rule out the case that the specific hyperparameter setting just works good for the specific test data set but is not generally a good hyperparameter setting.</p>
 <p>In the following cell the train and the validation data set are still one data set, because this array will be later splitted into two arrays when th model is fitted.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -534,7 +525,7 @@ div.rendered_html tbody tr:hover {
 <h2>Fit the model<a class="headerlink" href="#Fit-the-model" title="Permalink to this headline">¶</a></h2>
 <p>Now it is time to train the model! For this a random search is used for all keyword arguments that are passed in a <em>list</em> to the DEM.set_parameters() method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -542,11 +533,13 @@ div.rendered_html tbody tr:hover {
 <span class="n">model</span> <span class="o">=</span> <span class="n">DEM</span><span class="p">()</span>
 
 <span class="c1"># Set parameters</span>
-<span class="n">model</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">noise_in</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">noise_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span>
-                     <span class="n">noise_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">l1_hidden</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l2_hidden</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+<span class="n">model</span><span class="o">.</span><span class="n">set_hyperparameters</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">neurons</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">noise_in</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">noise_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span>
+                     <span class="n">noise_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">l1_hidden</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l2_hidden</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
                      <span class="n">l1_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l2_mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">l1_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
                      <span class="n">l2_sigma</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0001</span><span class="p">,</span><span class="mf">0.01</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                     <span class="n">n_members_segment</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                     <span class="n">n_members_segment</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span><span class="p">)</span>
+
+
 
 <span class="c1"># Use a random search to find the optimal hyperparamteres</span>
 <span class="n">model</span><span class="o">.</span><span class="n">fit_RandomizedSearch</span><span class="p">(</span><span class="n">train_val_X</span><span class="p">,</span> <span class="n">train_val_y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
@@ -558,462 +551,608 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-
-##################################################################
 Search iteration Nr 1/20
-##################################################################
-
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 45us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 76us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 61us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 79us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 45us/step
-Computation time: 8.4s
-New best hyperparameters
---------------------------------------
-Mean loss: 0.34392209892849557
-{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.12378305611318924, &#39;noise_in&#39;: 0.13682762378098945, &#39;noise_mu&#39;: 0.1594007153319167, &#39;noise_sigma&#39;: 0.26941913115524324, &#39;l1_hidden&#39;: 0.15920416814139493, &#39;l2_hidden&#39;: 0.14973220769991027, &#39;l1_mu&#39;: 0.0968840864748789, &#39;l2_mu&#39;: 0.18567445044732792, &#39;l1_sigma&#39;: 0.1606583760628583, &#39;l2_sigma&#39;: 0.02928805643650441, &#39;lr&#39;: 0.0054775495740690665, &#39;batch_size&#39;: 100}
-
-##################################################################
-Search iteration Nr 2/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 51us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 45us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 46us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 51us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 78us/step
-Computation time: 9.3s
-New best hyperparameters
---------------------------------------
-Mean loss: 0.3435987807486368
-{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.25141333998178195, &#39;noise_in&#39;: 0.2329862534019585, &#39;noise_mu&#39;: 0.2813460046840733, &#39;noise_sigma&#39;: 0.14595068639744221, &#39;l1_hidden&#39;: 0.08553348071011933, &#39;l2_hidden&#39;: 0.11981746410750115, &#39;l1_mu&#39;: 0.10558548934586615, &#39;l2_mu&#39;: 0.05080434557231146, &#39;l1_sigma&#39;: 0.037151218694687606, &#39;l2_sigma&#39;: 0.19769939661821626, &#39;lr&#39;: 0.006687247196565577, &#39;batch_size&#39;: 100}
-
-##################################################################
-Search iteration Nr 3/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 81us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 47us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 121us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 66us/step
-Computation time: 10.3s
-New best hyperparameters
---------------------------------------
-Mean loss: 0.11411247535244277
-{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.30452543907304586, &#39;noise_in&#39;: 0.21534727932400557, &#39;noise_mu&#39;: 0.2830000465254644, &#39;noise_sigma&#39;: 0.20073478581880644, &#39;l1_hidden&#39;: 0.08204434904474006, &#39;l2_hidden&#39;: 0.15817156327512816, &#39;l1_mu&#39;: 0.044876511619725834, &#39;l2_mu&#39;: 0.07501615431427888, &#39;l1_sigma&#39;: 0.13807434833687507, &#39;l2_sigma&#39;: 0.003930864203235141, &#39;lr&#39;: 0.005892578009524626, &#39;batch_size&#39;: 100}
-
-##################################################################
-Search iteration Nr 4/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 44us/step
-Train member Nr 2/5
---------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00052: early stopping
 46/46 [==============================] - 0s 84us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00132: early stopping
+46/46 [==============================] - 0s 71us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 90us/step
+Restoring model weights from the end of the best epoch
+Epoch 00059: early stopping
+46/46 [==============================] - 0s 50us/step
 Train member Nr 4/5
 --------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
 46/46 [==============================] - 0s 50us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 64us/step
-Computation time: 8.7s
-
-##################################################################
-Search iteration Nr 5/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 43us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 86us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 73us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 85us/step
-Computation time: 9.3s
-
-##################################################################
-Search iteration Nr 6/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 43us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 45us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 64us/step
-Computation time: 10.0s
-
-##################################################################
-Search iteration Nr 7/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 74us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 47us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 55us/step
-Computation time: 9.2s
-
-##################################################################
-Search iteration Nr 8/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 43us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 49us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 47us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 67us/step
-Computation time: 8.9s
-
-##################################################################
-Search iteration Nr 9/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00096: early stopping
 46/46 [==============================] - 0s 46us/step
+Loss: 0.3823194860116296
+Computation time: 8.8s
+New best hyperparameters
+Mean loss: 0.3823194860116296
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.41903529337320344, &#39;noise_in&#39;: 0.10347229433415084, &#39;noise_sigma&#39;: 0.2047585880842553, &#39;noise_mu&#39;: 0.49594753897933586, &#39;l1_hidden&#39;: 0.13152395470050957, &#39;l2_hidden&#39;: 0.08330581312568477, &#39;l1_mu&#39;: 0.15149749010743152, &#39;l2_mu&#39;: 0.11593669948708028, &#39;l1_sigma&#39;: 0.09967560356729449, &#39;l2_sigma&#39;: 0.1244877471669649, &#39;lr&#39;: 0.004634984622626636, &#39;batch_size&#39;: 100, &#39;epochs&#39;: 500, &#39;n_segments&#39;: 5, &#39;n_members_segment&#39;: 1, &#39;patience&#39;: 30, &#39;verbose&#39;: 0, &#39;pdf&#39;: &#39;normal&#39;, &#39;n_members&#39;: 5}
+Search iteration Nr 2/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00119: early stopping
+46/46 [==============================] - 0s 77us/step
 Train member Nr 2/5
 --------------------------------------
-46/46 [==============================] - 0s 70us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 130us/step
-Train member Nr 4/5
---------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00071: early stopping
 46/46 [==============================] - 0s 44us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 47us/step
-Computation time: 9.8s
-
-##################################################################
-Search iteration Nr 10/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 43us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 109us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 48us/step
+Restoring model weights from the end of the best epoch
+Epoch 00044: early stopping
+46/46 [==============================] - 0s 46us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 83us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 91us/step
 Train member Nr 5/5
 --------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00040: early stopping
 46/46 [==============================] - 0s 50us/step
-Computation time: 8.5s
-
-##################################################################
-Search iteration Nr 11/20
-##################################################################
-
+Loss: 0.536129170332266
+Computation time: 8.8s
+Search iteration Nr 3/20
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 46us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 46us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 67us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 63us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 93us/step
-Computation time: 8.7s
-
-##################################################################
-Search iteration Nr 12/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 57us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 82us/step
-Train member Nr 3/5
---------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00054: early stopping
 46/46 [==============================] - 0s 73us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 64us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 60us/step
-Computation time: 9.3s
-
-##################################################################
-Search iteration Nr 13/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 57us/step
 Train member Nr 2/5
 --------------------------------------
-46/46 [==============================] - 0s 47us/step
+Restoring model weights from the end of the best epoch
+Epoch 00060: early stopping
+46/46 [==============================] - 0s 51us/step
 Train member Nr 3/5
 --------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00041: early stopping
 46/46 [==============================] - 0s 46us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 78us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 51us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 54us/step
-Computation time: 8.9s
-
-##################################################################
-Search iteration Nr 14/20
-##################################################################
-
+Restoring model weights from the end of the best epoch
+Epoch 00150: early stopping
+46/46 [==============================] - 0s 83us/step
+Loss: 0.35812768055045086
+Computation time: 9.1s
+New best hyperparameters
+Mean loss: 0.35812768055045086
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.4969969924220081, &#39;noise_in&#39;: 0.19616484546423987, &#39;noise_sigma&#39;: 0.19645462330381283, &#39;noise_mu&#39;: 0.3658885794233012, &#39;l1_hidden&#39;: 0.18712187452622892, &#39;l2_hidden&#39;: 0.06757120513272023, &#39;l1_mu&#39;: 0.030331377920337535, &#39;l2_mu&#39;: 0.053227700652674396, &#39;l1_sigma&#39;: 0.02411236317733605, &#39;l2_sigma&#39;: 0.040351529483836225, &#39;lr&#39;: 0.005768259463912277, &#39;batch_size&#39;: 100, &#39;epochs&#39;: 500, &#39;n_segments&#39;: 5, &#39;n_members_segment&#39;: 1, &#39;patience&#39;: 30, &#39;verbose&#39;: 0, &#39;pdf&#39;: &#39;normal&#39;, &#39;n_members&#39;: 5}
+Search iteration Nr 4/20
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 47us/step
+Restoring model weights from the end of the best epoch
+Epoch 00046: early stopping
+46/46 [==============================] - 0s 65us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 60us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00036: early stopping
+46/46 [==============================] - 0s 70us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00057: early stopping
+46/46 [==============================] - 0s 48us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00047: early stopping
+46/46 [==============================] - 0s 55us/step
+Loss: 0.3036035604774952
+Computation time: 8.5s
+New best hyperparameters
+Mean loss: 0.3036035604774952
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.23004481921165137, &#39;noise_in&#39;: 0.46270830851367095, &#39;noise_sigma&#39;: 0.45638086691256086, &#39;noise_mu&#39;: 0.2680286780681471, &#39;l1_hidden&#39;: 0.07392628874726237, &#39;l2_hidden&#39;: 0.18280564143180358, &#39;l1_mu&#39;: 0.03358655835944029, &#39;l2_mu&#39;: 0.04964944019738571, &#39;l1_sigma&#39;: 0.1284721092428513, &#39;l2_sigma&#39;: 0.06915923429350067, &#39;lr&#39;: 0.007624401534440948, &#39;batch_size&#39;: 100, &#39;epochs&#39;: 500, &#39;n_segments&#39;: 5, &#39;n_members_segment&#39;: 1, &#39;patience&#39;: 30, &#39;verbose&#39;: 0, &#39;pdf&#39;: &#39;normal&#39;, &#39;n_members&#39;: 5}
+Search iteration Nr 5/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00081: early stopping
+46/46 [==============================] - 0s 75us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00104: early stopping
+46/46 [==============================] - 0s 48us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00065: early stopping
+46/46 [==============================] - 0s 53us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 109us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00092: early stopping
+46/46 [==============================] - 0s 53us/step
+Loss: 0.46464331263433334
+Computation time: 11.1s
+Search iteration Nr 6/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00067: early stopping
+46/46 [==============================] - 0s 48us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00202: early stopping
+46/46 [==============================] - 0s 48us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00058: early stopping
+46/46 [==============================] - 0s 78us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 76us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00145: early stopping
+46/46 [==============================] - 0s 54us/step
+Loss: 0.38047359326611396
+Computation time: 10.3s
+Search iteration Nr 7/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00044: early stopping
+46/46 [==============================] - 0s 52us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00048: early stopping
+46/46 [==============================] - 0s 49us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 109us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 68us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 46us/step
+Loss: 0.5316211005915765
+Computation time: 9.0s
+Search iteration Nr 8/20
+Train member Nr 1/5
+--------------------------------------
+46/46 [==============================] - 0s 71us/step
 Train member Nr 2/5
 --------------------------------------
 46/46 [==============================] - 0s 72us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 54us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 81us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 54us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 85us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 95us/step
-Computation time: 8.6s
-
-##################################################################
-Search iteration Nr 15/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
-46/46 [==============================] - 0s 48us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 50us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 48us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 57us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 79us/step
-Computation time: 8.6s
-
-##################################################################
-Search iteration Nr 16/20
-##################################################################
-
-Train member Nr 1/5
---------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
 46/46 [==============================] - 0s 52us/step
-Train member Nr 2/5
---------------------------------------
-46/46 [==============================] - 0s 60us/step
-Train member Nr 3/5
---------------------------------------
-46/46 [==============================] - 0s 42us/step
-Train member Nr 4/5
---------------------------------------
-46/46 [==============================] - 0s 58us/step
-Train member Nr 5/5
---------------------------------------
-46/46 [==============================] - 0s 83us/step
-Computation time: 8.9s
-
-##################################################################
-Search iteration Nr 17/20
-##################################################################
-
+Loss: 0.5255566728503809
+Computation time: 12.6s
+Search iteration Nr 9/20
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 97us/step
+Restoring model weights from the end of the best epoch
+Epoch 00081: early stopping
+46/46 [==============================] - 0s 76us/step
 Train member Nr 2/5
 --------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00083: early stopping
+46/46 [==============================] - 0s 54us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00044: early stopping
+46/46 [==============================] - 0s 51us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 74us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00081: early stopping
+46/46 [==============================] - 0s 82us/step
+Loss: 0.27809078570293344
+Computation time: 9.2s
+New best hyperparameters
+Mean loss: 0.27809078570293344
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.39958636593035646, &#39;noise_in&#39;: 0.2801139377909808, &#39;noise_sigma&#39;: 0.23157012188768117, &#39;noise_mu&#39;: 0.35653555105103407, &#39;l1_hidden&#39;: 0.09710335042994389, &#39;l2_hidden&#39;: 0.030661447903490638, &#39;l1_mu&#39;: 0.15575931599607082, &#39;l2_mu&#39;: 0.11771970888833305, &#39;l1_sigma&#39;: 0.1712642514949432, &#39;l2_sigma&#39;: 0.06606412633278731, &#39;lr&#39;: 0.0053689200750857225, &#39;batch_size&#39;: 100, &#39;epochs&#39;: 500, &#39;n_segments&#39;: 5, &#39;n_members_segment&#39;: 1, &#39;patience&#39;: 30, &#39;verbose&#39;: 0, &#39;pdf&#39;: &#39;normal&#39;, &#39;n_members&#39;: 5}
+Search iteration Nr 10/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00135: early stopping
+46/46 [==============================] - 0s 78us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00111: early stopping
 46/46 [==============================] - 0s 39us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 84us/step
+Restoring model weights from the end of the best epoch
+Epoch 00105: early stopping
+46/46 [==============================] - 0s 62us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 79us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 80us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 70us/step
-Computation time: 13.1s
-
-##################################################################
-Search iteration Nr 18/20
-##################################################################
-
+Restoring model weights from the end of the best epoch
+Epoch 00077: early stopping
+46/46 [==============================] - 0s 47us/step
+Loss: 0.22250935001217803
+Computation time: 11.0s
+New best hyperparameters
+Mean loss: 0.22250935001217803
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.17954696328551784, &#39;noise_in&#39;: 0.48765233117205986, &#39;noise_sigma&#39;: 0.2344138299710665, &#39;noise_mu&#39;: 0.28641868136528587, &#39;l1_hidden&#39;: 0.07373889141305061, &#39;l2_hidden&#39;: 0.06504845804389796, &#39;l1_mu&#39;: 0.07739008026671873, &#39;l2_mu&#39;: 0.05793634510447043, &#39;l1_sigma&#39;: 0.07610942970011525, &#39;l2_sigma&#39;: 0.13103696054979164, &#39;lr&#39;: 0.004272988853087075, &#39;batch_size&#39;: 100, &#39;epochs&#39;: 500, &#39;n_segments&#39;: 5, &#39;n_members_segment&#39;: 1, &#39;patience&#39;: 30, &#39;verbose&#39;: 0, &#39;pdf&#39;: &#39;normal&#39;, &#39;n_members&#39;: 5}
+Search iteration Nr 11/20
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 54us/step
+Restoring model weights from the end of the best epoch
+Epoch 00053: early stopping
+46/46 [==============================] - 0s 71us/step
 Train member Nr 2/5
 --------------------------------------
-46/46 [==============================] - 0s 45us/step
+Restoring model weights from the end of the best epoch
+Epoch 00047: early stopping
+46/46 [==============================] - 0s 49us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 50us/step
+Restoring model weights from the end of the best epoch
+Epoch 00039: early stopping
+46/46 [==============================] - 0s 54us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 109us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 118us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 78us/step
-Computation time: 10.5s
-
-##################################################################
-Search iteration Nr 19/20
-##################################################################
-
+Restoring model weights from the end of the best epoch
+Epoch 00071: early stopping
+46/46 [==============================] - 0s 68us/step
+Loss: 0.35565991032382716
+Computation time: 10.1s
+Search iteration Nr 12/20
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 92us/step
+Restoring model weights from the end of the best epoch
+Epoch 00082: early stopping
+46/46 [==============================] - 0s 82us/step
 Train member Nr 2/5
 --------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00077: early stopping
+46/46 [==============================] - 0s 70us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00034: early stopping
+46/46 [==============================] - 0s 104us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 55us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00121: early stopping
+46/46 [==============================] - 0s 53us/step
+Loss: 0.25811459438308426
+Computation time: 10.8s
+Search iteration Nr 13/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00115: early stopping
+46/46 [==============================] - 0s 61us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00040: early stopping
+46/46 [==============================] - 0s 75us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00042: early stopping
+46/46 [==============================] - 0s 49us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00122: early stopping
+46/46 [==============================] - 0s 49us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00042: early stopping
+46/46 [==============================] - 0s 66us/step
+Loss: 0.29950643440951474
+Computation time: 9.8s
+Search iteration Nr 14/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00107: early stopping
+46/46 [==============================] - 0s 96us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 54us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00058: early stopping
+46/46 [==============================] - 0s 168us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 73us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00032: early stopping
+46/46 [==============================] - 0s 123us/step
+Loss: 0.5440963976409124
+Computation time: 15.5s
+Search iteration Nr 15/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00032: early stopping
+46/46 [==============================] - 0s 152us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00040: early stopping
+46/46 [==============================] - 0s 150us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00054: early stopping
+46/46 [==============================] - 0s 103us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00041: early stopping
+46/46 [==============================] - 0s 133us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00059: early stopping
+46/46 [==============================] - 0s 150us/step
+Loss: 0.28715189351983694
+Computation time: 20.9s
+Search iteration Nr 16/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00095: early stopping
+46/46 [==============================] - 0s 193us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00033: early stopping
 46/46 [==============================] - 0s 59us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 45us/step
+Restoring model weights from the end of the best epoch
+Epoch 00105: early stopping
+46/46 [==============================] - 0s 146us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 81us/step
+Restoring model weights from the end of the best epoch
+Epoch 00034: early stopping
+46/46 [==============================] - 0s 82us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 75us/step
-Computation time: 8.6s
-
-##################################################################
+Restoring model weights from the end of the best epoch
+Epoch 00045: early stopping
+46/46 [==============================] - 0s 95us/step
+Loss: 0.513937189883512
+Computation time: 21.3s
+Search iteration Nr 17/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00112: early stopping
+46/46 [==============================] - 0s 156us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00088: early stopping
+46/46 [==============================] - 0s 67us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 152us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 89us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00181: early stopping
+46/46 [==============================] - 0s 127us/step
+Loss: 0.3518007106755091
+Computation time: 21.9s
+Search iteration Nr 18/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00105: early stopping
+46/46 [==============================] - 0s 126us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00128: early stopping
+46/46 [==============================] - 0s 66us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00033: early stopping
+46/46 [==============================] - 0s 67us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 155us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00061: early stopping
+46/46 [==============================] - 0s 105us/step
+Loss: 0.38344535646231276
+Computation time: 22.7s
+Search iteration Nr 19/20
+Train member Nr 1/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00079: early stopping
+46/46 [==============================] - 0s 286us/step
+Train member Nr 2/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00073: early stopping
+46/46 [==============================] - 0s 169us/step
+Train member Nr 3/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00041: early stopping
+46/46 [==============================] - 0s 106us/step
+Train member Nr 4/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00033: early stopping
+46/46 [==============================] - 0s 67us/step
+Train member Nr 5/5
+--------------------------------------
+Restoring model weights from the end of the best epoch
+Epoch 00057: early stopping
+46/46 [==============================] - 0s 82us/step
+Loss: 0.32215388132178263
+Computation time: 20.3s
 Search iteration Nr 20/20
-##################################################################
-
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 49us/step
+Restoring model weights from the end of the best epoch
+Epoch 00065: early stopping
+46/46 [==============================] - 0s 136us/step
 Train member Nr 2/5
 --------------------------------------
-46/46 [==============================] - 0s 47us/step
+Restoring model weights from the end of the best epoch
+Epoch 00084: early stopping
+46/46 [==============================] - 0s 96us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 54us/step
+Restoring model weights from the end of the best epoch
+Epoch 00032: early stopping
+46/46 [==============================] - 0s 60us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 49us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 246us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 51us/step
-Computation time: 9.8s
-
-##################################################################
+Restoring model weights from the end of the best epoch
+Epoch 00047: early stopping
+46/46 [==============================] - 0s 132us/step
+Loss: 0.4694813759430595
+Computation time: 20.6s
 Refit the model with best hyperparamters
-##################################################################
-
-{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.30452543907304586, &#39;noise_in&#39;: 0.21534727932400557, &#39;noise_mu&#39;: 0.2830000465254644, &#39;noise_sigma&#39;: 0.20073478581880644, &#39;l1_hidden&#39;: 0.08204434904474006, &#39;l2_hidden&#39;: 0.15817156327512816, &#39;l1_mu&#39;: 0.044876511619725834, &#39;l2_mu&#39;: 0.07501615431427888, &#39;l1_sigma&#39;: 0.13807434833687507, &#39;l2_sigma&#39;: 0.003930864203235141, &#39;lr&#39;: 0.005892578009524626, &#39;batch_size&#39;: 100}
+{&#39;layers&#39;: 1, &#39;neurons&#39;: 16, &#39;dropout&#39;: 0.17954696328551784, &#39;noise_in&#39;: 0.48765233117205986, &#39;noise_sigma&#39;: 0.2344138299710665, &#39;noise_mu&#39;: 0.28641868136528587, &#39;l1_hidden&#39;: 0.07373889141305061, &#39;l2_hidden&#39;: 0.06504845804389796, &#39;l1_mu&#39;: 0.07739008026671873, &#39;l2_mu&#39;: 0.05793634510447043, &#39;l1_sigma&#39;: 0.07610942970011525, &#39;l2_sigma&#39;: 0.13103696054979164, &#39;lr&#39;: 0.004272988853087075, &#39;batch_size&#39;: 100, &#39;epochs&#39;: 500, &#39;n_segments&#39;: 5, &#39;n_members_segment&#39;: 1, &#39;patience&#39;: 30, &#39;verbose&#39;: 0, &#39;pdf&#39;: &#39;normal&#39;, &#39;n_members&#39;: 5}
 Train member Nr 1/5
 --------------------------------------
-46/46 [==============================] - 0s 56us/step
+Restoring model weights from the end of the best epoch
+Epoch 00067: early stopping
+46/46 [==============================] - 0s 71us/step
 Train member Nr 2/5
 --------------------------------------
-46/46 [==============================] - 0s 47us/step
+Restoring model weights from the end of the best epoch
+Epoch 00160: early stopping
+46/46 [==============================] - 0s 306us/step
 Train member Nr 3/5
 --------------------------------------
-46/46 [==============================] - 0s 51us/step
+Restoring model weights from the end of the best epoch
+Epoch 00061: early stopping
+46/46 [==============================] - 0s 276us/step
 Train member Nr 4/5
 --------------------------------------
-46/46 [==============================] - 0s 50us/step
+Restoring model weights from the end of the best epoch
+Epoch 00031: early stopping
+46/46 [==============================] - 0s 191us/step
 Train member Nr 5/5
 --------------------------------------
-46/46 [==============================] - 0s 58us/step
-Computation time: 9.9s
-best loss search: 0.11411247535244277
-loss refitting : 0.14777255660813787
+Restoring model weights from the end of the best epoch
+Epoch 00047: early stopping
+46/46 [==============================] - 0s 178us/step
+Loss: 0.3001609052652898
+Computation time: 21.4s
+best loss search: 0.22250935001217803
+loss refitting : 0.3001609052652898
 </pre></div></div>
 </div>
 </div>
@@ -1021,7 +1160,7 @@ loss refitting : 0.14777255660813787
 <h2>Make predictions for the test data set<a class="headerlink" href="#Make-predictions-for-the-test-data-set" title="Permalink to this headline">¶</a></h2>
 <p>Now we can use the trained models to make predicitons on the test data set to evaluate how good the model perfoms on a data set that it never saw before.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1034,7 +1173,7 @@ loss refitting : 0.14777255660813787
 <h2>Plot the prediction<a class="headerlink" href="#Plot-the-prediction" title="Permalink to this headline">¶</a></h2>
 <p>Let’s see how the predicion is looking like</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1061,15 +1200,8 @@ loss refitting : 0.14777255660813787
 
 <span class="c1"># plot the observation</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timey</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>[&lt;matplotlib.lines.Line2D at 0x7fd9fe77cb38&gt;]
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1077,7 +1209,7 @@ loss refitting : 0.14777255660813787
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/jupyter_notebook_tutorials_deep_ensemble_10_1.png" src="../_images/jupyter_notebook_tutorials_deep_ensemble_10_1.png" />
+<img alt="../_images/jupyter_notebook_tutorials_deep_ensemble_10_0.png" src="../_images/jupyter_notebook_tutorials_deep_ensemble_10_0.png" />
 </div>
 </div>
 </div>
@@ -1085,7 +1217,7 @@ loss refitting : 0.14777255660813787
 <h2>Evaluate the model<a class="headerlink" href="#Evaluate-the-model" title="Permalink to this headline">¶</a></h2>
 <p>We can evaluate the model a bit more quantitatively using the loss function that was used to train the model, namely the negative-log-likelihood of the Gaussian and the correlation between the predicted mean and the observed ONI index.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1106,7 +1238,7 @@ loss refitting : 0.14777255660813787
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Loss (Negative-Log-Likelihood): 0.1747595046770062
+Loss (Negative-Log-Likelihood): 0.19635278216131088
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1114,6 +1246,15 @@ Loss (Negative-Log-Likelihood): 0.1747595046770062
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/jupyter_notebook_tutorials_deep_ensemble_12_1.png" src="../_images/jupyter_notebook_tutorials_deep_ensemble_12_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -1141,7 +1282,7 @@ Loss (Negative-Log-Likelihood): 0.1747595046770062
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on Oktober 07, 2019.
+        Last updated on Oktober 14, 2019.
       </span>
 
     </p>

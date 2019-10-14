@@ -405,13 +405,13 @@ div.rendered_html tbody tr:hover {
 <p><code class="docutils literal notranslate"><span class="pre">variablename_dataset_postprocessing.extension</span></code></p>
 <p>This means the unprocessed data is saved to the postprocessed directory as ‘sst_ERSSTv5.nc’ and the anoamaly data as ‘sst_ERSSTv5_anom.nc’. This naming convention makes it easy to access them later using the <code class="docutils literal notranslate"><span class="pre">ninolearn.IO.read_post.data_reader</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">ninolearn.IO</span> <span class="k">import</span> <span class="n">read_raw</span>
-<span class="kn">from</span> <span class="nn">ninolearn.postprocess.anomaly</span> <span class="k">import</span> <span class="n">postprocess</span>
-<span class="kn">from</span> <span class="nn">ninolearn.postprocess.regrid</span> <span class="k">import</span> <span class="n">to2_5x2_5</span>
+<span class="kn">from</span> <span class="nn">ninolearn.preprocess.anomaly</span> <span class="k">import</span> <span class="n">postprocess</span>
+<span class="kn">from</span> <span class="nn">ninolearn.preprocess.regrid</span> <span class="k">import</span> <span class="n">to2_5x2_5</span>
 
 <span class="c1"># read raw data from the raw data directory</span>
 <span class="n">sst_ERSSTv5</span> <span class="o">=</span> <span class="n">read_raw</span><span class="o">.</span><span class="n">sst_ERSSTv5</span><span class="p">()</span>
@@ -430,8 +430,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Overwrite existing file: bilinear_89x180_73x144.nc
- You can set reuse_weights=True to save computing time.
+Create weight file: bilinear_89x180_73x144.nc
 Process sst from ERSSTv5
 --------------------------------------
 save sst in post directory
@@ -445,12 +444,12 @@ Compute and save sst anomaly
 <h2>Principal component analysis (PCA)<a class="headerlink" href="#Principal-component-analysis-(PCA)" title="Permalink to this headline">¶</a></h2>
 <p>Now, let’s perform a PCA on the just computed SST anomalies (SSTA). Note, that the naming convention from the previous section now appears in the <code class="docutils literal notranslate"><span class="pre">pca.load_data()</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">from</span> <span class="nn">ninolearn.postprocess.pca</span> <span class="k">import</span> <span class="n">pca</span>
+<span class="kn">from</span> <span class="nn">ninolearn.preprocess.pca</span> <span class="k">import</span> <span class="n">pca</span>
 
 <span class="n">pca_sst</span> <span class="o">=</span> <span class="n">pca</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 
@@ -471,9 +470,15 @@ Compute and save sst anomaly
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/paul/MEGA/Studium/UU/Master_thesis/ninolearn/ninolearn/postprocess/pca.py:156: MatplotlibDeprecationWarning:
+/home/paul/MEGA/Studium/UU/Master_thesis/ninolearn/ninolearn/preprocess/pca.py:156: MatplotlibDeprecationWarning:
 The dedent function was deprecated in Matplotlib 3.1 and will be removed in 3.3. Use inspect.cleandoc instead.
   m = Basemap(projection=&#39;robin&#39;, lon_0=-180, resolution=&#39;c&#39;)
+/home/paul/miniconda2/envs/ninolearn/lib/python3.6/site-packages/pandas/plotting/_matplotlib/converter.py:102: FutureWarning: Using an implicitly registered datetime converter for a matplotlib plotting method. The converter was registered by pandas on import. Future versions of pandas will require you to explicitly register matplotlib converters.
+
+To register the converters:
+        &gt;&gt;&gt; from pandas.plotting import register_matplotlib_converters
+        &gt;&gt;&gt; register_matplotlib_converters()
+  warnings.warn(msg, FutureWarning)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -488,13 +493,13 @@ The dedent function was deprecated in Matplotlib 3.1 and will be removed in 3.3.
 <h2>Evolving Climate Networks (ECNs)<a class="headerlink" href="#Evolving-Climate-Networks-(ECNs)" title="Permalink to this headline">¶</a></h2>
 <p>The following cell computes the ECN time series and calculates network metrics from it for the SSTA anomaly field in the equatorial Pacific (<code class="docutils literal notranslate"><span class="pre">lon_min=120,</span> <span class="pre">lon_max=280,</span> <span class="pre">lat_min=-30,</span> <span class="pre">lat_max=30</span></code>) between the year 2000 and 2018 (<code class="docutils literal notranslate"><span class="pre">startyear=2000,</span> <span class="pre">endyear=2018</span></code>). Complex networks are computed for a time window of 12 time steps (<code class="docutils literal notranslate"><span class="pre">window_size=12</span></code>) which is shifted by one time step for the next data point.</p>
 <p>The threshold method is used in this example (also the edge density method is available). This means, connection between two nodes/grid points are established when pearson correlation greater than the threshold.</p>
-<p>The computation may take some time (5-20min).</p>
+<p>The computation may take some time (5-20min). No worries, about the two warnings. They are raised just for the first computed time step for the Hamming distance metrics, because this metric needs the network from a previous time step to be computed (which does not exist for the first time step).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.network</span> <span class="k">import</span> <span class="n">networkMetricsSeries</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.preprocess.network</span> <span class="k">import</span> <span class="n">networkMetricsSeries</span>
 
 <span class="c1"># settings for the computation of the network metrics time series</span>
 <span class="n">nms</span> <span class="o">=</span> <span class="n">networkMetricsSeries</span><span class="p">(</span><span class="s1">&#39;sst&#39;</span><span class="p">,</span> <span class="s1">&#39;ERSSTv5&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="s2">&quot;anom&quot;</span><span class="p">,</span>
@@ -520,13 +525,13 @@ WARNING:Wrong input for computation of corrected hamming distance.
 </div>
 <p>Now let us read the data from the postprocessed directory</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">matplotlib</span> inline
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+<span class="kn">from</span> <span class="nn">ninolearn.IO.read_processed</span> <span class="k">import</span> <span class="n">data_reader</span>
 
 <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1950-02&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2018-12&#39;</span><span class="p">)</span>
 
@@ -548,11 +553,11 @@ WARNING:Wrong input for computation of corrected hamming distance.
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f28f17e7f28&gt;
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f1bf4dd9c18&gt;
 </pre></div>
 </div>
 </div>
@@ -580,7 +585,7 @@ WARNING:Wrong input for computation of corrected hamming distance.
 <p>Is there a lead correlation of the <code class="docutils literal notranslate"><span class="pre">c2</span></code> or <code class="docutils literal notranslate"><span class="pre">H</span></code> onto the ONI?</p>
 <p>NOTE: Lead time is defined as the time that passed between the last observed and the first date of the target season. Hence, negative appear, e.g. if you compare the DJF season with the target season JFM, you have a lead time of -2 month (Last observed date: Feburary 28/29, First date of the target season January 1).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -620,11 +625,11 @@ WARNING:Wrong input for computation of corrected hamming distance.
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.legend.Legend at 0x7f28fa6b1400&gt;
+<span></span>&lt;matplotlib.legend.Legend at 0x7f1be8e83048&gt;
 </pre></div>
 </div>
 </div>
@@ -661,7 +666,7 @@ WARNING:Wrong input for computation of corrected hamming distance.
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on Oktober 07, 2019.
+        Last updated on Oktober 14, 2019.
       </span>
 
     </p>

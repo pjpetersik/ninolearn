@@ -8,19 +8,6 @@ plt.close("all")
 # Decadel PCAs
 # =============================================================================
 
-reader = data_reader(startdate='1955-02', enddate='2018-12', lon_min=120, lon_max=300)
-hca = reader.read_netcdf('hca', dataset='NODC', processed='anom')
-
-hca_decadel = hca.rolling(time=60, center=False).mean()
-hca_decadel.attrs = hca.attrs.copy()
-hca_decadel.name = f'dec_{hca.name}'
-
-pca_hca_decadel = pca(n_components=6)
-
-pca_hca_decadel.set_eof_array(hca_decadel)
-pca_hca_decadel.compute_pca()
-pca_hca_decadel.plot_eof()
-pca_hca_decadel.save(extension='.csv', filename='dec_hca_NODC_anom')
 
 reader = data_reader(startdate='1955-01', enddate='2018-12',lon_min=120, lon_max=300)
 sst = reader.read_netcdf('sst', dataset='ERSSTv5', processed='anom')

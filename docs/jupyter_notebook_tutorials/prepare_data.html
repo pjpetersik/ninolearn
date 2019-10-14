@@ -395,7 +395,7 @@ div.rendered_html tbody tr:hover {
 <h1>Data preparation and read postprocessed data<a class="headerlink" href="#Data-preparation-and-read-postprocessed-data" title="Permalink to this headline">¶</a></h1>
 <p>Do you remember from the <a class="reference internal" href="download_and_read_raw_data.html"><span class="doc">Download and read raw data</span></a> tutorial, that the ONI had a wired time axis? As a little reminder:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -430,11 +430,11 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>This time axis is difficult to work with. For this NinoLearn contains a postprocessing method that fixes this for you.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ninolearn.postprocess.prepare</span> <span class="k">import</span> <span class="n">prep_oni</span><span class="p">,</span> <span class="n">prep_wwv</span><span class="p">,</span> <span class="n">prep_iod</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.preprocess.prepare</span> <span class="k">import</span> <span class="n">prep_oni</span><span class="p">,</span> <span class="n">prep_wwv</span><span class="p">,</span> <span class="n">prep_iod</span>
 
 <span class="n">prep_oni</span><span class="p">()</span>
 <span class="n">prep_wwv</span><span class="p">()</span>
@@ -455,11 +455,11 @@ Prepare IOD timeseries.
 <p>All methods from the <code class="docutils literal notranslate"><span class="pre">postprocess</span></code> sub-package save the data directly to the data directory <code class="docutils literal notranslate"><span class="pre">postdir</span></code> that you need to specify in <code class="docutils literal notranslate"><span class="pre">ninolean.pathes</span></code>.</p>
 <p>Now, lets read this data using the data reader for postprocessed data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_post</span> <span class="k">import</span> <span class="n">data_reader</span>
+<span></span><span class="kn">from</span> <span class="nn">ninolearn.IO.read_processed</span> <span class="k">import</span> <span class="n">data_reader</span>
 
 <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">()</span>
 <span class="n">reader</span> <span class="o">=</span> <span class="n">data_reader</span><span class="p">(</span><span class="n">startdate</span><span class="o">=</span><span class="s1">&#39;1980-01&#39;</span><span class="p">,</span> <span class="n">enddate</span><span class="o">=</span><span class="s1">&#39;2017-12&#39;</span><span class="p">)</span>
@@ -530,7 +530,7 @@ Name: anom, dtype: float64
     <p>
         &copy; Copyright 2019, Paul Petersik
       <span class="lastupdated">
-        Last updated on Oktober 07, 2019.
+        Last updated on Oktober 14, 2019.
       </span>
 
     </p>

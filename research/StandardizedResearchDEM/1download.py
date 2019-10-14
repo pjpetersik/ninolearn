@@ -13,16 +13,13 @@ print_header("Download Data")
 # =============================================================================
 download(sources.SST_ERSSTv5)
 download(sources.ONI)
-download(sources.NINOindeces)
+download(sources.NINOindices)
 download(sources.IOD)
-download(sources.HCA)
 download(sources.OLR_NOAA)
 download(sources.WWV)
 download(sources.WWV_West)
 download(sources.UWIND_NCEP)
 download(sources.VWIND_NCEP)
-download(sources.VWIND_NCEP)
-download(sources.SAT_monthly_NCEP)
 download(sources.otherForecasts)
 
 # =============================================================================

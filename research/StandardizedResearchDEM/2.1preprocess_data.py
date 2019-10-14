@@ -42,10 +42,7 @@ sst_ERSSTv5 = read_raw.sst_ERSSTv5()
 sst_ERSSTv5_regrid = to2_5x2_5(sst_ERSSTv5)
 postprocess(sst_ERSSTv5_regrid)
 
-# postprocess sat daily values from NCEP/NCAR reanalysis monthly
-sat = read_raw.sat(mean='monthly')
-postprocess(sat)
-
+# NCEP reanalysis
 uwind = read_raw.uwind()
 postprocess(uwind)
 
@@ -57,23 +54,7 @@ ssh_oras4 = read_raw.oras4()
 ssh_oras4_regrid = to2_5x2_5(ssh_oras4)
 postprocess(ssh_oras4_regrid)
 
-# post process values from GODAS
-ssh_godas = read_raw.godas(variable='sshg')
-ssh_godas_regrid = to2_5x2_5(ssh_godas)
-postprocess(ssh_godas_regrid)
-
-ucur_godas = read_raw.godas(variable='ucur')
-ucur_godas_regrid = to2_5x2_5(ucur_godas)
-postprocess(ucur_godas_regrid)
-
-vcur_godas = read_raw.godas(variable='vcur')
-vcur_godas_regrid = to2_5x2_5(vcur_godas)
-postprocess(vcur_godas_regrid)
-
-hca_ndoc = read_raw.hca_mon()
-hca_ndoc_regrid = to2_5x2_5(hca_ndoc)
-saveAnomaly(hca_ndoc_regrid, False, compute=False)
-
+# OLR
 olr_ncar = read_raw.olr()
 olr_ncar_regrid = to2_5x2_5(olr_ncar)
 postprocess(olr_ncar_regrid)
