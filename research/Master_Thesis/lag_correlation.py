@@ -11,7 +11,7 @@ from os.path import join
 
 plt.close("all")
 
-start = '2002'
+start = '2000'
 end = '2017'
 
 reader = data_reader(startdate=f'{start}-01', enddate=f'{end}-12', lon_min=30)

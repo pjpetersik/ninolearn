@@ -102,25 +102,43 @@ def pipeline_small(lead_time,  return_persistance=False):
     """
     reader = data_reader(startdate='1960-01', enddate='2017-12')
 
-    # indeces
+     # indeces
     oni = reader.read_csv('oni')
 
+    iod = reader.read_csv('iod')
     wwv = reader.read_csv('wwv_proxy')
 
     # seasonal cycle
     sc = np.cos(np.arange(len(oni))/12*2*np.pi)
 
+    # network metrics
+    network_ssh = reader.read_statistic('network_metrics', variable='zos', dataset='ORAS4', processed="anom")
+    c2_ssh = network_ssh['fraction_clusters_size_2']
+    H_ssh = network_ssh['corrected_hamming_distance']
+
+    #wind stress
+    taux = reader.read_netcdf('taux', dataset='NCEP', processed='anom')
+
+    taux_WP = taux.loc[dict(lat=slice(2.5,-2.5), lon=slice(120, 160))]
+    taux_WP_mean = taux_WP.mean(dim='lat').mean(dim='lon')
+
     # decadel variation of leading eof
     pca_dec = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')['pca1']
 
     # time lag
-    time_lag = 3
+    time_lag = 12
 
     # shift such that lead time corresponds to the definition of lead time
     shift = 3
 
     # process features
-    feature_unscaled = np.stack((oni, sc, wwv, pca_dec), axis=1)
+    # process features
+    feature_unscaled = np.stack((oni, sc, wwv,
+#                                 iod,
+#                                 taux_WP_mean,
+#                                 c2_ssh,
+#                                 H_ssh,
+                                 pca_dec), axis=1)
 
     # scale each feature
     scalerX = StandardScaler()
@@ -153,4 +171,4 @@ if __name__=="__main__":
                    l1_mu=[0.0, 0.02], l2_mu=[0.0, 0.02], l1_sigma=[0.0, 0.02],
                    l2_sigma=[0.0, 0.02], lr=[0.0001,0.01], batch_size=100,
                    epochs=500, n_segments=5, n_members_segment=1, patience=30,
-                   verbose=0, pdf="normal", name="dem_small")
+                   verbose=0, pdf="normal", name="dem_review")

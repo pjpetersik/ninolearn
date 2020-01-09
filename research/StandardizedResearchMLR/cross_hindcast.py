@@ -8,9 +8,11 @@ from ninolearn.learn.evaluation import evaluation_correlation, evaluation_decada
 from ninolearn.learn.evaluation import evaluation_srmse, evaluation_decadal_srmse, evaluation_seasonal_srmse
 from ninolearn.plot.evaluation import plot_seasonal_skill
 
-from mlr import pipeline, mlr
+from mlr import pipeline, mlr, pipeline_noise
 #
-cross_hindcast(mlr, pipeline, 'mlr')
+
+model_name = 'mlr_review'
+cross_hindcast(mlr, pipeline, f'{model_name}')
 
 #%% =============================================================================
 # All season correlation skill
@@ -18,10 +20,10 @@ cross_hindcast(mlr, pipeline, 'mlr')
 
 plt.close("all")
 # scores on the full time series
-r, p  = evaluation_correlation('mlr', variable_name='prediction')
+r, p  = evaluation_correlation(f'{model_name}', variable_name='prediction')
 
 # score in different decades
-r_dec, p_dec = evaluation_decadal_correlation('mlr', variable_name='prediction')
+r_dec, p_dec = evaluation_decadal_correlation(f'{model_name}', variable_name='prediction')
 
 # plot correlation skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
@@ -42,8 +44,8 @@ plt.tight_layout()
 #%% =============================================================================
 # All season SRMSE skill
 # =============================================================================
-srmse_dec = evaluation_decadal_srmse('mlr', variable_name='prediction')
-srmse = evaluation_srmse('mlr', variable_name='prediction')
+srmse_dec = evaluation_decadal_srmse(f'{model_name}', variable_name='prediction')
+srmse = evaluation_srmse(f'{model_name}', variable_name='prediction')
 
 # plot SRMSE skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
@@ -64,14 +66,14 @@ plt.tight_layout()
 # Seasonal correlation skills
 # =============================================================================
 # evaluate the model in different seasons
-r_seas, p_seas = evaluation_seasonal_correlation('mlr', variable_name='prediction')
+r_seas, p_seas = evaluation_seasonal_correlation(f'{model_name}', variable_name='prediction')
 
 plot_seasonal_skill(lead_times, r_seas,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_times, p_seas, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
 plt.title('Correlation skill')
 plt.tight_layout()
 
-srsme_seas = evaluation_seasonal_srmse('mlr', variable_name='prediction')
+srsme_seas = evaluation_seasonal_srmse(f'{model_name}', variable_name='prediction')
 plot_seasonal_skill(lead_times, srsme_seas,  vmin=0, vmax=1.5, cmap=plt.cm.inferno_r, extend='max')
 plt.title('SSRMSE skill')
 plt.tight_layout()

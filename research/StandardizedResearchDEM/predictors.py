@@ -40,7 +40,7 @@ def plot_timeseries(data, ax, ylabel):
 
 
 data = [oni, wwv, iod, c2_ssh, H_ssh, taux_WP_mean.to_series(), pca_dec]
-y_label= ['ONI [K]', r'WWV [m$^3 \cdot$ 10$^{12}$]', 'DMI [K]', '$c_2$', '$\mathcal{H}^*$', r'$\tau_{x,WP}$ [m$^2/s^2$]','PC1$_{decadal}$']
+y_label= ['ONI [K]', r'WWV [m$^3 \cdot$ 10$^{12}$]', 'DMI [K]', '$c_2$', '$\mathcal{H}^*$', r'$\bar{\tau}_{x,WP}$ [m$^2/s^2$]','PC1$_{decadal}$']
 
 plt.close("all")
 fig, axs = plt.subplots(7,1,  figsize=(12, 8))

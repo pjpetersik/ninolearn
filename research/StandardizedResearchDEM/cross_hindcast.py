@@ -16,15 +16,18 @@ from ninolearn.plot.prediction import plot_prediction
 from ninolearn.IO.read_processed import data_reader
 from ninolearn.pathes import processeddir
 
-from cross_training import pipeline
+from cross_training import pipeline, pipeline_small
 #%%
-#cross_hindcast(DEM, pipeline, 'dem')
+model_name = 'dem_review'
+
+#cross_hindcast(DEM, pipeline_small, 'model_name')
+
 
 start = '1963-01'
 end = '2017-12'
 reader = data_reader(startdate=start, enddate=end)
 oni = reader.read_csv('oni')
-data = xr.open_dataset(join(processeddir, f'dem_forecasts.nc'))
+data = xr.open_dataset(join(processeddir, f'{model_name}_forecasts.nc'))
 
 # =============================================================================
 # Plot Hindcasts
@@ -59,10 +62,10 @@ plt.tight_layout()
 # All season NLL skill
 # =============================================================================
 # scores on the full time series
-nll = evaluation_nll('dem')
+nll = evaluation_nll(f'{model_name}')
 
 # score in different decades
-nll_dec = evaluation_decadal_nll('dem')
+nll_dec = evaluation_decadal_nll(f'{model_name}')
 
 # plot correlation skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
@@ -85,10 +88,10 @@ plt.tight_layout()
 # All season correlation skill
 # =============================================================================
 # scores on the full time series
-r, p  = evaluation_correlation('dem')
+r, p  = evaluation_correlation(f'{model_name}')
 
 # score in different decades
-r_dec, p_dec = evaluation_decadal_correlation('dem')
+r_dec, p_dec = evaluation_decadal_correlation(f'{model_name}')
 
 # plot correlation skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
@@ -110,8 +113,8 @@ plt.tight_layout()
 #%% =============================================================================
 # All season SRMSE skill
 # =============================================================================
-srmse_dec = evaluation_decadal_srmse('dem')
-srmse = evaluation_srmse('dem')
+srmse_dec = evaluation_decadal_srmse(f'{model_name}')
+srmse = evaluation_srmse(f'{model_name}')
 
 # plot SRMSE skills
 ax = plt.figure(figsize=(6.5,3.5)).gca()
@@ -136,7 +139,7 @@ plt.tight_layout()
 background = "all"
 #background = "el-nino-like"
 
-r_seas, p_seas = evaluation_seasonal_correlation('dem', background=background)
+r_seas, p_seas = evaluation_seasonal_correlation(f'{model_name}', background=background)
 
 plot_seasonal_skill(lead_times, r_seas,  vmin=0, vmax=1)
 plt.contour(np.arange(1,13),lead_times, p_seas, levels=[0.01, 0.05, 0.1], linestyles=['solid', 'dashed', 'dotted'], colors='k')
@@ -145,7 +148,7 @@ plt.tight_layout()
 plt.savefig('/home/paul/Downloads/test.png', dpi=360)
 
 #
-srsme_seas = evaluation_seasonal_srmse('dem', background=background)
+srsme_seas = evaluation_seasonal_srmse(f'{model_name}', background=background)
 plot_seasonal_skill(lead_times, srsme_seas,  vmin=0, vmax=1., cmap=plt.cm.inferno_r, extend='max')
 plt.title('SRMSE skill')
 plt.tight_layout()

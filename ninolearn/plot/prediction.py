@@ -16,7 +16,7 @@ def plot_prediction(time, mean, std=None, std_level=1, facecolor='royalblue', li
             plt.fill_between(time, m1std, p1std , facecolor=facecolor, alpha=alpha)
             plt.fill_between(time, m2std, p2std , facecolor=facecolor, alpha=alpha/2)
 
-        plt.plot(time, mean, line_color)
+        plt.plot(time, mean, line_color, label="DE Mean", lw=2)
 
     else:
         if std is not None:
@@ -28,4 +28,4 @@ def plot_prediction(time, mean, std=None, std_level=1, facecolor='royalblue', li
             ax.fill_between(time, m1std, p1std , facecolor=facecolor, alpha=alpha)
             ax.fill_between(time, m2std, p2std , facecolor=facecolor, alpha=alpha/2)
 
-        ax.plot(time, mean, line_color)
+        ax.plot(time, mean, line_color,  label=" DE Mean", lw=2)

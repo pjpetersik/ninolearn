@@ -59,6 +59,60 @@ def pipeline(lead_time,  return_persistance=False):
         return X, y, timey
 
 
+def pipeline_noise(lead_time,  return_persistance=False):
+    """
+    Data pipeline for the processing of the data before the MLR
+    is trained.
+
+    :type lead_time: int
+    :param lead_time: The lead time in month.
+
+    :type return_persistance: boolean
+    :param return_persistance: Return as the persistance as well.
+
+    :returns: The feature "X" (at observation time), the label "y" (at lead
+    time), the target season "timey" (least month) and if selected the
+    label at observation time "y_persistance". Hence, the output comes as:
+    X, y, timey, y_persistance.
+    """
+    # initialize the reader
+    reader = data_reader(startdate='1960-01', enddate='2017-12')
+
+    np.random.seed(0)
+
+    # load data
+    oni = reader.read_csv('oni')
+    wwv = reader.read_csv('wwv_proxy')
+    iod = reader.read_csv('iod')
+
+    # the shift data by 3 in addition to lead time shift (due to definition
+    # of lead time) as in barnston et al. (2012)
+    shift = 3
+
+    # make feature
+    Xorg = np.stack((oni, wwv, iod), axis=1)
+
+    for i in range(100):
+        random_noise = np.random.normal(size=len(oni)).reshape(len(oni), 1)
+        Xorg = np.concatenate((Xorg, random_noise), axis=1)
+
+    X = Xorg[:-lead_time-shift,:]
+
+
+    # arange label
+    yorg = oni.values
+    y = yorg[lead_time + shift:]
+
+    # get the time axis of the label
+    timey = oni.index[lead_time + shift:]
+
+    if return_persistance:
+        y_persistance = yorg[: - lead_time - shift]
+        return X, y, timey, y_persistance
+    else:
+        return X, y, timey
+
+
 # =============================================================================
 # Now the actual model is build.
 # =============================================================================
