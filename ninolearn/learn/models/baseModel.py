@@ -64,18 +64,25 @@ class baseModel(object):
             for key in self.hyperparameters_search.keys():
                 low = self.hyperparameters_search[key][0]
                 high = self.hyperparameters_search[key][1]
+                search_type = self.hyperparameters_search[key][2]
 
-                if type(low) is float or type(high) is float:
-                    self.hyperparameters[key] = np.random.uniform(low, high)
+                if search_type=='linear':
+                    if type(low) is float or type(high) is float:
+                        self.hyperparameters[key] = np.random.uniform(low, high)
 
-                if type(low) is int and type(high) is int:
-                    self.hyperparameters[key] = np.random.randint(low, high+1)
+                    elif type(low) is int and type(high) is int:
+                        self.hyperparameters[key] = np.random.randint(low, high+1)
 
-                if type(low) is tuple and type(high) is tuple:
-                    hyp_list = []
-                    for i in range(len(low)):
-                        hyp_list.append(np.random.randint(low[i], high[i]+1))
-                    self.hyperparameters[key] = tuple(hyp_list)
+                    elif type(low) is tuple and type(high) is tuple:
+                        hyp_list = []
+                        for i in range(len(low)):
+                            hyp_list.append(np.random.randint(low[i], high[i]+1))
+                        self.hyperparameters[key] = tuple(hyp_list)
+
+                elif search_type=='log':
+                    choice_values = np.logspace(np.log10(low), np.log10(high), 100)
+                    self.hyperparameters[key] = np.random.choice(choice_values)
+
 
             self.fit(trainX, trainy, **kwargs)
             self.history_RandomizedSearch.append(self.mean_val_loss)

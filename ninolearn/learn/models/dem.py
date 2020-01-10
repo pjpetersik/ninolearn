@@ -29,7 +29,6 @@ class DEM(baseModel):
     the hidden layer. It is trained using the MSE or negative-log-likelihood of
     a gaussian distribution, respectively.
 
-
     :type layers: int
     :param layers: Number of hidden layers.
 
@@ -160,7 +159,6 @@ class DEM(baseModel):
 
             h = Dropout(self.hyperparameters['dropout'],
                         name=f'hidden_dropout_{i}')(h)
-
 
         mu = Dense(1, activation='linear',
                    kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_mu'],

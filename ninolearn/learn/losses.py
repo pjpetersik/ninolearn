@@ -36,3 +36,10 @@ def nll_skewed_gaussian(y_true, y_pred):
     loss =  K.mean(summed, axis=-1)
 
     return loss
+
+def tilted_loss(q, y, f):
+    """
+    Tilted loss for quantile regression
+    """
+    e = (y-f)
+    return K.mean(K.maximum(q*e, (q-1)*e), axis=-1)

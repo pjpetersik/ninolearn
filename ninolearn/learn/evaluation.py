@@ -15,7 +15,7 @@ from scipy.stats import pearsonr
 # ALL SEASONS EVALUATION
 # =============================================================================
 
-def evaluation_nll(model_name, mean_name = 'mean', std_name='std'):
+def evaluation_nll(model_name, mean_name = 'mean', std_name='std', filename=None):
     """
     Evaluate the model using the negativ log-likelihood skill for the full time series.
     """
@@ -28,12 +28,13 @@ def evaluation_nll(model_name, mean_name = 'mean', std_name='std'):
     obs = reader.read_csv('oni')
 
     for i in range(n_lead):
-        pred_all = reader.read_forecasts(model_name, lead_times[i])
+        pred_all = reader.read_forecasts(model_name, lead_times[i], filename=filename)
         mean = pred_all[mean_name]
         std = pred_all[std_name]
 
         # calculate all seasons scores
         nll[i] = nll_gaussian(obs, mean, std)
+
     return nll
 
 

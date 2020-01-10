@@ -41,7 +41,7 @@ def cross_training(model, pipeline, n_iter, **kwargs):
     method of the provided model.
     """
 
-    for lead_time in [0, 3, 6, 9, 12, 15]:
+    for lead_time in [6, 9, 12, 15, 0, 3,]:
         X, y, timey = pipeline(lead_time, return_persistance=False)
 
         print_header(f'Lead time: {lead_time} month')
@@ -138,3 +138,91 @@ def cross_hindcast(model, pipeline, model_name):
     ds = xr.Dataset(save_dict, coords={'target_season': timeytrue,
                                        'lead': lead_times} )
     ds.to_netcdf(join(processeddir, f'{model_name}_forecasts.nc'))
+
+
+def cross_hindcast_dem(model, pipeline, model_name):
+    """
+    Generate a hindcast from 1962 till today using the models which were
+    trained by the .cross_training() method. ONLY works for the DEM.
+    This routine returns an std estimate that is only based on the corrlation
+    skill of the DEM predicted mean.
+
+    :param model: The considered model.
+
+    :param pipeline: The data pipeline that already was used before in \
+    .cross_training().
+    """
+    #cross_hindcast(model, pipeline, model_name)
+
+    std_estimate = xr.open_dataarray(join(processeddir, f'{model_name}_std_estimate.nc'))
+
+    first_lead_loop = True
+
+    for i in range(n_lead):
+        lead_time = lead_times[i]
+        print_header(f'Lead time: {lead_time} months')
+
+        X, y, timey, y_persistance = pipeline(lead_time, return_persistance=True)
+
+        ytrue = np.array([])
+        timeytrue = pd.DatetimeIndex([])
+
+        first_dec_loop = True
+        for j in range(n_decades-1):
+            small_print_header(f'Predict: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
+
+            # test indices
+            test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
+            testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
+
+            m = model()
+            m.load(location=modeldir, dir_name=f'{model_name}_decade{decades[j]}_lead{lead_time}')
+
+            # allocate arrays and variables for which the model must be loaded
+            if first_dec_loop:
+                n_outputs = m.n_outputs
+                output_names = m.output_names
+                pred_full = np.zeros((n_outputs+1, 0))
+                first_dec_loop=False
+
+            # make prediction
+            pred = np.zeros((m.n_outputs+1, testX.shape[0]))
+            pred[:2,:] = m.predict(testX)
+
+            for k in range(len(testtimey)):
+                month = testtimey[k].date().month
+                pred[2, k] = std_estimate[i, month-1]
+
+            # make the full time series
+            pred_full = np.append(pred_full, pred, axis=1)
+            ytrue = np.append(ytrue, testy)
+            timeytrue = timeytrue.append(testtimey)
+            del m
+
+        if timeytrue[0]!=pd.to_datetime('1963-01-01'):
+            expected_first_date = '1963-01-01'
+            got_first_date = timeytrue[0].isoformat()[:10]
+
+            raise Exception(f"The first predicted date for lead time {lead_time} \
+                            is {got_first_date} but expected {expected_first_date}")
+
+        # allocate arrays and variables for which the full length of the time
+        # series must be known
+        if first_lead_loop:
+            n_time = len(timeytrue)
+            pred_save =  np.zeros((n_outputs+1, n_time, n_lead))
+            first_lead_loop=False
+
+        pred_save[:,:,i] =  pred_full
+
+    # Save data to a netcdf file
+    save_dict = {}
+    for i in range(n_outputs + 1):
+        if i<n_outputs:
+            save_dict[output_names[i]] = (['target_season', 'lead'],  pred_save[i,:,:])
+        else:
+            save_dict['std_estimate'] = (['target_season', 'lead'],  pred_save[i,:,:])
+
+    ds = xr.Dataset(save_dict, coords={'target_season': timeytrue,
+                                       'lead': lead_times} )
+    ds.to_netcdf(join(processeddir, f'{model_name}_forecasts_with_std_estimated.nc'))
