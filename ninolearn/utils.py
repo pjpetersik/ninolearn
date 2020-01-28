@@ -71,10 +71,10 @@ here I want to implement the code for the MLP regression and classification
 """
 
 
-def include_time_lag(X, max_lag=0):
-    Xnew = np.copy(X[max_lag:])
-    for i in range (0, max_lag):
-        Xnew = np.concatenate((Xnew, X[max_lag-i-1:-i-1]), axis=1)
+def include_time_lag(X, n_lags=0, step=1):
+    Xnew = np.copy(X[n_lags*step:])
+    for i in range (1, n_lags):
+        Xnew = np.concatenate((Xnew, X[(n_lags-i)*step:-i*step]), axis=1)
     return Xnew
 
 

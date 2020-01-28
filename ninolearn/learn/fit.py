@@ -6,6 +6,7 @@ import pandas as pd
 import xarray as xr
 
 from os.path import join, exists
+from os import listdir
 
 from ninolearn.utils import print_header, small_print_header
 from ninolearn.pathes import modeldir, processeddir
@@ -17,11 +18,12 @@ decades_elninolike = []
 n_decades = len(decades)
 
 # lead times for the evaluation
-lead_times = [0, 3, 6, 9, 12, 15]
+lead_times = [0, 3, 6, 9, 12, 15, 18, 21]
 n_lead = len(lead_times)
 
 decade_color = ['orange', 'violet', 'limegreen', 'darkgoldenrod', 'red', 'royalblue']
 decade_name = ['1963-1971', '1972-1981', '1982-1991', '1992-2001', '2002-2011', '2012-2017']
+
 
 def cross_training(model, pipeline, n_iter, **kwargs):
     """
@@ -41,7 +43,7 @@ def cross_training(model, pipeline, n_iter, **kwargs):
     method of the provided model.
     """
 
-    for lead_time in [6, 9, 12, 15, 0, 3,]:
+    for lead_time in lead_times:
         X, y, timey = pipeline(lead_time, return_persistance=False)
 
         print_header(f'Lead time: {lead_time} month')
@@ -49,22 +51,26 @@ def cross_training(model, pipeline, n_iter, **kwargs):
         for j in range(n_decades-1):
             m = model(**kwargs)
             dir_name = f"{m.hyperparameters['name']}_decade{decades[j]}_lead{lead_time}"
+            path = join(modeldir, dir_name)
 
-            if not exists(join(modeldir, dir_name)):
+            n_files=0
+            if exists(path):
+                n_files = len(listdir(path))
+
+            if not exists(path) or n_files==0:
                 small_print_header(f'Test period: {decades[j]}-01-01 till {decades[j+1]-1}-12-01')
 
                 test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
                 train_indeces = np.invert(test_indeces)
+                trainX, trainy, traintime = X[train_indeces,:], y[train_indeces], timey[train_indeces]
 
-                trainX, trainy = X[train_indeces,:], y[train_indeces]
-
-                m.fit_RandomizedSearch(trainX, trainy, n_iter=n_iter)
+                m.fit_RandomizedSearch(trainX, trainy, traintime, n_iter=n_iter)
                 m.save(location=modeldir, dir_name=dir_name)
             else:
                 print(f'{dir_name} already exists')
             del m
 
-def cross_hindcast(model, pipeline, model_name):
+def cross_hindcast(model, pipeline, model_name, **kwargs):
     """
     Generate a hindcast from 1962 till today using the models which were
     trained by the .cross_training() method.
@@ -94,12 +100,13 @@ def cross_hindcast(model, pipeline, model_name):
             test_indeces = (timey>=f'{decades[j]}-01-01') & (timey<=f'{decades[j+1]-1}-12-01')
             testX, testy, testtimey = X[test_indeces,:], y[test_indeces], timey[test_indeces]
 
-            m = model()
+            m = model(**kwargs)
             m.load(location=modeldir, dir_name=f'{model_name}_decade{decades[j]}_lead{lead_time}')
 
             # allocate arrays and variables for which the model must be loaded
             if first_dec_loop:
                 n_outputs = m.n_outputs
+
                 output_names = m.output_names
                 pred_full = np.zeros((n_outputs, 0))
                 first_dec_loop=False
@@ -107,6 +114,7 @@ def cross_hindcast(model, pipeline, model_name):
             # make prediction
             pred = np.zeros((m.n_outputs, testX.shape[0]))
             pred[:,:] = m.predict(testX)
+
 
             # make the full time series
             pred_full = np.append(pred_full, pred, axis=1)
@@ -191,7 +199,7 @@ def cross_hindcast_dem(model, pipeline, model_name):
 
             for k in range(len(testtimey)):
                 month = testtimey[k].date().month
-                pred[2, k] = std_estimate[i, month-1]
+                pred[-1, k] = std_estimate[i, month-1]
 
             # make the full time series
             pred_full = np.append(pred_full, pred, axis=1)
@@ -226,3 +234,4 @@ def cross_hindcast_dem(model, pipeline, model_name):
     ds = xr.Dataset(save_dict, coords={'target_season': timeytrue,
                                        'lead': lead_times} )
     ds.to_netcdf(join(processeddir, f'{model_name}_forecasts_with_std_estimated.nc'))
+    ds.close()

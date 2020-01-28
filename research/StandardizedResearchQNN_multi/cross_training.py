@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 
 from ninolearn.utils import include_time_lag
 from ninolearn.IO.read_processed import data_reader
-from ninolearn.learn.models.dem import DEM
+from ninolearn.learn.models.qnn_multi import qnn
 
 from ninolearn.learn.fit import cross_training
 
@@ -167,10 +167,9 @@ def pipeline_small(lead_time,  return_persistance=False):
         return X, y, timey
 
 if __name__=="__main__":
-    cross_training(DEM, pipeline_small, 20,
-                   layers=1, neurons = 16, dropout=0.0, noise_in=0.0, noise_sigma=0.,
-                   noise_mu=0., l1_hidden=[1e-16, 1e-6, 'log'], l2_hidden=0.,
-                   l1_mu=0., l2_mu=0., l1_sigma=0.0,
-                   l2_sigma=0.0, lr=0.001, batch_size=100,
-                   epochs=5000, n_segments=5, n_members_segment=1, patience=100,
-                   verbose=0, pdf="normal", name="dem_review_new")
+    cross_training(qnn, pipeline, 1,
+                   layers=1, neurons = 1024, dropout=0., noise_in=0.0, noise_out=0.,
+                   l1_hidden=[1e-16, 1e-13, 'log'], l2_hidden=0,
+                   l1_out=0., l2_out=0., batch_size=100, lr = 0.001,
+                   epochs=5000, n_segments=5, n_members_segment=1, patience=25,
+                   verbose=0, name="qnn_multi_test")

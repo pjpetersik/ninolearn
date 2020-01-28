@@ -1,4 +1,6 @@
 import numpy as np
+from collections import defaultdict
+import pandas as pd
 
 class baseModel(object):
     """
@@ -36,7 +38,7 @@ class baseModel(object):
                     self.hyperparameters_search[key] = self.hyperparameters[key].copy()
 
 
-    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
+    def fit_RandomizedSearch(self, trainX, trainy, timey, n_iter=10, **kwargs):
         """
         This method performs a random search in the hyperparamter space.
 
@@ -49,11 +51,11 @@ class baseModel(object):
         :param kwargs: Keyword arguments that are passed to the fit method.
         """
 
-        self.history_RandomizedSearch = []
+        self.history_hyp = defaultdict(list)
 
         # check if hyperparameters where provided in lists for randomized search
         if len(self.hyperparameters_search) == 0:
-            raise Exception("No variable indicated for hyperparameter search!")
+            print("WARNING: No variable indicated for hyperparameter search!")
 
         #iterate with randomized hyperparameters
         best_loss = np.inf
@@ -62,11 +64,11 @@ class baseModel(object):
 
             # random selection of hyperparameters
             for key in self.hyperparameters_search.keys():
-                low = self.hyperparameters_search[key][0]
-                high = self.hyperparameters_search[key][1]
                 search_type = self.hyperparameters_search[key][2]
-
                 if search_type=='linear':
+                    low = self.hyperparameters_search[key][0]
+                    high = self.hyperparameters_search[key][1]
+
                     if type(low) is float or type(high) is float:
                         self.hyperparameters[key] = np.random.uniform(low, high)
 
@@ -80,12 +82,30 @@ class baseModel(object):
                         self.hyperparameters[key] = tuple(hyp_list)
 
                 elif search_type=='log':
+                    low = self.hyperparameters_search[key][0]
+                    high = self.hyperparameters_search[key][1]
+
                     choice_values = np.logspace(np.log10(low), np.log10(high), 100)
                     self.hyperparameters[key] = np.random.choice(choice_values)
 
+                elif search_type=='exp':
+                     base = self.hyperparameters_search[key][0]
+                     low_exp = self.hyperparameters_search[key][1][0]
+                     high_exp = self.hyperparameters_search[key][1][1]
 
-            self.fit(trainX, trainy, **kwargs)
-            self.history_RandomizedSearch.append(self.mean_val_loss)
+                     exponents = np.arange(low_exp, high_exp+1)
+                     choice_values = base**exponents
+
+                     self.hyperparameters[key] = np.random.choice(choice_values)
+
+
+            self.fit(trainX, trainy, timey, **kwargs)
+            self.history_hyp['loss'].append(self.mean_val_loss)
+            for key in self.hyperparameters_search.keys():
+                self.history_hyp[key].append(self.hyperparameters[key])
+
+            self.df_history_hyp = pd.DataFrame(dict(self.history_hyp))
+            self.df_history_hyp.to_csv('/tmp/hyperparameter_history.csv')
 
             # check if validation score was enhanced
             if self.mean_val_loss<best_loss:
@@ -98,14 +118,15 @@ class baseModel(object):
 
         # refit the model with optimized hyperparameter
         # AND to have the weights of the DE for the best hyperparameters again
-        print("Refit the model with best hyperparamters")
+        if n_iter!=1:
+            print("Refit the model with best hyperparamters")
 
-        self.hyperparameters = self.best_hyperparameters.copy()
-        print(self.hyperparameters)
-        self.fit(trainX, trainy, **kwargs)
+            self.hyperparameters = self.best_hyperparameters.copy()
+            print(self.hyperparameters)
+            self.fit(trainX, trainy, timey, **kwargs)
 
-        print(f"best loss search: {best_loss}")
-        print(f"loss refitting : {self.mean_val_loss}")
+            print(f"best loss search: {best_loss}")
+            print(f"loss refitting : {self.mean_val_loss}")
 
 
     def fit(self):

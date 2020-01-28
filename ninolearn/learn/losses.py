@@ -43,3 +43,17 @@ def tilted_loss(q, y, f):
     """
     e = (y-f)
     return K.mean(K.maximum(q*e, (q-1)*e), axis=-1)
+
+
+def tilted_loss_multi(q, y, f):
+    """
+    Tilted loss for quantile regression
+    """
+    losses = []
+
+    for i in range(len(q)):
+        e = (y-f[i])
+        loss = K.mean(K.maximum(q[i]*e, (q[i]-1)*e), axis=-1)
+        losses.append(loss)
+
+    return K.mean(loss)

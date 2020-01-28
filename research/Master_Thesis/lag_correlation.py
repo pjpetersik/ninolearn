@@ -11,7 +11,7 @@ from os.path import join
 
 plt.close("all")
 
-start = '2000'
+start = '1963'
 end = '2017'
 
 reader = data_reader(startdate=f'{start}-01', enddate=f'{end}-12', lon_min=30)
@@ -43,7 +43,7 @@ axs[0].plot(lead_time_arr, r_oni)
 axs[0].plot(lead_time_arr, r_tau)
 axs[0].plot(lead_time_arr,r_wwv)
 axs[0].plot(lead_time_arr,r_iod)
-axs[0].plot(lead_time_arr,r_c2)
+#axs[0].plot(lead_time_arr,r_c2)
 axs[0].plot(lead_time_arr,r_H)
 
 axs[0].set_xlim(-3, max_lag-3)
@@ -56,7 +56,7 @@ axs[1].plot(lead_time_arr,p_oni, label=r'ONI')
 axs[1].plot(lead_time_arr,p_tau, label=r'$tau_{x,WP}$')
 axs[1].plot(lead_time_arr,p_wwv, label='WWV')
 axs[1].plot(lead_time_arr,p_iod, label='DMI (IOD)')
-axs[1].plot(lead_time_arr,p_c2, label=r'c$_2$')
+#axs[1].plot(lead_time_arr,p_c2, label=r'c$_2$')
 axs[1].plot(lead_time_arr,p_H, label=r'$\mathcal{H}^*$')
 
 
@@ -70,6 +70,6 @@ axs[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 plt.tight_layout()
 
-plt.savefig(join(plotdir, f'lag_correlation_{start[2:]}{end[2:]}.pdf'))
-plt.savefig(join(plotdir, f'lag_correlation_{start[2:]}{end[2:]}.jpg'), dpi=360)
+#plt.savefig(join(plotdir, f'lag_correlation_{start[2:]}{end[2:]}.pdf'))
+#plt.savefig(join(plotdir, f'lag_correlation_{start[2:]}{end[2:]}.jpg'), dpi=360)
 

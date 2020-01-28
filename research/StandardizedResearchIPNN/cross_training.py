@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 
 from ninolearn.utils import include_time_lag
 from ninolearn.IO.read_processed import data_reader
-from ninolearn.learn.models.qnn import qnn
+from ninolearn.learn.models.ipnn import ipnn
 
 from ninolearn.learn.fit import cross_training
 
@@ -85,6 +85,7 @@ def pipeline(lead_time,  return_persistance=False):
     else:
         return X, y, timey
 
+
 def pipeline_small(lead_time,  return_persistance=False):
     """
     Data pipeline for the processing of the data before the Deep Ensemble
@@ -109,10 +110,6 @@ def pipeline_small(lead_time,  return_persistance=False):
     iod = reader.read_csv('iod')
     wwv = reader.read_csv('wwv_proxy')
 
-    # seasonal cycle
-    cos = np.cos(np.arange(len(oni))/12*2*np.pi)
-    sin = np.cos(np.arange(len(oni))/12*2*np.pi)
-
     # network metrics
     network_ssh = reader.read_statistic('network_metrics', variable='zos', dataset='ORAS4', processed="anom")
     c2_ssh = network_ssh['fraction_clusters_size_2']
@@ -128,16 +125,18 @@ def pipeline_small(lead_time,  return_persistance=False):
     pca_dec = reader.read_statistic('pca', variable='dec_sst', dataset='ERSSTv5', processed='anom')['pca1']
 
     # time lag
-    time_lag = 12
+    time_lag = 2
 
     # shift such that lead time corresponds to the definition of lead time
     shift = 3
 
     # process features
-    feature_unscaled = np.stack((oni, cos, sin, wwv,
-                                 iod,
-                                 taux_WP_mean,
-                                 c2_ssh,
+    feature_unscaled = np.stack((oni,
+                                 oni.index.month,
+                                 wwv,
+                                 #iod,
+                                 #taux_WP_mean,
+                                 #c2_ssh,
                                  H_ssh,
                                  pca_dec
                                  ), axis=1)
@@ -167,9 +166,10 @@ def pipeline_small(lead_time,  return_persistance=False):
         return X, y, timey
 
 if __name__=="__main__":
-    cross_training(qnn, pipeline_small, 20,
-                   layers=1, neurons = 16, dropout=0.2, noise_in=0.0, noise_out=0.,
-                   l1_hidden=[1e-16, 1e-6, 'log'], l2_hidden=[1e-16, 1e-6, 'log'],
-                   l1_out=0., l2_out=0., batch_size=100,
-                   epochs=500, n_segments=5, n_members_segment=1, patience=100,
-                   verbose=0,name="qnn_test")
+
+    cross_training(ipnn, pipeline_small, 10,
+                   layers=1, neurons = 32, dropout=0.2, noise_in=0.0, noise_out=0.,
+                   l1_hidden=[0.002, 0.15, 'log'], l2_hidden=0.,
+                   l1_out=0., l2_out=0., batch_size=100, lr =  0.01,
+                   epochs=5000, n_segments=5, n_members_segment=1, patience=25,
+                   verbose=0, name="ipnn_new")

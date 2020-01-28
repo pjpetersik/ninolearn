@@ -181,3 +181,88 @@ def inside_fraction(y, pred_mean, pred_std, std_level=1):
     in_frac = np.sum(in_or_out)/len(y)
 
     return in_frac
+
+def below_fraction(y, pred_mean, pred_std, std_level=1):
+    """
+    Returns the fraction of how much of the true observation is in the\
+    confindence interval.
+
+    :type y: array_like
+    :param ytrue: The true observation.
+
+    :type pred_mean: array_like
+    :param pred_mean: The mean of the prediction.
+
+    :type pred_std: array_like
+    :param pred_std: The standard deviation of the prediction.
+
+    :type std_level: int
+    :param std_level: The standard deviation of the confidence interval.
+
+    :rtype: float
+    :return: The fraction  of the observation that is in the confidence\
+    interval.
+    """
+    ypred_max = pred_mean + pred_std * std_level
+
+    in_or_out = np.zeros((len(pred_mean)))
+    in_or_out[y<ypred_max] = 1
+    in_frac = np.sum(in_or_out)/len(y)
+
+    return in_frac
+
+def inside_fraction_quantiles(y, low, high):
+    """
+    Returns the fraction of how much of the true observation is in the\
+    confindence interval.
+
+    :type y: array_like
+    :param ytrue: The true observation.
+
+    :type pred_mean: array_like
+    :param pred_mean: The mean of the prediction.
+
+    :type pred_std: array_like
+    :param pred_std: The standard deviation of the prediction.
+
+    :type std_level: int
+    :param std_level: The standard deviation of the confidence interval.
+
+    :rtype: float
+    :return: The fraction  of the observation that is in the confidence\
+    interval.
+    """
+
+    in_or_out = np.zeros((len(y)))
+    in_or_out[(y>low) & (y<high)] = 1
+    in_frac = np.sum(in_or_out)/len(y)
+
+    return in_frac
+
+def below_fraction_quantiles(y, quantlie_value):
+    """
+    Returns the fraction of how much of the true observation is in the\
+    confindence interval.
+
+    :type y: array_like
+    :param ytrue: The true observation.
+
+    :type pred_mean: array_like
+    :param pred_mean: The mean of the prediction.
+
+    :type pred_std: array_like
+    :param pred_std: The standard deviation of the prediction.
+
+    :type std_level: int
+    :param std_level: The standard deviation of the confidence interval.
+
+    :rtype: float
+    :return: The fraction  of the observation that is in the confidence\
+    interval.
+    """
+
+    below = np.zeros((len(y)))
+    below[(y<quantlie_value)] = 1
+    frac = np.sum(below)/len(y)
+
+    return frac

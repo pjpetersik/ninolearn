@@ -1,16 +1,18 @@
 import numpy as np
 
 import keras.backend as K
+from keras.activations import elu
 from keras.models import Model, save_model, load_model
 from keras.layers import Dense, Input, concatenate
 from keras.layers import Dropout, GaussianNoise
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from keras.callbacks import EarlyStopping
 from keras import regularizers
 
 from os.path import join, exists
 from os import mkdir, listdir, getcwd
 from shutil import rmtree
+import glob
 
 from ninolearn.learn.models.baseModel import baseModel
 from ninolearn.learn.losses import nll_gaussian, nll_skewed_gaussian
@@ -89,14 +91,15 @@ class DEM(baseModel):
     def __del__(self):
         K.clear_session()
 
-    def __init__(self, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
-                       noise_mu=0.1, noise_sigma=0.1, noise_alpha=0.1,
-                       l1_hidden=0.1, l2_hidden=0.1,
-                       l1_mu=0.0, l2_mu=0.1,
-                       l1_sigma=0.1, l2_sigma=0.1,
-                       l1_alpha=0.1, l2_alpha=0.1,
+    def __init__(self, layers=1, neurons=16, dropout=0.2, noise_in=0.0,
+                       noise_mu=0.0, noise_sigma=0.0, noise_alpha=0.0,
+                       l1_hidden=0.0, l2_hidden=0.0,
+                       l1_mu=0.0, l2_mu=0.0,
+                       l1_sigma=0.0, l2_sigma=0.0,
+                       l1_alpha=0.0, l2_alpha=0.0,
                        batch_size=10, n_segments=5, n_members_segment=1,
-                       lr=0.001, patience = 10, epochs=300, verbose=0, pdf='normal',
+                       lr=0.001, patience = 10, epochs=100, verbose=0, pdf='normal',
+                       activation='relu',
                        name='dem'):
 
         self.set_hyperparameters(layers=layers, neurons=neurons, dropout=dropout,
@@ -107,6 +110,7 @@ class DEM(baseModel):
                                  l1_alpha=l1_alpha, l2_alpha=l2_alpha,
                                  batch_size=batch_size, n_segments=n_segments, n_members_segment=n_members_segment,
                                  lr=lr, patience=patience, epochs=epochs, verbose=verbose, pdf=pdf,
+                                 activation=activation,
                                  name=name)
         self.get_model_desc(self.hyperparameters['pdf'])
 
@@ -131,7 +135,7 @@ class DEM(baseModel):
             self.loss = 'mse'
             self.loss_name = 'mean_squared_error'
             self.n_outputs = 1
-            self.output_names =  ['prediction']
+            self.output_names =  ['mean']
 
     def build_model(self, n_features):
         """
@@ -141,7 +145,9 @@ class DEM(baseModel):
         self.hyperparameters['n_members'] = self.hyperparameters['n_segments'] * self.hyperparameters['n_members_segment']
 
         # initialize optimizer and early stopping
-        self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
+        self.optimizer =  Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
+
+
         self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.hyperparameters['patience'], verbose=1,
                    mode='min', restore_best_weights=True)
 
@@ -150,7 +156,7 @@ class DEM(baseModel):
                           name='noise_input')(inputs)
 
         for i in range(self.hyperparameters['layers']):
-            h = Dense(self.hyperparameters['neurons'], activation='relu',
+            h = Dense(self.hyperparameters['neurons'], activation=self.hyperparameters['activation'],
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']),
                       kernel_initializer='random_uniform',
@@ -178,6 +184,7 @@ class DEM(baseModel):
                           kernel_initializer='random_uniform',
                           bias_initializer='zeros',
                           name='sigma_output')(h)
+
             sigma = GaussianNoise(self.hyperparameters['noise_sigma'],
                                   name='noise_sigma')(sigma)
 
@@ -203,7 +210,7 @@ class DEM(baseModel):
         return model
 
 
-    def fit(self, trainX, trainy, valX=None, valy=None, use_pretrained=False):
+    def fit(self, trainX, trainy, timey, valX=None, valy=None, use_pretrained=False):
         """
         Fit the model to training data
         """
@@ -226,6 +233,7 @@ class DEM(baseModel):
         while i<self.hyperparameters['n_members_segment']:
             j = 0
             while j<self.hyperparameters['n_segments']:
+                print("build")
                 ensemble_member = self.build_model(trainX.shape[1])
 
                 n_ens_sel = len(self.ensemble)
@@ -234,6 +242,7 @@ class DEM(baseModel):
                 if use_pretrained:
                     ensemble_member.load_weights(self.pretrained_weights)
 
+                print("compile")
                 ensemble_member.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.loss])
 
                 # validate on the spare segment
@@ -246,8 +255,35 @@ class DEM(baseModel):
 
                     trainXens = np.delete(trainX, np.s_[start_ind:end_ind], axis=0)
                     trainyens = np.delete(trainy, np.s_[start_ind:end_ind])
+
+                    # upsample el nino like periods
+                    if False:
+                        timeyens = np.delete(timey, np.s_[start_ind:end_ind])
+
+                        elninolike = (timeyens>=f'1982-01-01') & (timeyens<=f'2001-12-01')
+                        laninalike = np.invert(elninolike)
+
+
+                        trainXens_nino, trainyens_nino = trainXens[elninolike], trainyens[elninolike]
+                        trainXens_nina, trainyens_nina = trainXens[laninalike], trainyens[laninalike]
+
+                        nino_choices = np.random.choice(np.arange(len(trainyens_nino)), size=1000)
+                        nina_choices = np.random.choice(np.arange(len(trainyens_nina)), size=1000)
+
+
+                        trainXens = np.concatenate((trainXens_nino[nino_choices],
+                                                    trainXens_nina[nina_choices]))
+
+                        trainyens = np.concatenate((trainyens_nino[nino_choices],
+                                                    trainyens_nina[nina_choices]))
+
+
                     valXens = trainX[start_ind:end_ind]
                     valyens = trainy[start_ind:end_ind]
+
+                    if False:
+                        valXens, trainXens = trainXens, valXens
+                        valyens, trainyens = trainyens, valyens
 
                 # validate on test data set
                 elif self.hyperparameters['n_segments']==1:
@@ -277,46 +313,6 @@ class DEM(baseModel):
         passed_time = np.round(end_time-start_time, decimals=1)
         print(f'Computation time: {passed_time}s')
 #
-#
-#    def fit_RandomizedSearch(self, trainX, trainy,  n_iter=10, **kwargs):
-#
-#        # check if hyperparameters where provided in lists for randomized search
-#        if len(self.hyperparameters_search) == 0:
-#            raise Exception("No variable indicated for hyperparameter search!")
-#
-#        #iterate with randomized hyperparameters
-#        best_loss = np.inf
-#        for i in range(n_iter):
-#            print_header(f"Search iteration Nr {i+1}/{n_iter}")
-#
-#            # random selection of hyperparameters
-#            for key in self.hyperparameters_search.keys():
-#                low = self.hyperparameters_search[key][0]
-#                high = self.hyperparameters_search[key][1]
-#
-#                self.hyperparameters[key] = np.random.uniform(low, high)
-#
-#            self.fit(trainX, trainy, **kwargs)
-#
-#            # check if validation score was enhanced
-#            if self.mean_val_loss<best_loss:
-#                best_loss = self.mean_val_loss
-#                self.best_hyperparameters = self.hyperparameters.copy()
-#
-#                small_print_header("New best hyperparameters")
-#                print(f"Mean loss: {best_loss}")
-#                print(self.best_hyperparameters)
-#
-#        # refit the model with optimized hyperparameter
-#        # AND to have the weights of the DE for the best hyperparameters again
-#        print_header("Refit the model with best hyperparamters")
-#
-#        self.hyperparameters = self.best_hyperparameters.copy()
-#        print(self.hyperparameters)
-#        self.fit(trainX, trainy, **kwargs)
-#
-#        print(f"best loss search: {best_loss}")
-#        print(f"loss refitting : {self.mean_val_loss}")
 
     def predict(self, X):
         """
@@ -379,6 +375,7 @@ class DEM(baseModel):
             loss =  np.mean(summed, axis=-1)
             return loss
 
+
     def save(self, location='', dir_name='ensemble'):
         """
         Save the ensemble
@@ -390,24 +387,12 @@ class DEM(baseModel):
             rmtree(path)
             mkdir(path)
 
+        self.df_history_hyp.to_csv(join(path, 'hyperparameters_history.csv'))
+
         for i in range(self.hyperparameters['n_members']):
             path_h5 = join(path, f"member{i}.h5")
             save_model(self.ensemble[i], path_h5, include_optimizer=False)
 
-    def save_weights(self, location='', dir_name='ensemble'):
-        """
-        Saves the weights
-        """
-        path = join(location, dir_name)
-        if not exists(path):
-            mkdir(path)
-        else:
-            rmtree(path)
-            mkdir(path)
-
-        for i in range(self.hyperparameters['n_members']):
-            path_h5 = join(path, f"member{i}.h5")
-            self.ensemble[i].save_weights(path_h5)
 
     def load(self, location=None,  dir_name='dem'):
         """
@@ -416,8 +401,8 @@ class DEM(baseModel):
         if location is None:
             location = getcwd()
 
-        path = join(location, dir_name)
-        files = listdir(path)
+        path = join(location, dir_name, '*.h5')
+        files = glob.glob(path)
         self.hyperparameters = {}
         self.hyperparameters['n_members'] = len(files)
         self.ensemble = []

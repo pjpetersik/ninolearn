@@ -15,11 +15,12 @@ from scipy.stats import pearsonr
 # ALL SEASONS EVALUATION
 # =============================================================================
 
-def evaluation_nll(model_name, mean_name = 'mean', std_name='std', filename=None):
+def evaluation_nll(model_name, mean_name = 'mean', std_name='std', filename=None,
+                   start='1963-01', end='2017-12'):
     """
     Evaluate the model using the negativ log-likelihood skill for the full time series.
     """
-    reader = data_reader(startdate='1963-01', enddate='2017-12')
+    reader = data_reader(startdate=start, enddate=end)
 
     # scores for the full timeseries
     nll = np.zeros(n_lead)
@@ -38,7 +39,8 @@ def evaluation_nll(model_name, mean_name = 'mean', std_name='std', filename=None
     return nll
 
 
-def evaluation_correlation(model_name, variable_name = 'mean'):
+def evaluation_correlation(model_name, variable_name = 'mean', start='1963-01',
+                                   end='2017-12'):
     """
     Evaluate the model using the correlation skill for the full time series.
 
@@ -52,7 +54,7 @@ def evaluation_correlation(model_name, variable_name = 'mean'):
     :returns: The correlation skill for the 0, 3, 6, 9, 12 and 15-month lead\
     time and the corresponding p values.
     """
-    reader = data_reader(startdate='1963-01', enddate='2017-12')
+    reader = data_reader(startdate=start, enddate=end)
 
     # scores for the full timeseries
     r = np.zeros(n_lead)
@@ -107,7 +109,7 @@ def evaluation_srmse(model_name, variable_name = 'mean'):
 # =============================================================================
 # DECADAL EVALUATION
 # =============================================================================
-def evaluation_decadal_nll(model_name, mean_name = 'mean', std_name='std'):
+def evaluation_decadal_nll(model_name, mean_name = 'mean', std_name='std', filename=None):
     """
     Evaluate the model in the decades 1963-1971, 1972-1981, ..., 2012-2017 \
     using the negative log-likelihood.
@@ -123,7 +125,7 @@ def evaluation_decadal_nll(model_name, mean_name = 'mean', std_name='std'):
 
     for i in range(n_lead):
 
-        pred_all = reader.read_forecasts(model_name, lead_times[i])
+        pred_all = reader.read_forecasts(model_name, lead_times[i], filename)
         pred_mean = pred_all[mean_name]
         pred_std = pred_all[std_name]
 
@@ -136,7 +138,8 @@ def evaluation_decadal_nll(model_name, mean_name = 'mean', std_name='std'):
     return decadal_nll
 
 
-def evaluation_decadal_correlation(model_name, variable_name = 'mean'):
+def evaluation_decadal_correlation(model_name, variable_name = 'mean', start='1963-01',
+                                   end='2017-12'):
     """
     Evaluate the model in the decades 1963-1971, 1972-1981, ..., 2012-2017 using the correlation skill-
 
@@ -151,7 +154,7 @@ def evaluation_decadal_correlation(model_name, variable_name = 'mean'):
     time and the corresponding p values for the respective decades. The\
     returned arrays have the shape (lead time, decades).
     """
-    reader = data_reader(startdate='1963-01', enddate='2017-12')
+    reader = data_reader(startdate=start, enddate=end)
 
     # decadal scores
     decadal_r = np.zeros((n_lead, n_decades-1))
@@ -245,6 +248,8 @@ def evaluation_seasonal_correlation(model_name, variable_name='mean', background
         obs = oni[(oni.index.year>=1982)&(oni.index.year<=2001)]
     elif background=="la-nina-like":
         obs = oni[(oni.index.year<1982)|(oni.index.year>2001)]
+    elif background=="barnston_2019":
+        obs = oni[(oni.index.year>=1982)|(oni.index.year>2015)]
     elif background=="all":
         obs = oni
     obs_time = obs.index

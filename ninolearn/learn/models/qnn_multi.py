@@ -4,18 +4,16 @@ import keras.backend as K
 from keras.models import Model, save_model, load_model
 from keras.layers import Dense, Input
 from keras.layers import Dropout, GaussianNoise
-from keras.optimizers import Adam, RMSprop
+from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras import regularizers
 
 from os.path import join, exists
-from os import mkdir, getcwd
+from os import mkdir, listdir, getcwd
 from shutil import rmtree
-import json
-import glob
 
 from ninolearn.learn.models.baseModel import baseModel
-from ninolearn.learn.losses import tilted_loss
+from ninolearn.learn.losses import tilted_loss_multi
 from ninolearn.utils import small_print_header
 from ninolearn.exceptions import MissingArgumentError
 
@@ -30,35 +28,32 @@ class qnn(baseModel):
     def __del__(self):
         K.clear_session()
 
-    def __init__(self, q=0.99, layers=1, neurons=16, dropout=0.2, noise_in=0.1,
+    def __init__(self, q=[0.01, 0.5, 0.99], layers=1, neurons=16, dropout=0.2, noise_in=0.1,
                        noise_out=0.1,
                        l1_hidden=0.1, l2_hidden=0.1,
                        l1_out=0.0, l2_out=0.1,
                        batch_size=10, n_segments=5, n_members_segment=1,
                        lr=0.001, patience = 10, epochs=300, verbose=0,
-                       activation='tanh',
-                       name='qnn'):
-        print(q)
+                       name='qnn_multi'):
+
         self.set_hyperparameters(layers=layers, neurons=neurons, dropout=dropout,
                                  noise_in=noise_in, noise_out=noise_out,
                                  l1_hidden=l1_hidden, l2_hidden=l2_hidden,
                                  l1_out=l1_out, l2_out=l2_out,
-                                 activation=activation,
+
                                  batch_size=batch_size, n_segments=n_segments, n_members_segment=n_members_segment,
                                  lr=lr, patience=patience, epochs=epochs, verbose=verbose,
-                                 name=f'{name}{round(q*100)}')
+                                 name=name)
 
         self.q = q
-
         def tilted_q_loss(y_true, y_pred):
-            return tilted_loss(q, y_true, y_pred)
+            return tilted_loss_multi(q, y_true, y_pred)
 
         self.loss = tilted_q_loss
         self.loss_name = 'tilted_q_loss'
 
-        # this is artificial and not dynamic!!
-        self.n_outputs = 1
-        self.output_names = [f'quantile{q}']
+        self.n_outputs = len(q)
+        self.output_names = [f'quantile{i}' for i in q]
 
 
     def build_model(self, n_features):
@@ -70,8 +65,6 @@ class qnn(baseModel):
 
         # initialize optimizer and early stopping
         self.optimizer = Adam(lr=self.hyperparameters['lr'], beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
-        #self.optimizer = RMSprop(lr=self.hyperparameters['lr'])
-
         self.es = EarlyStopping(monitor=f'val_{self.loss_name}', min_delta=0.0, patience=self.hyperparameters['patience'], verbose=1,
                    mode='min', restore_best_weights=True)
 
@@ -80,7 +73,7 @@ class qnn(baseModel):
                           name='noise_input')(inputs)
 
         for i in range(self.hyperparameters['layers']):
-            h = Dense(self.hyperparameters['neurons'], activation=self.hyperparameters['activation'],
+            h = Dense(self.hyperparameters['neurons'], activation='relu',
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']),
                       kernel_initializer='random_uniform',
@@ -90,7 +83,7 @@ class qnn(baseModel):
             h = Dropout(self.hyperparameters['dropout'],
                         name=f'hidden_dropout_{i}')(h)
 
-        out = Dense(1, activation='linear',
+        out = Dense(self.n_outputs , activation='linear',
                    kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
                                                          self.hyperparameters['l2_out']),
                    kernel_initializer='random_uniform',
@@ -118,7 +111,6 @@ class qnn(baseModel):
         self.ensemble = []
         self.history = []
         self.val_loss = []
-        self.pre_val_loss = []
 
         self.segment_len = trainX.shape[0]//self.hyperparameters['n_segments']
 
@@ -161,7 +153,6 @@ class qnn(baseModel):
                     valXens = valX
                     valyens = valy
 
-                self.pre_val_loss.append(ensemble_member.evaluate(valXens, valyens)[1])
                 history = ensemble_member.fit(trainXens, trainyens,
                                             epochs=self.hyperparameters['epochs'],
                                             batch_size=self.hyperparameters['batch_size'],
@@ -175,10 +166,8 @@ class qnn(baseModel):
                 j+=1
             i+=1
         self.mean_val_loss = np.mean(self.val_loss)
-        self.mean_pre_val_loss = np.mean(self.pre_val_loss)
 
         print(f'Loss: {self.mean_val_loss}')
-        print(f'Pre-Loss: {self.mean_pre_val_loss}')
         # print computation time
         end_time = time.time()
         passed_time = np.round(end_time-start_time, decimals=1)
@@ -193,7 +182,7 @@ class qnn(baseModel):
 
         """
 
-        pred_ens = np.zeros((X.shape[0], 1, self.hyperparameters['n_members']))
+        pred_ens = np.zeros((X.shape[0], self.n_outputs , self.hyperparameters['n_members']))
 
         for i in range(self.hyperparameters['n_members']):
             pred_ens[:,:,i] = self.ensemble[i].predict(X)
@@ -204,8 +193,8 @@ class qnn(baseModel):
         """
         returns the ensemble mixture results
         """
-        mix_mean = pred[:,0,:].mean(axis=1)
-        return mix_mean
+        mix_mean = pred.mean(axis=2)
+        return mix_mean.T
 
 
     def evaluate(self, ytrue, mean_pred, std_pred=False):
@@ -225,9 +214,6 @@ class qnn(baseModel):
             rmtree(path)
             mkdir(path)
 
-        with open(join(path, 'hyperparameters.json'), 'w') as file:
-            json.dump(self.hyperparameters, file)
-
         for i in range(self.hyperparameters['n_members']):
             path_h5 = join(path, f"member{i}.h5")
             save_model(self.ensemble[i], path_h5, include_optimizer=False)
@@ -240,16 +226,11 @@ class qnn(baseModel):
             location = getcwd()
 
         path = join(location, dir_name)
-        files = glob.glob(join(path,'*.h5'))
+        files = listdir(path)
         self.hyperparameters = {}
         self.hyperparameters['n_members'] = len(files)
         self.ensemble = []
 
-
         for file in files:
             file_path = join(path, file)
-            member = load_model(file_path)
-            self.ensemble.append(member)
-
-
-
+            self.ensemble.append(load_model(file_path))
