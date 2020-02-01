@@ -140,7 +140,7 @@ def q_score(q, ytrue, ypred):
 
     return np.mean(np.maximum(q*e, (q-1)*e), axis=-1)
 
-start_sel = '1963-01-01'
+start_sel = '1982-01-01'
 end_sel = '2017-12-01'
 data_sel = data.loc[{'target_season':slice(start_sel, end_sel)}]
 ytrue = oni.loc[start_sel : end_sel]
@@ -167,7 +167,7 @@ plt.figure(figsize=(4,3))
 M=plt.pcolormesh(qss_estimate.T, vmin=-0.2, vmax=0.2, cmap=plt.cm.PuOr)
 plt.colorbar(M, extend='both')
 plt.yticks(np.arange(0.5,8.5), labels=lead_times)
-plt.ylabel('Lead')
+plt.ylabel('Lead Time [Months]')
 plt.xticks(np.arange(0.5,4.5), labels=q_set*100)
 plt.xlabel('Quantile')
 plt.tight_layout()
@@ -182,16 +182,20 @@ def rel_diagram(lead):
 
     return frac
 
-
+std_levels =[-1.959964, -0.994458, 0, 0.994458, 1.959964]
+q_set = np.array([0.025, 0.16, 0.5, 0.84, 0.975])
 frac = rel_diagram(3)
 
-plt.figure()
+plt.figure(figsize=(5,4))
 for lead in lead_times:
-    plt.plot(q_set, rel_diagram(lead), ls=':', marker="x")
+    plt.plot(q_set, rel_diagram(lead), ls=':', marker="x",label=f"{lead}-months")
 
 plt.xlim(0,1)
 plt.ylim(0,1)
 plt.plot([0,1], [0,1], 'k')
+plt.xlabel('Predicted quantile')
+plt.ylabel('Observed frequency')
+plt.legend()
 #%%
 
 def plot_timeseries_spread(lead, ax):
@@ -224,7 +228,7 @@ r, p  = evaluation_correlation(f'{model_name}', variable_name=f'quantile0.5')
 r_dec, p_dec = evaluation_decadal_correlation(f'{model_name}',variable_name=f'quantile0.5')
 
 # plot correlation skills
-ax = plt.figure(figsize=(6.5,3.5)).gca()
+ax = plt.figure(figsize=(5.,3.)).gca()
 
 for j in range(n_decades-1):
     plt.plot(lead_times, r_dec[:,j], c=decade_color[j], label=f"{decade_name[j]}")
@@ -233,7 +237,7 @@ plt.plot(lead_times, r, label="1963-2017", c='k', lw=2)
 plt.ylim(0,1)
 plt.xlim(0.,lead_times[-1])
 plt.xlabel('Lead Time [Months]')
-plt.ylabel('r')
+plt.ylabel('ACC')
 plt.grid()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -248,7 +252,7 @@ plt.tight_layout()
 
 background = "la-nina-like"
 background = "el-nino-like"
-background = "all"
+#background = "all"
 
 r_seas, p_seas = evaluation_seasonal_correlation(f'{model_name}',
                                                  background=background,
@@ -256,7 +260,7 @@ r_seas, p_seas = evaluation_seasonal_correlation(f'{model_name}',
 # mask p-values
 p_seasm = np.ma.masked_greater_equal(p_seas, 0.05)
 
-plt.figure(figsize=(6,3))
+plt.figure(figsize=(5.5,2.8))
 M=plt.pcolormesh(r_seas, vmin=0.0, vmax=1, cmap=plt.cm.RdYlGn_r, hatch='/')
 plt.colorbar(M, extend="min")
 
