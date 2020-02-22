@@ -66,6 +66,7 @@ def cross_training(model, pipeline, n_iter, **kwargs):
 
                 m.fit_RandomizedSearch(trainX, trainy, traintime, n_iter=n_iter)
                 m.save(location=modeldir, dir_name=dir_name)
+
             else:
                 print(f'{dir_name} already exists')
             del m

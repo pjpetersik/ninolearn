@@ -2,7 +2,7 @@ import numpy as np
 
 import keras.backend as K
 from keras.models import Model, save_model, load_model
-from keras.layers import Dense, Input
+from keras.layers import Dense, Input, Add, Subtract, Concatenate
 from keras.layers import Dropout, GaussianNoise
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
@@ -21,7 +21,7 @@ import warnings
 
 import time
 
-class qnn(baseModel):
+class mqnn(baseModel):
     """
 
     """
@@ -34,18 +34,19 @@ class qnn(baseModel):
                        l1_out=0.0, l2_out=0.1,
                        batch_size=10, n_segments=5, n_members_segment=1,
                        lr=0.001, patience = 10, epochs=300, verbose=0,
-                       name='qnn_multi'):
+                       activation='tanh',
+                       name='mqnn'):
 
         self.set_hyperparameters(layers=layers, neurons=neurons, dropout=dropout,
                                  noise_in=noise_in, noise_out=noise_out,
                                  l1_hidden=l1_hidden, l2_hidden=l2_hidden,
                                  l1_out=l1_out, l2_out=l2_out,
-
+                                 activation=activation,
                                  batch_size=batch_size, n_segments=n_segments, n_members_segment=n_members_segment,
                                  lr=lr, patience=patience, epochs=epochs, verbose=verbose,
                                  name=name)
-
         self.q = q
+
         def tilted_q_loss(y_true, y_pred):
             return tilted_loss_multi(q, y_true, y_pred)
 
@@ -73,7 +74,8 @@ class qnn(baseModel):
                           name='noise_input')(inputs)
 
         for i in range(self.hyperparameters['layers']):
-            h = Dense(self.hyperparameters['neurons'], activation='relu',
+
+            h = Dense(self.hyperparameters['neurons'], activation=self.hyperparameters['activation'],
                       kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_hidden'],
                                                             self.hyperparameters['l2_hidden']),
                       kernel_initializer='random_uniform',
@@ -83,16 +85,51 @@ class qnn(baseModel):
             h = Dropout(self.hyperparameters['dropout'],
                         name=f'hidden_dropout_{i}')(h)
 
-        out = Dense(self.n_outputs , activation='linear',
+        median = Dense(1, activation='linear',
                    kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
                                                          self.hyperparameters['l2_out']),
                    kernel_initializer='random_uniform',
                    bias_initializer='random_uniform',
-                   name='output')(h)
+                   name='median')(h)
+
+        qp1 = Dense(1, activation='relu',
+                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
+                                                         self.hyperparameters['l2_out']),
+                   kernel_initializer='random_uniform',
+                   bias_initializer='random_uniform',
+                   name='qp1')(h)
+
+        qp2 = Dense(1, activation='relu',
+                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
+                                                         self.hyperparameters['l2_out']),
+                   kernel_initializer='random_uniform',
+                   bias_initializer='random_uniform',
+                   name='qp2')(h)
+
+        qm1 = Dense(1, activation='relu',
+                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
+                                                         self.hyperparameters['l2_out']),
+                   kernel_initializer='random_uniform',
+                   bias_initializer='random_uniform',
+                   name='qm1')(h)
+
+        qm2 = Dense(1, activation='relu',
+                   kernel_regularizer=regularizers.l1_l2(self.hyperparameters['l1_out'],
+                                                      self.hyperparameters['l2_out']),
+                   kernel_initializer='random_uniform',
+                   bias_initializer='random_uniform',
+                   name='qm2')(h)
+
+
+        qp1 = Add()([median, qp1])
+        qp2 = Add()([qp1, qp2])
+        qm1 = Subtract()([median, qm1])
+        qm2 = Subtract()([qm1, qm2])
+
+        out =  Concatenate()([qm2, qm1, median, qp1, qp2])
 
         out = GaussianNoise(self.hyperparameters['noise_out'],
                            name='noise_out')(out)
-
 
         model = Model(inputs=inputs, outputs=out)
         return model
@@ -104,6 +141,7 @@ class qnn(baseModel):
         """
 
         start_time = time.time()
+
         # clear memory
         K.clear_session()
 
