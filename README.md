@@ -29,7 +29,7 @@ git clone https://github.com/Your_Username/ninolearn
 ```
 3. Make a conda environment from the .yml file.
 ```
-conda create -f ninolearn.yml
+conda env create -f ninolearn.yml
 ```
 4. Activate the environment.
 ```
