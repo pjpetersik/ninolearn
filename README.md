@@ -19,5 +19,3 @@ Moreover, it contains models for the ENSO forecasting:
 · Deep Ensemble Model (DEM)
 
 · Encoder-Decoder Ensemble Model
-
-Check out the documentation for more information: https://pjpetersik.github.io/ninolearn/
