@@ -19,3 +19,32 @@ Moreover, it contains models for the ENSO forecasting:
 · Deep Ensemble Model (DEM)
 
 · Encoder-Decoder Ensemble Model
+
+## Installation for own development
+
+1. Fork the repository.
+2. Clone the repository to your local machine.
+```
+git clone https://github.com/Your_Username/ninolearn
+```
+3. Make a conda environment from the .yml file.
+```
+conda create -f ninolearn.yml
+```
+4. Activate the environment.
+```
+conda activate ninolearn
+```
+5.  Add ninolearn to the conda environment in 'development mode'.
+```
+conda develop /path/to/ninolearn
+```
+6. Fill out the `ninolearn/private_template.py` file with the required pathes and save a copy as `private.py`. The `private.py` will not be pushed to your remote repository because it contain sensitive information as well as pathes that are specific to your machine.
+
+Now you should be ready to use ninolearn. For the beginning you can try to run the Jupyter Notebook tutorials which are currently located in `docs-sphinx/source/jupyter_notebook_tutorials/`. 
+
+## Folder structure
+In the folder `ninolearn` the actual ninolearn code is located. 
+The `research` folder contains pervious research that was done with ninolearn. Hence, if you want to do your own research with ninolearn, make a new directory in the research folder in which you can start to do your own stuff.
+
+The folders `docs` and `docs-sphinx` contain the documentation of ninolearn. Currently the documentation is somewhat outdated.
